@@ -579,7 +579,7 @@ static Dictionary<string, string[]> ValidarSolicitudRegistro(SolicitudRegistroEx
     ValidarTexto(solicitud.PrimerApellido, "primerApellido", "Ingresa tu primer apellido.", 120, errores);
     ValidarTextoOpcional(solicitud.SegundoNombre, "segundoNombre", 120, errores);
     ValidarTextoOpcional(solicitud.SegundoApellido, "segundoApellido", 120, errores);
-    var tiposPermitidos = new[] { "CC", "CE", "PASAPORTE", "PPT", "DOCUMENTO_PAIS_ORIGEN", "DOCUMENTO_DIPLOMATICO" };
+    var tiposPermitidos = new[] { "CC", "CE", "PA", "PPT", "DIE", "CD" };
     if (!tiposPermitidos.Contains(solicitud.CodigoTipoIdentificacion?.Trim().ToUpperInvariant())) errores["codigoTipoIdentificacion"] = ["Selecciona un tipo de identificación válido."];
     ValidarTexto(solicitud.NumeroIdentificacion, "numeroIdentificacion", "Ingresa tu número de identificación.", 120, errores);
     if (string.IsNullOrWhiteSpace(solicitud.Correo)) errores["correo"] = ["Ingresa tu correo electrónico."];
