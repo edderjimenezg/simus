@@ -106,7 +106,7 @@ app.MapGet("/api/sesion/estado", async (HttpContext contexto, IConfiguration con
     return idPersona is null ? Results.Unauthorized() : Results.Ok(new { idPersona });
 });
 
-app.MapPost("/api/sesion/cerrar", async (HttpContext contexto, IConfiguration configuracion, ServicioSesiones sesiones, CancellationToken cancelacion) =>
+app.MapPost("/api/sesion/cerrar", async (HttpContext contexto, IConfiguration configuracion, ServicioSesiones sesiones, ServicioAuditoriaAcceso auditoria, CancellationToken cancelacion) =>
 {
     if (contexto.Request.Cookies.TryGetValue("simus_sesion", out var secreto) && !string.IsNullOrWhiteSpace(secreto))
     {
@@ -115,14 +115,16 @@ app.MapPost("/api/sesion/cerrar", async (HttpContext contexto, IConfiguration co
         {
             await using var conexion = new SqlConnection(cadenaConexion);
             await conexion.OpenAsync(cancelacion);
+            var idPersona = await sesiones.ValidarAsync(conexion, secreto, cancelacion);
             await sesiones.CerrarAsync(conexion, secreto, cancelacion);
+            if (idPersona is not null) await auditoria.RegistrarAsync(conexion, idPersona, "cierre_sesion", contexto.TraceIdentifier, cancelacion);
         }
     }
     contexto.Response.Cookies.Delete("simus_sesion");
     return Results.NoContent();
 });
 
-app.MapPost("/api/acceso/ingresar", async (SolicitudIngreso solicitud, HttpContext contexto, IConfiguration configuracion, ServicioSesiones sesiones, CancellationToken cancelacion) =>
+app.MapPost("/api/acceso/ingresar", async (SolicitudIngreso solicitud, HttpContext contexto, IConfiguration configuracion, ServicioSesiones sesiones, ServicioAuditoriaAcceso auditoria, CancellationToken cancelacion) =>
 {
     var errores = new Dictionary<string, string[]>();
     if (string.IsNullOrWhiteSpace(solicitud.Correo)) errores["correo"] = ["Ingresa tu correo electrónico."];
@@ -136,12 +138,22 @@ app.MapPost("/api/acceso/ingresar", async (SolicitudIngreso solicitud, HttpConte
     await using var comando = new SqlCommand(sql, conexion);
     comando.Parameters.AddWithValue("@correo", solicitud.Correo.Trim().ToLowerInvariant());
     await using var lector = await comando.ExecuteReaderAsync(cancelacion);
-    if (!await lector.ReadAsync(cancelacion)) return Results.Unauthorized();
+    if (!await lector.ReadAsync(cancelacion))
+    {
+        await lector.CloseAsync();
+        await auditoria.RegistrarAsync(conexion, null, "ingreso_rechazado", contexto.TraceIdentifier, cancelacion);
+        return Results.Unauthorized();
+    }
     var idPersona = lector.GetGuid(0); var hash = lector.GetString(1); var estado = lector.GetString(2);
     await lector.CloseAsync();
-    if (estado != "activa" || new PasswordHasher<object>().VerifyHashedPassword(new object(), hash, solicitud.Contrasena) == PasswordVerificationResult.Failed) return Results.Unauthorized();
+    if (estado != "activa" || new PasswordHasher<object>().VerifyHashedPassword(new object(), hash, solicitud.Contrasena) == PasswordVerificationResult.Failed)
+    {
+        await auditoria.RegistrarAsync(conexion, idPersona, "ingreso_rechazado", contexto.TraceIdentifier, cancelacion);
+        return Results.Unauthorized();
+    }
     var (secreto, venceEn) = await sesiones.CrearAsync(conexion, idPersona, cancelacion);
     contexto.Response.Cookies.Append("simus_sesion", secreto, new CookieOptions { HttpOnly = true, Secure = !app.Environment.IsDevelopment(), SameSite = SameSiteMode.Strict, Expires = venceEn });
+    await auditoria.RegistrarAsync(conexion, idPersona, "ingreso_exitoso", contexto.TraceIdentifier, cancelacion);
     return Results.Ok(new { idPersona });
 }).RequireRateLimiting("ingreso");
 
