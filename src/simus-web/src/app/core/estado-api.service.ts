@@ -9,7 +9,17 @@ export interface EstadoApi {
 
 export interface DisponibilidadRegistro {
   registroDisponible: boolean;
+  territorioDisponible: boolean;
+  documentos: DocumentoConsentimiento[];
   impedimentos: string[];
+}
+
+export interface DocumentoConsentimiento {
+  id: string;
+  codigo: string;
+  titulo: string;
+  version: string;
+  urlPublica: string;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -21,6 +31,6 @@ export class ServicioEstadoApi {
   }
 
   obtenerDisponibilidadRegistro(): Observable<DisponibilidadRegistro> {
-    return this.http.get<DisponibilidadRegistro>('/api/registro/disponibilidad');
+    return this.http.get<DisponibilidadRegistro>('/api/registro/preparacion');
   }
 }

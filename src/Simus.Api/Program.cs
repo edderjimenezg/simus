@@ -76,33 +76,51 @@ app.MapGet("/api/salud", async (IConfiguration configuracion, CancellationToken 
     }
 });
 
-app.MapGet("/api/registro/disponibilidad", async (IConfiguration configuracion, CancellationToken cancelacion) =>
+app.MapGet("/api/registro/preparacion", async (IConfiguration configuracion, CancellationToken cancelacion) =>
 {
     var cadenaConexion = configuracion.GetConnectionString("Simus");
     if (string.IsNullOrWhiteSpace(cadenaConexion))
-        return Results.Ok(new DisponibilidadRegistro(false, ["La base de datos aún no está configurada."]));
+        return Results.Ok(new PreparacionRegistro(false, false, [], ["La base de datos aún no está configurada."]));
 
     try
     {
         await using var conexion = new SqlConnection(cadenaConexion);
         await conexion.OpenAsync(cancelacion);
-        const string consulta = """
-            SELECT (SELECT COUNT(*) FROM legal.Documentos WHERE Codigo IN (N'terminos_uso', N'tratamiento_datos') AND EsVigente = 1),
-                   (SELECT COUNT(*) FROM territorio.Departamentos),
-                   (SELECT COUNT(*) FROM territorio.Municipios);
-            """;
-        await using var comando = new SqlCommand(consulta, conexion);
-        await using var lector = await comando.ExecuteReaderAsync(cancelacion);
-        await lector.ReadAsync(cancelacion);
-        var impedimentos = new List<string>();
-        if (lector.GetInt32(0) < 2) impedimentos.Add("Faltan los documentos vigentes de términos de uso y tratamiento de datos.");
-        if (lector.GetInt32(1) == 0 || lector.GetInt32(2) == 0) impedimentos.Add("Falta incorporar el catálogo oficial de departamentos y municipios.");
-        return Results.Ok(new DisponibilidadRegistro(impedimentos.Count == 0, impedimentos));
+        return Results.Ok(await ObtenerPreparacionRegistroAsync(conexion, cancelacion));
     }
     catch (SqlException)
     {
-        return Results.Ok(new DisponibilidadRegistro(false, ["La base de datos no está disponible temporalmente."]));
+        return Results.Ok(new PreparacionRegistro(false, false, [], ["La base de datos no está disponible temporalmente."]));
     }
+});
+
+app.MapGet("/api/registro/departamentos", async (IConfiguration configuracion, CancellationToken cancelacion) =>
+{
+    var cadenaConexion = configuracion.GetConnectionString("Simus");
+    if (string.IsNullOrWhiteSpace(cadenaConexion)) return Results.StatusCode(StatusCodes.Status503ServiceUnavailable);
+    await using var conexion = new SqlConnection(cadenaConexion);
+    await conexion.OpenAsync(cancelacion);
+    const string consulta = "SELECT Codigo,Nombre FROM territorio.Departamentos ORDER BY Nombre;";
+    await using var comando = new SqlCommand(consulta, conexion);
+    await using var lector = await comando.ExecuteReaderAsync(cancelacion);
+    var departamentos = new List<TerritorioRegistro>();
+    while (await lector.ReadAsync(cancelacion)) departamentos.Add(new TerritorioRegistro(lector.GetString(0), lector.GetString(1)));
+    return Results.Ok(departamentos);
+});
+
+app.MapGet("/api/registro/departamentos/{codigoDepartamento}/municipios", async (string codigoDepartamento, IConfiguration configuracion, CancellationToken cancelacion) =>
+{
+    var cadenaConexion = configuracion.GetConnectionString("Simus");
+    if (string.IsNullOrWhiteSpace(cadenaConexion)) return Results.StatusCode(StatusCodes.Status503ServiceUnavailable);
+    await using var conexion = new SqlConnection(cadenaConexion);
+    await conexion.OpenAsync(cancelacion);
+    const string consulta = "SELECT Codigo,Nombre FROM territorio.Municipios WHERE CodigoDepartamento=@departamento ORDER BY Nombre;";
+    await using var comando = new SqlCommand(consulta, conexion);
+    comando.Parameters.AddWithValue("@departamento", codigoDepartamento.Trim());
+    await using var lector = await comando.ExecuteReaderAsync(cancelacion);
+    var municipios = new List<TerritorioRegistro>();
+    while (await lector.ReadAsync(cancelacion)) municipios.Add(new TerritorioRegistro(lector.GetString(0), lector.GetString(1)));
+    return Results.Ok(municipios);
 });
 
 app.MapGet("/api/sesion/estado", async (HttpContext contexto, IConfiguration configuracion, ServicioSesiones sesiones, CancellationToken cancelacion) =>
@@ -162,17 +180,173 @@ app.MapPost("/api/acceso/ingresar", async (SolicitudIngreso solicitud, HttpConte
         return Results.Unauthorized();
     }
     var (secreto, venceEn) = await sesiones.CrearAsync(conexion, idPersona, cancelacion);
-    contexto.Response.Cookies.Append("simus_sesion", secreto, new CookieOptions { HttpOnly = true, Secure = !app.Environment.IsDevelopment(), SameSite = SameSiteMode.Strict, Expires = venceEn });
+    contexto.Response.Cookies.Append("simus_sesion", secreto, OpcionesCookieSesion(app, venceEn));
     await auditoria.RegistrarAsync(conexion, idPersona, "ingreso_exitoso", contexto.TraceIdentifier, cancelacion);
     return Results.Ok(new { idPersona });
 }).RequireRateLimiting("ingreso");
 
+app.MapPost("/api/registro", async (SolicitudRegistroExterno solicitud, HttpContext contexto, IConfiguration configuracion, ServicioSesiones sesiones, ServicioAuditoriaAcceso auditoria, CancellationToken cancelacion) =>
+{
+    var errores = ValidarSolicitudRegistro(solicitud);
+    if (errores.Count > 0) return Results.UnprocessableEntity(new ErrorApi("campos_invalidos", "Revisa los campos indicados.", contexto.TraceIdentifier, errores));
+    var cadenaConexion = configuracion.GetConnectionString("Simus");
+    if (string.IsNullOrWhiteSpace(cadenaConexion)) return Results.StatusCode(StatusCodes.Status503ServiceUnavailable);
+
+    await using var conexion = new SqlConnection(cadenaConexion);
+    await conexion.OpenAsync(cancelacion);
+    var preparacion = await ObtenerPreparacionRegistroAsync(conexion, cancelacion);
+    if (!preparacion.RegistroDisponible)
+        return Results.Conflict(new ErrorApi("registro_no_disponible", "El registro aún no está disponible porque faltan requisitos institucionales.", contexto.TraceIdentifier));
+
+    const string territorioExiste = "SELECT COUNT(*) FROM territorio.Municipios WHERE CodigoDepartamento=@departamento AND Codigo=@municipio;";
+    await using (var comandoTerritorio = new SqlCommand(territorioExiste, conexion))
+    {
+        comandoTerritorio.Parameters.AddWithValue("@departamento", solicitud.CodigoDepartamento.Trim());
+        comandoTerritorio.Parameters.AddWithValue("@municipio", solicitud.CodigoMunicipio.Trim());
+        if (Convert.ToInt32(await comandoTerritorio.ExecuteScalarAsync(cancelacion)) == 0)
+        {
+            errores["codigoMunicipio"] = ["El municipio no corresponde al departamento seleccionado."];
+            return Results.UnprocessableEntity(new ErrorApi("territorio_invalido", "Revisa los campos indicados.", contexto.TraceIdentifier, errores));
+        }
+    }
+
+    var aceptados = (solicitud.CodigosDocumentosAceptados ?? []).ToHashSet(StringComparer.Ordinal);
+    var faltantes = preparacion.Documentos.Where(documento => !aceptados.Contains(documento.Codigo)).ToList();
+    if (faltantes.Count > 0)
+    {
+        errores["consentimientos"] = ["Debes aceptar los documentos vigentes para continuar."];
+        return Results.UnprocessableEntity(new ErrorApi("consentimientos_pendientes", "Revisa los campos indicados.", contexto.TraceIdentifier, errores));
+    }
+
+    var correo = solicitud.Correo.Trim().ToLowerInvariant();
+    var identificacion = solicitud.NumeroIdentificacion.Trim().ToUpperInvariant();
+    var tipoIdentificacion = solicitud.CodigoTipoIdentificacion.Trim().ToUpperInvariant();
+    var idPersona = Guid.NewGuid();
+    var idOrganizacion = Guid.NewGuid();
+    try
+    {
+        await using var transaccion = await conexion.BeginTransactionAsync(cancelacion);
+        const string insertar = """
+            INSERT INTO identidad.Personas (Id,PrimerNombre,SegundoNombre,PrimerApellido,SegundoApellido,CodigoTipoIdentificacion,NumeroIdentificacionNormalizado,CorreoNormalizado,Telefono,HashContrasena,EstadoCuenta,EstadoVerificacionCorreo,FechaCreacion,FechaActualizacion)
+            VALUES (@persona,@primerNombre,@segundoNombre,@primerApellido,@segundoApellido,@tipo,@numero,@correo,@telefono,@hash,N'activa',N'no_configurada',SYSUTCDATETIME(),SYSUTCDATETIME());
+            INSERT INTO identidad.PersonasRoles (IdPersona,CodigoRol,FechaAsignacion) VALUES (@persona,N'externo',SYSUTCDATETIME());
+            INSERT INTO organizaciones.Organizaciones (Id,Nombre,NumeroIdentificacion,CorreoContacto,CodigoDepartamento,CodigoMunicipio,Estado,FechaCreacion,FechaActualizacion)
+            VALUES (@organizacion,@nombreOrganizacion,@numeroOrganizacion,NULL,@departamento,@municipio,N'activa',SYSUTCDATETIME(),SYSUTCDATETIME());
+            INSERT INTO organizaciones.Administradores (IdOrganizacion,IdPersona,FechaAsignacion) VALUES (@organizacion,@persona,SYSUTCDATETIME());
+            """;
+        await using var comando = new SqlCommand(insertar, conexion, (SqlTransaction)transaccion);
+        comando.Parameters.AddWithValue("@persona", idPersona);
+        comando.Parameters.AddWithValue("@organizacion", idOrganizacion);
+        comando.Parameters.AddWithValue("@primerNombre", solicitud.PrimerNombre.Trim());
+        comando.Parameters.AddWithValue("@segundoNombre", ComoDbNull(solicitud.SegundoNombre));
+        comando.Parameters.AddWithValue("@primerApellido", solicitud.PrimerApellido.Trim());
+        comando.Parameters.AddWithValue("@segundoApellido", ComoDbNull(solicitud.SegundoApellido));
+        comando.Parameters.AddWithValue("@tipo", tipoIdentificacion);
+        comando.Parameters.AddWithValue("@numero", identificacion);
+        comando.Parameters.AddWithValue("@correo", correo);
+        comando.Parameters.AddWithValue("@telefono", ComoDbNull(solicitud.Telefono));
+        comando.Parameters.AddWithValue("@hash", new PasswordHasher<object>().HashPassword(new object(), solicitud.Contrasena));
+        comando.Parameters.AddWithValue("@nombreOrganizacion", solicitud.NombreOrganizacion.Trim());
+        comando.Parameters.AddWithValue("@numeroOrganizacion", ComoDbNull(solicitud.NumeroIdentificacionOrganizacion));
+        comando.Parameters.AddWithValue("@departamento", solicitud.CodigoDepartamento.Trim());
+        comando.Parameters.AddWithValue("@municipio", solicitud.CodigoMunicipio.Trim());
+        await comando.ExecuteNonQueryAsync(cancelacion);
+
+        const string aceptar = "INSERT INTO legal.Aceptaciones (Id,IdPersona,IdDocumento,FechaAceptacion) VALUES (NEWID(),@persona,@documento,SYSUTCDATETIME());";
+        foreach (var documento in preparacion.Documentos)
+        {
+            await using var comandoAceptacion = new SqlCommand(aceptar, conexion, (SqlTransaction)transaccion);
+            comandoAceptacion.Parameters.AddWithValue("@persona", idPersona);
+            comandoAceptacion.Parameters.AddWithValue("@documento", documento.Id);
+            await comandoAceptacion.ExecuteNonQueryAsync(cancelacion);
+        }
+        await transaccion.CommitAsync(cancelacion);
+    }
+    catch (SqlException error) when (error.Number is 2601 or 2627)
+    {
+        var campo = error.Message.Contains("CorreoNormalizado", StringComparison.OrdinalIgnoreCase) ? "correo" : "numeroIdentificacion";
+        errores[campo] = [campo == "correo" ? "Ya existe una cuenta con este correo electrónico." : "Ya existe una cuenta con este tipo y número de identificación."];
+        return Results.Conflict(new ErrorApi("dato_duplicado", "Revisa los campos indicados.", contexto.TraceIdentifier, errores));
+    }
+
+    var (secreto, venceEn) = await sesiones.CrearAsync(conexion, idPersona, cancelacion);
+    contexto.Response.Cookies.Append("simus_sesion", secreto, OpcionesCookieSesion(app));
+    await auditoria.RegistrarAsync(conexion, idPersona, "registro_externo_exitoso", contexto.TraceIdentifier, cancelacion);
+    return Results.Ok(new { idPersona, idOrganizacion, venceEn });
+}).RequireRateLimiting("ingreso");
+
+static CookieOptions OpcionesCookieSesion(WebApplication aplicacion, DateTime? venceEn = null) => new()
+{
+    HttpOnly = true,
+    Secure = !aplicacion.Environment.IsDevelopment(),
+    SameSite = SameSiteMode.Strict,
+    Expires = venceEn
+};
+
+static object ComoDbNull(string? valor) => string.IsNullOrWhiteSpace(valor) ? DBNull.Value : valor.Trim();
+
+static Dictionary<string, string[]> ValidarSolicitudRegistro(SolicitudRegistroExterno solicitud)
+{
+    var errores = new Dictionary<string, string[]>();
+    ValidarTexto(solicitud.PrimerNombre, "primerNombre", "Ingresa tu primer nombre.", 120, errores);
+    ValidarTexto(solicitud.PrimerApellido, "primerApellido", "Ingresa tu primer apellido.", 120, errores);
+    ValidarTextoOpcional(solicitud.SegundoNombre, "segundoNombre", 120, errores);
+    ValidarTextoOpcional(solicitud.SegundoApellido, "segundoApellido", 120, errores);
+    var tiposPermitidos = new[] { "CC", "CE", "PASAPORTE", "PPT", "DOCUMENTO_PAIS_ORIGEN", "DOCUMENTO_DIPLOMATICO" };
+    if (!tiposPermitidos.Contains(solicitud.CodigoTipoIdentificacion?.Trim().ToUpperInvariant())) errores["codigoTipoIdentificacion"] = ["Selecciona un tipo de identificación válido."];
+    ValidarTexto(solicitud.NumeroIdentificacion, "numeroIdentificacion", "Ingresa tu número de identificación.", 120, errores);
+    if (string.IsNullOrWhiteSpace(solicitud.Correo)) errores["correo"] = ["Ingresa tu correo electrónico."];
+    else if (!System.Net.Mail.MailAddress.TryCreate(solicitud.Correo.Trim(), out _)) errores["correo"] = ["Ingresa un correo electrónico válido."];
+    ValidarTextoOpcional(solicitud.Telefono, "telefono", 40, errores);
+    if (string.IsNullOrWhiteSpace(solicitud.Contrasena)) errores["contrasena"] = ["Crea una contraseña."];
+    else if (solicitud.Contrasena.Length < 12) errores["contrasena"] = ["La contraseña debe tener al menos 12 caracteres."];
+    ValidarTexto(solicitud.NombreOrganizacion, "nombreOrganizacion", "Ingresa el nombre de la organización.", 240, errores);
+    ValidarTextoOpcional(solicitud.NumeroIdentificacionOrganizacion, "numeroIdentificacionOrganizacion", 80, errores);
+    ValidarTexto(solicitud.CodigoDepartamento, "codigoDepartamento", "Selecciona un departamento.", 10, errores);
+    ValidarTexto(solicitud.CodigoMunicipio, "codigoMunicipio", "Selecciona un municipio.", 10, errores);
+    return errores;
+}
+
+static void ValidarTexto(string? valor, string campo, string mensajeVacio, int longitudMaxima, IDictionary<string, string[]> errores)
+{
+    if (string.IsNullOrWhiteSpace(valor)) errores[campo] = [mensajeVacio];
+    else if (valor.Trim().Length > longitudMaxima) errores[campo] = [$"Este campo no puede superar {longitudMaxima} caracteres."];
+}
+
+static void ValidarTextoOpcional(string? valor, string campo, int longitudMaxima, IDictionary<string, string[]> errores)
+{
+    if (!string.IsNullOrWhiteSpace(valor) && valor.Trim().Length > longitudMaxima) errores[campo] = [$"Este campo no puede superar {longitudMaxima} caracteres."];
+}
+
+static async Task<PreparacionRegistro> ObtenerPreparacionRegistroAsync(SqlConnection conexion, CancellationToken cancelacion)
+{
+    const string consulta = """
+        SELECT Id,Codigo,Version,Titulo,UrlPublica FROM legal.Documentos
+        WHERE Codigo IN (N'terminos_uso',N'tratamiento_datos') AND EsVigente=1 ORDER BY Codigo;
+        SELECT (SELECT COUNT(*) FROM territorio.Departamentos),(SELECT COUNT(*) FROM territorio.Municipios);
+        """;
+    await using var comando = new SqlCommand(consulta, conexion);
+    await using var lector = await comando.ExecuteReaderAsync(cancelacion);
+    var documentos = new List<DocumentoConsentimiento>();
+    while (await lector.ReadAsync(cancelacion)) documentos.Add(new DocumentoConsentimiento(lector.GetGuid(0), lector.GetString(1), lector.GetString(3), lector.GetString(2), lector.GetString(4)));
+    await lector.NextResultAsync(cancelacion);
+    await lector.ReadAsync(cancelacion);
+    var territorioDisponible = lector.GetInt32(0) > 0 && lector.GetInt32(1) > 0;
+    var impedimentos = new List<string>();
+    if (documentos.Count < 2) impedimentos.Add("Faltan los documentos vigentes de términos de uso y tratamiento de datos.");
+    if (!territorioDisponible) impedimentos.Add("Falta incorporar el catálogo oficial de departamentos y municipios.");
+    return new PreparacionRegistro(impedimentos.Count == 0, territorioDisponible, documentos, impedimentos);
+}
+
 app.Run();
 
 public sealed record RespuestaSalud(string Api, string BaseDatos);
-public sealed record DisponibilidadRegistro(bool RegistroDisponible, IReadOnlyList<string> Impedimentos);
+public sealed record DocumentoConsentimiento(Guid Id, string Codigo, string Titulo, string Version, string UrlPublica);
+public sealed record PreparacionRegistro(bool RegistroDisponible, bool TerritorioDisponible, IReadOnlyList<DocumentoConsentimiento> Documentos, IReadOnlyList<string> Impedimentos);
+public sealed record TerritorioRegistro(string Codigo, string Nombre);
 public sealed record ErrorApi(string Codigo, string Mensaje, string TrazaId, IReadOnlyDictionary<string, string[]>? Campos = null);
 public sealed record SolicitudIngreso(string Correo, string Contrasena);
+public sealed record SolicitudRegistroExterno(string PrimerNombre, string? SegundoNombre, string PrimerApellido, string? SegundoApellido, string CodigoTipoIdentificacion, string NumeroIdentificacion, string Correo, string? Telefono, string Contrasena, string NombreOrganizacion, string? NumeroIdentificacionOrganizacion, string CodigoDepartamento, string CodigoMunicipio, IReadOnlyList<string>? CodigosDocumentosAceptados);
 public sealed class OpcionesSesion
 {
     public int MinutosInactividad { get; init; }
