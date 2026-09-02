@@ -1,0 +1,21 @@
+<main>
+  <p class="eyebrow">SIMUS</p>
+  <h1>Núcleo técnico</h1>
+  <p class="intro">Esta instancia no contiene registros ni datos de muestra.</p>
+
+  @if (loading()) {
+    <p class="status">Comprobando la conexión con el sistema…</p>
+  } @else if (error()) {
+    <section class="status error" aria-live="polite">
+      <h2>No fue posible consultar el estado técnico.</h2>
+      <p>Verifica que la API esté en ejecución y vuelve a intentarlo.</p>
+      <button type="button" (click)="refresh()">Reintentar</button>
+    </section>
+  } @else if (health(); as currentHealth) {
+    <section class="status" aria-live="polite">
+      <h2>API {{ currentHealth.api === 'available' ? 'disponible' : 'no disponible' }}</h2>
+      <p>Base de datos: {{ currentHealth.database === 'available' ? 'disponible' : 'sin conexión' }}.</p>
+      <button type="button" (click)="refresh()">Actualizar estado</button>
+    </section>
+  }
+</main>

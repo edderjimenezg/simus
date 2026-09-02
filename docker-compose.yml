@@ -1,0 +1,13 @@
+services:
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    environment:
+      ACCEPT_EULA: "Y"
+      MSSQL_SA_PASSWORD: ${SIMUS_SQL_SA_PASSWORD:?Define SIMUS_SQL_SA_PASSWORD in .env}
+    ports:
+      - "${SIMUS_SQL_PORT:-14335}:1433"
+    volumes:
+      - simus_sql_data:/var/opt/mssql
+
+volumes:
+  simus_sql_data:
