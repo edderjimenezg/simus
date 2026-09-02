@@ -1,6 +1,7 @@
 using System.Diagnostics;
 using Microsoft.Data.SqlClient;
 using Microsoft.AspNetCore.Diagnostics;
+using Microsoft.AspNetCore.Identity;
 using Simus.Api.Servicios;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -111,11 +112,35 @@ app.MapPost("/api/sesion/cerrar", async (HttpContext contexto, IConfiguration co
     return Results.NoContent();
 });
 
+app.MapPost("/api/acceso/ingresar", async (SolicitudIngreso solicitud, HttpContext contexto, IConfiguration configuracion, ServicioSesiones sesiones, CancellationToken cancelacion) =>
+{
+    var errores = new Dictionary<string, string[]>();
+    if (string.IsNullOrWhiteSpace(solicitud.Correo)) errores["correo"] = ["Ingresa tu correo electrónico."];
+    if (string.IsNullOrWhiteSpace(solicitud.Contrasena)) errores["contrasena"] = ["Ingresa tu contraseña."];
+    if (errores.Count > 0) return Results.UnprocessableEntity(new ErrorApi("campos_invalidos", "Revisa los campos indicados.", contexto.TraceIdentifier, errores));
+    var cadenaConexion = configuracion.GetConnectionString("Simus");
+    if (string.IsNullOrWhiteSpace(cadenaConexion)) return Results.StatusCode(StatusCodes.Status503ServiceUnavailable);
+    await using var conexion = new SqlConnection(cadenaConexion);
+    await conexion.OpenAsync(cancelacion);
+    const string sql = "SELECT Id,HashContrasena,EstadoCuenta FROM identidad.Personas WHERE CorreoNormalizado=@correo;";
+    await using var comando = new SqlCommand(sql, conexion);
+    comando.Parameters.AddWithValue("@correo", solicitud.Correo.Trim().ToLowerInvariant());
+    await using var lector = await comando.ExecuteReaderAsync(cancelacion);
+    if (!await lector.ReadAsync(cancelacion)) return Results.Unauthorized();
+    var idPersona = lector.GetGuid(0); var hash = lector.GetString(1); var estado = lector.GetString(2);
+    await lector.CloseAsync();
+    if (estado != "activa" || new PasswordHasher<object>().VerifyHashedPassword(new object(), hash, solicitud.Contrasena) == PasswordVerificationResult.Failed) return Results.Unauthorized();
+    var (secreto, venceEn) = await sesiones.CrearAsync(conexion, idPersona, cancelacion);
+    contexto.Response.Cookies.Append("simus_sesion", secreto, new CookieOptions { HttpOnly = true, Secure = !app.Environment.IsDevelopment(), SameSite = SameSiteMode.Strict, Expires = venceEn });
+    return Results.Ok(new { idPersona });
+});
+
 app.Run();
 
 public sealed record RespuestaSalud(string Api, string BaseDatos);
 public sealed record DisponibilidadRegistro(bool RegistroDisponible, IReadOnlyList<string> Impedimentos);
 public sealed record ErrorApi(string Codigo, string Mensaje, string TrazaId, IReadOnlyDictionary<string, string[]>? Campos = null);
+public sealed record SolicitudIngreso(string Correo, string Contrasena);
 public sealed class OpcionesSesion
 {
     public int MinutosInactividad { get; init; }
