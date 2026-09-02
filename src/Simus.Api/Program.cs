@@ -84,6 +84,33 @@ app.MapGet("/api/registro/disponibilidad", async (IConfiguration configuracion, 
     }
 });
 
+app.MapGet("/api/sesion/estado", async (HttpContext contexto, IConfiguration configuracion, ServicioSesiones sesiones, CancellationToken cancelacion) =>
+{
+    if (!contexto.Request.Cookies.TryGetValue("simus_sesion", out var secreto) || string.IsNullOrWhiteSpace(secreto)) return Results.Unauthorized();
+    var cadenaConexion = configuracion.GetConnectionString("Simus");
+    if (string.IsNullOrWhiteSpace(cadenaConexion)) return Results.StatusCode(StatusCodes.Status503ServiceUnavailable);
+    await using var conexion = new SqlConnection(cadenaConexion);
+    await conexion.OpenAsync(cancelacion);
+    var idPersona = await sesiones.ValidarAsync(conexion, secreto, cancelacion);
+    return idPersona is null ? Results.Unauthorized() : Results.Ok(new { idPersona });
+});
+
+app.MapPost("/api/sesion/cerrar", async (HttpContext contexto, IConfiguration configuracion, ServicioSesiones sesiones, CancellationToken cancelacion) =>
+{
+    if (contexto.Request.Cookies.TryGetValue("simus_sesion", out var secreto) && !string.IsNullOrWhiteSpace(secreto))
+    {
+        var cadenaConexion = configuracion.GetConnectionString("Simus");
+        if (!string.IsNullOrWhiteSpace(cadenaConexion))
+        {
+            await using var conexion = new SqlConnection(cadenaConexion);
+            await conexion.OpenAsync(cancelacion);
+            await sesiones.CerrarAsync(conexion, secreto, cancelacion);
+        }
+    }
+    contexto.Response.Cookies.Delete("simus_sesion");
+    return Results.NoContent();
+});
+
 app.Run();
 
 public sealed record RespuestaSalud(string Api, string BaseDatos);
