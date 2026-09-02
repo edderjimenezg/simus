@@ -13,6 +13,7 @@ if (opcionesSesion.MinutosInactividad is < 5 or > 240 || opcionesSesion.HorasMax
     throw new InvalidOperationException("La configuración de sesión no está dentro de los límites permitidos.");
 builder.Services.AddSingleton(opcionesSesion);
 builder.Services.AddSingleton<ServicioSesiones>();
+builder.Services.AddSingleton<ServicioAuditoriaAcceso>();
 builder.Services.AddCors(options => options.AddDefaultPolicy(policy =>
     policy.WithOrigins("http://localhost:4200")
         .AllowAnyHeader()
