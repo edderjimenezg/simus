@@ -19,12 +19,16 @@ builder.Services.AddCors(options => options.AddDefaultPolicy(policy =>
         .AllowAnyHeader()
         .AllowAnyMethod()));
 builder.Services.AddProblemDetails();
-builder.Services.AddRateLimiter(opciones => opciones.AddFixedWindowLimiter("ingreso", limites =>
+builder.Services.AddRateLimiter(opciones =>
 {
-    limites.PermitLimit = 5;
-    limites.Window = TimeSpan.FromMinutes(15);
-    limites.QueueLimit = 0;
-}));
+    opciones.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+    opciones.AddFixedWindowLimiter("ingreso", limites =>
+    {
+        limites.PermitLimit = 5;
+        limites.Window = TimeSpan.FromMinutes(15);
+        limites.QueueLimit = 0;
+    });
+});
 
 var app = builder.Build();
 app.UseExceptionHandler(manejador => manejador.Run(async contexto =>
