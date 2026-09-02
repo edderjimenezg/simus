@@ -2,6 +2,8 @@ using System.Diagnostics;
 using Microsoft.Data.SqlClient;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.RateLimiting;
+using System.Threading.RateLimiting;
 using Simus.Api.Servicios;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -16,6 +18,12 @@ builder.Services.AddCors(options => options.AddDefaultPolicy(policy =>
         .AllowAnyHeader()
         .AllowAnyMethod()));
 builder.Services.AddProblemDetails();
+builder.Services.AddRateLimiter(opciones => opciones.AddFixedWindowLimiter("ingreso", limites =>
+{
+    limites.PermitLimit = 5;
+    limites.Window = TimeSpan.FromMinutes(15);
+    limites.QueueLimit = 0;
+}));
 
 var app = builder.Build();
 app.UseExceptionHandler(manejador => manejador.Run(async contexto =>
@@ -35,6 +43,7 @@ app.Use(async (contexto, siguiente) =>
         Stopwatch.GetElapsedTime(inicio).TotalMilliseconds, contexto.TraceIdentifier);
 });
 app.UseCors();
+app.UseRateLimiter();
 
 app.MapGet("/api/salud", async (IConfiguration configuracion, CancellationToken cancelacion) =>
 {
@@ -133,7 +142,7 @@ app.MapPost("/api/acceso/ingresar", async (SolicitudIngreso solicitud, HttpConte
     var (secreto, venceEn) = await sesiones.CrearAsync(conexion, idPersona, cancelacion);
     contexto.Response.Cookies.Append("simus_sesion", secreto, new CookieOptions { HttpOnly = true, Secure = !app.Environment.IsDevelopment(), SameSite = SameSiteMode.Strict, Expires = venceEn });
     return Results.Ok(new { idPersona });
-});
+}).RequireRateLimiting("ingreso");
 
 app.Run();
 
