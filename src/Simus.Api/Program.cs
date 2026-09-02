@@ -1,12 +1,31 @@
+using System.Diagnostics;
 using Microsoft.Data.SqlClient;
+using Microsoft.AspNetCore.Diagnostics;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddCors(options => options.AddDefaultPolicy(policy =>
     policy.WithOrigins("http://localhost:4200")
         .AllowAnyHeader()
         .AllowAnyMethod()));
+builder.Services.AddProblemDetails();
 
 var app = builder.Build();
+app.UseExceptionHandler(manejador => manejador.Run(async contexto =>
+{
+    var error = contexto.Features.Get<IExceptionHandlerFeature>()?.Error;
+    var trazaId = contexto.TraceIdentifier;
+    app.Logger.LogError(error, "Error no previsto. Traza: {TrazaId}", trazaId);
+    contexto.Response.StatusCode = StatusCodes.Status500InternalServerError;
+    await contexto.Response.WriteAsJsonAsync(new ErrorApi("error_no_previsto", "Ocurrió un error inesperado. Inténtalo nuevamente.", trazaId));
+}));
+app.Use(async (contexto, siguiente) =>
+{
+    var inicio = Stopwatch.GetTimestamp();
+    await siguiente();
+    app.Logger.LogInformation("Solicitud {Metodo} {Ruta} respondió {Estado} en {DuracionMs} ms. Traza: {TrazaId}",
+        contexto.Request.Method, contexto.Request.Path, contexto.Response.StatusCode,
+        Stopwatch.GetElapsedTime(inicio).TotalMilliseconds, contexto.TraceIdentifier);
+});
 app.UseCors();
 
 app.MapGet("/api/salud", async (IConfiguration configuracion, CancellationToken cancelacion) =>
@@ -62,5 +81,6 @@ app.Run();
 
 public sealed record RespuestaSalud(string Api, string BaseDatos);
 public sealed record DisponibilidadRegistro(bool RegistroDisponible, IReadOnlyList<string> Impedimentos);
+public sealed record ErrorApi(string Codigo, string Mensaje, string TrazaId, IReadOnlyDictionary<string, string[]>? Campos = null);
 
 public partial class Program;
