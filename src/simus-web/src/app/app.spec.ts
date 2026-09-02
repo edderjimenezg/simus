@@ -13,14 +13,14 @@ describe('App', () => {
 
   it('should create the app', () => {
     const fixture = TestBed.createComponent(App);
-    TestBed.inject(HttpTestingController).expectOne('/api/health').flush({ api: 'available', database: 'available' });
+    TestBed.inject(HttpTestingController).expectOne('/api/salud').flush({ api: 'disponible', baseDatos: 'disponible' });
     const app = fixture.componentInstance;
     expect(app).toBeTruthy();
   });
 
   it('shows the status returned by the API', async () => {
     const fixture = TestBed.createComponent(App);
-    TestBed.inject(HttpTestingController).expectOne('/api/health').flush({ api: 'available', database: 'available' });
+    TestBed.inject(HttpTestingController).expectOne('/api/salud').flush({ api: 'disponible', baseDatos: 'disponible' });
     fixture.detectChanges();
     await fixture.whenStable();
     const compiled = fixture.nativeElement as HTMLElement;

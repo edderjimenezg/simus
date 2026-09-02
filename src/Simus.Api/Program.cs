@@ -9,28 +9,28 @@ builder.Services.AddCors(options => options.AddDefaultPolicy(policy =>
 var app = builder.Build();
 app.UseCors();
 
-app.MapGet("/api/health", async (IConfiguration configuration, CancellationToken cancellationToken) =>
+app.MapGet("/api/salud", async (IConfiguration configuracion, CancellationToken cancelacion) =>
 {
-    var connectionString = configuration.GetConnectionString("Simus");
-    if (string.IsNullOrWhiteSpace(connectionString))
+    var cadenaConexion = configuracion.GetConnectionString("Simus");
+    if (string.IsNullOrWhiteSpace(cadenaConexion))
     {
-        return Results.Json(new HealthResponse("unavailable", "not-configured"), statusCode: StatusCodes.Status503ServiceUnavailable);
+        return Results.Json(new RespuestaSalud("no_disponible", "no_configurada"), statusCode: StatusCodes.Status503ServiceUnavailable);
     }
 
     try
     {
-        await using var connection = new SqlConnection(connectionString);
-        await connection.OpenAsync(cancellationToken);
-        return Results.Ok(new HealthResponse("available", "available"));
+        await using var conexion = new SqlConnection(cadenaConexion);
+        await conexion.OpenAsync(cancelacion);
+        return Results.Ok(new RespuestaSalud("disponible", "disponible"));
     }
     catch (SqlException)
     {
-        return Results.Json(new HealthResponse("available", "unavailable"), statusCode: StatusCodes.Status503ServiceUnavailable);
+        return Results.Json(new RespuestaSalud("disponible", "no_disponible"), statusCode: StatusCodes.Status503ServiceUnavailable);
     }
 });
 
 app.Run();
 
-public sealed record HealthResponse(string Api, string Database);
+public sealed record RespuestaSalud(string Api, string BaseDatos);
 
 public partial class Program;

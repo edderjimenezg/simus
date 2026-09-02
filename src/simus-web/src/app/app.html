@@ -11,10 +11,10 @@
       <p>Verifica que la API esté en ejecución y vuelve a intentarlo.</p>
       <button type="button" (click)="refresh()">Reintentar</button>
     </section>
-  } @else if (health(); as currentHealth) {
+  } @else if (estadoApi(); as estadoActual) {
     <section class="status" aria-live="polite">
-      <h2>API {{ currentHealth.api === 'available' ? 'disponible' : 'no disponible' }}</h2>
-      <p>Base de datos: {{ currentHealth.database === 'available' ? 'disponible' : 'sin conexión' }}.</p>
+      <h2>API {{ estadoActual.api === 'disponible' ? 'disponible' : 'no disponible' }}</h2>
+      <p>Base de datos: {{ estadoActual.baseDatos === 'disponible' ? 'disponible' : 'sin conexión' }}.</p>
       <button type="button" (click)="refresh()">Actualizar estado</button>
     </section>
   }

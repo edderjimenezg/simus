@@ -61,4 +61,4 @@ CREATE TABLE identity.Sessions (
  CONSTRAINT FK_Sessions_Person FOREIGN KEY(PersonId) REFERENCES identity.Persons(Id)
 );
 CREATE INDEX IX_Sessions_PersonId ON identity.Sessions(PersonId,RevokedAt,AbsoluteExpiresAt);
-INSERT INTO core.SchemaVersions (Version) VALUES (N'001_identity');
+INSERT INTO core.SchemaVersions (Version) VALUES (N'001_identidad');

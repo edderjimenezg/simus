@@ -2,11 +2,11 @@ using System.Text.RegularExpressions;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Data.SqlClient;
 
-const string SchemaVersion = "001_identity";
+const string SchemaVersion = "001_identidad";
 var connectionArgument = args.SkipWhile(value => value != "--connection").Skip(1).FirstOrDefault();
 if (string.IsNullOrWhiteSpace(connectionArgument))
 {
-    Console.Error.WriteLine("Uso: dotnet run --project src/Simus.Database.Setup -- --connection '<cadena de conexión>'");
+    Console.Error.WriteLine("Uso: dotnet run --project src/Simus.Preparar.BaseDatos -- --connection '<cadena de conexión>'");
     return 2;
 }
 
@@ -39,7 +39,7 @@ static async Task EnsureSchemaAsync(SqlConnection connection)
     versionCheck.Parameters.AddWithValue("@version", SchemaVersion);
     if (Convert.ToInt32(await versionCheck.ExecuteScalarAsync()) > 0) return;
 
-    var scriptPath = Path.Combine(AppContext.BaseDirectory, "Schema", "001_identity.sql");
+    var scriptPath = Path.Combine(AppContext.BaseDirectory, "Esquema", "001_identidad.sql");
     var script = await File.ReadAllTextAsync(scriptPath);
     await using var transaction = await connection.BeginTransactionAsync();
     await using var command = new SqlCommand(script, connection, (SqlTransaction)transaction);

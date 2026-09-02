@@ -1,5 +1,5 @@
 import { Component, inject, signal } from '@angular/core';
-import { ApiHealth, ApiStatusService } from './core/api-status.service';
+import { EstadoApi, ServicioEstadoApi } from './core/estado-api.service';
 
 @Component({
   selector: 'app-root',
@@ -7,9 +7,9 @@ import { ApiHealth, ApiStatusService } from './core/api-status.service';
   styleUrl: './app.scss'
 })
 export class App {
-  private readonly apiStatus = inject(ApiStatusService);
+  private readonly servicioEstadoApi = inject(ServicioEstadoApi);
 
-  protected readonly health = signal<ApiHealth | null>(null);
+  protected readonly estadoApi = signal<EstadoApi | null>(null);
   protected readonly loading = signal(true);
   protected readonly error = signal(false);
 
@@ -20,13 +20,13 @@ export class App {
   protected refresh(): void {
     this.loading.set(true);
     this.error.set(false);
-    this.apiStatus.getHealth().subscribe({
-      next: health => {
-        this.health.set(health);
+    this.servicioEstadoApi.obtenerSalud().subscribe({
+      next: estado => {
+        this.estadoApi.set(estado);
         this.loading.set(false);
       },
       error: () => {
-        this.health.set(null);
+        this.estadoApi.set(null);
         this.loading.set(false);
         this.error.set(true);
       }
