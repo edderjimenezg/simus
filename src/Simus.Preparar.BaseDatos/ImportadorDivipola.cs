@@ -33,6 +33,18 @@ internal static class ImportadorDivipola
         Console.WriteLine($"DIVIPOLA MGN {Version} incorporada: {departamentos.Count} departamentos y {municipios.Count} municipios.");
     }
 
+    public static async Task ImportarSiEstaVacioAsync(SqlConnection conexion, CancellationToken cancelacion = default)
+    {
+        const string consultaExistente = "SELECT COUNT(*) FROM territorio.Departamentos;";
+        await using var comandoExistente = new SqlCommand(consultaExistente, conexion);
+        if (Convert.ToInt32(await comandoExistente.ExecuteScalarAsync(cancelacion)) > 0)
+        {
+            Console.WriteLine("DIVIPOLA ya está incorporada; se conserva sin reemplazos.");
+            return;
+        }
+        await ImportarAsync(conexion, cancelacion);
+    }
+
     private static async Task<List<JsonElement>> ConsultarAsync(HttpClient cliente, int capa, string campos, CancellationToken cancelacion)
     {
         var url = $"{UrlServicio}/{capa}/query?where=1%3D1&outFields={Uri.EscapeDataString(campos)}&returnGeometry=false&f=json";

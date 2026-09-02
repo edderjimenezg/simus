@@ -10,7 +10,7 @@ var versionesEsquema = new[]
 var connectionArgument = args.SkipWhile(value => value != "--conexion").Skip(1).FirstOrDefault();
 if (string.IsNullOrWhiteSpace(connectionArgument))
 {
-    Console.Error.WriteLine("Uso: dotnet run --project src/Simus.Preparar.BaseDatos -- --conexion '<cadena de conexión>' [--importar-divipola]");
+    Console.Error.WriteLine("Uso: dotnet run --project src/Simus.Preparar.BaseDatos -- --conexion '<cadena de conexión>' [--importar-divipola|--asegurar-divipola]");
     return 2;
 }
 
@@ -34,6 +34,7 @@ await using var database = new SqlConnection(target.ConnectionString);
 await database.OpenAsync();
 await EnsureSchemaAsync(database, versionesEsquema);
 if (args.Contains("--importar-divipola", StringComparer.Ordinal)) await ImportadorDivipola.ImportarAsync(database);
+if (args.Contains("--asegurar-divipola", StringComparer.Ordinal)) await ImportadorDivipola.ImportarSiEstaVacioAsync(database);
 await BootstrapWebmasterAsync(database);
 Console.WriteLine("Esquema SIMUS preparado sin datos demostrativos.");
 return 0;
