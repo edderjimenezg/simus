@@ -1,6 +1,7 @@
 using System.Diagnostics;
 using Microsoft.Data.SqlClient;
 using Microsoft.AspNetCore.Diagnostics;
+using Simus.Api.Servicios;
 
 var builder = WebApplication.CreateBuilder(args);
 var opcionesSesion = builder.Configuration.GetSection("Sesion").Get<OpcionesSesion>()
@@ -8,6 +9,7 @@ var opcionesSesion = builder.Configuration.GetSection("Sesion").Get<OpcionesSesi
 if (opcionesSesion.MinutosInactividad is < 5 or > 240 || opcionesSesion.HorasMaximas is < 1 or > 24 || opcionesSesion.MinutosAvisoPrevio < 1)
     throw new InvalidOperationException("La configuración de sesión no está dentro de los límites permitidos.");
 builder.Services.AddSingleton(opcionesSesion);
+builder.Services.AddSingleton<ServicioSesiones>();
 builder.Services.AddCors(options => options.AddDefaultPolicy(policy =>
     policy.WithOrigins("http://localhost:4200")
         .AllowAnyHeader()
