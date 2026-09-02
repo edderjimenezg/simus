@@ -24,6 +24,7 @@
       <nav class="panel__navegacion" aria-label="Navegación del panel">
         <p>Mi panel</p>
         <button type="button" [class.activa]="seccion() === 'resumen'" (click)="cambiarSeccion('resumen')">Resumen</button>
+        <button type="button" [class.activa]="seccion() === 'procesos'" (click)="cambiarSeccion('procesos')">Procesos</button>
         <button type="button" [class.activa]="seccion() === 'organizacion'" (click)="cambiarSeccion('organizacion')">Organización</button>
         <button type="button" [class.activa]="seccion() === 'administradores'" (click)="cambiarSeccion('administradores')">Administradores</button>
         <span class="panel__separador"></span>
@@ -41,18 +42,34 @@
               <h1 id="titulo-resumen">{{ organizacion.nombre }}</h1>
               <p class="introduccion">{{ organizacion.municipio }}, {{ organizacion.departamento }} · Organización {{ organizacion.estado }}.</p>
               <div class="resumen-lineas">
-                <div><span>Procesos administrados</span><strong>0</strong><p>Cuando registres un proceso aparecerá aquí.</p></div>
+                <div><span>Festivales administrados</span><strong>{{ festivales().length }}</strong><p>@if (festivales().length) { Consulta o continúa tus borradores. } @else { Aún no tienes Festivales registrados. }</p></div>
                 <div><span>Solicitudes activas</span><strong>0</strong><p>No tienes solicitudes en curso.</p></div>
                 <div><span>Última actualización</span><strong class="dato-fecha">{{ fecha(organizacion.fechaActualizacion) }}</strong><p>Datos generales de la organización.</p></div>
               </div>
-              <section class="vacio" aria-labelledby="titulo-procesos">
-                <h2 id="titulo-procesos">Aún no hay procesos registrados</h2>
-                <p>La gestión de Festivales será el siguiente módulo conectado a este panel. No se muestran registros de demostración.</p>
-              </section>
+              @if (!festivales().length) { <section class="vacio" aria-labelledby="titulo-procesos"><h2 id="titulo-procesos">Aún no hay Festivales registrados</h2><p>Registra el primer Festival administrado por tu organización como borrador privado.</p><button type="button" class="boton-principal" (click)="cambiarSeccion('procesos'); abrirNuevoFestival()">Registrar Festival</button></section> }
             } @else {
               <h1 id="titulo-resumen">No administras una organización activa</h1>
               <p class="introduccion">Tu cuenta está autenticada, pero aún no tiene una organización activa asociada.</p>
             }
+          </section>
+        }
+
+        @if (seccion() === 'procesos') {
+          <section class="seccion" aria-labelledby="titulo-procesos">
+            <p class="rotulo">Procesos</p>
+            <div class="encabezado-procesos"><div><h1 id="titulo-procesos">Festivales</h1><p class="introduccion">Gestiona la identidad permanente de cada Festival. Las ediciones anuales se incorporarán en una etapa posterior.</p></div><button type="button" class="boton-principal" (click)="abrirNuevoFestival()">Registrar Festival</button></div>
+            @if (editandoFestival() || (!festivales().length && !cargandoFestivales())) {
+              <form class="formulario formulario--festival" (ngSubmit)="guardarFestival()" novalidate>
+                <header><h2>{{ editandoFestival() ? 'Continuar borrador de Festival' : 'Nuevo Festival' }}</h2><p>Este registro se guarda como borrador privado. Aún no se envía a revisión ni se publica.</p></header>
+                <div class="campo campo--ancho"><label for="festival-nombreFestival">Nombre del Festival</label><input id="festival-nombreFestival" name="nombreFestival" [(ngModel)]="formularioFestival.nombre" (input)="limpiarError('nombreFestival')" [attr.aria-invalid]="erroresCampos()['nombreFestival'] ? true : null">@if (erroresCampos()['nombreFestival']) { <p class="campo__error">{{ erroresCampos()['nombreFestival'] }}</p> }</div>
+                <div class="campo campo--ancho"><label for="festival-descripcionFestival">Descripción <span>Opcional</span></label><textarea id="festival-descripcionFestival" name="descripcionFestival" [(ngModel)]="formularioFestival.descripcion" (input)="limpiarError('descripcionFestival')" [attr.aria-invalid]="erroresCampos()['descripcionFestival'] ? true : null"></textarea>@if (erroresCampos()['descripcionFestival']) { <p class="campo__error">{{ erroresCampos()['descripcionFestival'] }}</p> }</div>
+                <div class="campo"><label for="festival-codigoDepartamentoFestival">Departamento</label><select id="festival-codigoDepartamentoFestival" name="codigoDepartamentoFestival" [(ngModel)]="formularioFestival.codigoDepartamento" (change)="cambiarDepartamentoFestival()" [attr.aria-invalid]="erroresCampos()['codigoDepartamentoFestival'] ? true : null"><option value="">Selecciona un departamento</option>@for (departamento of departamentos(); track departamento.codigo) { <option [value]="departamento.codigo">{{ departamento.nombre }}</option>}</select>@if (erroresCampos()['codigoDepartamentoFestival']) { <p class="campo__error">{{ erroresCampos()['codigoDepartamentoFestival'] }}</p> }</div>
+                <div class="campo"><label for="festival-codigoMunicipioFestival">Municipio</label><select id="festival-codigoMunicipioFestival" name="codigoMunicipioFestival" [(ngModel)]="formularioFestival.codigoMunicipio" (change)="limpiarError('codigoMunicipioFestival')" [disabled]="!formularioFestival.codigoDepartamento" [attr.aria-invalid]="erroresCampos()['codigoMunicipioFestival'] ? true : null"><option value="">Selecciona un municipio</option>@for (municipio of municipios(); track municipio.codigo) { <option [value]="municipio.codigo">{{ municipio.nombre }}</option>}</select>@if (erroresCampos()['codigoMunicipioFestival']) { <p class="campo__error">{{ erroresCampos()['codigoMunicipioFestival'] }}</p> }</div>
+                <div class="formulario__acciones"><button type="submit" class="boton-principal" [disabled]="guardandoFestival()">{{ guardandoFestival() ? 'Guardando…' : 'Guardar borrador' }}</button>@if (festivales().length) { <button type="button" class="enlace-accion" (click)="cerrarFormularioFestival()">Cancelar</button> }</div>
+              </form>
+            }
+            @if (cargandoFestivales()) { <p class="cargando-lista">Cargando Festivales…</p> }
+            @else if (festivales().length) { <ul class="lista-festivales">@for (festival of festivales(); track festival.idFestival) { <li><div><strong>{{ festival.nombre }}</strong><span>{{ festival.organizacion }} · {{ festival.municipio }}, {{ festival.departamento }}</span><small>{{ festival.estadoEditorial === 'borrador' ? 'Borrador privado' : festival.estadoEditorial }} · Actualizado {{ fecha(festival.fechaActualizacion) }}</small></div>@if (festival.estadoEditorial === 'borrador') { <button type="button" class="boton-secundario" (click)="continuarFestival(festival)">Continuar borrador</button> }</li> }</ul> }
           </section>
         }
 

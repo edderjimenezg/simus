@@ -2,7 +2,11 @@ using System.Text.RegularExpressions;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Data.SqlClient;
 
-const string SchemaVersion = "001_identidad";
+var versionesEsquema = new[]
+{
+    new VersionEsquema("001_identidad", "001_identidad.sql"),
+    new VersionEsquema("002_festivales", "002_festivales.sql")
+};
 var connectionArgument = args.SkipWhile(value => value != "--conexion").Skip(1).FirstOrDefault();
 if (string.IsNullOrWhiteSpace(connectionArgument))
 {
@@ -28,24 +32,33 @@ await using (var connection = new SqlConnection(master.ConnectionString))
 
 await using var database = new SqlConnection(target.ConnectionString);
 await database.OpenAsync();
-await EnsureSchemaAsync(database);
+await EnsureSchemaAsync(database, versionesEsquema);
 if (args.Contains("--importar-divipola", StringComparer.Ordinal)) await ImportadorDivipola.ImportarAsync(database);
 await BootstrapWebmasterAsync(database);
 Console.WriteLine("Esquema SIMUS preparado sin datos demostrativos.");
 return 0;
 
-static async Task EnsureSchemaAsync(SqlConnection connection)
+static async Task EnsureSchemaAsync(SqlConnection connection, IReadOnlyList<VersionEsquema> versiones)
 {
-    await using var versionCheck = new SqlCommand("SELECT COUNT(*) FROM nucleo.VersionesEsquema WHERE Version = @version;", connection);
-    versionCheck.Parameters.AddWithValue("@version", SchemaVersion);
-    if (Convert.ToInt32(await versionCheck.ExecuteScalarAsync()) > 0) return;
+    foreach (var version in versiones)
+    {
+        const string consultaVersion = """
+            IF OBJECT_ID(N'nucleo.VersionesEsquema', N'U') IS NULL
+                SELECT CAST(0 AS int);
+            ELSE
+                SELECT COUNT(*) FROM nucleo.VersionesEsquema WHERE Version = @version;
+            """;
+        await using var versionCheck = new SqlCommand(consultaVersion, connection);
+        versionCheck.Parameters.AddWithValue("@version", version.Codigo);
+        if (Convert.ToInt32(await versionCheck.ExecuteScalarAsync()) > 0) continue;
 
-    var scriptPath = Path.Combine(AppContext.BaseDirectory, "Esquema", "001_identidad.sql");
-    var script = await File.ReadAllTextAsync(scriptPath);
-    await using var transaction = await connection.BeginTransactionAsync();
-    await using var command = new SqlCommand(script, connection, (SqlTransaction)transaction);
-    await command.ExecuteNonQueryAsync();
-    await transaction.CommitAsync();
+        var scriptPath = Path.Combine(AppContext.BaseDirectory, "Esquema", version.Archivo);
+        var script = await File.ReadAllTextAsync(scriptPath);
+        await using var transaction = await connection.BeginTransactionAsync();
+        await using var command = new SqlCommand(script, connection, (SqlTransaction)transaction);
+        await command.ExecuteNonQueryAsync();
+        await transaction.CommitAsync();
+    }
 }
 
 static async Task BootstrapWebmasterAsync(SqlConnection connection)
@@ -77,3 +90,5 @@ static async Task BootstrapWebmasterAsync(SqlConnection connection)
     await command.ExecuteNonQueryAsync();
     await transaction.CommitAsync();
 }
+
+sealed record VersionEsquema(string Codigo, string Archivo);

@@ -25,6 +25,16 @@ public sealed class PruebasSaludApi(WebApplicationFactory<Program> fabrica) : IC
     }
 
     [Fact]
+    public async Task Rechaza_la_lista_de_festivales_sin_cookie()
+    {
+        using var cliente = fabrica.CreateClient();
+
+        var respuesta = await cliente.GetAsync("/api/mi-panel/festivales");
+
+        Assert.Equal(System.Net.HttpStatusCode.Unauthorized, respuesta.StatusCode);
+    }
+
+    [Fact]
     public async Task Limita_los_intentos_repetidos_de_ingreso()
     {
         using var cliente = fabrica.CreateClient();

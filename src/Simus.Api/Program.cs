@@ -234,6 +234,116 @@ app.MapPatch("/api/mi-panel/organizaciones/{idOrganizacion:guid}", async (Guid i
     }
 });
 
+app.MapGet("/api/mi-panel/festivales", async (HttpContext contexto, IConfiguration configuracion, ServicioSesiones sesiones, CancellationToken cancelacion) =>
+{
+    var (conexion, idPersona, error) = await ObtenerConexionAutorizadaAsync(contexto, configuracion, sesiones, cancelacion);
+    if (error is not null) return error;
+    await using (conexion!)
+    {
+        var conexionAbierta = conexion!;
+        const string consulta = """
+            SELECT f.Id,p.Id,p.Nombre,p.EstadoEditorial,p.Descripcion,p.CodigoDepartamento,d.Nombre,p.CodigoMunicipio,m.Nombre,p.FechaActualizacion,
+                   o.Id,o.Nombre
+            FROM festivales.Festivales f
+            INNER JOIN organizaciones.Administradores a ON a.IdOrganizacion=f.IdOrganizacionAdministradora AND a.FechaRetiro IS NULL
+            INNER JOIN organizaciones.Organizaciones o ON o.Id=f.IdOrganizacionAdministradora
+            CROSS APPLY (
+                SELECT TOP 1 Id,Nombre,EstadoEditorial,Descripcion,CodigoDepartamento,CodigoMunicipio,FechaActualizacion
+                FROM festivales.Perfiles WHERE IdFestival=f.Id ORDER BY NumeroVersion DESC
+            ) p
+            INNER JOIN territorio.Departamentos d ON d.Codigo=p.CodigoDepartamento
+            INNER JOIN territorio.Municipios m ON m.Codigo=p.CodigoMunicipio AND m.CodigoDepartamento=p.CodigoDepartamento
+            WHERE a.IdPersona=@persona AND f.EstadoIdentidad=N'activa'
+            ORDER BY p.FechaActualizacion DESC,p.Nombre;
+            """;
+        await using var comando = new SqlCommand(consulta, conexionAbierta);
+        comando.Parameters.AddWithValue("@persona", idPersona!.Value);
+        await using var lector = await comando.ExecuteReaderAsync(cancelacion);
+        var festivales = new List<FestivalPanel>();
+        while (await lector.ReadAsync(cancelacion))
+        {
+            festivales.Add(new FestivalPanel(
+                lector.GetGuid(0), lector.GetGuid(1), lector.GetString(2), lector.GetString(3), lector.IsDBNull(4) ? null : lector.GetString(4),
+                lector.GetString(5), lector.GetString(6), lector.GetString(7), lector.GetString(8), lector.GetDateTime(9), lector.GetGuid(10), lector.GetString(11)));
+        }
+        return Results.Ok(festivales);
+    }
+});
+
+app.MapPost("/api/mi-panel/festivales", async (SolicitudCrearFestival solicitud, HttpContext contexto, IConfiguration configuracion, ServicioSesiones sesiones, ServicioAuditoriaAcceso auditoria, CancellationToken cancelacion) =>
+{
+    var errores = ValidarSolicitudFestival(solicitud.Nombre, solicitud.Descripcion, solicitud.CodigoDepartamento, solicitud.CodigoMunicipio);
+    if (solicitud.IdOrganizacion == Guid.Empty) errores["idOrganizacion"] = ["Selecciona la organización que administrará el Festival."];
+    if (errores.Count > 0) return Results.UnprocessableEntity(new ErrorApi("campos_invalidos", "Revisa los campos indicados.", contexto.TraceIdentifier, errores));
+    var (conexion, idPersona, error) = await ObtenerConexionAutorizadaAsync(contexto, configuracion, sesiones, cancelacion);
+    if (error is not null) return error;
+    await using (conexion!)
+    {
+        var conexionAbierta = conexion!;
+        if (!await PuedeAdministrarOrganizacionAsync(conexionAbierta, idPersona!.Value, solicitud.IdOrganizacion, cancelacion)) return Results.Forbid();
+        if (!await TerritorioExisteAsync(conexionAbierta, solicitud.CodigoDepartamento, solicitud.CodigoMunicipio, cancelacion))
+        {
+            errores["codigoMunicipio"] = ["El municipio no corresponde al departamento seleccionado."];
+            return Results.UnprocessableEntity(new ErrorApi("territorio_invalido", "Revisa los campos indicados.", contexto.TraceIdentifier, errores));
+        }
+        var idFestival = Guid.NewGuid();
+        var idPerfil = Guid.NewGuid();
+        await using var transaccion = await conexionAbierta.BeginTransactionAsync(cancelacion);
+        const string insertar = """
+            INSERT INTO festivales.Festivales (Id,IdOrganizacionAdministradora,EstadoIdentidad,FechaCreacion,FechaActualizacion)
+            VALUES (@festival,@organizacion,N'activa',SYSUTCDATETIME(),SYSUTCDATETIME());
+            INSERT INTO festivales.Perfiles (Id,IdFestival,NumeroVersion,EstadoEditorial,Nombre,Descripcion,CodigoDepartamento,CodigoMunicipio,IdPersonaCreadora,FechaCreacion,FechaActualizacion)
+            VALUES (@perfil,@festival,1,N'borrador',@nombre,@descripcion,@departamento,@municipio,@persona,SYSUTCDATETIME(),SYSUTCDATETIME());
+            """;
+        await using var comando = new SqlCommand(insertar, conexionAbierta, (SqlTransaction)transaccion);
+        comando.Parameters.AddWithValue("@festival", idFestival);
+        comando.Parameters.AddWithValue("@perfil", idPerfil);
+        comando.Parameters.AddWithValue("@organizacion", solicitud.IdOrganizacion);
+        comando.Parameters.AddWithValue("@nombre", solicitud.Nombre.Trim());
+        comando.Parameters.AddWithValue("@descripcion", ComoDbNull(solicitud.Descripcion));
+        comando.Parameters.AddWithValue("@departamento", solicitud.CodigoDepartamento.Trim());
+        comando.Parameters.AddWithValue("@municipio", solicitud.CodigoMunicipio.Trim());
+        comando.Parameters.AddWithValue("@persona", idPersona.Value);
+        await comando.ExecuteNonQueryAsync(cancelacion);
+        await transaccion.CommitAsync(cancelacion);
+        await auditoria.RegistrarAsync(conexionAbierta, idPersona.Value, "festival_borrador_creado", contexto.TraceIdentifier, cancelacion);
+        return Results.Created($"/api/mi-panel/festivales/{idFestival}", new { idFestival, idPerfil });
+    }
+});
+
+app.MapPatch("/api/mi-panel/festivales/{idFestival:guid}/perfil-borrador", async (Guid idFestival, SolicitudActualizarFestival solicitud, HttpContext contexto, IConfiguration configuracion, ServicioSesiones sesiones, ServicioAuditoriaAcceso auditoria, CancellationToken cancelacion) =>
+{
+    var errores = ValidarSolicitudFestival(solicitud.Nombre, solicitud.Descripcion, solicitud.CodigoDepartamento, solicitud.CodigoMunicipio);
+    if (errores.Count > 0) return Results.UnprocessableEntity(new ErrorApi("campos_invalidos", "Revisa los campos indicados.", contexto.TraceIdentifier, errores));
+    var (conexion, idPersona, error) = await ObtenerConexionAutorizadaAsync(contexto, configuracion, sesiones, cancelacion);
+    if (error is not null) return error;
+    await using (conexion!)
+    {
+        var conexionAbierta = conexion!;
+        if (!await PuedeAdministrarFestivalAsync(conexionAbierta, idPersona!.Value, idFestival, cancelacion)) return Results.Forbid();
+        if (!await TerritorioExisteAsync(conexionAbierta, solicitud.CodigoDepartamento, solicitud.CodigoMunicipio, cancelacion))
+        {
+            errores["codigoMunicipio"] = ["El municipio no corresponde al departamento seleccionado."];
+            return Results.UnprocessableEntity(new ErrorApi("territorio_invalido", "Revisa los campos indicados.", contexto.TraceIdentifier, errores));
+        }
+        const string actualizar = """
+            UPDATE festivales.Perfiles SET Nombre=@nombre,Descripcion=@descripcion,CodigoDepartamento=@departamento,CodigoMunicipio=@municipio,FechaActualizacion=SYSUTCDATETIME()
+            WHERE IdFestival=@festival AND EstadoEditorial=N'borrador' AND NumeroVersion=(SELECT MAX(NumeroVersion) FROM festivales.Perfiles WHERE IdFestival=@festival);
+            UPDATE festivales.Festivales SET FechaActualizacion=SYSUTCDATETIME() WHERE Id=@festival;
+            """;
+        await using var comando = new SqlCommand(actualizar, conexionAbierta);
+        comando.Parameters.AddWithValue("@nombre", solicitud.Nombre.Trim());
+        comando.Parameters.AddWithValue("@descripcion", ComoDbNull(solicitud.Descripcion));
+        comando.Parameters.AddWithValue("@departamento", solicitud.CodigoDepartamento.Trim());
+        comando.Parameters.AddWithValue("@municipio", solicitud.CodigoMunicipio.Trim());
+        comando.Parameters.AddWithValue("@festival", idFestival);
+        var filas = await comando.ExecuteNonQueryAsync(cancelacion);
+        if (filas == 1) return Results.Conflict(new ErrorApi("borrador_no_disponible", "Este Festival ya no tiene un borrador disponible para editar.", contexto.TraceIdentifier));
+        await auditoria.RegistrarAsync(conexionAbierta, idPersona.Value, "festival_borrador_actualizado", contexto.TraceIdentifier, cancelacion);
+        return Results.NoContent();
+    }
+});
+
 app.MapPost("/api/sesion/cerrar", async (HttpContext contexto, IConfiguration configuracion, ServicioSesiones sesiones, ServicioAuditoriaAcceso auditoria, CancellationToken cancelacion) =>
 {
     if (contexto.Request.Cookies.TryGetValue("simus_sesion", out var secreto) && !string.IsNullOrWhiteSpace(secreto))
@@ -420,6 +530,28 @@ static async Task<bool> PuedeAdministrarOrganizacionAsync(SqlConnection conexion
     return Convert.ToInt32(await comando.ExecuteScalarAsync(cancelacion)) == 1;
 }
 
+static async Task<bool> PuedeAdministrarFestivalAsync(SqlConnection conexion, Guid idPersona, Guid idFestival, CancellationToken cancelacion)
+{
+    const string consulta = """
+        SELECT COUNT(*) FROM festivales.Festivales f
+        INNER JOIN organizaciones.Administradores a ON a.IdOrganizacion=f.IdOrganizacionAdministradora AND a.FechaRetiro IS NULL
+        WHERE f.Id=@festival AND f.EstadoIdentidad=N'activa' AND a.IdPersona=@persona;
+        """;
+    await using var comando = new SqlCommand(consulta, conexion);
+    comando.Parameters.AddWithValue("@persona", idPersona);
+    comando.Parameters.AddWithValue("@festival", idFestival);
+    return Convert.ToInt32(await comando.ExecuteScalarAsync(cancelacion)) == 1;
+}
+
+static async Task<bool> TerritorioExisteAsync(SqlConnection conexion, string codigoDepartamento, string codigoMunicipio, CancellationToken cancelacion)
+{
+    const string consulta = "SELECT COUNT(*) FROM territorio.Municipios WHERE CodigoDepartamento=@departamento AND Codigo=@municipio;";
+    await using var comando = new SqlCommand(consulta, conexion);
+    comando.Parameters.AddWithValue("@departamento", codigoDepartamento.Trim());
+    comando.Parameters.AddWithValue("@municipio", codigoMunicipio.Trim());
+    return Convert.ToInt32(await comando.ExecuteScalarAsync(cancelacion)) == 1;
+}
+
 static Dictionary<string, string[]> ValidarActualizacionOrganizacion(ActualizacionOrganizacionPanel solicitud)
 {
     var errores = new Dictionary<string, string[]>();
@@ -427,6 +559,16 @@ static Dictionary<string, string[]> ValidarActualizacionOrganizacion(Actualizaci
     ValidarTextoOpcional(solicitud.NumeroIdentificacion, "numeroIdentificacion", 80, errores);
     ValidarTexto(solicitud.CodigoDepartamento, "codigoDepartamento", "Selecciona un departamento.", 10, errores);
     ValidarTexto(solicitud.CodigoMunicipio, "codigoMunicipio", "Selecciona un municipio.", 10, errores);
+    return errores;
+}
+
+static Dictionary<string, string[]> ValidarSolicitudFestival(string? nombre, string? descripcion, string? codigoDepartamento, string? codigoMunicipio)
+{
+    var errores = new Dictionary<string, string[]>();
+    ValidarTexto(nombre, "nombre", "Ingresa el nombre del Festival.", 240, errores);
+    ValidarTextoOpcional(descripcion, "descripcion", 8000, errores);
+    ValidarTexto(codigoDepartamento, "codigoDepartamento", "Selecciona un departamento.", 10, errores);
+    ValidarTexto(codigoMunicipio, "codigoMunicipio", "Selecciona un municipio.", 10, errores);
     return errores;
 }
 
@@ -497,6 +639,9 @@ public sealed record OrganizacionPanel(Guid Id, string Nombre, string? NumeroIde
 public sealed record ContextoPanel(PersonaPanel Persona, IReadOnlyList<OrganizacionPanel> Organizaciones);
 public sealed record AdministradorOrganizacionPanel(Guid IdPersona, string Nombre, string Correo, string? Telefono, DateTime FechaAsignacion);
 public sealed record ActualizacionOrganizacionPanel(string Nombre, string? NumeroIdentificacion, string CodigoDepartamento, string CodigoMunicipio);
+public sealed record FestivalPanel(Guid IdFestival, Guid IdPerfil, string Nombre, string EstadoEditorial, string? Descripcion, string CodigoDepartamento, string Departamento, string CodigoMunicipio, string Municipio, DateTime FechaActualizacion, Guid IdOrganizacion, string Organizacion);
+public sealed record SolicitudCrearFestival(Guid IdOrganizacion, string Nombre, string? Descripcion, string CodigoDepartamento, string CodigoMunicipio);
+public sealed record SolicitudActualizarFestival(string Nombre, string? Descripcion, string CodigoDepartamento, string CodigoMunicipio);
 public sealed class OpcionesSesion
 {
     public int MinutosInactividad { get; init; }
