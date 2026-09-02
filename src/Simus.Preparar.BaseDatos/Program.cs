@@ -3,10 +3,10 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.Data.SqlClient;
 
 const string SchemaVersion = "001_identidad";
-var connectionArgument = args.SkipWhile(value => value != "--connection").Skip(1).FirstOrDefault();
+var connectionArgument = args.SkipWhile(value => value != "--conexion").Skip(1).FirstOrDefault();
 if (string.IsNullOrWhiteSpace(connectionArgument))
 {
-    Console.Error.WriteLine("Uso: dotnet run --project src/Simus.Preparar.BaseDatos -- --connection '<cadena de conexión>'");
+    Console.Error.WriteLine("Uso: dotnet run --project src/Simus.Preparar.BaseDatos -- --conexion '<cadena de conexión>' [--importar-divipola]");
     return 2;
 }
 
@@ -29,6 +29,7 @@ await using (var connection = new SqlConnection(master.ConnectionString))
 await using var database = new SqlConnection(target.ConnectionString);
 await database.OpenAsync();
 await EnsureSchemaAsync(database);
+if (args.Contains("--importar-divipola", StringComparer.Ordinal)) await ImportadorDivipola.ImportarAsync(database);
 await BootstrapWebmasterAsync(database);
 Console.WriteLine("Esquema SIMUS preparado sin datos demostrativos.");
 return 0;
