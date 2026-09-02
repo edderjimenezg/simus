@@ -16,6 +16,7 @@ internal static class ImportadorDivipola
         }
 
         using var cliente = new HttpClient { Timeout = TimeSpan.FromSeconds(45) };
+        cliente.DefaultRequestHeaders.UserAgent.ParseAdd("Simus-Nucleo-ImportadorDivipola/1.0");
         var departamentos = await ConsultarAsync(cliente, 319, "DPTO_CCDGO,DPTO_CNMBRE", cancelacion);
         var municipios = await ConsultarAsync(cliente, 317, "DPTO_CCDGO,MPIO_CCDGO,MPIO_CNMBRE", cancelacion);
         if (departamentos.Count == 0 || municipios.Count == 0)
