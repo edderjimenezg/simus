@@ -24,11 +24,11 @@ h1 { font-size: clamp(2.45rem, 5.2vw, 4.75rem); letter-spacing: -.045em; line-he
 .selector-vista button:hover { color: var(--simus-morado); }
 .selector-vista button:focus-visible, .enlace:focus-visible { outline: 3px solid var(--simus-anillo-foco); outline-offset: 2px; }
 .selector-vista__opcion--activa { background: var(--simus-morado) !important; color: white !important; }
-.formulario, .registro-preparado, .sesion-activa { margin-block-start: clamp(2rem, 5vh, 3.5rem); }
+.formulario, .registro-preparado { margin-block-start: clamp(2rem, 5vh, 3.5rem); }
 .formulario { display: grid; gap: 1.3rem; }
 .formulario__encabezado { margin-block-end: .5rem; }
-.formulario__encabezado h2, .sesion-activa h2 { font-size: clamp(1.85rem, 3vw, 2.55rem); letter-spacing: -.035em; line-height: 1.08; }
-.formulario__encabezado > p:not(.rotulo), .sesion-activa > p:not(.rotulo) { color: var(--simus-texto-secundario); line-height: 1.55; margin: .75rem 0 0; }
+.formulario__encabezado h2 { font-size: clamp(1.85rem, 3vw, 2.55rem); letter-spacing: -.035em; line-height: 1.08; }
+.formulario__encabezado > p:not(.rotulo) { color: var(--simus-texto-secundario); line-height: 1.55; margin: .75rem 0 0; }
 .campo { display: grid; gap: .5rem; }
 .campo label { font-size: .9375rem; font-weight: 700; }
 .campo__encabezado { align-items: baseline; display: flex; flex-wrap: wrap; gap: .4rem 1rem; justify-content: space-between; }
@@ -64,7 +64,6 @@ select:focus { border-color: var(--simus-morado); box-shadow: 0 0 0 3px var(--si
 .registro-preparado__estado p { color: var(--simus-texto-secundario); line-height: 1.55; }
 .registro-preparado__estado ul { color: var(--simus-texto-secundario); display: grid; gap: .65rem; line-height: 1.5; margin: 1.25rem 0; padding-inline-start: 1.25rem; }
 .registro-preparado__nota { border-block-start: 1px solid var(--simus-borde); font-size: .875rem; margin-block-start: 1.4rem; padding-block-start: 1.25rem; }
-.sesion-activa { border-inline-start: .25rem solid var(--simus-verde-medio); padding-inline-start: 1.25rem; }
 
 @media (min-width: 60rem) { .acceso { grid-template-columns: minmax(22rem, .9fr) minmax(30rem, 1.1fr); } }
 @media (min-width: 36rem) { .campos-dos { grid-template-columns: 1fr 1fr; } }

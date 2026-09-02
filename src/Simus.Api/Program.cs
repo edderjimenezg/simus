@@ -134,6 +134,106 @@ app.MapGet("/api/sesion/estado", async (HttpContext contexto, IConfiguration con
     return idPersona is null ? Results.Unauthorized() : Results.Ok(new { idPersona });
 });
 
+app.MapGet("/api/mi-panel/contexto", async (HttpContext contexto, IConfiguration configuracion, ServicioSesiones sesiones, CancellationToken cancelacion) =>
+{
+    var (conexion, idPersona, error) = await ObtenerConexionAutorizadaAsync(contexto, configuracion, sesiones, cancelacion);
+    if (error is not null) return error;
+    await using (conexion!)
+    {
+        var conexionAbierta = conexion!;
+        const string consulta = """
+            SELECT p.PrimerNombre,p.PrimerApellido,p.CorreoNormalizado,p.Telefono,
+                   o.Id,o.Nombre,o.NumeroIdentificacion,o.Estado,o.CodigoDepartamento,d.Nombre,o.CodigoMunicipio,m.Nombre,o.FechaActualizacion
+            FROM identidad.Personas p
+            INNER JOIN organizaciones.Administradores a ON a.IdPersona=p.Id AND a.FechaRetiro IS NULL
+            INNER JOIN organizaciones.Organizaciones o ON o.Id=a.IdOrganizacion
+            INNER JOIN territorio.Departamentos d ON d.Codigo=o.CodigoDepartamento
+            INNER JOIN territorio.Municipios m ON m.Codigo=o.CodigoMunicipio AND m.CodigoDepartamento=o.CodigoDepartamento
+            WHERE p.Id=@persona
+            ORDER BY o.Nombre;
+            """;
+        await using var comando = new SqlCommand(consulta, conexionAbierta);
+        comando.Parameters.AddWithValue("@persona", idPersona!.Value);
+        await using var lector = await comando.ExecuteReaderAsync(cancelacion);
+        PersonaPanel? persona = null;
+        var organizaciones = new List<OrganizacionPanel>();
+        while (await lector.ReadAsync(cancelacion))
+        {
+            persona ??= new PersonaPanel(lector.GetString(0), lector.GetString(1), lector.GetString(2), lector.IsDBNull(3) ? null : lector.GetString(3));
+            organizaciones.Add(new OrganizacionPanel(lector.GetGuid(4), lector.GetString(5), lector.IsDBNull(6) ? null : lector.GetString(6), lector.GetString(7), lector.GetString(8), lector.GetString(9), lector.GetString(10), lector.GetString(11), lector.GetDateTime(12)));
+        }
+        return persona is null
+            ? Results.Unauthorized()
+            : Results.Ok(new ContextoPanel(persona, organizaciones));
+    }
+});
+
+app.MapGet("/api/mi-panel/organizaciones/{idOrganizacion:guid}/administradores", async (Guid idOrganizacion, HttpContext contexto, IConfiguration configuracion, ServicioSesiones sesiones, CancellationToken cancelacion) =>
+{
+    var (conexion, idPersona, error) = await ObtenerConexionAutorizadaAsync(contexto, configuracion, sesiones, cancelacion);
+    if (error is not null) return error;
+    await using (conexion!)
+    {
+        var conexionAbierta = conexion!;
+        if (!await PuedeAdministrarOrganizacionAsync(conexionAbierta, idPersona!.Value, idOrganizacion, cancelacion)) return Results.Forbid();
+        const string consulta = """
+            SELECT p.Id,p.PrimerNombre,p.SegundoNombre,p.PrimerApellido,p.SegundoApellido,p.CorreoNormalizado,p.Telefono,a.FechaAsignacion
+            FROM organizaciones.Administradores a
+            INNER JOIN identidad.Personas p ON p.Id=a.IdPersona
+            WHERE a.IdOrganizacion=@organizacion AND a.FechaRetiro IS NULL
+            ORDER BY p.PrimerApellido,p.PrimerNombre;
+            """;
+        await using var comando = new SqlCommand(consulta, conexionAbierta);
+        comando.Parameters.AddWithValue("@organizacion", idOrganizacion);
+        await using var lector = await comando.ExecuteReaderAsync(cancelacion);
+        var administradores = new List<AdministradorOrganizacionPanel>();
+        while (await lector.ReadAsync(cancelacion))
+        {
+            var nombres = string.Join(" ", new[] { lector.GetString(1), lector.IsDBNull(2) ? null : lector.GetString(2), lector.GetString(3), lector.IsDBNull(4) ? null : lector.GetString(4) }.Where(valor => !string.IsNullOrWhiteSpace(valor)));
+            administradores.Add(new AdministradorOrganizacionPanel(lector.GetGuid(0), nombres, lector.GetString(5), lector.IsDBNull(6) ? null : lector.GetString(6), lector.GetDateTime(7)));
+        }
+        return Results.Ok(administradores);
+    }
+});
+
+app.MapPatch("/api/mi-panel/organizaciones/{idOrganizacion:guid}", async (Guid idOrganizacion, ActualizacionOrganizacionPanel solicitud, HttpContext contexto, IConfiguration configuracion, ServicioSesiones sesiones, ServicioAuditoriaAcceso auditoria, CancellationToken cancelacion) =>
+{
+    var errores = ValidarActualizacionOrganizacion(solicitud);
+    if (errores.Count > 0) return Results.UnprocessableEntity(new ErrorApi("campos_invalidos", "Revisa los campos indicados.", contexto.TraceIdentifier, errores));
+    var (conexion, idPersona, error) = await ObtenerConexionAutorizadaAsync(contexto, configuracion, sesiones, cancelacion);
+    if (error is not null) return error;
+    await using (conexion!)
+    {
+        var conexionAbierta = conexion!;
+        if (!await PuedeAdministrarOrganizacionAsync(conexionAbierta, idPersona!.Value, idOrganizacion, cancelacion)) return Results.Forbid();
+        const string territorioExiste = "SELECT COUNT(*) FROM territorio.Municipios WHERE CodigoDepartamento=@departamento AND Codigo=@municipio;";
+        await using (var comandoTerritorio = new SqlCommand(territorioExiste, conexionAbierta))
+        {
+            comandoTerritorio.Parameters.AddWithValue("@departamento", solicitud.CodigoDepartamento.Trim());
+            comandoTerritorio.Parameters.AddWithValue("@municipio", solicitud.CodigoMunicipio.Trim());
+            if (Convert.ToInt32(await comandoTerritorio.ExecuteScalarAsync(cancelacion)) == 0)
+            {
+                errores["codigoMunicipio"] = ["El municipio no corresponde al departamento seleccionado."];
+                return Results.UnprocessableEntity(new ErrorApi("territorio_invalido", "Revisa los campos indicados.", contexto.TraceIdentifier, errores));
+            }
+        }
+        const string actualizar = """
+            UPDATE organizaciones.Organizaciones
+            SET Nombre=@nombre,NumeroIdentificacion=@numero,CodigoDepartamento=@departamento,CodigoMunicipio=@municipio,FechaActualizacion=SYSUTCDATETIME()
+            WHERE Id=@organizacion;
+            """;
+        await using var comando = new SqlCommand(actualizar, conexionAbierta);
+        comando.Parameters.AddWithValue("@nombre", solicitud.Nombre.Trim());
+        comando.Parameters.AddWithValue("@numero", ComoDbNull(solicitud.NumeroIdentificacion));
+        comando.Parameters.AddWithValue("@departamento", solicitud.CodigoDepartamento.Trim());
+        comando.Parameters.AddWithValue("@municipio", solicitud.CodigoMunicipio.Trim());
+        comando.Parameters.AddWithValue("@organizacion", idOrganizacion);
+        await comando.ExecuteNonQueryAsync(cancelacion);
+        await auditoria.RegistrarAsync(conexionAbierta, idPersona.Value, "organizacion_actualizada", contexto.TraceIdentifier, cancelacion);
+        return Results.NoContent();
+    }
+});
+
 app.MapPost("/api/sesion/cerrar", async (HttpContext contexto, IConfiguration configuracion, ServicioSesiones sesiones, ServicioAuditoriaAcceso auditoria, CancellationToken cancelacion) =>
 {
     if (contexto.Request.Cookies.TryGetValue("simus_sesion", out var secreto) && !string.IsNullOrWhiteSpace(secreto))
@@ -270,7 +370,7 @@ app.MapPost("/api/registro", async (SolicitudRegistroExterno solicitud, HttpCont
     }
 
     var (secreto, venceEn) = await sesiones.CrearAsync(conexion, idPersona, cancelacion);
-    contexto.Response.Cookies.Append("simus_sesion", secreto, OpcionesCookieSesion(app));
+    contexto.Response.Cookies.Append("simus_sesion", secreto, OpcionesCookieSesion(app, venceEn));
     await auditoria.RegistrarAsync(conexion, idPersona, "registro_externo_exitoso", contexto.TraceIdentifier, cancelacion);
     return Results.Ok(new { idPersona, idOrganizacion, venceEn });
 }).RequireRateLimiting("ingreso");
@@ -284,6 +384,51 @@ static CookieOptions OpcionesCookieSesion(WebApplication aplicacion, DateTime? v
 };
 
 static object ComoDbNull(string? valor) => string.IsNullOrWhiteSpace(valor) ? DBNull.Value : valor.Trim();
+
+static async Task<(SqlConnection? Conexion, Guid? IdPersona, IResult? Error)> ObtenerConexionAutorizadaAsync(HttpContext contexto, IConfiguration configuracion, ServicioSesiones sesiones, CancellationToken cancelacion)
+{
+    if (!contexto.Request.Cookies.TryGetValue("simus_sesion", out var secreto) || string.IsNullOrWhiteSpace(secreto))
+        return (null, null, Results.Unauthorized());
+    var cadenaConexion = configuracion.GetConnectionString("Simus");
+    if (string.IsNullOrWhiteSpace(cadenaConexion)) return (null, null, Results.StatusCode(StatusCodes.Status503ServiceUnavailable));
+    var conexion = new SqlConnection(cadenaConexion);
+    try
+    {
+        await conexion.OpenAsync(cancelacion);
+        var idPersona = await sesiones.ValidarAsync(conexion, secreto, cancelacion);
+        if (idPersona is not null) return (conexion, idPersona, null);
+        await conexion.DisposeAsync();
+        return (null, null, Results.Unauthorized());
+    }
+    catch
+    {
+        await conexion.DisposeAsync();
+        throw;
+    }
+}
+
+static async Task<bool> PuedeAdministrarOrganizacionAsync(SqlConnection conexion, Guid idPersona, Guid idOrganizacion, CancellationToken cancelacion)
+{
+    const string consulta = """
+        SELECT COUNT(*) FROM organizaciones.Administradores a
+        INNER JOIN organizaciones.Organizaciones o ON o.Id=a.IdOrganizacion
+        WHERE a.IdPersona=@persona AND a.IdOrganizacion=@organizacion AND a.FechaRetiro IS NULL AND o.Estado=N'activa';
+        """;
+    await using var comando = new SqlCommand(consulta, conexion);
+    comando.Parameters.AddWithValue("@persona", idPersona);
+    comando.Parameters.AddWithValue("@organizacion", idOrganizacion);
+    return Convert.ToInt32(await comando.ExecuteScalarAsync(cancelacion)) == 1;
+}
+
+static Dictionary<string, string[]> ValidarActualizacionOrganizacion(ActualizacionOrganizacionPanel solicitud)
+{
+    var errores = new Dictionary<string, string[]>();
+    ValidarTexto(solicitud.Nombre, "nombre", "Ingresa el nombre de la organización.", 240, errores);
+    ValidarTextoOpcional(solicitud.NumeroIdentificacion, "numeroIdentificacion", 80, errores);
+    ValidarTexto(solicitud.CodigoDepartamento, "codigoDepartamento", "Selecciona un departamento.", 10, errores);
+    ValidarTexto(solicitud.CodigoMunicipio, "codigoMunicipio", "Selecciona un municipio.", 10, errores);
+    return errores;
+}
 
 static Dictionary<string, string[]> ValidarSolicitudRegistro(SolicitudRegistroExterno solicitud)
 {
@@ -347,6 +492,11 @@ public sealed record TerritorioRegistro(string Codigo, string Nombre);
 public sealed record ErrorApi(string Codigo, string Mensaje, string TrazaId, IReadOnlyDictionary<string, string[]>? Campos = null);
 public sealed record SolicitudIngreso(string Correo, string Contrasena);
 public sealed record SolicitudRegistroExterno(string PrimerNombre, string? SegundoNombre, string PrimerApellido, string? SegundoApellido, string CodigoTipoIdentificacion, string NumeroIdentificacion, string Correo, string? Telefono, string Contrasena, string NombreOrganizacion, string? NumeroIdentificacionOrganizacion, string CodigoDepartamento, string CodigoMunicipio, IReadOnlyList<string>? CodigosDocumentosAceptados);
+public sealed record PersonaPanel(string PrimerNombre, string PrimerApellido, string Correo, string? Telefono);
+public sealed record OrganizacionPanel(Guid Id, string Nombre, string? NumeroIdentificacion, string Estado, string CodigoDepartamento, string Departamento, string CodigoMunicipio, string Municipio, DateTime FechaActualizacion);
+public sealed record ContextoPanel(PersonaPanel Persona, IReadOnlyList<OrganizacionPanel> Organizaciones);
+public sealed record AdministradorOrganizacionPanel(Guid IdPersona, string Nombre, string Correo, string? Telefono, DateTime FechaAsignacion);
+public sealed record ActualizacionOrganizacionPanel(string Nombre, string? NumeroIdentificacion, string CodigoDepartamento, string CodigoMunicipio);
 public sealed class OpcionesSesion
 {
     public int MinutosInactividad { get; init; }

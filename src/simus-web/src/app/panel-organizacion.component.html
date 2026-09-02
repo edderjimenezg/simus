@@ -1,0 +1,102 @@
+@if (cargando()) {
+  <main class="estado-panel" aria-live="polite"><p>Estamos preparando tu panel…</p></main>
+} @else if (contexto(); as datos) {
+  <div class="panel">
+    <header class="panel__cabecera">
+      <a class="marca" routerLink="/" aria-label="SIMUS, ir al inicio"><span>SIMUS</span><small>Sistema de información musical</small></a>
+      <div class="panel__cuenta">
+        @if (organizacionActiva(); as organizacion) {
+          <label class="selector-organizacion" for="organizacion-activa">
+            <span>Organización activa</span>
+            <select id="organizacion-activa" [ngModel]="organizacion.id" (ngModelChange)="seleccionarOrganizacion($event)">
+              @for (opcion of datos.organizaciones; track opcion.id) { <option [value]="opcion.id">{{ opcion.nombre }}</option> }
+            </select>
+          </label>
+        }
+        <button type="button" class="cuenta" (click)="cambiarSeccion('cuenta')" [attr.aria-current]="seccion() === 'cuenta' ? 'page' : null">
+          <span class="cuenta__inicial">{{ datos.persona.primerNombre.slice(0, 1) }}{{ datos.persona.primerApellido.slice(0, 1) }}</span>
+          <span>{{ datos.persona.primerNombre }} {{ datos.persona.primerApellido }}</span>
+        </button>
+      </div>
+    </header>
+
+    <div class="panel__cuerpo">
+      <nav class="panel__navegacion" aria-label="Navegación del panel">
+        <p>Mi panel</p>
+        <button type="button" [class.activa]="seccion() === 'resumen'" (click)="cambiarSeccion('resumen')">Resumen</button>
+        <button type="button" [class.activa]="seccion() === 'organizacion'" (click)="cambiarSeccion('organizacion')">Organización</button>
+        <button type="button" [class.activa]="seccion() === 'administradores'" (click)="cambiarSeccion('administradores')">Administradores</button>
+        <span class="panel__separador"></span>
+        <button type="button" [class.activa]="seccion() === 'cuenta'" (click)="cambiarSeccion('cuenta')">Cuenta y seguridad</button>
+      </nav>
+
+      <main class="panel__contenido" tabindex="-1">
+        @if (errorGeneral()) { <p class="aviso aviso--error" role="alert">{{ errorGeneral() }}</p> }
+        @if (mensajeExito()) { <p class="aviso aviso--exito" role="status">{{ mensajeExito() }}</p> }
+
+        @if (seccion() === 'resumen') {
+          <section class="seccion" aria-labelledby="titulo-resumen">
+            <p class="rotulo">Panel de organización</p>
+            @if (organizacionActiva(); as organizacion) {
+              <h1 id="titulo-resumen">{{ organizacion.nombre }}</h1>
+              <p class="introduccion">{{ organizacion.municipio }}, {{ organizacion.departamento }} · Organización {{ organizacion.estado }}.</p>
+              <div class="resumen-lineas">
+                <div><span>Procesos administrados</span><strong>0</strong><p>Cuando registres un proceso aparecerá aquí.</p></div>
+                <div><span>Solicitudes activas</span><strong>0</strong><p>No tienes solicitudes en curso.</p></div>
+                <div><span>Última actualización</span><strong class="dato-fecha">{{ fecha(organizacion.fechaActualizacion) }}</strong><p>Datos generales de la organización.</p></div>
+              </div>
+              <section class="vacio" aria-labelledby="titulo-procesos">
+                <h2 id="titulo-procesos">Aún no hay procesos registrados</h2>
+                <p>La gestión de Festivales será el siguiente módulo conectado a este panel. No se muestran registros de demostración.</p>
+              </section>
+            } @else {
+              <h1 id="titulo-resumen">No administras una organización activa</h1>
+              <p class="introduccion">Tu cuenta está autenticada, pero aún no tiene una organización activa asociada.</p>
+            }
+          </section>
+        }
+
+        @if (seccion() === 'organizacion' && organizacionActiva()) {
+          <section class="seccion seccion--formulario" aria-labelledby="titulo-organizacion">
+            <p class="rotulo">Organización</p>
+            <h1 id="titulo-organizacion">Datos generales</h1>
+            <p class="introduccion">Esta información identifica a la organización. Los cambios quedan registrados en su trazabilidad administrativa.</p>
+            <form class="formulario" (ngSubmit)="guardarPerfil()" novalidate>
+              <div class="campo campo--ancho"><label for="perfil-nombre">Nombre de la organización</label><input id="perfil-nombre" name="nombre" [(ngModel)]="perfil.nombre" (input)="limpiarError('nombre')" [attr.aria-invalid]="erroresCampos()['nombre'] ? true : null">@if (erroresCampos()['nombre']) { <p class="campo__error">{{ erroresCampos()['nombre'] }}</p> }</div>
+              <div class="campo"><label for="perfil-numeroIdentificacion">Identificador de la entidad <span>Opcional</span></label><input id="perfil-numeroIdentificacion" name="numeroIdentificacion" [(ngModel)]="perfil.numeroIdentificacion" (input)="limpiarError('numeroIdentificacion')">@if (erroresCampos()['numeroIdentificacion']) { <p class="campo__error">{{ erroresCampos()['numeroIdentificacion'] }}</p> }</div>
+              <div class="campo"><label for="perfil-codigoDepartamento">Departamento</label><select id="perfil-codigoDepartamento" name="codigoDepartamento" [(ngModel)]="perfil.codigoDepartamento" (change)="cambiarDepartamento()" [attr.aria-invalid]="erroresCampos()['codigoDepartamento'] ? true : null"><option value="">Selecciona un departamento</option>@for (departamento of departamentos(); track departamento.codigo) { <option [value]="departamento.codigo">{{ departamento.nombre }}</option>}</select>@if (erroresCampos()['codigoDepartamento']) { <p class="campo__error">{{ erroresCampos()['codigoDepartamento'] }}</p> }</div>
+              <div class="campo"><label for="perfil-codigoMunicipio">Municipio</label><select id="perfil-codigoMunicipio" name="codigoMunicipio" [(ngModel)]="perfil.codigoMunicipio" (change)="limpiarError('codigoMunicipio')" [disabled]="!perfil.codigoDepartamento" [attr.aria-invalid]="erroresCampos()['codigoMunicipio'] ? true : null"><option value="">Selecciona un municipio</option>@for (municipio of municipios(); track municipio.codigo) { <option [value]="municipio.codigo">{{ municipio.nombre }}</option>}</select>@if (erroresCampos()['codigoMunicipio']) { <p class="campo__error">{{ erroresCampos()['codigoMunicipio'] }}</p> }</div>
+              <div class="formulario__acciones"><button type="submit" class="boton-principal" [disabled]="guardando()">{{ guardando() ? 'Guardando…' : 'Guardar cambios' }}</button></div>
+            </form>
+          </section>
+        }
+
+        @if (seccion() === 'administradores' && organizacionActiva(); as organizacion) {
+          <section class="seccion" aria-labelledby="titulo-administradores">
+            <p class="rotulo">Organización</p>
+            <h1 id="titulo-administradores">Administradores</h1>
+            <p class="introduccion">Las personas de esta lista pueden administrar {{ organizacion.nombre }}. Todas tienen el mismo nivel de administración.</p>
+            @if (cargandoAdministradores()) { <p class="cargando-lista">Cargando administradores…</p> }
+            @else if (administradores().length) {
+              <ul class="lista-personas">
+                @for (administrador of administradores(); track administrador.idPersona) { <li><span class="avatar">{{ administrador.nombre.slice(0, 1) }}</span><div><strong>{{ administrador.nombre }}</strong><span>{{ administrador.correo }}</span>@if (administrador.telefono) { <span>{{ administrador.telefono }}</span> }</div><small>Desde {{ fecha(administrador.fechaAsignacion) }}</small></li> }
+              </ul>
+            } @else { <p class="vacio">No se encontraron administradores activos para esta organización.</p> }
+            <p class="nota-pendiente">Agregar o retirar administradores se habilitará cuando estén definidas las reglas de invitación, aceptación y auditoría correspondientes.</p>
+          </section>
+        }
+
+        @if (seccion() === 'cuenta') {
+          <section class="seccion" aria-labelledby="titulo-cuenta">
+            <p class="rotulo">Cuenta personal</p>
+            <h1 id="titulo-cuenta">Cuenta y seguridad</h1>
+            <p class="introduccion">Tu cuenta personal es independiente de las organizaciones que administras.</p>
+            <dl class="datos-cuenta"><div><dt>Nombre</dt><dd>{{ datos.persona.primerNombre }} {{ datos.persona.primerApellido }}</dd></div><div><dt>Correo electrónico</dt><dd>{{ datos.persona.correo }}</dd></div><div><dt>Teléfono</dt><dd>{{ datos.persona.telefono || 'No registrado' }}</dd></div></dl>
+            <section class="seguridad"><h2>Sesión</h2><p>Por seguridad, la sesión vence tras un periodo de inactividad y tiene una duración máxima. Cierra sesión si estás en un equipo compartido.</p><button type="button" class="boton-secundario" (click)="cerrarSesion()">Cerrar sesión</button></section>
+            <p class="nota-pendiente">La edición de datos de identidad, recuperación de acceso y confirmación efectiva de correo requieren los controles documentales y el servicio de correo pendientes.</p>
+          </section>
+        }
+      </main>
+    </div>
+  </div>
+}

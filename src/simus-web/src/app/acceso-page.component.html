@@ -18,12 +18,10 @@
 
   <section class="acceso__formulario" aria-label="Acceso a SIMUS">
     <div class="acceso__formulario-contenido">
-      @if (vista() !== 'sesion') {
-        <div class="selector-vista" role="tablist" aria-label="Opciones de acceso">
-          <button type="button" role="tab" [attr.aria-selected]="vista() === 'ingresar'" [class.selector-vista__opcion--activa]="vista() === 'ingresar'" (click)="cambiarVista('ingresar')">Ingresar</button>
-          <button type="button" role="tab" [attr.aria-selected]="vista() === 'registro'" [class.selector-vista__opcion--activa]="vista() === 'registro'" (click)="cambiarVista('registro')">Crear cuenta</button>
-        </div>
-      }
+      <div class="selector-vista" role="tablist" aria-label="Opciones de acceso">
+        <button type="button" role="tab" [attr.aria-selected]="vista() === 'ingresar'" [class.selector-vista__opcion--activa]="vista() === 'ingresar'" (click)="cambiarVista('ingresar')">Ingresar</button>
+        <button type="button" role="tab" [attr.aria-selected]="vista() === 'registro'" [class.selector-vista__opcion--activa]="vista() === 'registro'" (click)="cambiarVista('registro')">Crear cuenta</button>
+      </div>
 
       @if (vista() === 'ingresar') {
         <form class="formulario" (ngSubmit)="ingresar()" novalidate>
@@ -95,16 +93,6 @@
           } @else {
             <p class="aviso aviso--error" role="alert">No fue posible verificar los requisitos del registro. Inténtalo nuevamente más tarde.</p>
           }
-        </section>
-      }
-
-      @if (vista() === 'sesion') {
-        <section class="sesion-activa" aria-live="polite">
-          <p class="rotulo rotulo--morado">Sesión iniciada</p>
-          <h2>Tu acceso fue verificado.</h2>
-          <p>La sesión se cierra después de un periodo de inactividad. El panel de organización será la siguiente vista funcional a construir; no se mostrará un panel simulado.</p>
-          @if (errorGeneral()) { <p class="aviso aviso--error" role="alert">{{ errorGeneral() }}</p> }
-          <button class="boton-secundario" type="button" (click)="cerrarSesion()">Cerrar sesión</button>
         </section>
       }
     </div>
