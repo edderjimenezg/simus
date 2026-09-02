@@ -35,7 +35,7 @@ return 0;
 
 static async Task EnsureSchemaAsync(SqlConnection connection)
 {
-    await using var versionCheck = new SqlCommand("SELECT COUNT(*) FROM core.SchemaVersions WHERE Version = @version;", connection);
+    await using var versionCheck = new SqlCommand("SELECT COUNT(*) FROM nucleo.VersionesEsquema WHERE Version = @version;", connection);
     versionCheck.Parameters.AddWithValue("@version", SchemaVersion);
     if (Convert.ToInt32(await versionCheck.ExecuteScalarAsync()) > 0) return;
 
@@ -56,7 +56,7 @@ static async Task BootstrapWebmasterAsync(SqlConnection connection)
         throw new InvalidOperationException("El aprovisionamiento requiere correo y contraseña de al menos 12 caracteres.");
 
     await using var transaction = await connection.BeginTransactionAsync();
-    const string alreadyBootstrapped = "SELECT COUNT(*) FROM core.BootstrapEvents WHERE EventCode = 'first_webmaster';";
+    const string alreadyBootstrapped = "SELECT COUNT(*) FROM nucleo.EventosInicializacion WHERE CodigoEvento = 'primer_administrador_sistema';";
     await using var check = new SqlCommand(alreadyBootstrapped, connection, (SqlTransaction)transaction);
     if (Convert.ToInt32(await check.ExecuteScalarAsync()) > 0) { await transaction.CommitAsync(); return; }
 
@@ -64,10 +64,10 @@ static async Task BootstrapWebmasterAsync(SqlConnection connection)
     var hasher = new PasswordHasher<object>();
     var hash = hasher.HashPassword(new object(), password);
     const string insert = """
-        INSERT INTO identity.Persons (Id, GivenName, FirstSurname, IdentityTypeCode, IdentityNumberNormalized, EmailNormalized, PasswordHash, AccountState, EmailVerificationState, CreatedAt, UpdatedAt)
-        VALUES (@id, N'Webmaster', N'SIMUS', N'CONFIG', @email, @email, @hash, N'active', N'not_configured', SYSUTCDATETIME(), SYSUTCDATETIME());
-        INSERT INTO identity.PersonRoles (PersonId, RoleCode, GrantedAt) VALUES (@id, N'webmaster', SYSUTCDATETIME());
-        INSERT INTO core.BootstrapEvents (EventCode, CompletedAt) VALUES (N'first_webmaster', SYSUTCDATETIME());
+        INSERT INTO identidad.Personas (Id, PrimerNombre, PrimerApellido, CodigoTipoIdentificacion, NumeroIdentificacionNormalizado, CorreoNormalizado, HashContrasena, EstadoCuenta, EstadoVerificacionCorreo, FechaCreacion, FechaActualizacion)
+        VALUES (@id, N'Administración', N'SIMUS', N'CONFIG', @email, @email, @hash, N'activa', N'no_configurada', SYSUTCDATETIME(), SYSUTCDATETIME());
+        INSERT INTO identidad.PersonasRoles (IdPersona, CodigoRol, FechaAsignacion) VALUES (@id, N'administrador_sistema', SYSUTCDATETIME());
+        INSERT INTO nucleo.EventosInicializacion (CodigoEvento, FechaFinalizacion) VALUES (N'primer_administrador_sistema', SYSUTCDATETIME());
         """;
     await using var command = new SqlCommand(insert, connection, (SqlTransaction)transaction);
     command.Parameters.AddWithValue("@id", personId);
