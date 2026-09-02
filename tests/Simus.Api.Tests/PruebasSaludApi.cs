@@ -1,10 +1,16 @@
 using Microsoft.AspNetCore.Mvc.Testing;
+using Microsoft.Extensions.Configuration;
 using Xunit;
 
 namespace Simus.Api.Tests;
 
-public sealed class PruebasSaludApi(WebApplicationFactory<Program> fabrica) : IClassFixture<WebApplicationFactory<Program>>
+public sealed class PruebasSaludApi(WebApplicationFactory<Program> fabricaBase) : IClassFixture<WebApplicationFactory<Program>>
 {
+    private readonly WebApplicationFactory<Program> fabrica = fabricaBase.WithWebHostBuilder(builder =>
+        builder.ConfigureAppConfiguration((_, configuracion) =>
+            configuracion.AddInMemoryCollection(new Dictionary<string, string?> { ["ConnectionStrings:Simus"] = null })));
+
+
     [Fact]
     public async Task Rechaza_el_estado_de_sesion_sin_cookie()
     {
