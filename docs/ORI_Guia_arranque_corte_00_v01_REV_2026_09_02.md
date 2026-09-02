@@ -19,7 +19,7 @@ docker compose up -d sqlserver
 3. Iniciar la API con la conexión declarada únicamente para esa sesión:
 
 ```bash
-ConnectionStrings__Simus='Server=localhost,14335;Database=master;User Id=sa;Password=<clave-local>;TrustServerCertificate=True;Encrypt=False' \
+ConnectionStrings__Simus='Server=localhost,14335;Database=simus_nucleo;User Id=sa;Password=<clave-local>;TrustServerCertificate=True;Encrypt=False' \
 dotnet run --project src/Simus.Api
 ```
 

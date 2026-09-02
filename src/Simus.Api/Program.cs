@@ -3,6 +3,11 @@ using Microsoft.Data.SqlClient;
 using Microsoft.AspNetCore.Diagnostics;
 
 var builder = WebApplication.CreateBuilder(args);
+var opcionesSesion = builder.Configuration.GetSection("Sesion").Get<OpcionesSesion>()
+    ?? throw new InvalidOperationException("Falta la configuración de sesión.");
+if (opcionesSesion.MinutosInactividad is < 5 or > 240 || opcionesSesion.HorasMaximas is < 1 or > 24 || opcionesSesion.MinutosAvisoPrevio < 1)
+    throw new InvalidOperationException("La configuración de sesión no está dentro de los límites permitidos.");
+builder.Services.AddSingleton(opcionesSesion);
 builder.Services.AddCors(options => options.AddDefaultPolicy(policy =>
     policy.WithOrigins("http://localhost:4200")
         .AllowAnyHeader()
@@ -82,5 +87,11 @@ app.Run();
 public sealed record RespuestaSalud(string Api, string BaseDatos);
 public sealed record DisponibilidadRegistro(bool RegistroDisponible, IReadOnlyList<string> Impedimentos);
 public sealed record ErrorApi(string Codigo, string Mensaje, string TrazaId, IReadOnlyDictionary<string, string[]>? Campos = null);
+public sealed class OpcionesSesion
+{
+    public int MinutosInactividad { get; init; }
+    public int HorasMaximas { get; init; }
+    public int MinutosAvisoPrevio { get; init; }
+}
 
 public partial class Program;

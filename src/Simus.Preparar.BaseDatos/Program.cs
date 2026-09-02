@@ -49,8 +49,8 @@ static async Task EnsureSchemaAsync(SqlConnection connection)
 
 static async Task BootstrapWebmasterAsync(SqlConnection connection)
 {
-    var email = Environment.GetEnvironmentVariable("SIMUS_BOOTSTRAP_WEBMASTER_EMAIL")?.Trim().ToLowerInvariant();
-    var password = Environment.GetEnvironmentVariable("SIMUS_BOOTSTRAP_WEBMASTER_PASSWORD");
+    var email = Environment.GetEnvironmentVariable("SIMUS_INICIALIZACION_ADMINISTRADOR_CORREO")?.Trim().ToLowerInvariant();
+    var password = Environment.GetEnvironmentVariable("SIMUS_INICIALIZACION_ADMINISTRADOR_CONTRASENA");
     if (string.IsNullOrWhiteSpace(email) && string.IsNullOrWhiteSpace(password)) return;
     if (string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(password) || password.Length < 12)
         throw new InvalidOperationException("El aprovisionamiento requiere correo y contraseña de al menos 12 caracteres.");
