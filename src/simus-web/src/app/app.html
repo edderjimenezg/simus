@@ -1,21 +1,93 @@
-<main>
-  <p class="eyebrow">SIMUS</p>
-  <h1>Núcleo técnico</h1>
-  <p class="intro">Esta instancia no contiene registros ni datos de muestra.</p>
+<main class="acceso">
+  <section class="acceso__marca" aria-labelledby="titulo-acceso">
+    <div class="acceso__halo acceso__halo--superior" aria-hidden="true"></div>
+    <div class="acceso__halo acceso__halo--inferior" aria-hidden="true"></div>
+    <div class="acceso__marca-contenido">
+      <a class="marca-simus" href="/" aria-label="SIMUS, ir al inicio">
+        <span class="marca-simus__sigla">SIMUS</span>
+        <span class="marca-simus__subtitulo">Sistema de información musical</span>
+      </a>
+      <div class="acceso__mensaje">
+        <p class="rotulo">Ecosistema musical</p>
+        <h1 id="titulo-acceso">Gestiona la información de tu organización.</h1>
+        <p>Accede a los procesos que administras y conserva el control sobre sus registros.</p>
+      </div>
+      <p class="acceso__nota">Una plataforma del sector cultural para organizar, revisar y publicar información musical.</p>
+    </div>
+  </section>
 
-  @if (loading()) {
-    <p class="status">Comprobando la conexión con el sistema…</p>
-  } @else if (error()) {
-    <section class="status error" aria-live="polite">
-      <h2>No fue posible consultar el estado técnico.</h2>
-      <p>Verifica que la API esté en ejecución y vuelve a intentarlo.</p>
-      <button type="button" (click)="refresh()">Reintentar</button>
-    </section>
-  } @else if (estadoApi(); as estadoActual) {
-    <section class="status" aria-live="polite">
-      <h2>API {{ estadoActual.api === 'disponible' ? 'disponible' : 'no disponible' }}</h2>
-      <p>Base de datos: {{ estadoActual.baseDatos === 'disponible' ? 'disponible' : 'sin conexión' }}.</p>
-      <button type="button" (click)="refresh()">Actualizar estado</button>
-    </section>
-  }
+  <section class="acceso__formulario" aria-label="Acceso a SIMUS">
+    <div class="acceso__formulario-contenido">
+      @if (vista() !== 'sesion') {
+        <div class="selector-vista" role="tablist" aria-label="Opciones de acceso">
+          <button type="button" role="tab" [attr.aria-selected]="vista() === 'ingresar'" [class.selector-vista__opcion--activa]="vista() === 'ingresar'" (click)="cambiarVista('ingresar')">Ingresar</button>
+          <button type="button" role="tab" [attr.aria-selected]="vista() === 'registro'" [class.selector-vista__opcion--activa]="vista() === 'registro'" (click)="cambiarVista('registro')">Crear cuenta</button>
+        </div>
+      }
+
+      @if (vista() === 'ingresar') {
+        <form class="formulario" (ngSubmit)="ingresar()" novalidate>
+          <header class="formulario__encabezado">
+            <h2>Ingresa a SIMUS</h2>
+            <p>Usa el correo electrónico y la contraseña de tu cuenta personal.</p>
+          </header>
+
+          @if (errorGeneral()) { <p class="aviso aviso--error" role="alert">{{ errorGeneral() }}</p> }
+
+          <div class="campo">
+            <label for="correo">Correo electrónico</label>
+            <input id="correo" name="correo" type="email" autocomplete="email" inputmode="email" [(ngModel)]="ingreso.correo" (input)="limpiarError('correo')" [attr.aria-invalid]="erroresCampos()['correo'] ? true : null" [attr.aria-describedby]="erroresCampos()['correo'] ? 'error-correo' : null">
+            @if (erroresCampos()['correo']) { <p id="error-correo" class="campo__error">{{ erroresCampos()['correo'] }}</p> }
+          </div>
+
+          <div class="campo">
+            <div class="campo__encabezado"><label for="contrasena">Contraseña</label><span>La recuperación de acceso estará disponible próximamente.</span></div>
+            <input id="contrasena" name="contrasena" type="password" autocomplete="current-password" [(ngModel)]="ingreso.contrasena" (input)="limpiarError('contrasena')" [attr.aria-invalid]="erroresCampos()['contrasena'] ? true : null" [attr.aria-describedby]="erroresCampos()['contrasena'] ? 'error-contrasena' : null">
+            @if (erroresCampos()['contrasena']) { <p id="error-contrasena" class="campo__error">{{ erroresCampos()['contrasena'] }}</p> }
+          </div>
+
+          <button class="boton-principal" type="submit" [disabled]="enviandoIngreso()">{{ enviandoIngreso() ? 'Ingresando…' : 'Ingresar' }}</button>
+          <p class="formulario__pie">¿Aún no tienes cuenta? <button type="button" class="enlace" (click)="cambiarVista('registro')">Crea una cuenta y registra tu organización.</button></p>
+        </form>
+      }
+
+      @if (vista() === 'registro') {
+        <section class="registro-preparado" role="tabpanel" aria-labelledby="titulo-registro">
+          <header class="formulario__encabezado">
+            <p class="rotulo rotulo--morado">Registro externo</p>
+            <h2 id="titulo-registro">Crea tu cuenta y registra tu organización</h2>
+            <p>La ruta está diseñada para crear una cuenta personal, una organización activa y su primer administrador en un solo recorrido.</p>
+          </header>
+          @if (cargandoDisponibilidad()) {
+            <p class="aviso">Estamos verificando los requisitos para habilitar el registro.</p>
+          } @else if (disponibilidadRegistro(); as disponibilidad) {
+            @if (!disponibilidad.registroDisponible) {
+              <div class="registro-preparado__estado">
+                <h3>El registro aún no está habilitado</h3>
+                <p>Antes de solicitar datos personales, SIMUS debe contar con los siguientes elementos oficiales:</p>
+                <ul>
+                  @for (impedimento of disponibilidad.impedimentos; track impedimento) { <li>{{ impedimento }}</li> }
+                </ul>
+                <p class="registro-preparado__nota">La confirmación de correo tendrá código de seis dígitos y enlace de confirmación cuando exista un proveedor institucional de correo. No se simulará este paso.</p>
+              </div>
+            } @else {
+              <p class="aviso">Los requisitos base están disponibles. El formulario de registro se incorporará en el siguiente bloque de construcción.</p>
+            }
+          } @else {
+            <p class="aviso aviso--error" role="alert">No fue posible verificar los requisitos del registro. Inténtalo nuevamente más tarde.</p>
+          }
+        </section>
+      }
+
+      @if (vista() === 'sesion') {
+        <section class="sesion-activa" aria-live="polite">
+          <p class="rotulo rotulo--morado">Sesión iniciada</p>
+          <h2>Tu acceso fue verificado.</h2>
+          <p>La sesión se cierra después de un periodo de inactividad. El panel de organización será la siguiente vista funcional a construir; no se mostrará un panel simulado.</p>
+          @if (errorGeneral()) { <p class="aviso aviso--error" role="alert">{{ errorGeneral() }}</p> }
+          <button class="boton-secundario" type="button" (click)="cerrarSesion()">Cerrar sesión</button>
+        </section>
+      }
+    </div>
+  </section>
 </main>

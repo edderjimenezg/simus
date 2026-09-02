@@ -1,57 +1,61 @@
-:host {
-  color: #25202d;
-  display: block;
-  font-family: Arial, sans-serif;
-}
+:host { display: block; min-block-size: 100dvh; }
 
-main {
-  margin: 0 auto;
-  max-width: 44rem;
-  padding: 6rem 2rem;
-}
+.acceso { background: var(--simus-hueso); color: var(--simus-tinta); display: grid; min-block-size: 100dvh; }
+.acceso__marca { background: var(--simus-morado); color: white; isolation: isolate; overflow: hidden; padding: clamp(2rem, 5vw, 5rem); position: relative; }
+.acceso__marca-contenido { display: grid; gap: clamp(3rem, 10vh, 8rem); margin-inline: auto; max-inline-size: 34rem; min-block-size: calc(100dvh - 2 * clamp(2rem, 5vw, 5rem)); position: relative; z-index: 1; }
+.acceso__halo { border-radius: 50%; filter: blur(7rem); pointer-events: none; position: absolute; z-index: 0; }
+.acceso__halo--superior { background: rgb(0 218 94 / 16%); block-size: 24rem; inline-size: 24rem; inset-block-start: -10rem; inset-inline-end: -10rem; }
+.acceso__halo--inferior { background: rgb(97 0 215 / 32%); block-size: 30rem; inline-size: 30rem; inset-block-end: -16rem; inset-inline-start: -12rem; }
+.marca-simus { color: inherit; display: inline-grid; gap: .15rem; text-decoration: none; width: fit-content; }
+.marca-simus__sigla { font-family: var(--simus-fuente-titulos); font-size: 1.6rem; font-weight: 800; letter-spacing: .08em; line-height: 1; }
+.marca-simus__subtitulo { font-size: .6875rem; letter-spacing: .04em; opacity: .72; }
+.acceso__mensaje { align-self: center; max-inline-size: 31rem; }
+.rotulo { color: var(--simus-verde); font-size: .75rem; font-weight: 750; letter-spacing: .12em; line-height: 1.2; margin: 0 0 .9rem; text-transform: uppercase; }
+.rotulo--morado { color: var(--simus-morado-claro); }
+h1, h2, h3 { font-family: var(--simus-fuente-titulos); margin: 0; }
+h1 { font-size: clamp(2.45rem, 5.2vw, 4.75rem); letter-spacing: -.045em; line-height: .98; }
+.acceso__mensaje > p:not(.rotulo) { color: rgb(255 255 255 / 76%); font-size: clamp(1rem, 1.5vw, 1.1875rem); line-height: 1.6; margin: 1.5rem 0 0; max-inline-size: 29rem; }
+.acceso__nota { align-self: end; color: rgb(255 255 255 / 58%); font-size: .875rem; line-height: 1.5; margin: 0; max-inline-size: 27rem; }
 
-.eyebrow {
-  color: #5c347e;
-  font-size: .875rem;
-  font-weight: 700;
-  letter-spacing: .08em;
-  margin: 0 0 1rem;
-}
+.acceso__formulario { align-content: center; display: grid; padding: clamp(2rem, 6vw, 6rem); }
+.acceso__formulario-contenido { inline-size: min(100%, 34rem); margin-inline: auto; }
+.selector-vista { background: var(--simus-superficie-suave); border: 1px solid var(--simus-borde); border-radius: .8rem; display: grid; grid-template-columns: 1fr 1fr; padding: .25rem; }
+.selector-vista button { background: transparent; border: 0; border-radius: .55rem; color: var(--simus-texto-secundario); cursor: pointer; font: inherit; font-size: .875rem; font-weight: 700; min-block-size: 2.75rem; padding-inline: 1rem; }
+.selector-vista button:hover { color: var(--simus-morado); }
+.selector-vista button:focus-visible, .enlace:focus-visible { outline: 3px solid var(--simus-anillo-foco); outline-offset: 2px; }
+.selector-vista__opcion--activa { background: var(--simus-morado) !important; color: white !important; }
+.formulario, .registro-preparado, .sesion-activa { margin-block-start: clamp(2rem, 5vh, 3.5rem); }
+.formulario { display: grid; gap: 1.3rem; }
+.formulario__encabezado { margin-block-end: .5rem; }
+.formulario__encabezado h2, .sesion-activa h2 { font-size: clamp(1.85rem, 3vw, 2.55rem); letter-spacing: -.035em; line-height: 1.08; }
+.formulario__encabezado > p:not(.rotulo), .sesion-activa > p:not(.rotulo) { color: var(--simus-texto-secundario); line-height: 1.55; margin: .75rem 0 0; }
+.campo { display: grid; gap: .5rem; }
+.campo label { font-size: .9375rem; font-weight: 700; }
+.campo__encabezado { align-items: baseline; display: flex; flex-wrap: wrap; gap: .4rem 1rem; justify-content: space-between; }
+.campo__encabezado span { color: var(--simus-texto-secundario); font-size: .75rem; }
+input { background: white; border: 1px solid var(--simus-borde-fuerte); border-radius: .55rem; color: var(--simus-tinta); font: inherit; min-block-size: 3rem; padding-inline: .875rem; transition: border-color 160ms ease, box-shadow 160ms ease; }
+input:hover { border-color: var(--simus-morado-claro); }
+input:focus { border-color: var(--simus-morado); box-shadow: 0 0 0 3px var(--simus-anillo-foco); outline: 0; }
+input[aria-invalid="true"] { border-color: var(--simus-error); }
+.campo__error { color: var(--simus-error); font-size: .8125rem; font-weight: 650; line-height: 1.35; margin: 0; }
+.aviso { background: var(--simus-superficie-suave); border-inline-start: .25rem solid var(--simus-morado-claro); color: var(--simus-texto-secundario); font-size: .9rem; line-height: 1.5; margin: 0; padding: .9rem 1rem; }
+.aviso--error { background: var(--simus-error-suave); border-color: var(--simus-error); color: var(--simus-error-oscuro); }
+.boton-principal, .boton-secundario { border-radius: .55rem; cursor: pointer; font: inherit; font-weight: 750; min-block-size: 3rem; padding-inline: 1.25rem; transition: background-color 160ms ease, transform 160ms ease; }
+.boton-principal { background: var(--simus-verde); border: 1px solid var(--simus-verde); color: var(--simus-tinta); }
+.boton-principal:hover:not(:disabled) { background: var(--simus-verde-medio); transform: translateY(-1px); }
+.boton-principal:disabled { cursor: wait; opacity: .62; }
+.boton-secundario { background: transparent; border: 1px solid var(--simus-morado); color: var(--simus-morado); margin-block-start: 1.5rem; }
+.boton-secundario:hover { background: var(--simus-morado); color: white; }
+.boton-principal:focus-visible, .boton-secundario:focus-visible { outline: 3px solid var(--simus-anillo-foco); outline-offset: 3px; }
+.formulario__pie { color: var(--simus-texto-secundario); font-size: .9rem; line-height: 1.5; margin: .35rem 0 0; text-align: center; }
+.enlace { background: transparent; border: 0; color: var(--simus-morado); cursor: pointer; font: inherit; font-weight: 750; padding: 0; text-decoration: underline; text-underline-offset: .18em; }
+.registro-preparado__estado { border-block: 1px solid var(--simus-borde); margin-block-start: 2rem; padding-block: 1.5rem; }
+.registro-preparado__estado h3 { font-size: 1.25rem; letter-spacing: -.02em; }
+.registro-preparado__estado p { color: var(--simus-texto-secundario); line-height: 1.55; }
+.registro-preparado__estado ul { color: var(--simus-texto-secundario); display: grid; gap: .65rem; line-height: 1.5; margin: 1.25rem 0; padding-inline-start: 1.25rem; }
+.registro-preparado__nota { border-block-start: 1px solid var(--simus-borde); font-size: .875rem; margin-block-start: 1.4rem; padding-block-start: 1.25rem; }
+.sesion-activa { border-inline-start: .25rem solid var(--simus-verde-medio); padding-inline-start: 1.25rem; }
 
-h1 {
-  font-size: clamp(2.2rem, 6vw, 4rem);
-  letter-spacing: -.04em;
-  margin: 0;
-}
-
-.intro {
-  color: #625b6d;
-  font-size: 1.125rem;
-  line-height: 1.6;
-  margin: 1rem 0 2.5rem;
-}
-
-.status {
-  border-left: 4px solid #5c347e;
-  line-height: 1.5;
-  padding: 1.25rem 1.5rem;
-}
-
-.status h2,
-.status p {
-  margin: 0 0 .5rem;
-}
-
-.status.error {
-  border-color: #ae2c45;
-}
-
-button {
-  background: #5c347e;
-  border: 0;
-  color: white;
-  cursor: pointer;
-  font: inherit;
-  margin-top: .5rem;
-  padding: .65rem 1rem;
-}
+@media (min-width: 60rem) { .acceso { grid-template-columns: minmax(22rem, .9fr) minmax(30rem, 1.1fr); } }
+@media (max-width: 34rem) { .acceso__marca-contenido { gap: 3.5rem; } .campo__encabezado { display: grid; } }
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; } }

@@ -13,18 +13,18 @@ describe('App', () => {
 
   it('should create the app', () => {
     const fixture = TestBed.createComponent(App);
-    TestBed.inject(HttpTestingController).expectOne('/api/salud').flush({ api: 'disponible', baseDatos: 'disponible' });
+    TestBed.inject(HttpTestingController).expectOne('/api/registro/disponibilidad').flush({ registroDisponible: false, impedimentos: [] });
     const app = fixture.componentInstance;
     expect(app).toBeTruthy();
   });
 
-  it('shows the status returned by the API', async () => {
+  it('shows the access form and uses contextual labels', async () => {
     const fixture = TestBed.createComponent(App);
-    TestBed.inject(HttpTestingController).expectOne('/api/salud').flush({ api: 'disponible', baseDatos: 'disponible' });
+    TestBed.inject(HttpTestingController).expectOne('/api/registro/disponibilidad').flush({ registroDisponible: false, impedimentos: [] });
     fixture.detectChanges();
     await fixture.whenStable();
     const compiled = fixture.nativeElement as HTMLElement;
-    expect(compiled.querySelector('h1')?.textContent).toContain('Núcleo técnico');
-    expect(compiled.textContent).toContain('Base de datos: disponible.');
+    expect(compiled.querySelector('h1')?.textContent).toContain('Gestiona la información');
+    expect(compiled.querySelector('label[for="correo"]')?.textContent).toContain('Correo electrónico');
   });
 });

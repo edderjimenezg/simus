@@ -7,11 +7,20 @@ export interface EstadoApi {
   baseDatos: 'disponible' | 'no_disponible' | 'no_configurada';
 }
 
+export interface DisponibilidadRegistro {
+  registroDisponible: boolean;
+  impedimentos: string[];
+}
+
 @Injectable({ providedIn: 'root' })
 export class ServicioEstadoApi {
   constructor(private readonly http: HttpClient) {}
 
   obtenerSalud(): Observable<EstadoApi> {
     return this.http.get<EstadoApi>('/api/salud');
+  }
+
+  obtenerDisponibilidadRegistro(): Observable<DisponibilidadRegistro> {
+    return this.http.get<DisponibilidadRegistro>('/api/registro/disponibilidad');
   }
 }

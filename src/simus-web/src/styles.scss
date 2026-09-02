@@ -1,1 +1,23 @@
-/* You can add global styles to this file, and also import other style files */
+:root {
+  --simus-morado: #291242;
+  --simus-morado-claro: #533075;
+  --simus-verde: #00da5e;
+  --simus-verde-medio: #00a849;
+  --simus-tinta: #0d0820;
+  --simus-hueso: #fbfcfb;
+  --simus-superficie-suave: #f6f3f7;
+  --simus-borde: #ded7e1;
+  --simus-borde-fuerte: #b7afbd;
+  --simus-texto-secundario: #625b6d;
+  --simus-error: #b4233c;
+  --simus-error-oscuro: #841c30;
+  --simus-error-suave: #fff1f3;
+  --simus-anillo-foco: rgb(0 168 73 / 38%);
+  --simus-fuente-texto: Inter, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --simus-fuente-titulos: "Arial Narrow", "Roboto Condensed", Arial, sans-serif;
+}
+
+* { box-sizing: border-box; }
+html { background: var(--simus-hueso); font-family: var(--simus-fuente-texto); }
+body { margin: 0; min-inline-size: 20rem; }
+button, input { font: inherit; }

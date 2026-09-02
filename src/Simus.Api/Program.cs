@@ -17,16 +17,22 @@ builder.Services.AddSingleton<ServicioAuditoriaAcceso>();
 builder.Services.AddCors(options => options.AddDefaultPolicy(policy =>
     policy.WithOrigins("http://localhost:4200")
         .AllowAnyHeader()
-        .AllowAnyMethod()));
+        .AllowAnyMethod()
+        .AllowCredentials()));
 builder.Services.AddProblemDetails();
 builder.Services.AddRateLimiter(opciones =>
 {
     opciones.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
-    opciones.AddFixedWindowLimiter("ingreso", limites =>
+    opciones.AddPolicy("ingreso", contexto =>
     {
-        limites.PermitLimit = 5;
-        limites.Window = TimeSpan.FromMinutes(15);
-        limites.QueueLimit = 0;
+        var claveParticion = contexto.Connection.RemoteIpAddress?.ToString() ?? "sin_ip";
+        return RateLimitPartition.GetFixedWindowLimiter(claveParticion, _ => new FixedWindowRateLimiterOptions
+        {
+            PermitLimit = 5,
+            Window = TimeSpan.FromMinutes(15),
+            QueueLimit = 0,
+            AutoReplenishment = true
+        });
     });
 });
 
