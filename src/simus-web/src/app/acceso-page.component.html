@@ -18,10 +18,10 @@
 
   <section class="acceso__formulario" aria-label="Acceso a SIMUS">
     <div class="acceso__formulario-contenido">
-      <div class="selector-vista" role="tablist" aria-label="Opciones de acceso">
-        <button type="button" role="tab" [attr.aria-selected]="vista() === 'ingresar'" [class.selector-vista__opcion--activa]="vista() === 'ingresar'" (click)="cambiarVista('ingresar')">Ingresar</button>
-        <button type="button" role="tab" [attr.aria-selected]="vista() === 'registro'" [class.selector-vista__opcion--activa]="vista() === 'registro'" (click)="cambiarVista('registro')">Crear cuenta</button>
-      </div>
+      <nav class="selector-vista" aria-label="Opciones de acceso">
+        <a routerLink="/ingresar" routerLinkActive="selector-vista__opcion--activa" [attr.aria-current]="vista() === 'ingresar' ? 'page' : null">Ingresar</a>
+        <a routerLink="/registro" routerLinkActive="selector-vista__opcion--activa" [attr.aria-current]="vista() === 'registro' ? 'page' : null">Crear cuenta</a>
+      </nav>
 
       @if (vista() === 'ingresar') {
         <form class="formulario" (ngSubmit)="ingresar()" novalidate>
@@ -45,7 +45,7 @@
           </div>
 
           <button class="boton-principal" type="submit" [disabled]="enviandoIngreso()">{{ enviandoIngreso() ? 'Ingresando…' : 'Ingresar' }}</button>
-          <p class="formulario__pie">¿Aún no tienes cuenta? <button type="button" class="enlace" (click)="cambiarVista('registro')">Crea una cuenta y registra tu organización.</button></p>
+          <p class="formulario__pie">¿Aún no tienes cuenta? <a class="enlace" routerLink="/registro">Crea una cuenta y registra tu organización.</a></p>
         </form>
       }
 

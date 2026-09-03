@@ -20,9 +20,9 @@ h1 { font-size: clamp(2.45rem, 5.2vw, 4.75rem); letter-spacing: -.045em; line-he
 .acceso__formulario { align-content: center; display: grid; padding: clamp(2rem, 6vw, 6rem); }
 .acceso__formulario-contenido { inline-size: min(100%, 34rem); margin-inline: auto; }
 .selector-vista { background: var(--simus-superficie-suave); border: 1px solid var(--simus-borde); border-radius: .8rem; display: grid; grid-template-columns: 1fr 1fr; padding: .25rem; }
-.selector-vista button { background: transparent; border: 0; border-radius: .55rem; color: var(--simus-texto-secundario); cursor: pointer; font: inherit; font-size: .875rem; font-weight: 700; min-block-size: 2.75rem; padding-inline: 1rem; }
-.selector-vista button:hover { color: var(--simus-morado); }
-.selector-vista button:focus-visible, .enlace:focus-visible { outline: 3px solid var(--simus-anillo-foco); outline-offset: 2px; }
+.selector-vista a { align-items: center; border-radius: .55rem; color: var(--simus-texto-secundario); cursor: pointer; display: flex; font: inherit; font-size: .875rem; font-weight: 700; justify-content: center; min-block-size: 2.75rem; padding-inline: 1rem; text-decoration: none; }
+.selector-vista a:hover { color: var(--simus-morado); }
+.selector-vista a:focus-visible, .enlace:focus-visible { outline: 3px solid var(--simus-anillo-foco); outline-offset: 2px; }
 .selector-vista__opcion--activa { background: var(--simus-morado) !important; color: white !important; }
 .formulario, .registro-preparado { margin-block-start: clamp(2rem, 5vh, 3.5rem); }
 .formulario { display: grid; gap: 1.3rem; }

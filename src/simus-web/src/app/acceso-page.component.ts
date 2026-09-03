@@ -1,7 +1,7 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import { Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { DisponibilidadRegistro, ServicioEstadoApi } from './core/estado-api.service';
 import { ServicioAcceso } from './core/servicio-acceso';
 import { ServicioRegistroExterno, SolicitudRegistroExterno, TerritorioRegistro } from './core/servicio-registro-externo';
@@ -29,7 +29,7 @@ const PASO_POR_CAMPO: Record<string, number> = {
 
 @Component({
   selector: 'app-acceso-page',
-  imports: [FormsModule],
+  imports: [FormsModule, RouterLink, RouterLinkActive],
   templateUrl: './acceso-page.component.html',
   styleUrl: './acceso-page.component.scss'
 })
@@ -38,6 +38,7 @@ export class AccesoPageComponent {
   private readonly servicioAcceso = inject(ServicioAcceso);
   private readonly servicioRegistroExterno = inject(ServicioRegistroExterno);
   private readonly router = inject(Router);
+  private readonly ruta = inject(ActivatedRoute);
 
   protected readonly vista = signal<VistaAcceso>('ingresar');
   protected readonly disponibilidadRegistro = signal<DisponibilidadRegistro | null>(null);
@@ -60,10 +61,11 @@ export class AccesoPageComponent {
   };
 
   constructor() {
+    this.ruta.data.subscribe(datos => this.aplicarVista((datos['vista'] as VistaAcceso | undefined) ?? 'ingresar'));
     this.consultarDisponibilidadRegistro();
   }
 
-  protected cambiarVista(vista: VistaAcceso): void {
+  private aplicarVista(vista: VistaAcceso): void {
     this.vista.set(vista);
     this.errorGeneral.set(null);
     this.erroresCampos.set({});
