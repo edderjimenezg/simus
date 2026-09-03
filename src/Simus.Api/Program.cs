@@ -11,6 +11,10 @@ var opcionesSesion = builder.Configuration.GetSection("Sesion").Get<OpcionesSesi
     ?? throw new InvalidOperationException("Falta la configuración de sesión.");
 if (opcionesSesion.MinutosInactividad is < 5 or > 240 || opcionesSesion.HorasMaximas is < 1 or > 24 || opcionesSesion.MinutosAvisoPrevio < 1)
     throw new InvalidOperationException("La configuración de sesión no está dentro de los límites permitidos.");
+var opcionesLimiteIntentos = builder.Configuration.GetSection("LimiteIntentos").Get<OpcionesLimiteIntentos>()
+    ?? throw new InvalidOperationException("Falta la configuración de límite de intentos.");
+if (opcionesLimiteIntentos.PermitLimit is < 1 or > 100_000 || opcionesLimiteIntentos.VentanaMinutos is < 1 or > 1440)
+    throw new InvalidOperationException("La configuración de límite de intentos no está dentro de los límites permitidos.");
 builder.Services.AddSingleton(opcionesSesion);
 builder.Services.AddSingleton<ServicioSesiones>();
 builder.Services.AddSingleton<ServicioAuditoriaAcceso>();
@@ -23,17 +27,19 @@ builder.Services.AddProblemDetails();
 builder.Services.AddRateLimiter(opciones =>
 {
     opciones.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
-    opciones.AddPolicy("ingreso", contexto =>
+    Func<HttpContext, RateLimitPartition<string>> LimitadorPorIp(string prefijoParticion) => contexto =>
     {
-        var claveParticion = contexto.Connection.RemoteIpAddress?.ToString() ?? "sin_ip";
+        var claveParticion = $"{prefijoParticion}:{contexto.Connection.RemoteIpAddress?.ToString() ?? "sin_ip"}";
         return RateLimitPartition.GetFixedWindowLimiter(claveParticion, _ => new FixedWindowRateLimiterOptions
         {
-            PermitLimit = 5,
-            Window = TimeSpan.FromMinutes(15),
+            PermitLimit = opcionesLimiteIntentos.PermitLimit,
+            Window = TimeSpan.FromMinutes(opcionesLimiteIntentos.VentanaMinutos),
             QueueLimit = 0,
             AutoReplenishment = true
         });
-    });
+    };
+    opciones.AddPolicy("ingreso", LimitadorPorIp("ingreso"));
+    opciones.AddPolicy("registro", LimitadorPorIp("registro"));
 });
 
 var app = builder.Build();
@@ -175,7 +181,7 @@ app.MapGet("/api/mi-panel/organizaciones/{idOrganizacion:guid}/administradores",
     await using (conexion!)
     {
         var conexionAbierta = conexion!;
-        if (!await PuedeAdministrarOrganizacionAsync(conexionAbierta, idPersona!.Value, idOrganizacion, cancelacion)) return Results.Forbid();
+        if (!await PuedeAdministrarOrganizacionAsync(conexionAbierta, idPersona!.Value, idOrganizacion, cancelacion)) return Results.StatusCode(StatusCodes.Status403Forbidden);
         const string consulta = """
             SELECT p.Id,p.PrimerNombre,p.SegundoNombre,p.PrimerApellido,p.SegundoApellido,p.CorreoNormalizado,p.Telefono,a.FechaAsignacion
             FROM organizaciones.Administradores a
@@ -205,7 +211,7 @@ app.MapPatch("/api/mi-panel/organizaciones/{idOrganizacion:guid}", async (Guid i
     await using (conexion!)
     {
         var conexionAbierta = conexion!;
-        if (!await PuedeAdministrarOrganizacionAsync(conexionAbierta, idPersona!.Value, idOrganizacion, cancelacion)) return Results.Forbid();
+        if (!await PuedeAdministrarOrganizacionAsync(conexionAbierta, idPersona!.Value, idOrganizacion, cancelacion)) return Results.StatusCode(StatusCodes.Status403Forbidden);
         const string territorioExiste = "SELECT COUNT(*) FROM territorio.Municipios WHERE CodigoDepartamento=@departamento AND Codigo=@municipio;";
         await using (var comandoTerritorio = new SqlCommand(territorioExiste, conexionAbierta))
         {
@@ -280,7 +286,7 @@ app.MapPost("/api/mi-panel/festivales", async (SolicitudCrearFestival solicitud,
     await using (conexion!)
     {
         var conexionAbierta = conexion!;
-        if (!await PuedeAdministrarOrganizacionAsync(conexionAbierta, idPersona!.Value, solicitud.IdOrganizacion, cancelacion)) return Results.Forbid();
+        if (!await PuedeAdministrarOrganizacionAsync(conexionAbierta, idPersona!.Value, solicitud.IdOrganizacion, cancelacion)) return Results.StatusCode(StatusCodes.Status403Forbidden);
         if (!await TerritorioExisteAsync(conexionAbierta, solicitud.CodigoDepartamento, solicitud.CodigoMunicipio, cancelacion))
         {
             errores["codigoMunicipio"] = ["El municipio no corresponde al departamento seleccionado."];
@@ -320,7 +326,7 @@ app.MapPatch("/api/mi-panel/festivales/{idFestival:guid}/perfil-borrador", async
     await using (conexion!)
     {
         var conexionAbierta = conexion!;
-        if (!await PuedeAdministrarFestivalAsync(conexionAbierta, idPersona!.Value, idFestival, cancelacion)) return Results.Forbid();
+        if (!await PuedeAdministrarFestivalAsync(conexionAbierta, idPersona!.Value, idFestival, cancelacion)) return Results.StatusCode(StatusCodes.Status403Forbidden);
         if (!await TerritorioExisteAsync(conexionAbierta, solicitud.CodigoDepartamento, solicitud.CodigoMunicipio, cancelacion))
         {
             errores["codigoMunicipio"] = ["El municipio no corresponde al departamento seleccionado."];
@@ -483,7 +489,7 @@ app.MapPost("/api/registro", async (SolicitudRegistroExterno solicitud, HttpCont
     contexto.Response.Cookies.Append("simus_sesion", secreto, OpcionesCookieSesion(app, venceEn));
     await auditoria.RegistrarAsync(conexion, idPersona, "registro_externo_exitoso", contexto.TraceIdentifier, cancelacion);
     return Results.Ok(new { idPersona, idOrganizacion, venceEn });
-}).RequireRateLimiting("ingreso");
+}).RequireRateLimiting("registro");
 
 static CookieOptions OpcionesCookieSesion(WebApplication aplicacion, DateTime? venceEn = null) => new()
 {
@@ -647,6 +653,11 @@ public sealed class OpcionesSesion
     public int MinutosInactividad { get; init; }
     public int HorasMaximas { get; init; }
     public int MinutosAvisoPrevio { get; init; }
+}
+public sealed class OpcionesLimiteIntentos
+{
+    public int PermitLimit { get; init; }
+    public int VentanaMinutos { get; init; }
 }
 
 public partial class Program;

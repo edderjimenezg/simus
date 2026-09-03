@@ -2,14 +2,20 @@ using System.Net;
 using System.Net.Http.Json;
 using System.Text.Json;
 using Microsoft.AspNetCore.Mvc.Testing;
+using Microsoft.Extensions.Configuration;
 using Xunit;
 
 namespace Simus.Api.Tests;
 
 [Collection(ColeccionBaseDatos.Nombre)]
-public sealed class PruebasRecorridoCompletoApi(WebApplicationFactory<Program> fabrica, BaseDatosPruebasFixture baseDatos)
+public sealed class PruebasRecorridoCompletoApi(WebApplicationFactory<Program> fabricaBase, BaseDatosPruebasFixture baseDatos)
     : IClassFixture<WebApplicationFactory<Program>>
 {
+    private readonly WebApplicationFactory<Program> fabrica = fabricaBase.WithWebHostBuilder(builder =>
+        builder.ConfigureAppConfiguration((_, configuracion) =>
+            configuracion.AddInMemoryCollection(new Dictionary<string, string?> { ["LimiteIntentos:PermitLimit"] = "1000" })));
+
+
     private const string RazonOmision = "Requiere base de datos local: scripts/dev-test-integracion.sh";
 
     [SkippableFact]
@@ -75,6 +81,62 @@ public sealed class PruebasRecorridoCompletoApi(WebApplicationFactory<Program> f
 
         var listado = await cliente.GetFromJsonAsync<JsonElement>("/api/mi-panel/festivales");
         Assert.Contains(listado.EnumerateArray(), festival => festival.GetProperty("nombre").GetString() == "Festival de prueba");
+    }
+
+    [SkippableFact]
+    public async Task Persona_no_puede_administrar_organizacion_ni_festival_ajenos()
+    {
+        Skip.IfNot(baseDatos.BaseDatosDisponible, RazonOmision);
+        using var clienteA = fabrica.CreateClient();
+        using var clienteB = fabrica.CreateClient();
+        await RegistrarYObtenerCorreoAsync(clienteA);
+        await RegistrarYObtenerCorreoAsync(clienteB);
+        var idOrganizacionB = await ObtenerOrganizacionActivaAsync(clienteB);
+
+        var creacionFestivalB = await clienteB.PostAsJsonAsync("/api/mi-panel/festivales", new
+        {
+            idOrganizacion = idOrganizacionB,
+            nombre = "Festival de la organización B",
+            descripcion = (string?)null,
+            codigoDepartamento = BaseDatosPruebasFixture.CodigoDepartamentoPrueba,
+            codigoMunicipio = BaseDatosPruebasFixture.CodigoMunicipioPrueba
+        });
+        creacionFestivalB.EnsureSuccessStatusCode();
+        var idFestivalB = (await creacionFestivalB.Content.ReadFromJsonAsync<JsonElement>()).GetProperty("idFestival").GetGuid();
+
+        var intentoActualizarOrganizacion = await clienteA.PatchAsJsonAsync($"/api/mi-panel/organizaciones/{idOrganizacionB}", new
+        {
+            nombre = "Intento de secuestro",
+            numeroIdentificacion = (string?)null,
+            codigoDepartamento = BaseDatosPruebasFixture.CodigoDepartamentoPrueba,
+            codigoMunicipio = BaseDatosPruebasFixture.CodigoMunicipioPrueba
+        });
+        Assert.Equal(HttpStatusCode.Forbidden, intentoActualizarOrganizacion.StatusCode);
+
+        var intentoVerAdministradores = await clienteA.GetAsync($"/api/mi-panel/organizaciones/{idOrganizacionB}/administradores");
+        Assert.Equal(HttpStatusCode.Forbidden, intentoVerAdministradores.StatusCode);
+
+        var intentoCrearFestivalAjeno = await clienteA.PostAsJsonAsync("/api/mi-panel/festivales", new
+        {
+            idOrganizacion = idOrganizacionB,
+            nombre = "Festival intruso",
+            descripcion = (string?)null,
+            codigoDepartamento = BaseDatosPruebasFixture.CodigoDepartamentoPrueba,
+            codigoMunicipio = BaseDatosPruebasFixture.CodigoMunicipioPrueba
+        });
+        Assert.Equal(HttpStatusCode.Forbidden, intentoCrearFestivalAjeno.StatusCode);
+
+        var intentoEditarFestivalAjeno = await clienteA.PatchAsJsonAsync($"/api/mi-panel/festivales/{idFestivalB}/perfil-borrador", new
+        {
+            nombre = "Perfil secuestrado",
+            descripcion = (string?)null,
+            codigoDepartamento = BaseDatosPruebasFixture.CodigoDepartamentoPrueba,
+            codigoMunicipio = BaseDatosPruebasFixture.CodigoMunicipioPrueba
+        });
+        Assert.Equal(HttpStatusCode.Forbidden, intentoEditarFestivalAjeno.StatusCode);
+
+        var listadoFestivalesA = await clienteA.GetFromJsonAsync<JsonElement>("/api/mi-panel/festivales");
+        Assert.DoesNotContain(listadoFestivalesA.EnumerateArray(), festival => festival.GetProperty("idFestival").GetGuid() == idFestivalB);
     }
 
     private const string ContrasenaPrueba = "ContrasenaSeguraDePrueba123";
