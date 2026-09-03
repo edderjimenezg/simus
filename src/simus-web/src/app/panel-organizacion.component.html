@@ -15,7 +15,7 @@
         }
         <button type="button" class="cuenta" (click)="cambiarSeccion('cuenta')" [attr.aria-current]="seccion() === 'cuenta' ? 'page' : null">
           <span class="cuenta__inicial">{{ datos.persona.primerNombre.slice(0, 1) }}{{ datos.persona.primerApellido.slice(0, 1) }}</span>
-          <span>{{ datos.persona.primerNombre }} {{ datos.persona.primerApellido }}</span>
+          <span class="cuenta__nombre">{{ datos.persona.primerNombre }} {{ datos.persona.primerApellido }}</span>
         </button>
       </div>
     </header>
