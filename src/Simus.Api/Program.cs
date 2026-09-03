@@ -1,12 +1,17 @@
 using System.Diagnostics;
 using Microsoft.Data.SqlClient;
 using Microsoft.AspNetCore.Diagnostics;
+using Microsoft.AspNetCore.Antiforgery;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.RateLimiting;
 using System.Threading.RateLimiting;
 using Simus.Api.Servicios;
 
 var builder = WebApplication.CreateBuilder(args);
+var origenesCors = builder.Configuration.GetSection("Cors:Origenes").Get<string[]>()
+    ?.Where(origen => Uri.TryCreate(origen, UriKind.Absolute, out _)).Distinct(StringComparer.OrdinalIgnoreCase).ToArray()
+    ?? [];
+if (origenesCors.Length == 0) throw new InvalidOperationException("Configura al menos un origen CORS válido.");
 var opcionesSesion = builder.Configuration.GetSection("Sesion").Get<OpcionesSesion>()
     ?? throw new InvalidOperationException("Falta la configuración de sesión.");
 if (opcionesSesion.MinutosInactividad is < 5 or > 240 || opcionesSesion.HorasMaximas is < 1 or > 24 || opcionesSesion.MinutosAvisoPrevio < 1)
@@ -19,11 +24,19 @@ builder.Services.AddSingleton(opcionesSesion);
 builder.Services.AddSingleton<ServicioSesiones>();
 builder.Services.AddSingleton<ServicioAuditoriaAcceso>();
 builder.Services.AddCors(options => options.AddDefaultPolicy(policy =>
-    policy.WithOrigins("http://localhost:4200")
+    policy.WithOrigins(origenesCors)
         .AllowAnyHeader()
         .AllowAnyMethod()
         .AllowCredentials()));
 builder.Services.AddProblemDetails();
+builder.Services.AddAntiforgery(opciones =>
+{
+    opciones.HeaderName = "X-SIMUS-CSRF";
+    opciones.Cookie.Name = "simus_antiforgery";
+    opciones.Cookie.HttpOnly = true;
+    opciones.Cookie.SameSite = SameSiteMode.Strict;
+    opciones.Cookie.SecurePolicy = builder.Environment.IsDevelopment() ? CookieSecurePolicy.None : CookieSecurePolicy.Always;
+});
 builder.Services.AddRateLimiter(opciones =>
 {
     opciones.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
@@ -51,6 +64,16 @@ app.UseExceptionHandler(manejador => manejador.Run(async contexto =>
     contexto.Response.StatusCode = StatusCodes.Status500InternalServerError;
     await contexto.Response.WriteAsJsonAsync(new ErrorApi("error_no_previsto", "Ocurrió un error inesperado. Inténtalo nuevamente.", trazaId));
 }));
+app.Use(async (contexto, siguiente) =>
+{
+    contexto.Response.Headers.Append("X-Content-Type-Options", "nosniff");
+    contexto.Response.Headers.Append("X-Frame-Options", "DENY");
+    contexto.Response.Headers.Append("Referrer-Policy", "no-referrer");
+    contexto.Response.Headers.Append("Permissions-Policy", "camera=(), geolocation=(), microphone=()");
+    contexto.Response.Headers.Append("Content-Security-Policy", "default-src 'none'; base-uri 'none'; frame-ancestors 'none'; form-action 'self'");
+    if (!app.Environment.IsDevelopment()) contexto.Response.Headers.Append("Strict-Transport-Security", "max-age=31536000; includeSubDomains");
+    await siguiente();
+});
 app.Use(async (contexto, siguiente) =>
 {
     var inicio = Stopwatch.GetTimestamp();
@@ -140,6 +163,17 @@ app.MapGet("/api/sesion/estado", async (HttpContext contexto, IConfiguration con
     return idPersona is null ? Results.Unauthorized() : Results.Ok(new { idPersona });
 });
 
+app.MapGet("/api/sesion/proteccion", async (HttpContext contexto, IConfiguration configuracion, ServicioSesiones sesiones, IAntiforgery antiforgery, CancellationToken cancelacion) =>
+{
+    var (conexion, _, error) = await ObtenerConexionAutorizadaAsync(contexto, configuracion, sesiones, cancelacion);
+    if (error is not null) return error;
+    await using (conexion!)
+    {
+        var token = antiforgery.GetAndStoreTokens(contexto).RequestToken;
+        return Results.Ok(new { token });
+    }
+});
+
 app.MapGet("/api/mi-panel/contexto", async (HttpContext contexto, IConfiguration configuracion, ServicioSesiones sesiones, CancellationToken cancelacion) =>
 {
     var (conexion, idPersona, error) = await ObtenerConexionAutorizadaAsync(contexto, configuracion, sesiones, cancelacion);
@@ -202,8 +236,9 @@ app.MapGet("/api/mi-panel/organizaciones/{idOrganizacion:guid}/administradores",
     }
 });
 
-app.MapPatch("/api/mi-panel/organizaciones/{idOrganizacion:guid}", async (Guid idOrganizacion, ActualizacionOrganizacionPanel solicitud, HttpContext contexto, IConfiguration configuracion, ServicioSesiones sesiones, ServicioAuditoriaAcceso auditoria, CancellationToken cancelacion) =>
+app.MapPatch("/api/mi-panel/organizaciones/{idOrganizacion:guid}", async (Guid idOrganizacion, ActualizacionOrganizacionPanel solicitud, HttpContext contexto, IConfiguration configuracion, ServicioSesiones sesiones, ServicioAuditoriaAcceso auditoria, IAntiforgery antiforgery, CancellationToken cancelacion) =>
 {
+    if (!await antiforgery.IsRequestValidAsync(contexto)) return ResultadoSolicitudNoProtegida(contexto);
     var errores = ValidarActualizacionOrganizacion(solicitud);
     if (errores.Count > 0) return Results.UnprocessableEntity(new ErrorApi("campos_invalidos", "Revisa los campos indicados.", contexto.TraceIdentifier, errores));
     var (conexion, idPersona, error) = await ObtenerConexionAutorizadaAsync(contexto, configuracion, sesiones, cancelacion);
@@ -276,8 +311,9 @@ app.MapGet("/api/mi-panel/festivales", async (HttpContext contexto, IConfigurati
     }
 });
 
-app.MapPost("/api/mi-panel/festivales", async (SolicitudCrearFestival solicitud, HttpContext contexto, IConfiguration configuracion, ServicioSesiones sesiones, ServicioAuditoriaAcceso auditoria, CancellationToken cancelacion) =>
+app.MapPost("/api/mi-panel/festivales", async (SolicitudCrearFestival solicitud, HttpContext contexto, IConfiguration configuracion, ServicioSesiones sesiones, ServicioAuditoriaAcceso auditoria, IAntiforgery antiforgery, CancellationToken cancelacion) =>
 {
+    if (!await antiforgery.IsRequestValidAsync(contexto)) return ResultadoSolicitudNoProtegida(contexto);
     var errores = ValidarSolicitudFestival(solicitud.Nombre, solicitud.Descripcion, solicitud.CodigoDepartamento, solicitud.CodigoMunicipio);
     if (solicitud.IdOrganizacion == Guid.Empty) errores["idOrganizacion"] = ["Selecciona la organización que administrará el Festival."];
     if (errores.Count > 0) return Results.UnprocessableEntity(new ErrorApi("campos_invalidos", "Revisa los campos indicados.", contexto.TraceIdentifier, errores));
@@ -317,8 +353,9 @@ app.MapPost("/api/mi-panel/festivales", async (SolicitudCrearFestival solicitud,
     }
 });
 
-app.MapPatch("/api/mi-panel/festivales/{idFestival:guid}/perfil-borrador", async (Guid idFestival, SolicitudActualizarFestival solicitud, HttpContext contexto, IConfiguration configuracion, ServicioSesiones sesiones, ServicioAuditoriaAcceso auditoria, CancellationToken cancelacion) =>
+app.MapPatch("/api/mi-panel/festivales/{idFestival:guid}/perfil-borrador", async (Guid idFestival, SolicitudActualizarFestival solicitud, HttpContext contexto, IConfiguration configuracion, ServicioSesiones sesiones, ServicioAuditoriaAcceso auditoria, IAntiforgery antiforgery, CancellationToken cancelacion) =>
 {
+    if (!await antiforgery.IsRequestValidAsync(contexto)) return ResultadoSolicitudNoProtegida(contexto);
     var errores = ValidarSolicitudFestival(solicitud.Nombre, solicitud.Descripcion, solicitud.CodigoDepartamento, solicitud.CodigoMunicipio);
     if (errores.Count > 0) return Results.UnprocessableEntity(new ErrorApi("campos_invalidos", "Revisa los campos indicados.", contexto.TraceIdentifier, errores));
     var (conexion, idPersona, error) = await ObtenerConexionAutorizadaAsync(contexto, configuracion, sesiones, cancelacion);
@@ -350,8 +387,9 @@ app.MapPatch("/api/mi-panel/festivales/{idFestival:guid}/perfil-borrador", async
     }
 });
 
-app.MapPost("/api/sesion/cerrar", async (HttpContext contexto, IConfiguration configuracion, ServicioSesiones sesiones, ServicioAuditoriaAcceso auditoria, CancellationToken cancelacion) =>
+app.MapPost("/api/sesion/cerrar", async (HttpContext contexto, IConfiguration configuracion, ServicioSesiones sesiones, ServicioAuditoriaAcceso auditoria, IAntiforgery antiforgery, CancellationToken cancelacion) =>
 {
+    if (!await antiforgery.IsRequestValidAsync(contexto)) return ResultadoSolicitudNoProtegida(contexto);
     if (contexto.Request.Cookies.TryGetValue("simus_sesion", out var secreto) && !string.IsNullOrWhiteSpace(secreto))
     {
         var cadenaConexion = configuracion.GetConnectionString("Simus");
@@ -500,6 +538,8 @@ static CookieOptions OpcionesCookieSesion(WebApplication aplicacion, DateTime? v
 };
 
 static object ComoDbNull(string? valor) => string.IsNullOrWhiteSpace(valor) ? DBNull.Value : valor.Trim();
+
+static IResult ResultadoSolicitudNoProtegida(HttpContext contexto) => Results.BadRequest(new ErrorApi("solicitud_no_protegida", "Actualiza la página antes de realizar esta acción.", contexto.TraceIdentifier));
 
 static async Task<(SqlConnection? Conexion, Guid? IdPersona, IResult? Error)> ObtenerConexionAutorizadaAsync(HttpContext contexto, IConfiguration configuracion, ServicioSesiones sesiones, CancellationToken cancelacion)
 {

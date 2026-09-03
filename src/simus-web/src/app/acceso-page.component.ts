@@ -5,6 +5,7 @@ import { ActivatedRoute, Router, RouterLink, RouterLinkActive } from '@angular/r
 import { DisponibilidadRegistro, ServicioEstadoApi } from './core/estado-api.service';
 import { ServicioAcceso } from './core/servicio-acceso';
 import { ServicioRegistroExterno, SolicitudRegistroExterno, TerritorioRegistro } from './core/servicio-registro-externo';
+import { ServicioProteccionSolicitud } from './core/servicio-proteccion-solicitud';
 
 type VistaAcceso = 'ingresar' | 'registro';
 
@@ -37,6 +38,7 @@ export class AccesoPageComponent {
   private readonly servicioEstadoApi = inject(ServicioEstadoApi);
   private readonly servicioAcceso = inject(ServicioAcceso);
   private readonly servicioRegistroExterno = inject(ServicioRegistroExterno);
+  private readonly proteccion = inject(ServicioProteccionSolicitud);
   private readonly router = inject(Router);
   private readonly ruta = inject(ActivatedRoute);
 
@@ -125,8 +127,10 @@ export class AccesoPageComponent {
     this.erroresCampos.set({});
     this.servicioAcceso.ingresar(correo, this.ingreso.contrasena).subscribe({
       next: () => {
-        this.enviandoIngreso.set(false);
-        void this.router.navigateByUrl('/mi-panel');
+        this.proteccion.preparar().subscribe({
+          next: () => { this.enviandoIngreso.set(false); void this.router.navigateByUrl('/mi-panel'); },
+          error: error => { this.enviandoIngreso.set(false); this.procesarErrorIngreso(error); }
+        });
       },
       error: error => {
         this.enviandoIngreso.set(false);
@@ -180,7 +184,10 @@ export class AccesoPageComponent {
     this.enviandoRegistro.set(true);
     this.errorGeneral.set(null);
     this.servicioRegistroExterno.registrar(solicitud).subscribe({
-      next: () => { this.enviandoRegistro.set(false); void this.router.navigateByUrl('/mi-panel'); },
+      next: () => this.proteccion.preparar().subscribe({
+        next: () => { this.enviandoRegistro.set(false); void this.router.navigateByUrl('/mi-panel'); },
+        error: error => { this.enviandoRegistro.set(false); this.procesarErrorRegistro(error); }
+      }),
       error: error => { this.enviandoRegistro.set(false); this.procesarErrorRegistro(error); }
     });
   }

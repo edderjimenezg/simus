@@ -7,6 +7,7 @@ import { ServicioAcceso } from './core/servicio-acceso';
 import { FestivalPanel, ServicioFestivales } from './core/servicio-festivales';
 import { AdministradorOrganizacion, ContextoPanel, OrganizacionPanel, ServicioPanelOrganizacion } from './core/servicio-panel-organizacion';
 import { TerritorioRegistro } from './core/servicio-registro-externo';
+import { ServicioProteccionSolicitud } from './core/servicio-proteccion-solicitud';
 
 type SeccionPanel = 'resumen' | 'organizacion' | 'administradores' | 'procesos' | 'cuenta';
 interface ErrorApi { mensaje?: string; campos?: Record<string, string[]>; }
@@ -21,6 +22,7 @@ export class PanelOrganizacionComponent {
   private readonly servicioPanel = inject(ServicioPanelOrganizacion);
   private readonly servicioAcceso = inject(ServicioAcceso);
   private readonly servicioFestivales = inject(ServicioFestivales);
+  private readonly proteccion = inject(ServicioProteccionSolicitud);
   private readonly router = inject(Router);
 
   protected readonly contexto = signal<ContextoPanel | null>(null);
@@ -190,6 +192,17 @@ export class PanelOrganizacionComponent {
   }
 
   private cargarContexto(idAConservar?: string): void {
+    this.proteccion.preparar().subscribe({
+      next: () => this.cargarContextoProtegido(idAConservar),
+      error: error => {
+        this.cargando.set(false);
+        if (error instanceof HttpErrorResponse && error.status === 401) void this.router.navigateByUrl('/');
+        else this.errorGeneral.set('No fue posible preparar una sesión segura. Inténtalo nuevamente.');
+      }
+    });
+  }
+
+  private cargarContextoProtegido(idAConservar?: string): void {
     this.cargando.set(true);
     this.servicioPanel.obtenerContexto().subscribe({
       next: contexto => {

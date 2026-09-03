@@ -168,7 +168,15 @@ public sealed class PruebasRecorridoCompletoApi(WebApplicationFactory<Program> f
         var correo = $"prueba-{Guid.NewGuid():N}@simus.test";
         var respuesta = await RegistrarPersonaDePruebaAsync(cliente, correo);
         respuesta.EnsureSuccessStatusCode();
+        await PrepararProteccionAsync(cliente);
         return correo;
+    }
+
+    private static async Task PrepararProteccionAsync(HttpClient cliente)
+    {
+        var proteccion = await cliente.GetFromJsonAsync<JsonElement>("/api/sesion/proteccion");
+        cliente.DefaultRequestHeaders.Remove("X-SIMUS-CSRF");
+        cliente.DefaultRequestHeaders.Add("X-SIMUS-CSRF", proteccion.GetProperty("token").GetString());
     }
 
     private static async Task<Guid> ObtenerOrganizacionActivaAsync(HttpClient cliente)
