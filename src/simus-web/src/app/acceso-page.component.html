@@ -39,7 +39,7 @@
           </div>
 
           <div class="campo">
-            <div class="campo__encabezado"><label for="contrasena">Contraseña</label><span>La recuperación de acceso estará disponible próximamente.</span></div>
+            <div class="campo__encabezado"><label for="contrasena">Contraseña</label><span>Podrás recuperarla próximamente.</span></div>
             <input id="contrasena" name="contrasena" type="password" autocomplete="current-password" [(ngModel)]="ingreso.contrasena" (input)="limpiarError('contrasena')" [attr.aria-invalid]="erroresCampos()['contrasena'] ? true : null" [attr.aria-describedby]="erroresCampos()['contrasena'] ? 'error-contrasena' : null">
             @if (erroresCampos()['contrasena']) { <p id="error-contrasena" class="campo__error">{{ erroresCampos()['contrasena'] }}</p> }
           </div>
@@ -82,14 +82,14 @@
                 </fieldset>
                 <fieldset class="consentimientos"><legend>Consentimientos obligatorios</legend>
                   @if (disponibilidad.documentos.length) { @for (documento of disponibilidad.documentos; track documento.codigo) { <label><input type="checkbox" [name]="'aceptacion-' + documento.codigo" [ngModel]="aceptaciones()[documento.codigo]" (ngModelChange)="cambiarAceptacion(documento.codigo, $event)"> Acepto <a [href]="documento.urlPublica" target="_blank" rel="noopener">{{ documento.titulo }}</a> (versión {{ documento.version }}).</label> } }
-                  @else { <p class="aviso">Las casillas se activarán al publicar los textos institucionales vigentes. No se registrará una aceptación sin el documento correspondiente.</p> }
+                  @else { <p class="aviso">Los documentos legales todavía no están publicados. Vuelve pronto para completar tu registro.</p> }
                   @if (erroresCampos()['consentimientos']) { <p class="campo__error">{{ erroresCampos()['consentimientos'] }}</p> }
                 </fieldset>
                 @if (!disponibilidad.registroDisponible) { <p class="aviso aviso--error">Aún no puedes finalizar: @for (impedimento of disponibilidad.impedimentos; track impedimento) { {{ impedimento }} }</p> }
                 <button class="boton-principal" type="submit" [disabled]="enviandoRegistro() || !disponibilidad.registroDisponible">{{ enviandoRegistro() ? 'Creando cuenta…' : 'Crear cuenta y organización' }}</button>
-                <p class="registro-preparado__nota">La confirmación de correo tendrá código y enlace cuando exista el servicio institucional de correo. Por ahora, este paso continúa sin envío.</p>
+                <p class="registro-preparado__nota">Te avisaremos por correo en cuanto la confirmación de cuenta esté activa.</p>
               </form>
-            } @else { <div class="registro-preparado__estado"><h3>El registro aún no está habilitado</h3><p>Antes de solicitar datos personales, SIMUS debe contar con los siguientes elementos oficiales:</p><ul>@for (impedimento of disponibilidad.impedimentos; track impedimento) { <li>{{ impedimento }}</li> }</ul></div> }
+            } @else { <div class="registro-preparado__estado"><h3>El registro no está disponible por ahora</h3><p>Estamos completando lo necesario para habilitarlo:</p><ul>@for (impedimento of disponibilidad.impedimentos; track impedimento) { <li>{{ impedimento }}</li> }</ul></div> }
           } @else {
             <p class="aviso aviso--error" role="alert">No fue posible verificar los requisitos del registro. Inténtalo nuevamente más tarde.</p>
           }

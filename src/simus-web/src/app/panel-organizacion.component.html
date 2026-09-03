@@ -99,7 +99,7 @@
                 @for (administrador of administradores(); track administrador.idPersona) { <li><span class="avatar">{{ administrador.nombre.slice(0, 1) }}</span><div><strong>{{ administrador.nombre }}</strong><span>{{ administrador.correo }}</span>@if (administrador.telefono) { <span>{{ administrador.telefono }}</span> }</div><small>Desde {{ fecha(administrador.fechaAsignacion) }}</small></li> }
               </ul>
             } @else { <p class="vacio">No se encontraron administradores activos para esta organización.</p> }
-            <p class="nota-pendiente">Agregar o retirar administradores se habilitará cuando estén definidas las reglas de invitación, aceptación y auditoría correspondientes.</p>
+            <p class="nota-pendiente">Podrás invitar o retirar administradores próximamente.</p>
           </section>
         }
 
@@ -110,7 +110,7 @@
             <p class="introduccion">Tu cuenta personal es independiente de las organizaciones que administras.</p>
             <dl class="datos-cuenta"><div><dt>Nombre</dt><dd>{{ datos.persona.primerNombre }} {{ datos.persona.primerApellido }}</dd></div><div><dt>Correo electrónico</dt><dd>{{ datos.persona.correo }}</dd></div><div><dt>Teléfono</dt><dd>{{ datos.persona.telefono || 'No registrado' }}</dd></div></dl>
             <section class="seguridad"><h2>Sesión</h2><p>Por seguridad, la sesión vence tras un periodo de inactividad y tiene una duración máxima. Cierra sesión si estás en un equipo compartido.</p><button type="button" class="boton-secundario" (click)="cerrarSesion()">Cerrar sesión</button></section>
-            <p class="nota-pendiente">La edición de datos de identidad, recuperación de acceso y confirmación efectiva de correo requieren los controles documentales y el servicio de correo pendientes.</p>
+            <p class="nota-pendiente">La edición de tus datos personales, la recuperación de acceso y la confirmación de correo estarán disponibles próximamente.</p>
           </section>
         }
       </main>
