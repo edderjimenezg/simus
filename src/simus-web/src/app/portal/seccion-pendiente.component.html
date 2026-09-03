@@ -1,0 +1,6 @@
+<section class="seccion-pendiente" aria-labelledby="titulo-seccion-pendiente">
+  <p class="rotulo">Próximamente</p>
+  <h1 id="titulo-seccion-pendiente">{{ titulo() }}</h1>
+  @if (motivo()) { <p class="seccion-pendiente__motivo">{{ motivo() }}</p> }
+  <a class="enlace-volver" routerLink="/">Volver al inicio</a>
+</section>

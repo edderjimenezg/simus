@@ -1,0 +1,50 @@
+<div class="portal">
+  <header class="portal__encabezado">
+    <a class="marca-portal" routerLink="/" (click)="cerrarMenu()" aria-label="SIMUS, ir al inicio">
+      <span class="marca-portal__sigla">SIMUS</span>
+      <span class="marca-portal__subtitulo">Sistema de información musical</span>
+    </a>
+
+    <button type="button" class="portal__alternador" [attr.aria-expanded]="menuAbierto()" aria-controls="navegacion-portal" (click)="alternarMenu()">
+      <span class="oculto-visualmente">{{ menuAbierto() ? 'Cerrar menú' : 'Abrir menú' }}</span>
+      <span class="portal__alternador-icono" aria-hidden="true"></span>
+    </button>
+
+    <nav id="navegacion-portal" class="portal__navegacion" [class.portal__navegacion--abierta]="menuAbierto()" aria-label="Navegación principal">
+      <ul>
+        @for (elemento of navegacion; track elemento.ruta) {
+          <li>
+            @if (elemento.disponible) {
+              <a [routerLink]="elemento.ruta" routerLinkActive="portal__enlace--activo" [routerLinkActiveOptions]="{ exact: elemento.ruta === '/' }" (click)="cerrarMenu()">{{ elemento.etiqueta }}</a>
+            } @else {
+              <a [routerLink]="elemento.ruta" routerLinkActive="portal__enlace--activo" class="portal__enlace--pendiente" (click)="cerrarMenu()">{{ elemento.etiqueta }} <span>Próximamente</span></a>
+            }
+          </li>
+        }
+      </ul>
+      <div class="portal__accesos">
+        <a class="boton-secundario-portal" routerLink="/ingresar" (click)="cerrarMenu()">Ingresar</a>
+        <a class="boton-principal-portal" routerLink="/registro" (click)="cerrarMenu()">Crear cuenta</a>
+      </div>
+    </nav>
+  </header>
+
+  <main class="portal__contenido">
+    <router-outlet />
+  </main>
+
+  <footer class="portal__pie">
+    <div class="portal__pie-contenido">
+      <div class="marca-portal">
+        <span class="marca-portal__sigla">SIMUS</span>
+        <span class="marca-portal__subtitulo">Plan Nacional de Música para la Convivencia</span>
+      </div>
+      <nav aria-label="Enlaces del pie de página">
+        <a routerLink="/institucional">Institucional</a>
+        <a routerLink="/ayuda">Ayuda y contacto</a>
+        <a routerLink="/ingresar">Ingresar</a>
+      </nav>
+    </div>
+    <p class="portal__pie-nota">Una plataforma del Ministerio de las Culturas, las Artes y los Saberes para organizar, revisar y publicar información musical.</p>
+  </footer>
+</div>

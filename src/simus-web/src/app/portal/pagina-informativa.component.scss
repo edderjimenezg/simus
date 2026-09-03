@@ -1,0 +1,8 @@
+:host { display: block; }
+.pagina-informativa { inline-size: min(100%, 48rem); margin-inline: auto; padding: clamp(2.5rem, 6vw, 5rem) clamp(1.25rem, 4vw, 3rem); }
+.rotulo { color: var(--simus-morado-claro); font-size: .75rem; font-weight: 800; letter-spacing: .1em; margin: 0 0 .75rem; text-transform: uppercase; }
+h1 { font-family: var(--simus-fuente-titulos); font-size: clamp(2rem, 4.5vw, 3rem); letter-spacing: -.03em; line-height: 1.05; margin: 0; }
+.pagina-informativa__introduccion { color: var(--simus-texto-secundario); font-size: 1.0625rem; line-height: 1.6; margin: 1.25rem 0 0; max-inline-size: 42rem; }
+.pagina-informativa__cuerpo { color: var(--simus-tinta); display: grid; gap: 1.5rem; line-height: 1.6; margin-block-start: 2.5rem; }
+.pagina-informativa__cuerpo h2 { font-family: var(--simus-fuente-titulos); font-size: 1.35rem; letter-spacing: -.02em; margin: 0 0 .5rem; }
+.pagina-informativa__cuerpo :is(p, ul) { color: var(--simus-texto-secundario); margin: 0; }

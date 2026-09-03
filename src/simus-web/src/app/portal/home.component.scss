@@ -1,0 +1,23 @@
+:host { display: block; }
+
+.inicio-hero { background: var(--simus-morado); color: white; isolation: isolate; overflow: hidden; padding: clamp(3rem, 10vw, 7rem) clamp(1.25rem, 4vw, 3rem); position: relative; }
+.inicio-hero__halo { border-radius: 50%; filter: blur(7rem); pointer-events: none; position: absolute; z-index: 0; }
+.inicio-hero__halo--superior { background: rgb(0 218 94 / 16%); block-size: 24rem; inline-size: 24rem; inset-block-start: -10rem; inset-inline-end: -10rem; }
+.inicio-hero__halo--inferior { background: rgb(97 0 215 / 32%); block-size: 26rem; inline-size: 26rem; inset-block-end: -14rem; inset-inline-start: -10rem; }
+.inicio-hero__contenido { inline-size: min(100%, 40rem); margin-inline: auto; position: relative; text-align: center; z-index: 1; }
+.rotulo { color: var(--simus-verde); font-size: .75rem; font-weight: 750; letter-spacing: .12em; margin: 0 0 .9rem; text-transform: uppercase; }
+.inicio-hero h1 { font-family: var(--simus-fuente-titulos); font-size: clamp(2.25rem, 6vw, 3.75rem); letter-spacing: -.04em; line-height: 1; margin: 0; }
+.inicio-hero__introduccion { color: rgb(255 255 255 / 78%); font-size: clamp(1rem, 1.6vw, 1.15rem); line-height: 1.6; margin: 1.5rem auto 0; max-inline-size: 30rem; }
+.inicio-hero__acciones { display: flex; flex-wrap: wrap; gap: 1rem; justify-content: center; margin-block-start: 2.25rem; }
+.boton-secundario-portal--sobre-morado { border-color: rgb(255 255 255 / 55%); color: white; }
+.boton-secundario-portal--sobre-morado:hover { background: rgb(255 255 255 / 12%); }
+
+.inicio-secciones { inline-size: min(100%, 64rem); margin-inline: auto; padding: clamp(3rem, 7vw, 5rem) clamp(1.25rem, 4vw, 3rem); }
+.inicio-secciones .rotulo { color: var(--simus-morado-claro); }
+.inicio-secciones h2 { font-family: var(--simus-fuente-titulos); font-size: clamp(1.75rem, 3.5vw, 2.35rem); letter-spacing: -.03em; margin: 0; }
+.tarjetas-seccion { display: grid; gap: 1rem; grid-template-columns: repeat(auto-fill, minmax(min(100%, 15rem), 1fr)); list-style: none; margin: 2rem 0 0; padding: 0; }
+.tarjeta-seccion { align-items: center; background: var(--simus-superficie-suave); border: 1px solid var(--simus-borde); border-radius: .8rem; color: var(--simus-tinta); display: flex; gap: .5rem 1rem; font-weight: 700; justify-content: space-between; min-block-size: 4rem; padding: 1rem 1.25rem; text-decoration: none; }
+.tarjeta-seccion:hover { border-color: var(--simus-morado-claro); }
+.tarjeta-seccion--pendiente { color: var(--simus-texto-secundario); }
+.tarjeta-seccion__etiqueta { min-inline-size: 0; }
+.tarjeta-seccion__estado { background: white; border-radius: .35rem; color: var(--simus-texto-secundario); flex-shrink: 0; font-size: .7rem; font-weight: 700; padding: .2rem .5rem; text-transform: uppercase; }

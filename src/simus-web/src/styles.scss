@@ -21,3 +21,19 @@
 html { background: var(--simus-hueso); font-family: var(--simus-fuente-texto); }
 body { margin: 0; min-inline-size: 20rem; }
 button, input { font: inherit; }
+
+/* Botones compartidos del portal público: usados por varios componentes con
+   encapsulación de vista propia, por eso viven en el estilo global en vez de
+   duplicarse en cada uno. */
+.boton-principal-portal, .boton-secundario-portal {
+  border-radius: .55rem;
+  display: grid;
+  font-weight: 750;
+  min-block-size: 2.75rem;
+  padding-inline: 1.25rem;
+  place-items: center;
+  text-align: center;
+  text-decoration: none;
+}
+.boton-principal-portal { background: var(--simus-verde); color: var(--simus-tinta); }
+.boton-secundario-portal { background: transparent; border: 1px solid var(--simus-morado); color: var(--simus-morado); }

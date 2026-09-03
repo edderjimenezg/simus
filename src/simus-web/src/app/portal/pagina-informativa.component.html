@@ -1,0 +1,8 @@
+<article class="pagina-informativa">
+  @if (rotulo()) { <p class="rotulo">{{ rotulo() }}</p> }
+  <h1>{{ titulo() }}</h1>
+  @if (introduccion()) { <p class="pagina-informativa__introduccion">{{ introduccion() }}</p> }
+  <div class="pagina-informativa__cuerpo">
+    <ng-content />
+  </div>
+</article>

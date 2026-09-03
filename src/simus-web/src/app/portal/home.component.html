@@ -1,0 +1,28 @@
+<section class="inicio-hero">
+  <div class="inicio-hero__halo inicio-hero__halo--superior" aria-hidden="true"></div>
+  <div class="inicio-hero__halo inicio-hero__halo--inferior" aria-hidden="true"></div>
+  <div class="inicio-hero__contenido">
+    <p class="rotulo">Ecosistema musical</p>
+    <h1>SIMUS, el sistema de información musical</h1>
+    <p class="inicio-hero__introduccion">Una plataforma del sector cultural para organizar, revisar y publicar información musical.</p>
+    <div class="inicio-hero__acciones">
+      <a class="boton-principal-portal" routerLink="/registro">Registra tu organización</a>
+      <a class="boton-secundario-portal boton-secundario-portal--sobre-morado" routerLink="/institucional">Conoce SIMUS</a>
+    </div>
+  </div>
+</section>
+
+<section class="inicio-secciones" aria-labelledby="titulo-secciones">
+  <p class="rotulo">Explora SIMUS</p>
+  <h2 id="titulo-secciones">Recorre el ecosistema musical</h2>
+  <ul class="tarjetas-seccion">
+    @for (seccion of secciones; track seccion.ruta) {
+      <li>
+        <a [routerLink]="seccion.ruta" class="tarjeta-seccion" [class.tarjeta-seccion--pendiente]="!seccion.disponible">
+          <span class="tarjeta-seccion__etiqueta">{{ seccion.etiqueta }}</span>
+          @if (!seccion.disponible) { <span class="tarjeta-seccion__estado">Próximamente</span> }
+        </a>
+      </li>
+    }
+  </ul>
+</section>
