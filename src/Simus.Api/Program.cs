@@ -183,7 +183,7 @@ app.MapGet("/api/mi-panel/contexto", async (HttpContext contexto, IConfiguration
         var conexionAbierta = conexion!;
         const string consulta = """
             SELECT p.PrimerNombre,p.PrimerApellido,p.CorreoNormalizado,p.Telefono,
-                   o.Id,o.Nombre,o.NumeroIdentificacion,o.Estado,o.CodigoDepartamento,d.Nombre,o.CodigoMunicipio,m.Nombre,o.FechaActualizacion
+                   o.Id,o.Nombre,o.NumeroIdentificacion,o.EstadoRegistro,o.CodigoDepartamento,d.Nombre,o.CodigoMunicipio,m.Nombre,o.FechaActualizacion
             FROM identidad.Personas p
             INNER JOIN organizaciones.Administradores a ON a.IdPersona=p.Id AND a.FechaRetiro IS NULL
             INNER JOIN organizaciones.Organizaciones o ON o.Id=a.IdOrganizacion
@@ -283,18 +283,18 @@ app.MapGet("/api/mi-panel/festivales", async (HttpContext contexto, IConfigurati
     {
         var conexionAbierta = conexion!;
         const string consulta = """
-            SELECT f.Id,p.Id,p.Nombre,p.EstadoEditorial,p.Descripcion,p.CodigoDepartamento,d.Nombre,p.CodigoMunicipio,m.Nombre,p.FechaActualizacion,
+            SELECT f.Id,p.Id,p.Nombre,p.EstadoRevision,p.Descripcion,p.CodigoDepartamento,d.Nombre,p.CodigoMunicipio,m.Nombre,p.FechaActualizacion,
                    o.Id,o.Nombre
             FROM festivales.Festivales f
             INNER JOIN organizaciones.Administradores a ON a.IdOrganizacion=f.IdOrganizacionAdministradora AND a.FechaRetiro IS NULL
             INNER JOIN organizaciones.Organizaciones o ON o.Id=f.IdOrganizacionAdministradora
             CROSS APPLY (
-                SELECT TOP 1 Id,Nombre,EstadoEditorial,Descripcion,CodigoDepartamento,CodigoMunicipio,FechaActualizacion
+                SELECT TOP 1 Id,Nombre,EstadoRevision,Descripcion,CodigoDepartamento,CodigoMunicipio,FechaActualizacion
                 FROM festivales.Perfiles WHERE IdFestival=f.Id ORDER BY NumeroVersion DESC
             ) p
             INNER JOIN territorio.Departamentos d ON d.Codigo=p.CodigoDepartamento
             INNER JOIN territorio.Municipios m ON m.Codigo=p.CodigoMunicipio AND m.CodigoDepartamento=p.CodigoDepartamento
-            WHERE a.IdPersona=@persona AND f.EstadoIdentidad=N'activa'
+            WHERE a.IdPersona=@persona AND f.EstadoRegistro=N'registro_activo'
             ORDER BY p.FechaActualizacion DESC,p.Nombre;
             """;
         await using var comando = new SqlCommand(consulta, conexionAbierta);
@@ -332,10 +332,10 @@ app.MapPost("/api/mi-panel/festivales", async (SolicitudCrearFestival solicitud,
         var idPerfil = Guid.NewGuid();
         await using var transaccion = await conexionAbierta.BeginTransactionAsync(cancelacion);
         const string insertar = """
-            INSERT INTO festivales.Festivales (Id,IdOrganizacionAdministradora,EstadoIdentidad,FechaCreacion,FechaActualizacion)
-            VALUES (@festival,@organizacion,N'activa',SYSUTCDATETIME(),SYSUTCDATETIME());
-            INSERT INTO festivales.Perfiles (Id,IdFestival,NumeroVersion,EstadoEditorial,Nombre,Descripcion,CodigoDepartamento,CodigoMunicipio,IdPersonaCreadora,FechaCreacion,FechaActualizacion)
-            VALUES (@perfil,@festival,1,N'borrador',@nombre,@descripcion,@departamento,@municipio,@persona,SYSUTCDATETIME(),SYSUTCDATETIME());
+            INSERT INTO festivales.Festivales (Id,IdOrganizacionAdministradora,EstadoRegistro,FechaCreacion,FechaActualizacion)
+            VALUES (@festival,@organizacion,N'registro_activo',SYSUTCDATETIME(),SYSUTCDATETIME());
+            INSERT INTO festivales.Perfiles (Id,IdFestival,NumeroVersion,EstadoRevision,Nombre,Descripcion,CodigoDepartamento,CodigoMunicipio,IdPersonaCreadora,FechaCreacion,FechaActualizacion)
+            VALUES (@perfil,@festival,1,N'revision_borrador',@nombre,@descripcion,@departamento,@municipio,@persona,SYSUTCDATETIME(),SYSUTCDATETIME());
             """;
         await using var comando = new SqlCommand(insertar, conexionAbierta, (SqlTransaction)transaccion);
         comando.Parameters.AddWithValue("@festival", idFestival);
@@ -371,7 +371,7 @@ app.MapPatch("/api/mi-panel/festivales/{idFestival:guid}/perfil-borrador", async
         }
         const string actualizar = """
             UPDATE festivales.Perfiles SET Nombre=@nombre,Descripcion=@descripcion,CodigoDepartamento=@departamento,CodigoMunicipio=@municipio,FechaActualizacion=SYSUTCDATETIME()
-            WHERE IdFestival=@festival AND EstadoEditorial=N'borrador' AND NumeroVersion=(SELECT MAX(NumeroVersion) FROM festivales.Perfiles WHERE IdFestival=@festival);
+            WHERE IdFestival=@festival AND EstadoRevision=N'revision_borrador' AND NumeroVersion=(SELECT MAX(NumeroVersion) FROM festivales.Perfiles WHERE IdFestival=@festival);
             UPDATE festivales.Festivales SET FechaActualizacion=SYSUTCDATETIME() WHERE Id=@festival;
             """;
         await using var comando = new SqlCommand(actualizar, conexionAbierta);
@@ -484,8 +484,8 @@ app.MapPost("/api/registro", async (SolicitudRegistroExterno solicitud, HttpCont
             INSERT INTO identidad.Personas (Id,PrimerNombre,SegundoNombre,PrimerApellido,SegundoApellido,CodigoTipoIdentificacion,NumeroIdentificacionNormalizado,CorreoNormalizado,Telefono,HashContrasena,EstadoCuenta,EstadoVerificacionCorreo,FechaCreacion,FechaActualizacion)
             VALUES (@persona,@primerNombre,@segundoNombre,@primerApellido,@segundoApellido,@tipo,@numero,@correo,@telefono,@hash,N'activa',N'no_configurada',SYSUTCDATETIME(),SYSUTCDATETIME());
             INSERT INTO identidad.PersonasRoles (IdPersona,CodigoRol,FechaAsignacion) VALUES (@persona,N'externo',SYSUTCDATETIME());
-            INSERT INTO organizaciones.Organizaciones (Id,Nombre,NumeroIdentificacion,CorreoContacto,CodigoDepartamento,CodigoMunicipio,Estado,FechaCreacion,FechaActualizacion)
-            VALUES (@organizacion,@nombreOrganizacion,@numeroOrganizacion,NULL,@departamento,@municipio,N'activa',SYSUTCDATETIME(),SYSUTCDATETIME());
+            INSERT INTO organizaciones.Organizaciones (Id,Nombre,NumeroIdentificacion,CorreoContacto,CodigoDepartamento,CodigoMunicipio,EstadoRegistro,FechaCreacion,FechaActualizacion)
+            VALUES (@organizacion,@nombreOrganizacion,@numeroOrganizacion,NULL,@departamento,@municipio,N'registro_activo',SYSUTCDATETIME(),SYSUTCDATETIME());
             INSERT INTO organizaciones.Administradores (IdOrganizacion,IdPersona,FechaAsignacion) VALUES (@organizacion,@persona,SYSUTCDATETIME());
             """;
         await using var comando = new SqlCommand(insertar, conexion, (SqlTransaction)transaccion);
@@ -568,7 +568,7 @@ static async Task<bool> PuedeAdministrarOrganizacionAsync(SqlConnection conexion
     const string consulta = """
         SELECT COUNT(*) FROM organizaciones.Administradores a
         INNER JOIN organizaciones.Organizaciones o ON o.Id=a.IdOrganizacion
-        WHERE a.IdPersona=@persona AND a.IdOrganizacion=@organizacion AND a.FechaRetiro IS NULL AND o.Estado=N'activa';
+        WHERE a.IdPersona=@persona AND a.IdOrganizacion=@organizacion AND a.FechaRetiro IS NULL AND o.EstadoRegistro=N'registro_activo';
         """;
     await using var comando = new SqlCommand(consulta, conexion);
     comando.Parameters.AddWithValue("@persona", idPersona);
@@ -581,7 +581,7 @@ static async Task<bool> PuedeAdministrarFestivalAsync(SqlConnection conexion, Gu
     const string consulta = """
         SELECT COUNT(*) FROM festivales.Festivales f
         INNER JOIN organizaciones.Administradores a ON a.IdOrganizacion=f.IdOrganizacionAdministradora AND a.FechaRetiro IS NULL
-        WHERE f.Id=@festival AND f.EstadoIdentidad=N'activa' AND a.IdPersona=@persona;
+        WHERE f.Id=@festival AND f.EstadoRegistro=N'registro_activo' AND a.IdPersona=@persona;
         """;
     await using var comando = new SqlCommand(consulta, conexion);
     comando.Parameters.AddWithValue("@persona", idPersona);
@@ -685,7 +685,7 @@ public sealed record OrganizacionPanel(Guid Id, string Nombre, string? NumeroIde
 public sealed record ContextoPanel(PersonaPanel Persona, IReadOnlyList<OrganizacionPanel> Organizaciones);
 public sealed record AdministradorOrganizacionPanel(Guid IdPersona, string Nombre, string Correo, string? Telefono, DateTime FechaAsignacion);
 public sealed record ActualizacionOrganizacionPanel(string Nombre, string? NumeroIdentificacion, string CodigoDepartamento, string CodigoMunicipio);
-public sealed record FestivalPanel(Guid IdFestival, Guid IdPerfil, string Nombre, string EstadoEditorial, string? Descripcion, string CodigoDepartamento, string Departamento, string CodigoMunicipio, string Municipio, DateTime FechaActualizacion, Guid IdOrganizacion, string Organizacion);
+public sealed record FestivalPanel(Guid IdFestival, Guid IdPerfil, string Nombre, string EstadoRevision, string? Descripcion, string CodigoDepartamento, string Departamento, string CodigoMunicipio, string Municipio, DateTime FechaActualizacion, Guid IdOrganizacion, string Organizacion);
 public sealed record SolicitudCrearFestival(Guid IdOrganizacion, string Nombre, string? Descripcion, string CodigoDepartamento, string CodigoMunicipio);
 public sealed record SolicitudActualizarFestival(string Nombre, string? Descripcion, string CodigoDepartamento, string CodigoMunicipio);
 public sealed class OpcionesSesion

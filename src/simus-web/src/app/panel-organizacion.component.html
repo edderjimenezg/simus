@@ -69,7 +69,7 @@
               </form>
             }
             @if (cargandoFestivales()) { <p class="cargando-lista">Cargando Festivales…</p> }
-            @else if (festivales().length) { <ul class="lista-festivales">@for (festival of festivales(); track festival.idFestival) { <li><div><strong>{{ festival.nombre }}</strong><span>{{ festival.organizacion }} · {{ festival.municipio }}, {{ festival.departamento }}</span><small>{{ festival.estadoEditorial === 'borrador' ? 'Borrador privado' : festival.estadoEditorial }} · Actualizado {{ fecha(festival.fechaActualizacion) }}</small></div>@if (festival.estadoEditorial === 'borrador') { <button type="button" class="boton-secundario" (click)="continuarFestival(festival)">Continuar borrador</button> }</li> }</ul> }
+            @else if (festivales().length) { <ul class="lista-festivales">@for (festival of festivales(); track festival.idFestival) { <li><div><strong>{{ festival.nombre }}</strong><span>{{ festival.organizacion }} · {{ festival.municipio }}, {{ festival.departamento }}</span><small>{{ festival.estadoRevision === 'revision_borrador' ? 'Borrador privado' : festival.estadoRevision }} · Actualizado {{ fecha(festival.fechaActualizacion) }}</small></div>@if (festival.estadoRevision === 'revision_borrador') { <button type="button" class="boton-secundario" (click)="continuarFestival(festival)">Continuar borrador</button> }</li> }</ul> }
           </section>
         }
 

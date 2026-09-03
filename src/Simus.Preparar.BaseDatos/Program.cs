@@ -5,7 +5,8 @@ using Microsoft.Data.SqlClient;
 var versionesEsquema = new[]
 {
     new VersionEsquema("001_identidad", "001_identidad.sql"),
-    new VersionEsquema("002_festivales", "002_festivales.sql")
+    new VersionEsquema("002_festivales", "002_festivales.sql"),
+    new VersionEsquema("003_estados_transversales", "003_estados_transversales.sql")
 };
 var connectionArgument = args.SkipWhile(value => value != "--conexion").Skip(1).FirstOrDefault();
 if (string.IsNullOrWhiteSpace(connectionArgument))

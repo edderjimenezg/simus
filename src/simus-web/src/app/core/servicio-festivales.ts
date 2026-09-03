@@ -7,7 +7,7 @@ export interface FestivalPanel {
   idFestival: string;
   idPerfil: string;
   nombre: string;
-  estadoEditorial: string;
+  estadoRevision: string;
   descripcion: string | null;
   codigoDepartamento: string;
   departamento: string;
