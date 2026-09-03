@@ -35,5 +35,5 @@ if [[ "$preparado" != "1" ]]; then
   exit 1
 fi
 
-echo "Ejecutando pruebas de integración contra $BASE_PRUEBAS…"
+echo "Ejecutando pruebas de integración contra ${BASE_PRUEBAS}…"
 ConnectionStrings__Simus="$CADENA_PRUEBAS" dotnet test tests/Simus.Api.Tests/Simus.Api.Tests.csproj

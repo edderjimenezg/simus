@@ -48,3 +48,17 @@ puerto_en_uso() {
   local puerto="$1"
   lsof -nP -iTCP:"$puerto" -sTCP:LISTEN >/dev/null 2>&1
 }
+
+esperar_http() {
+  local url="$1"
+  local nombre="$2"
+  local intentos="${3:-30}"
+  for _ in $(seq 1 "$intentos"); do
+    if curl -fsS "$url" >/dev/null 2>&1; then
+      return 0
+    fi
+    sleep 1
+  done
+  echo "$nombre no quedó disponible en $url. Revisa $RUTA_EJECUCION." >&2
+  return 1
+}

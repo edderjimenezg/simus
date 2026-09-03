@@ -65,6 +65,15 @@ echo "Iniciando frontend…"
 nohup npm --prefix src/simus-web run start:local >"$RUTA_EJECUCION/web.log" 2>&1 &
 echo $! >"$RUTA_EJECUCION/web.pid"
 
+if ! esperar_http "http://localhost:5050/api/salud" "La API"; then
+  "$RAIZ_SCRIPT/dev-down.sh"
+  exit 1
+fi
+if ! esperar_http "http://localhost:4200/" "El frontend"; then
+  "$RAIZ_SCRIPT/dev-down.sh"
+  exit 1
+fi
+
 echo "Entorno iniciado."
 echo "Portal: http://localhost:4200"
 echo "API:    http://localhost:5050/api/salud"
