@@ -13,6 +13,20 @@ interface ErrorApi {
   campos?: Record<string, string[]>;
 }
 
+const PASOS_REGISTRO = [
+  { numero: 1, etiqueta: 'Datos personales' },
+  { numero: 2, etiqueta: 'Organización y territorio' },
+  { numero: 3, etiqueta: 'Consentimientos' }
+];
+
+const PASO_POR_CAMPO: Record<string, number> = {
+  primerNombre: 1, segundoNombre: 1, primerApellido: 1, segundoApellido: 1,
+  codigoTipoIdentificacion: 1, numeroIdentificacion: 1, correo: 1, telefono: 1,
+  contrasena: 1, confirmarContrasena: 1,
+  nombreOrganizacion: 2, numeroIdentificacionOrganizacion: 2, codigoDepartamento: 2, codigoMunicipio: 2,
+  consentimientos: 3
+};
+
 @Component({
   selector: 'app-acceso-page',
   imports: [FormsModule],
@@ -36,6 +50,8 @@ export class AccesoPageComponent {
   protected readonly departamentos = signal<TerritorioRegistro[]>([]);
   protected readonly municipios = signal<TerritorioRegistro[]>([]);
   protected readonly aceptaciones = signal<Record<string, boolean>>({});
+  protected readonly pasosRegistro = PASOS_REGISTRO;
+  protected readonly pasoRegistro = signal(1);
   protected readonly registro = {
     primerNombre: '', segundoNombre: '', primerApellido: '', segundoApellido: '',
     codigoTipoIdentificacion: '', numeroIdentificacion: '', correo: '', telefono: '',
@@ -51,7 +67,20 @@ export class AccesoPageComponent {
     this.vista.set(vista);
     this.errorGeneral.set(null);
     this.erroresCampos.set({});
+    this.pasoRegistro.set(1);
     if (vista === 'registro' && this.disponibilidadRegistro()?.territorioDisponible) this.cargarDepartamentos();
+  }
+
+  protected irAPaso(numero: number): void {
+    this.pasoRegistro.set(numero);
+  }
+
+  protected pasoSiguiente(): void {
+    this.pasoRegistro.update(paso => Math.min(3, paso + 1));
+  }
+
+  protected pasoAnterior(): void {
+    this.pasoRegistro.update(paso => Math.max(1, paso - 1));
   }
 
   protected consultarDisponibilidadRegistro(): void {
@@ -135,7 +164,7 @@ export class AccesoPageComponent {
     if (this.registro.contrasena !== this.registro.confirmarContrasena) errores['confirmarContrasena'] = 'Las contraseñas no coinciden.';
     const codigosAceptados = disponibilidad.documentos.filter(documento => this.aceptaciones()[documento.codigo]).map(documento => documento.codigo);
     if (codigosAceptados.length !== disponibilidad.documentos.length) errores['consentimientos'] = 'Debes aceptar los documentos vigentes para continuar.';
-    if (Object.keys(errores).length) { this.erroresCampos.set(errores); this.enfocarPrimerError(errores); return; }
+    if (Object.keys(errores).length) { this.erroresCampos.set(errores); this.enfocarPrimerErrorRegistro(errores); return; }
 
     const solicitud: SolicitudRegistroExterno = {
       primerNombre: this.registro.primerNombre, segundoNombre: this.registro.segundoNombre || undefined,
@@ -187,7 +216,7 @@ export class AccesoPageComponent {
       const errores = Object.fromEntries(Object.entries(campos).map(([campo, mensajes]) => [campo, mensajes[0]]));
       this.erroresCampos.set(errores);
       this.errorGeneral.set(Object.keys(errores).length ? null : (error.error as ErrorApi | null)?.mensaje ?? 'No fue posible completar el registro.');
-      if (Object.keys(errores).length) this.enfocarPrimerError(errores);
+      if (Object.keys(errores).length) this.enfocarPrimerErrorRegistro(errores);
       return;
     }
     this.errorGeneral.set('No fue posible completar el registro. Inténtalo nuevamente.');
@@ -196,5 +225,11 @@ export class AccesoPageComponent {
   private enfocarPrimerError(errores: Record<string, string>): void {
     const campo = Object.keys(errores)[0];
     queueMicrotask(() => document.getElementById(campo)?.focus());
+  }
+
+  private enfocarPrimerErrorRegistro(errores: Record<string, string>): void {
+    const campo = Object.keys(errores)[0];
+    this.pasoRegistro.set(PASO_POR_CAMPO[campo] ?? 1);
+    setTimeout(() => document.getElementById(campo)?.focus(), 0);
   }
 }
