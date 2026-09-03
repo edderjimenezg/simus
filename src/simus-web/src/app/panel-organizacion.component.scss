@@ -37,10 +37,10 @@ h2 { font-size: 1.35rem; letter-spacing: -.02em; }
 .vacio p, .nota-pendiente, .seguridad p { color: var(--simus-texto-secundario); line-height: 1.55; margin: 0; max-inline-size: 44rem; }
 .nota-pendiente { border-block-start: 1px solid var(--simus-borde); font-size: .85rem; margin-block-start: 2rem; padding-block-start: 1rem; }
 .formulario { display: grid; gap: 1.1rem; margin-block-start: 2.5rem; }
-.campo { display: grid; gap: .45rem; }
+.campo { display: grid; gap: .45rem; min-inline-size: 0; }
 .campo label { font-size: .9rem; font-weight: 750; }
 .campo label span { color: var(--simus-texto-secundario); font-size: .75rem; font-weight: 500; }
-input, select, textarea { background: white; border: 1px solid var(--simus-borde-fuerte); border-radius: .5rem; color: var(--simus-tinta); font: inherit; min-block-size: 3rem; padding: .85rem; }
+input, select, textarea { background: white; border: 1px solid var(--simus-borde-fuerte); border-radius: .5rem; color: var(--simus-tinta); font: inherit; inline-size: 100%; min-block-size: 3rem; min-inline-size: 0; padding: .85rem; }
 textarea { min-block-size: 8rem; resize: vertical; }
 input[aria-invalid='true'], select[aria-invalid='true'], textarea[aria-invalid='true'] { border-color: var(--simus-error); }
 .campo__error { color: var(--simus-error); font-size: .8rem; font-weight: 650; margin: 0; }

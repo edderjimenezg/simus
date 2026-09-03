@@ -29,12 +29,13 @@ h1 { font-size: clamp(2.45rem, 5.2vw, 4.75rem); letter-spacing: -.045em; line-he
 .formulario__encabezado { margin-block-end: .5rem; }
 .formulario__encabezado h2 { font-size: clamp(1.85rem, 3vw, 2.55rem); letter-spacing: -.035em; line-height: 1.08; }
 .formulario__encabezado > p:not(.rotulo) { color: var(--simus-texto-secundario); line-height: 1.55; margin: .75rem 0 0; }
-.campo { display: grid; gap: .5rem; }
+.campo { display: grid; gap: .5rem; min-inline-size: 0; }
 .campo label { font-size: .9375rem; font-weight: 700; }
 .campo__encabezado { align-items: baseline; display: flex; flex-wrap: wrap; gap: .4rem 1rem; justify-content: space-between; }
 .campo__encabezado span { color: var(--simus-texto-secundario); font-size: .75rem; }
+input, select { inline-size: 100%; min-inline-size: 0; }
 input { background: white; border: 1px solid var(--simus-borde-fuerte); border-radius: .55rem; color: var(--simus-tinta); font: inherit; min-block-size: 3rem; padding-inline: .875rem; transition: border-color 160ms ease, box-shadow 160ms ease; }
-select { appearance: auto; background: white; border: 1px solid var(--simus-borde-fuerte); border-radius: .55rem; color: var(--simus-tinta); font: inherit; min-block-size: 3rem; padding-inline: .875rem; }
+select { appearance: auto; background: white; border: 1px solid var(--simus-borde-fuerte); border-radius: .55rem; color: var(--simus-tinta); font: inherit; min-block-size: 3rem; padding-inline: .875rem; text-overflow: ellipsis; }
 input:hover { border-color: var(--simus-morado-claro); }
 input:focus { border-color: var(--simus-morado); box-shadow: 0 0 0 3px var(--simus-anillo-foco); outline: 0; }
 input[aria-invalid="true"] { border-color: var(--simus-error); }
@@ -55,7 +56,7 @@ select:focus { border-color: var(--simus-morado); box-shadow: 0 0 0 3px var(--si
 .formulario--registro { gap: 1.75rem; }
 .formulario--registro fieldset { border: 0; border-block-start: 1px solid var(--simus-borde); display: grid; gap: 1rem; margin: 0; min-inline-size: 0; padding: 1.25rem 0 0; }
 .formulario--registro legend { font-family: var(--simus-fuente-titulos); font-size: 1.25rem; font-weight: 700; letter-spacing: -.02em; padding: 0 .5rem 0 0; }
-.campos-dos { display: grid; gap: 1rem; }
+.campos-dos { display: grid; gap: 1rem; min-inline-size: 0; }
 .campo label span, .campo small { color: var(--simus-texto-secundario); font-size: .75rem; font-weight: 500; }
 .consentimientos label { align-items: start; display: flex; gap: .7rem; line-height: 1.45; }
 .consentimientos input[type="checkbox"] { accent-color: var(--simus-morado); block-size: 1.25rem; flex: 0 0 1.25rem; min-block-size: 1.25rem; margin-block-start: .15rem; padding: 0; }
