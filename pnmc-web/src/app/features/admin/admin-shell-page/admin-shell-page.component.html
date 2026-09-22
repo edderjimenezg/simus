@@ -1,0 +1,918 @@
+@if (sessionState() === 'checking') {
+  <section class="grid min-h-screen place-items-center bg-[#10152a]">
+    <div class="text-center text-white"><svg lucideShieldCheck class="mx-auto mb-3 h-7 w-7 text-[#58e7a0]"></svg><p class="text-xs font-bold uppercase tracking-[.18em] text-white/60">Abriendo gestión administrativa</p></div>
+  </section>
+} @else if (!isAuthenticated()) {
+  <app-admin-login (loginSuccess)="handleLogin($event)"></app-admin-login>
+} @else if (faltaElPrimerIngreso()) {
+  <!--
+    ANTES QUE NADA, EL RECORRIDO DE BIENVENIDA. Una cuenta administrativa se ENTREGA con correo y
+    contraseña por omisión: mientras no la cambie, esa credencial la conocen dos personas, y
+    mientras no diga quién es, no se puede responder quién hizo qué.
+
+    VA ANTES QUE CUALQUIER OTRA RAMA porque no hay nada más que hacer hasta terminarlo, y el
+    servidor lo aplica igual: sin terminar, cada módulo responde 403.
+  -->
+  <app-admin-primer-ingreso
+    [debeCambiarContrasena]="session()?.debeCambiarContrasena === true"
+    [correo]="session()?.email || ''"
+    (terminado)="primerIngresoTerminado()"></app-admin-primer-ingreso>
+} @else if (isCollaboratorRole) {
+  <!--
+    EL LADO SEGURO DEL ERROR, Y NADA MAS.
+
+    Aqui vivia `app-external-user-dashboard`: 1633 lineas que repintaban, dentro de la consola
+    institucional, el panel que las organizaciones ya tienen en `/gestion`. Era la ultima de las
+    «dos puertas al mismo sitio» que este proyecto viene cerrando —la otra fue `/colaboradores`,
+    retirada—.
+
+    POR QUE SE PUEDE RETIRAR SIN PERDER NADA: a esta rama no se llega con sesion. El API firma la
+    cookie institucional en tres sitios —entrar, renovar y actualizar el perfil— y los tres exigen
+    `Permisos.RolesInternos` antes de firmarla; `PuertaInstitucionalTests` lo fija. Es decir: si
+    hay sesion, es interna por construccion. Esta rama solo se alcanza si la lectura de la sesion
+    devuelve una lista de roles vacia, que es un fallo, no un perfil.
+
+    LA BIFURCACION SE QUEDA porque su valor nunca fue el panel: era caer del lado que no abre la
+    consola entera cuando algo va mal. Lo que cambia es el destino —una pantalla que dice la
+    verdad en vez de una consola paralela que hay que mantener.
+  -->
+  <section class="grid min-h-screen place-items-center bg-slate-50 px-4">
+    <div class="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-8 text-center shadow-sm">
+      <h1 class="font-alternate text-lg font-black uppercase tracking-wide text-slate-900">
+        Esta cuenta no abre la gestión administrativa
+      </h1>
+      <p class="mt-3 text-sm leading-relaxed text-slate-600">
+        No pudimos confirmar un rol del Ministerio para su sesión. Si administra una organización
+        del ecosistema, su espacio es el panel de gestión externa.
+      </p>
+      <div class="mt-6 flex flex-wrap justify-center gap-2">
+        <a
+          routerLink="/gestion"
+          class="rounded-xl bg-morado px-4 py-2.5 text-xs font-black uppercase tracking-wider text-white transition hover:bg-morado-claro"
+        >Ir a gestión externa</a>
+        <button
+          type="button"
+          (click)="handleLogout()"
+          class="rounded-xl border border-slate-200 px-4 py-2.5 text-xs font-black uppercase tracking-wider text-slate-600 transition hover:border-slate-300"
+        >Cerrar sesión</button>
+      </div>
+    </div>
+  </section>
+} @else {
+  <div class="admin-foundation">
+    <header class="foundation-header">
+      <button type="button" class="foundation-brand" (click)="irASeccion('monitor')" aria-label="Ir al Resumen del espacio de gestión administrativa">
+        <img src="/assets/branding/pnmc-blanco.png" class="brand-logo" alt="Plan Nacional de Música" />
+        <!--
+          LA JERARQUIA ESTABA INVERTIDA. Se leía «Espacio de Gestión Administrativa» en grande y
+          «SIMUS» debajo en pequeño, pero SIMUS es el producto y el espacio es una parte de él: el
+          nombre del sistema quedaba como nota al pie de su propia sección. Y cuatro palabras en
+          versalita ocupaban el ancho de la izquierda entera para decir dónde estás, que es lo que ya
+          dicen la barra lateral y el título de la pantalla.
+        -->
+        <span><b>SIMUS</b><small>Gestión administrativa</small></span>
+      </button>
+      <!--
+        AQUI VIVIA EL PULSO TECNICO: «API disponible», «Base de datos conectada», «Sesión activa»,
+        los tres permanentemente en la cabecera de todas las pantallas.
+
+        Es telemetría, no trabajo. Ocupaba un tercio del ancho superior para decir, casi siempre,
+        que todo va bien —y cuando algo falla, quien lo resuelve no es el gestor que está revisando
+        una solicitud—. Se traslada a «Salud del sistema», que es donde alguien la busca cuando la
+        necesita y donde ya se muestra con detalle.
+
+        La cabecera queda para lo que sí es de quien la mira: quién es, sus avisos y la salida.
+      -->
+      <!--
+        IR A UNA SECCION POR SU NOMBRE. La consola declara quince secciones en cinco familias, y
+        en pantalla pequeña la barra lateral se vuelve una tira de quince pestañas que hay que
+        recorrer de lado. Busca SECCIONES y el campo lo dice: un buscador de registros necesitaria
+        una consulta transversal que hoy no existe en el API, y prometerla aqui seria una caja que
+        parece encontrarlo todo y encuentra una parte.
+      -->
+      <div class="header-search">
+        <label class="sr-only" for="buscador-de-seccion">Buscar una sección de la consola</label>
+        <!--
+          CON SU ICONO: un campo suelto sobre morado, sin marca alguna, no se lee como buscador hasta
+          que se mira el texto de dentro. Y deja de flotar centrado: busca SECCIONES, así que
+          pertenece a la navegación y va junto a la marca, no en mitad de la cabecera.
+        -->
+        <svg lucideSearch class="header-search__icono" [size]="15" aria-hidden="true"></svg>
+        <input
+          id="buscador-de-seccion"
+          type="search"
+          [ngModel]="busquedaDeSeccion()"
+          (ngModelChange)="busquedaDeSeccion.set($event)"
+          (keydown.escape)="busquedaDeSeccion.set('')"
+          placeholder="Buscar una sección…"
+          autocomplete="off"
+          role="combobox"
+          aria-controls="secciones-encontradas"
+          [attr.aria-expanded]="seccionesEncontradas().length > 0"
+        />
+        <!--
+          LA «X» PARA LIMPIAR. Este campo ya filtraba mientras se escribe y Escape ya lo vaciaba,
+          pero Escape no se ve: quien no lo sabe tiene que seleccionar el texto y borrarlo. Es la
+          misma pieza que lleva `app-buscador-de-lista`, escrita aquí porque este campo NO es un
+          filtro de lista sino un `combobox` con su listado de secciones, y cambiarlo por el
+          componente compartido le quitaría esa semántica.
+        -->
+        @if (busquedaDeSeccion()) {
+          <button type="button" class="header-search__limpiar"
+            aria-label="Borrar la búsqueda de secciones" title="Borrar la búsqueda de secciones"
+            (click)="busquedaDeSeccion.set('')">
+            <svg lucideX [size]="14" aria-hidden="true"></svg>
+          </button>
+        }
+        @if (busquedaDeSeccion().trim().length >= 2) {
+          <div class="header-search__results" id="secciones-encontradas" role="listbox">
+            @for (seccion of seccionesEncontradas(); track seccion.id) {
+              <button type="button" role="option" [attr.aria-selected]="false" (click)="irASeccionEncontrada(seccion.id)">
+                <b>{{ seccion.label }}</b><small>{{ seccion.familia }}</small>
+              </button>
+            } @empty {
+              <p>Ninguna sección se llama así.</p>
+            }
+          </div>
+        }
+      </div>
+
+      <div class="header-user">
+        <!--
+          DOS GRUPOS Y NO CINCO ELEMENTOS SUELTOS. Enlace al portal, avisos, iniciales, nombre y
+          salida iban en fila con medio rem entre ellos y se leían como una sola masa; además «Salir»
+          quedaba pegado al nombre, que es la peor vecindad posible para una acción que cierra la
+          sesión. Ahora: utilidades a la izquierda, identidad a la derecha, separadas por un filete.
+        -->
+        <!--
+          «VISITAR SITIO» YA NO VIVE AQUI. Era un enlace de texto con icono metido entre un botón
+          circular con borde y una píldora con borde: tres tratamientos distintos de control en una
+          franja de setenta píxeles, que es lo que hacía que la cabecera se viera improvisada. Y
+          además no es una utilidad de la barra: es un DESTINO, y los destinos viven en la
+          navegación. Se ha movido al pie de la barra lateral.
+        -->
+        <div class="header-utiles">
+          <button type="button" class="notification-button" (click)="adminNotificationsOpen.set(!adminNotificationsOpen())"
+            [attr.aria-label]="unreadNotifications() > 0 ? unreadNotifications() + ' avisos sin leer' : 'Avisos'"
+            [attr.aria-expanded]="adminNotificationsOpen()">
+            <svg lucideBell [size]="16" aria-hidden="true"></svg>
+            @if (unreadNotifications() > 0) { <em>{{ unreadNotifications() > 9 ? '9+' : unreadNotifications() }}</em> }
+          </button>
+        </div>
+
+        <!--
+          UN SOLO CONTROL PARA LA CUENTA. Antes eran tres elementos sueltos en fila —iniciales,
+          nombre con su rol, y una salida siempre visible— y no había ningún sitio donde gestionar
+          la propia cuenta. Ahora el control dice quién eres y despliega lo que puedes hacer contigo
+          mismo. Cerrar la sesión deja de estar a un clic de distancia por accidente.
+        -->
+        <div class="header-cuenta">
+          <button type="button" class="header-cuenta__disparador"
+            (click)="abrirMenuDeCuenta()"
+            [attr.aria-expanded]="menuDeCuentaAbierto()"
+            aria-haspopup="menu"
+            [attr.aria-label]="'Cuenta de ' + (session()?.fullName || 'la sesión')">
+            <span class="user-initials" aria-hidden="true">{{ inicialesDe(session()?.fullName) }}</span>
+            <span class="header-identidad__quien">
+              <b>{{ session()?.fullName }}</b><small>{{ condicionInstitucional(roleId) }}</small>
+            </span>
+            <svg lucideChevronDown [size]="15" aria-hidden="true"></svg>
+          </button>
+
+          @if (menuDeCuentaAbierto()) {
+            <!-- El velo cierra al pulsar fuera; sin él habría que acertar en el propio botón. -->
+            <div class="header-cuenta__velo" (click)="cerrarMenuDeCuenta()" aria-hidden="true"></div>
+            <!--
+              SIN BLOQUEAR EL FONDO: es un menú, no un diálogo. El bloqueo se hace con
+              `overflow: hidden` en el `body`, y eso deja a la cabecera `sticky` sin contenedor al
+              que pegarse: con la página desplazada, abrir este menú la mandaba fuera de la pantalla
+              y había que subir del todo para recuperarla.
+            -->
+            <div class="header-cuenta__menu" role="menu" appDialogo [dialogoBloqueaElFondo]="false" (cerrar)="cerrarMenuDeCuenta()">
+              <p class="header-cuenta__quien">
+                <b>{{ session()?.fullName }}</b>
+                <small>{{ session()?.email }}</small>
+                <small>{{ condicionInstitucional(roleId) }}</small>
+              </p>
+              <button type="button" role="menuitem" (click)="abrirPerfil()">
+                <svg lucideUserCog [size]="16" aria-hidden="true"></svg>
+                <span>Mi perfil y contraseña</span>
+              </button>
+              <button type="button" role="menuitem" class="es-salida" (click)="handleLogout()">
+                <svg lucideLogOut [size]="16" aria-hidden="true"></svg>
+                <span>Cerrar sesión</span>
+              </button>
+            </div>
+          }
+        </div>
+      </div>
+    </header>
+
+    <!--
+      EL BUZON SE CERRABA SOLO PULSANDO OTRA VEZ LA CAMPANITA. Había que acertar en el mismo botón
+      de 36 px, Escape no hacía nada, y pulsar en la consola lo dejaba abierto tapando la esquina.
+      El menú de cuenta, a dos centímetros de aquí, ya se cerraba con velo y con Escape: dos
+      desplegables hermanos con dos comportamientos distintos. Ahora es el mismo.
+    -->
+    @if (adminNotificationsOpen()) {
+      <div class="notification-velo" (click)="adminNotificationsOpen.set(false)" aria-hidden="true"></div>
+      <section class="notification-tray" aria-label="Notificaciones"
+        appDialogo [dialogoBloqueaElFondo]="false" (cerrar)="adminNotificationsOpen.set(false)">
+        <div class="notification-tray__heading">
+          <div><b>Notificaciones</b><small>{{ unreadNotifications() ? unreadNotifications() + ' pendientes de lectura' : 'Estás al día' }}</small></div>
+          <div class="notification-tray__actions">
+            @if (readNotifications()) { <button type="button" (click)="clearReadNotifications()">Limpiar leídas</button> }
+            @if (unreadNotifications()) { <button type="button" (click)="markAllNotificationsRead()">Marcar todas</button> }
+          </div>
+        </div>
+        <div class="notification-tray__lista">
+          @for (notification of adminNotifications(); track notification.id) {
+            <button type="button" (click)="openNotification(notification)" [class.is-unread]="!notification.readAt">
+              <span class="notification-tray__status" [class.is-read]="notification.readAt"></span>
+              <span class="notification-tray__copy"><b>{{ notification.title || 'Actividad institucional' }}</b>
+                @if (detalleDeRevisionDeFestival(notification); as detalle) {
+                  <small>La organización <strong>{{ detalle.organizacion }}</strong> envió a revisión para publicación el Festival <strong>{{ detalle.festival }}</strong>.</small>
+                } @else {
+                  <small>{{ notification.body || 'Requiere consulta en Solicitudes.' }}</small>
+                }
+                @if (notification.eventType === 'FestivalRecibidoParaRevision') {
+                  <span class="notification-tray__action">Revisar solicitud<svg lucideChevronRight [size]="13" aria-hidden="true"></svg></span>
+                }
+                <em>{{ notification.createdAt | date: 'd MMM y, HH:mm':'':'es-CO' }}</em>
+              </span>
+            </button>
+          } @empty {
+            <p class="notification-tray__vacio">No hay notificaciones recientes.</p>
+          }
+        </div>
+      </section>
+    }
+
+    <div class="foundation-layout">
+      <!--
+        EL CAJON DE SECCIONES, QUE EXISTIA EN EL `.ts` Y NADIE PINTABA.
+
+        `sidebarAbierto` estaba declarada, la cerraba `irASeccion()` y la cerraba el fin de sesión,
+        pero ningún control la abría: es el mismo defecto que ya apareció con los iconos de la
+        navegación y con `PUT /auth/profile`, código escrito y no enganchado.
+
+        Mientras tanto, por debajo de 800 px la barra se convertía en una tira horizontal de 3 429
+        px para diecisiete destinos: nada quedaba oculto, pero llegar a «Usuarios y roles» eran casi
+        nueve pantallas de arrastre. El disparador devuelve la lista agrupada entera —la misma que
+        en escritorio, con sus títulos de grupo— a un toque, que es lo que pedía el problema real.
+
+        NO ES «ESCONDER DESTINOS DETRAS DE UN CLIC»: en escritorio la lista sigue desplegada y
+        ningún grupo se pliega. Esto solo existe donde no hay columna donde ponerla.
+      -->
+      <button type="button" class="sidebar-disparador"
+        [attr.aria-expanded]="sidebarAbierto()"
+        aria-controls="navegacion-administrativa"
+        (click)="alternarSidebar(!sidebarAbierto())">
+        <span class="sidebar-icono" aria-hidden="true">
+          @if (sidebarAbierto()) { <svg lucideX [size]="17"></svg> } @else { <svg lucideMenu [size]="17"></svg> }
+        </span>
+        <span class="sidebar-disparador__rotulo">Secciones</span>
+        <span class="sidebar-disparador__actual">{{ tituloDeSeccion() }}</span>
+      </button>
+
+      <!-- `tabindex="-1"`: Escape se atiende aquí para que funcione con el foco en cualquier
+           destino de la lista -la pulsación burbujea-, y una región que escucha teclado tiene que
+           poder recibir foco. No entra en el recorrido del tabulador. -->
+      <aside class="foundation-sidebar" id="navegacion-administrativa" tabindex="-1"
+        [class.esta-desplegada]="sidebarAbierto()"
+        (keydown.escape)="alternarSidebar(false)"
+        aria-label="Áreas de gestión administrativa">
+        <!--
+          LA LISTA SE DESPLAZA DENTRO, LA BARRA NO SE MUEVE. Antes las secciones y el enlace al
+          portal eran hijos directos de la barra, que se desplazaba entera; el enlace se quedaba al
+          pie con `position: sticky` y un margen negativo que tapaba el relleno. Funcionaba, pero se
+          notaba: al llegar al final la lista pasaba por debajo del enlace y el bloque entero daba
+          la sensación de correrse. Se detectó:
+          «a veces se corre el bloque completo de la barra de navegación izquierda… se siente poco
+          estable esa sección completa, no se siente fija».
+
+          Con este envoltorio, la barra mide siempre el alto de la ventana menos la cabecera, lo que
+          se desplaza es solo la lista, y el enlace al portal es un hermano suyo que ocupa su sitio
+          al final: estático de verdad, sin `sticky` y sin márgenes negativos.
+        -->
+        <div class="sidebar-secciones">
+        @for (group of visibleNavSections; track group.group) {
+          <section class="sidebar-group" [attr.aria-label]="group.label">
+            <p>{{ group.label }}</p>
+            @for (item of group.items; track item.id) {
+              <button type="button" (click)="irASeccion(item.id)" [class.is-active]="activeSection() === item.id">
+                <!--
+                  LOS ICONOS YA ESTABAN DECLARADOS Y NADIE LOS PINTABA. El modelo de navegación
+                  asignaba uno a cada una de las diecisiete secciones y la barra renderizaba solo el
+                  rótulo: diecisiete líneas de texto seguidas que hay que leer para encontrar una.
+                  Con el icono, la sección se reconoce por forma antes que por lectura.
+
+                  Se resuelven con @switch porque los iconos de este proyecto son componentes de
+                  atributo y no admiten enlace dinámico por nombre. Es el mismo patrón que usa
+                  `indicador-de-estado`.
+                -->
+                <span class="sidebar-icono" aria-hidden="true">
+                  @switch (item.icono) {
+                    @case ('LayoutDashboard') { <svg lucideLayoutDashboard [size]="17"></svg> }
+                    @case ('Inbox') { <svg lucideInbox [size]="17"></svg> }
+                    @case ('Sparkles') { <svg lucideSparkles [size]="17"></svg> }
+                    @case ('Music') { <svg lucideMusic [size]="17"></svg> }
+                    @case ('Store') { <svg lucideStore [size]="17"></svg> }
+                    @case ('Building2') { <svg lucideBuilding2 [size]="17"></svg> }
+                    @case ('BookOpen') { <svg lucideBookOpen [size]="17"></svg> }
+                    @case ('Calendar') { <svg lucideCalendar [size]="17"></svg> }
+                    @case ('Newspaper') { <svg lucideNewspaper [size]="17"></svg> }
+                    @case ('Tags') { <svg lucideTags [size]="17"></svg> }
+                    @case ('Files') { <svg lucideFiles [size]="17"></svg> }
+                    @case ('Globe') { <svg lucideGlobe [size]="17"></svg> }
+                    @case ('Mail') { <svg lucideMail [size]="17"></svg> }
+                    @case ('BarChart3') { <svg lucideBarChart3 [size]="17"></svg> }
+                    @case ('FileText') { <svg lucideFileText [size]="17"></svg> }
+                    @case ('Users') { <svg lucideUsers [size]="17"></svg> }
+                    @case ('Shield') { <svg lucideShield [size]="17"></svg> }
+                  }
+                </span>
+                <span class="sidebar-rotulo">{{ item.label }}</span>
+                <!--
+                  LA INSIGNIA CUENTA LA BANDEJA ENTERA, no solo las revisiones. Decía 9 mientras la
+                  bandeja tenía 12 asuntos esperando: contaba `bandeja.revisiones()` y dejaba fuera
+                  propuestas, ediciones, solicitudes y reclamaciones. Un número junto al nombre de
+                  una sección promete ser lo que hay dentro de esa sección.
+                -->
+                @if (item.id === 'solicitudes' && bandeja.colaCompleta().length > 0) { <em>{{ bandeja.colaCompleta().length }}</em> }
+              </button>
+            }
+          </section>
+        }
+        </div>
+        <!--
+          EL PORTAL PUBLICO, COMO DESTINO Y NO COMO UTILIDAD DE LA CABECERA. Al pie de la navegación
+          y separado del resto: no es una sección de la consola, es salir de ella.
+        -->
+        <a class="sidebar-portal" routerLink="/">
+          <span class="sidebar-icono" aria-hidden="true"><svg lucideExternalLink [size]="17"></svg></span>
+          <span class="sidebar-rotulo">Ver el portal público</span>
+        </a>
+      </aside>
+
+      <!--
+        NO ES UN <main>, Y ES DELIBERADO. El armazón de la aplicación ya declara
+        <main id="contenido-principal">, y un documento solo admite uno. Comprobado el 13 de septiembre
+        de 2026: las 17 secciones de la consola servían DOS, con lo que la navegación por regiones y
+        el enlace «saltar al contenido» dejaban de ser deterministas para un lector de pantalla.
+      -->
+      <!--
+        SOLICITUDES NO VA SOBRE EL GRIS DE LA CONSOLA. Es la única sección que se trabaja como un
+        lienzo entero -índice a un lado y trámite al otro- y el panel dejó de ser una tarjeta
+        blanca flotando sobre gris: «no dentro de una ficha blanca, sino como en toda esa sección,
+        con fondo blanco». El resto de las secciones conservan el gris, que es lo que separa sus
+        bloques.
+      -->
+      <div class="foundation-main" [class.es-lienzo-blanco]="SECCIONES_DE_LISTA.includes(activeSection())">
+      <!--
+        LA CABECERA DE PAGINA ES LA MISMA EN LAS DIECISIETE SECCIONES —contexto, título, descripción
+        y acciones— y por eso es un componente compartido. El contexto es el grupo al que pertenece
+        la sección, no un rótulo fijo. Las acciones de la sección se proyectan aquí: la consulta
+        guiada estaba flotando en la esquina inferior derecha y tapaba la columna de acciones de
+        las tablas; en la cabecera no se superpone a nada.
+      -->
+      <app-cabecera-de-pagina [contexto]="contextoDeGrupo()" [titulo]="tituloDeSeccion()" [descripcion]="descripcionDeBase()">
+            @if (activeSection() === 'organizaciones' && !mostrarImportacionDeOrganizaciones()) {
+              <app-boton importancia="secundaria" identificador="importar-organizaciones" (accion)="mostrarImportacionDeOrganizaciones.set(true)">Importar organizaciones</app-boton>
+            }
+            @if (activeSection() === 'ecosistema' && moduloActivoDe(ECOSYSTEM_MODULE_IDS)?.id === 'festivals' && !mostrarPreparacionDeArchivo()) {
+              <app-boton importancia="secundaria" (accion)="mostrarPreparacionDeArchivo.set(true)">Importar Festivales</app-boton>
+            }
+            @if (activeSection() !== 'analisis') {
+              <!-- Flotante y global: acompaña a toda la consola, no solo a esta cabecera. -->
+              <app-cajon-de-consulta-guiada
+                base="/api/v1/admin/analisis"
+                [contexto]="contextoDeLaConsulta()"
+                saludo="Puedo consultar cifras agregadas de Festivales, de Mercados musicales y del trabajo administrativo. Cada respuesta de datos muestra la fuente y el alcance que usó." />
+            }
+      </app-cabecera-de-pagina>
+
+      @if (activeSection() === 'monitor') {
+        <!--
+          UNA SOLA LISTA, Y NO DOS BLOQUES QUE DICEN LO MISMO.
+
+          Aqui habia cuatro indicadores y, debajo, una lista que repetia tres de esos cuatro
+          numeros —«1 registro pendiente de revision» arriba y «Revision de registros: 1
+          pendientes» abajo—. Los seis controles llevaban ademas a Solicitudes. Un numero repetido
+          no informa dos veces: hace dudar de si son dos cosas distintas.
+
+          LAS FILAS EN CERO SE QUEDAN PERO NO SON BOTONES. Saber que no hay nada pendiente es
+          informacion; llevar a alguien a una bandeja vacia es prometerle trabajo que no existe.
+        -->
+        <!--
+          EL RESUMEN: COMPACTO Y CON DATOS QUE SIRVEN.
+
+          Lo que había fallaba por dos sitios. Primero, decía poco: «9 · Revisión de registros y
+          propuestas» y nada más, cuando la cola de trabajo ya sabía de qué son esos nueve y desde
+          cuándo esperan. Segundo, respiraba de más: tres bloques separados por 2,75 rem, con un
+          cuarto inferior de pantalla en blanco a 1440 px. Un panel de resumen se mira de un vistazo;
+          si hay que desplazarse, no está resumiendo.
+
+          Ahora responde, en este orden: QUE hay que decidir, DE QUE TIPO es, CUANTO LLEVA ESPERANDO,
+          y en qué estado está el acervo.
+
+          Y NINGUNA FLECHA HACE DE BOTON. Había un «Revisar →» a la derecha de la fila fingiendo ser
+          una acción: ni tenía forma de control, ni área de toque, ni foco propio. La fila entera es
+          el control y se nota al posarse encima; la acción del bloque es un botón de verdad.
+        -->
+        <section class="resumen" aria-label="Resumen operativo">
+
+          <!-- ── 1. Lo que pide una decisión ─────────────────────────────────────── -->
+          <div class="resumen-prioridad" [class.esta-al-dia]="bandeja.colaCompleta().length === 0">
+            <!--
+              UN SOLO ENCABEZADO DE BLOQUE PARA TODA LA PANTALLA. Había dos implementaciones
+              distintas conviviendo —una para el bloque prioritario y otra para los demás—, con
+              alineaciones diferentes: las acciones de la derecha caían unas a la altura del
+              antetítulo y otras a la del título, y no formaban una línea. La clase es ahora la
+              misma para los cuatro y la acción se alinea SIEMPRE con el título, que es la línea
+              que el ojo sigue al recorrer la pantalla.
+            -->
+            <div class="resumen-encabezado">
+              <div>
+                <p class="workspace-kicker">Atención prioritaria</p>
+                <h2>Lo que necesita una decisión</h2>
+              </div>
+              @if (bandeja.colaCompleta().length > 0) {
+                <button type="button" class="resumen-accion" (click)="irASeccion('solicitudes')">
+                  Abrir la bandeja
+                </button>
+              }
+            </div>
+
+            @if (bandeja.colaCompleta().length > 0) {
+              <div class="resumen-decision">
+                <!--
+                  LA CIFRA Y EL DESGLOSE CUENTAN LO MISMO. Antes el titular salía de
+                  `totalPendienteDeDecision()` —revisiones + solicitudes + retiros— y el desglose de
+                  la cola unificada, que además incluye ediciones y propuestas. Resultado visible:
+                  «9 pendientes» encima de un desglose que sumaba 10. Ambos salen ahora de la misma
+                  cola, que es además la que lista la bandeja a la que lleva este botón.
+                -->
+                <button type="button" class="resumen-decision__cifra" (click)="irASeccion('solicitudes')">
+                  <strong>{{ bandeja.colaCompleta().length }}</strong>
+                  <span>{{ bandeja.colaCompleta().length === 1 ? 'pendiente' : 'pendientes' }}</span>
+                </button>
+
+                <!--
+                  DE QUE SON. La cola ya traía el tipo de cada elemento; nueve festivales nuevos y
+                  nueve eliminaciones no se atienden igual ni corren la misma prisa.
+                -->
+                <ul class="resumen-desglose">
+                  @for (parte of desgloseDeDecisiones(); track parte.tipo) {
+                    <li class="resumen-desglose__fila">
+                      <b class="resumen-desglose__cuenta">{{ parte.total }}</b>
+                      <span class="resumen-desglose__tipo">{{ parte.tipo }}</span>
+                      <!--
+                        LA BARRA ES EL DATO, NO UN ADORNO: dice qué parte del trabajo pendiente es de
+                        este tipo. Lleva `aria-hidden` porque la cifra de al lado ya lo dice para
+                        quien no la ve.
+                      -->
+                      <span class="resumen-desglose__barra" aria-hidden="true">
+                        <span [style.width.%]="parte.parte"></span>
+                      </span>
+                    </li>
+                  }
+                </ul>
+
+                @if (esperaMasLarga(); as espera) {
+                  <p class="resumen-espera" [class.es-vieja]="espera.dias >= 7">
+                    La más antigua espera desde el {{ espera.desde | date: FECHA_ADMINISTRATIVA:'':'es-CO' }}
+                    @if (espera.dias > 0) { <b>· {{ espera.dias }} {{ espera.dias === 1 ? 'día' : 'días' }}</b> }
+                  </p>
+                }
+              </div>
+            } @else {
+              <p class="resumen-vacio">No hay nada esperando una decisión.</p>
+            }
+
+            @if (bandeja.colaCompleta().length > 0 && alDia().length > 0) {
+              <p class="resumen-aldia">
+                Al día:
+                @for (fila of alDia(); track fila.id) {<span>{{ fila.etiqueta.toLowerCase() }}@if (!$last) {<span> · </span>}</span>}
+              </p>
+            }
+          </div>
+
+          <!-- ── 2. El estado del sistema, de un vistazo ─────────────────────────
+            EN HORIZONTAL Y NO APILADO. La composición y las cifras eran dos bloques uno debajo de
+            otro, y el Resumen se leía como una página larga en vez de como una consola. Puestos
+            lado a lado caben en una sola vista: a la izquierda de qué está hecho el acervo, a la
+            derecha lo que lo rodea.
+          -->
+          <div class="resumen-panel">
+            <!-- ── 2. De qué está hecho el acervo ──────────────────────────────────
+              «186 festivales» no dice si el trabajo está hecho: 160 publicados con 16 en borrador es
+              una situación sana, y 186 en borrador sería una parálisis. La composición por estado ya
+              venía en el monitor y esta pantalla solo leía el total.
+            -->
+            @if (composicionDelAcervo(); as acervo) {
+              @if (acervo.total > 0) {
+                <div class="resumen-composicion">
+                  <div class="resumen-encabezado">
+                    <!--
+                      MISMO PATRON QUE «ATENCION PRIORITARIA»: antetítulo en versalita y título
+                      debajo. Los cuatro bloques de esta pantalla lo llevaban distinto —uno con
+                      antetítulo, otro con una descripción, otro con una etiqueta suelta a la
+                      derecha—, y eso obliga a reaprender la jerarquía en cada bloque de la misma
+                      pantalla.
+                    -->
+                    <div>
+                      <p class="workspace-kicker">Acervo institucional</p>
+                      <h3>Procesos registrados</h3>
+                    </div>
+                  </div>
+
+                  <p class="resumen-composicion__total">
+                    <strong>{{ acervo.total }}</strong>
+                    <span>en el ecosistema</span>
+                  </p>
+
+                  <!--
+                    UNA BARRA POR MODULO DEL ECOSISTEMA, con su enlace. Era una sola barra del primer
+                    módulo del monitor y un «Ver procesos» que llevaba a Festivales: con Mercados en
+                    el monitor, el segundo módulo se habría quedado fuera del Resumen. Lo que se
+                    compara sigue siendo la proporción entre estados, dentro de cada módulo.
+                  -->
+                  @for (modulo of acervo.modulos; track modulo.id) {
+                    <div class="resumen-composicion__modulo" [attr.data-modulo-del-acervo]="modulo.id">
+                      <p class="resumen-composicion__nombre">
+                        <b>{{ modulo.rotulo }}</b>
+                        <span>{{ modulo.total }}</span>
+                        @if (modulo.seccion) {
+                          <button type="button" class="resumen-vinculo" (click)="irASeccion(modulo.seccion)">Ver</button>
+                        }
+                      </p>
+                      @if (modulo.total > 0) {
+                        <div class="resumen-barra-apilada" role="img"
+                          [attr.aria-label]="modulo.rotulo + ' por estado: ' + descripcionDeLaComposicion()">
+                          @for (parte of modulo.partes; track parte.code) {
+                            <span [class]="'es-' + parte.code" [style.width.%]="parte.parte"
+                              [title]="parte.label + ': ' + parte.total"></span>
+                          }
+                        </div>
+                        <ul class="resumen-leyenda">
+                          @for (parte of modulo.partes; track parte.code) {
+                            <li>
+                              <span class="resumen-leyenda__muestra" [class]="'resumen-leyenda__muestra es-' + parte.code" aria-hidden="true"></span>
+                              <b>{{ parte.total }}</b>
+                              <span class="resumen-leyenda__rotulo">{{ parte.label }}</span>
+                              <small>{{ parte.parte }} %</small>
+                            </li>
+                          }
+                        </ul>
+                      } @else {
+                        <p class="resumen-composicion__sin-nada">Todavía no hay registros.</p>
+                      }
+                    </div>
+                  }
+                </div>
+              }
+            }
+
+            <div class="resumen-pulso">
+              <button type="button" class="resumen-dato" (click)="irASeccion('organizaciones')">
+                <strong class="resumen-dato__cifra">{{ totalesDelSistema()?.entities ?? organizationsTotal() ?? '—' }}</strong>
+                <span class="resumen-dato__rotulo">Organizaciones</span>
+              </button>
+              <button type="button" class="resumen-dato" (click)="irASeccion('usuarios')">
+                <!-- El total de usuarios venía en el monitor y no lo leía nadie. -->
+                <strong class="resumen-dato__cifra">{{ totalesDelSistema()?.users ?? '—' }}</strong>
+                <span class="resumen-dato__rotulo">Usuarios</span>
+              </button>
+              <button type="button" class="resumen-dato" (click)="irALaBandeja('duplicado')">
+                <!-- Un cero no es una alarma: es que no hay nada que revisar. -->
+                <strong class="resumen-dato__cifra" [class.es-cero]="bandeja.duplicadosEsperando() === 0">{{ bandeja.duplicadosEsperando() }}</strong>
+                <span class="resumen-dato__rotulo">Posibles duplicados</span>
+              </button>
+              <!--
+              AQUI HABIA UN «ESTADO DEL SISTEMA · DISPONIBLE · API EN 10 MS», y ahora lo dice el panel
+              técnico de más abajo con su anillo, sus tres servicios y la latencia contra un umbral.
+              Tener el mismo dato dos veces en la misma pantalla, una de ellas peor, obliga a
+              comprobar si coinciden.
+            -->
+            </div>
+
+          </div>
+
+          <!-- ── 3. Trazabilidad y pulso técnico, lado a lado ────────────────────
+            La bitácora sola dejaba media franja vacía. A su derecha, el estado técnico del sistema
+            dibujado: qué piezas están en pie y cuánto tarda la API en contestar.
+          -->
+          <div class="resumen-cierre">
+            <!-- ── 3. La trazabilidad ──────────────────────────────────────────────── -->
+            <div class="resumen-traza">
+              <div class="resumen-encabezado">
+                <!-- Menor que el del bloque prioritario a propósito: esto es historial, no trabajo pendiente. -->
+                <div>
+                  <p class="workspace-kicker">Trazabilidad</p>
+                  <h3>Actividad administrativa</h3>
+                </div>
+                <button type="button" class="resumen-vinculo" (click)="irASeccion('auditoria')">Ver auditoría</button>
+              </div>
+              <!--
+                EN QUE SE VA EL TRABAJO. La bitácora ya viajaba aquí y solo se usaba como lista; agrupada
+                por acción dice en qué se emplea la gestión —revisar, publicar, entrar—, que es una
+                lectura distinta de «quién hizo qué a las 01:40».
+              -->
+              @if (actividadPorTipo(); as reparto) {
+                @if (reparto.partes.length > 1) {
+                  <ul class="resumen-reparto">
+                    @for (parte of reparto.partes; track parte.accion) {
+                      <li>
+                        <span class="resumen-reparto__rotulo">{{ parte.accion }}</span>
+                        <span class="resumen-reparto__barra" aria-hidden="true"><span [style.width.%]="parte.parte"></span></span>
+                        <b>{{ parte.total }}</b>
+                      </li>
+                    }
+                  </ul>
+                }
+              }
+
+              <ol class="resumen-traza__lista">
+                @for (grupo of actividadAgrupada(); track grupo.clave + grupo.hasta) {
+                  @let item = grupo.item;
+                  <li class="resumen-traza__fila">
+                    <span class="resumen-traza__quien">
+                      <b>{{ item.autor?.nombre || 'Actividad automática' }}</b>
+                      <span>{{ item.accionEtiqueta || item.accion || 'Actividad administrativa' }}</span>
+                    </span>
+                    <span class="resumen-traza__sobre">{{ sobreQue(item) }}</span>
+                    <span class="resumen-traza__cuando">
+                      {{ grupo.hasta ? (grupo.hasta | date: FECHA_Y_HORA_ADMINISTRATIVA:'':'es-CO') : '' }}
+                      @if (grupo.veces > 1) {
+                        <!-- Cuántas veces se repitió y desde cuándo: más información que seis filas iguales. -->
+                        <b>{{ grupo.veces }} veces, desde {{ grupo.desde | date: 'HH:mm':'':'es-CO' }}</b>
+                      }
+                    </span>
+                  </li>
+                } @empty {
+                  <li class="resumen-vacio">No hay actividad administrativa reciente.</li>
+                }
+              </ol>
+            </div>
+
+            <!-- ── El pulso técnico, dibujado ─────────────────────────────────────
+              «Disponible» no era un estado sino el resumen de tres: el monitor comprueba API, base de
+              datos y frontend por separado, y mide además cuánto tarda en contestar. Reducido a una
+              palabra, un sistema en pie pero lento y uno en pie y ágil se veían igual.
+            -->
+            @if (estadoTecnico(); as tecnico) {
+              <aside class="resumen-tecnico" aria-label="Estado técnico del sistema">
+                <div class="resumen-encabezado">
+                  <div>
+                    <p class="workspace-kicker">Infraestructura</p>
+                    <h3>Estado técnico</h3>
+                  </div>
+                  @if (tecnico.entorno) { <span class="resumen-tecnico__entorno">{{ tecnico.entorno }}</span> }
+                </div>
+
+
+                <!-- La latencia contra un techo explícito: un número de milisegundos solo no dice si está bien. -->
+                <!--
+                  LA LATENCIA, SOBRE UNA ESCALA CON SUS TRAMOS MARCADOS. Una barra que crece no dice
+                  si diez milisegundos están bien: hace falta ver contra qué. Aquí se dibujan las tres
+                  zonas —inmediata, aceptable, lenta— y una marca donde cae la medición, así que el
+                  juicio se lee sin saber de números.
+                -->
+                @if (tecnico.latencia !== null) {
+                  <div class="resumen-escala" [attr.data-tramo]="tecnico.tramoDeLatencia">
+                    <div class="resumen-escala__cabecera">
+                      <span class="resumen-escala__rotulo">Respuesta de la API</span>
+                      <strong class="resumen-escala__cifra">{{ tecnico.latencia }}<small> ms</small></strong>
+                    </div>
+
+                    <div class="resumen-escala__pista" role="img"
+                      [attr.aria-label]="'Respuesta de la API: ' + tecnico.latencia + ' milisegundos, ' + (tecnico.tramoDeLatencia === 'agil' ? 'inmediata' : tecnico.tramoDeLatencia === 'aceptable' ? 'aceptable' : 'lenta') + '. Inmediata por debajo de 150, aceptable hasta 600.'">
+                      <span class="resumen-escala__zona es-agil"></span>
+                      <span class="resumen-escala__zona es-aceptable"></span>
+                      <span class="resumen-escala__zona es-lenta"></span>
+                      <span class="resumen-escala__marca" [style.left.%]="tecnico.parteDeLatencia || 1"></span>
+                    </div>
+
+                    <div class="resumen-escala__pie">
+                      <span>0</span><span>150</span><span>600 ms</span>
+                    </div>
+
+                    <p class="resumen-escala__veredicto">
+                      {{ tecnico.tramoDeLatencia === 'agil' ? 'Inmediata' : tecnico.tramoDeLatencia === 'aceptable' ? 'Aceptable' : 'Lenta' }}
+                    </p>
+                  </div>
+                }
+
+                <ul class="resumen-tecnico__piezas">
+                  @for (pieza of tecnico.piezas; track pieza.id) {
+                    <li [class.esta-bien]="pieza.bien">
+                      <span class="resumen-tecnico__punto" aria-hidden="true"></span>
+                      <b>{{ pieza.rotulo }}</b>
+                      <small>{{ pieza.detalle }}</small>
+                    </li>
+                  }
+                </ul>
+                @if (tecnico.comprobadoEn) {
+                  <p class="resumen-tecnico__sello">Comprobado a las {{ tecnico.comprobadoEn | date: 'HH:mm':'':'es-CO' }}</p>
+                }
+              </aside>
+            }
+          </div>
+        </section>
+      } @else if (activeSection() === 'analisis') {
+        <section class="work-queue">
+          <app-panel-analisis-administrativo></app-panel-analisis-administrativo>
+        </section>
+      } @else if (activeSection() === 'solicitudes') {
+        <section class="work-queue">
+          <app-admin-solicitudes-panel />
+        </section>
+      } @else if (activeSection() === 'organizaciones') {
+        <section class="work-queue">
+          <!--
+            IMPORTAR ORGANIZACIONES ENTRA POR DONDE SE GESTIONAN, igual que Festivales desde el 2 de
+            septiembre de 2026: no es un ítem de navegación aparte. Y llega con el mismo circuito
+            —previsualizar sin escribir, decidir fila a fila, confirmar una sola vez— porque desde el
+            12 de septiembre de 2026 la Importación Asistida es una capacidad y no una pantalla.
+          -->
+          @if (mostrarImportacionDeOrganizaciones()) {
+            <!--
+              EL COLOR SALE DEL TOKEN Y NO DEL HEXADECIMAL. El botón gemelo de Festivales lleva
+              `#4a2a6f` escrito a mano desde antes; copiarlo aquí habría sumado una literal más al
+              trinquete de interfaz, que existe precisamente para que esa deuda no crezca por
+              imitación.
+            -->
+            <div class="mb-5"><app-boton importancia="terciaria" tamano="menudo" (accion)="mostrarImportacionDeOrganizaciones.set(false)">← Volver a Organizaciones</app-boton></div>
+            <app-admin-preparacion-asistida-panel [divipola]="divipola()" [idModulo]="'organizaciones'" />
+          } @else {
+            <!-- «Importar organizaciones» vive en las acciones de la cabecera de página, como en Festivales. -->
+            <app-admin-organizaciones-panel
+              [organizacionPedida]="organizacionPedida()"
+              (verFestival)="irAlFestival($event)"></app-admin-organizaciones-panel>
+          }
+        </section>
+      } @else if (activeSection() === 'ecosistema') {
+        <section class="work-queue">
+          <!--
+            SIN NAVEGACION DE MODULOS. Quedaba una tira con una sola pestaña —«FESTIVALES»— y un
+            «próximamente» para módulos que esta sección ya no contiene: son secciones propias del
+            grupo Ecosistema musical. Una pestaña única no elige nada y solo añadía un tercer
+            encabezado encima de la lista.
+          -->
+          @if (moduloActivoDe(ECOSYSTEM_MODULE_IDS); as modulo) {
+            @if (modulo.id === 'festivals') {
+              @if (mostrarPreparacionDeArchivo()) {
+                <div class="mb-5"><app-boton importancia="terciaria" tamano="menudo" (accion)="mostrarPreparacionDeArchivo.set(false)">← Volver a Festivales</app-boton></div>
+                <app-admin-preparacion-asistida-panel [divipola]="divipola()" [idModulo]="'festivals'"></app-admin-preparacion-asistida-panel>
+              } @else {
+                <!--
+                  «IMPORTAR FESTIVALES» YA NO ES UN ÍTEM DE NAVEGACIÓN APARTE. El criterio es este: «Ecosistema → Festivales → Importar Festivales», no
+                  una sección aparte para toda la consola. Este enlace abre el circuito gobernado:
+                  preparación local, previsualización sin escritura y confirmación explícita para
+                  crear únicamente borradores; nunca publica ni modifica Festivales existentes.
+                -->
+                @if (avisoDeFestival()) {
+                  <p class="mb-4 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-xs text-emerald-900" role="status">{{ avisoDeFestival() }}</p>
+                }
+                <app-admin-records-panel [module]="modulo" [roleId]="roleId" [divipola]="divipola()" [session]="session()" (solicitudesFestival)="openFestivalRequests($event)" (registroFestival)="abrirAltaDeFestival()" (fichaFestival)="abrirFichaDeFestival($event)"></app-admin-records-panel>
+                @if (fichaDeFestival(); as festivalId) {
+                  <app-admin-ficha-festival
+                    [festivalId]="festivalId"
+                    [puedePublicar]="puedePublicarSitio"
+                    (cerrar)="cerrarFichaDeFestival()"
+                    (verOrganizacion)="irALaOrganizacion($event)"></app-admin-ficha-festival>
+                }
+                @if (registrandoFestival()) {
+                  <app-admin-alta-festival
+                    (registrado)="festivalRegistrado($event)"
+                    (cancelado)="cerrarAltaDeFestival()"></app-admin-alta-festival>
+                }
+              }
+            }
+          }
+        </section>
+      } @else if (activeSection() === 'boletin') {
+        <section class="work-queue">
+          <app-admin-boletin-panel></app-admin-boletin-panel>
+        </section>
+      } @else if (activeSection() === 'gestion-sitio') {
+        <!--
+          GESTION DEL SITIO. Antes habia DOS pestañas —«Textos del sitio» e
+          «Imagenes y medios»— que no decian nada del estado del sitio: para saber si quedaba
+          algo sin publicar habia que entrar grupo por grupo. Ahora el area tiene sus seis
+          partes y un resumen que las cuenta de una sola lectura.
+
+          EL ARMAZON YA NO MONTA LOS EDITORES DIRECTAMENTE. Los monta `AdminGestionSitioPanel`,
+          que es quien conoce sus seis vistas; repetir aqui esa decision daria dos sitios donde
+          elegir que editor se ve, y el segundo envejeceria solo.
+        -->
+        <section class="work-queue">
+          <app-admin-gestion-sitio-panel
+            [enabled]="true"
+            [session]="session()"
+            [puedePublicar]="puedePublicarSitio"
+          ></app-admin-gestion-sitio-panel>
+        </section>
+      } @else if (activeSection() === 'catalogo-editorial') {
+        <section class="work-queue">
+          <app-admin-catalogo-editorial-panel
+            [enabled]="true"
+            [puedePublicar]="puedePublicarSitio"
+          ></app-admin-catalogo-editorial-panel>
+        </section>
+      } @else if (activeSection() === 'mercados') {
+        <section class="work-queue">
+          <app-admin-mercados-panel [enabled]="true" (fichaMercado)="abrirFichaDeMercado($event)"></app-admin-mercados-panel>
+          @if (fichaDeMercado(); as mercadoId) {
+            <app-admin-ficha-mercado
+              [mercadoId]="mercadoId"
+              [puedePublicar]="puedePublicarSitio"
+              (cerrar)="cerrarFichaDeMercado()"
+              (verOrganizacion)="irALaOrganizacion($event)"></app-admin-ficha-mercado>
+          }
+        </section>
+      } @else if (activeSection() === 'agenda') {
+        <section class="work-queue">
+          <app-admin-agenda-panel [enabled]="true"></app-admin-agenda-panel>
+        </section>
+      } @else if (activeSection() === 'noticias') {
+        <section class="work-queue">
+          <app-admin-noticias-panel [enabled]="true"></app-admin-noticias-panel>
+        </section>
+      } @else if (activeSection() === 'categorias') {
+        <section class="work-queue">
+          <app-admin-categorias-panel [enabled]="true"></app-admin-categorias-panel>
+        </section>
+      } @else if (activeSection() === 'banco-de-archivos') {
+        <section class="work-queue">
+          <app-gestion-del-banco canal="institucional"></app-gestion-del-banco>
+        </section>
+      } @else if (activeSection() === 'usuarios') {
+        <section class="work-queue">
+          <app-admin-users-panel [enabled]="true"></app-admin-users-panel>
+        </section>
+      } @else if (activeSection() === 'auditoria') {
+        <section class="work-queue">
+          <app-admin-auditoria-panel></app-admin-auditoria-panel>
+        </section>
+      } @else if (activeSection() === 'sistema') {
+        <section class="work-queue">
+          <app-admin-system-panel [schemaOnline]="schemaOnline()" [divipola]="divipola()" [monitor]="monitor()"
+            [ocupado]="refrescandoPanel()" (recargar)="refreshAdminBackend(true)" />
+        </section>
+      } @else {
+        <section class="command-canvas command-canvas--empty"><div class="empty-copy"><p class="workspace-kicker">Sección no disponible</p><h2>Ruta administrativa inválida</h2><p>Usa la navegación del espacio de gestión para continuar.</p></div></section>
+      }
+      </div>
+    </div>
+
+    <!--
+      LA CONSULTA GUIADA, DESDE CUALQUIER SECCION. Estaba solo dentro de «Análisis y consultas», que
+      es donde nadie la busca: quien revisa organizaciones y se pregunta cuántas hay sin correo
+      confirmado no abandona lo que está haciendo para ir a otra sección, reformular y volver. El
+      contexto que viaja es la sección abierta, y la respuesta declara sobre qué se calculó.
+    -->
+    <!-- La consulta guiada vive ahora en el encabezado de la sección. Ver workspace-title. -->
+
+  <!--
+    MI PERFIL. El endpoint `PUT /admin/auth/profile` y `AdminService.actualizarPerfil` existían desde
+    hace tiempo y ninguna pantalla los llamaba: se podía cambiar el nombre o la contraseña por API y
+    no desde la consola. Es el mismo defecto de «escrito y no enganchado» que los iconos del menú.
+  -->
+  @if (editandoPerfil()) {
+    <div class="perfil-velo" (click)="editandoPerfil.set(false)" aria-hidden="true"></div>
+    <div class="perfil-dialogo" role="dialog" aria-modal="true" aria-labelledby="titulo-perfil"
+      appDialogo (cerrar)="editandoPerfil.set(false)">
+      <h2 id="titulo-perfil">Mi perfil</h2>
+      <p class="perfil-nota">Estos datos identifican tus decisiones en la bitácora de la consola.</p>
+
+      <label class="perfil-campo">
+        <span>Nombre completo</span>
+        <input type="text" [value]="perfil().fullName" (input)="cambiarPerfil('fullName', $any($event.target).value)" autocomplete="name" />
+      </label>
+      <label class="perfil-campo">
+        <span>Correo institucional</span>
+        <input type="email" [value]="perfil().email" (input)="cambiarPerfil('email', $any($event.target).value)" autocomplete="email" />
+      </label>
+      <label class="perfil-campo">
+        <span>Contraseña nueva</span>
+        <input type="password" [value]="perfil().password" (input)="cambiarPerfil('password', $any($event.target).value)"
+          autocomplete="new-password" placeholder="Déjala vacía para no cambiarla" />
+        <!-- Se dice qué pasa si se deja en blanco: en blanco NO es «bórrala». -->
+        <small>Si la dejas vacía, tu contraseña actual no cambia.</small>
+      </label>
+
+      @if (errorDePerfil(); as error) { <p class="perfil-error" role="alert">{{ error }}</p> }
+      @if (avisoDePerfil(); as ok) { <p class="perfil-ok" role="status">{{ ok }}</p> }
+
+      <div class="perfil-acciones">
+        <button type="button" class="perfil-cancelar" (click)="editandoPerfil.set(false)">Cancelar</button>
+        <button type="button" class="perfil-guardar" [disabled]="guardandoPerfil()" (click)="guardarPerfil()">
+          {{ guardandoPerfil() ? 'Guardando…' : 'Guardar cambios' }}
+        </button>
+      </div>
+    </div>
+  }
+  </div>
+}

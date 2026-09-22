@@ -1,0 +1,105 @@
+<section aria-labelledby="mis-autorizaciones-titulo" class="rounded-xl border border-slate-200 bg-white p-5">
+  <h2 id="mis-autorizaciones-titulo" class="font-alternate text-titulo font-bold uppercase tracking-wide text-morado">
+    Mis autorizaciones
+  </h2>
+  <p class="mt-1 text-dato leading-relaxed text-slate-500">
+    Qué autorizaste, cuándo y con qué texto delante. Puedes leer el texto exacto que aceptaste y
+    retirar lo que sea voluntario.
+  </p>
+
+  @if (cargando()) {
+    <p class="mt-4 text-dato font-bold uppercase tracking-wider text-slate-400" role="status">Cargando…</p>
+  } @else if (error(); as fallo) {
+    <p class="mt-4 rounded-lg bg-red-50 px-3 py-2 text-dato font-medium text-red-700" role="alert">{{ fallo }}</p>
+  } @else if (!ordenadas().length) {
+    <p class="mt-4 rounded-lg border border-dashed border-slate-300 px-4 py-6 text-center text-dato text-slate-500">
+      Todavía no hay ninguna autorización registrada para esta cuenta.
+    </p>
+  } @else {
+    <ul class="mt-4 divide-y divide-slate-100">
+      @for (autorizacion of ordenadas(); track autorizacion.id) {
+        @let abierta = textoAbierto() === autorizacion.id;
+        <li class="py-3.5 first:pt-0 last:pb-0">
+          <div class="flex flex-wrap items-start justify-between gap-3">
+            <div class="min-w-0 flex-1">
+              <!--
+                EL ESTADO SALE DEL COMPONENTE UNICO DEL PROYECTO, no de un icono escrito aquí:
+                icono con texto al lado y nunca una píldora de color con el texto dentro, y el tono
+                decidido en un solo sitio para que el mismo concepto no acabe en verde en una
+                pantalla y en gris en otra.
+              -->
+              <app-indicador-de-estado
+                [etiqueta]="autorizacion.vigente ? 'Vigente' : 'Retirada'"
+                [tono]="autorizacion.vigente ? 'logrado' : 'cerrado'"
+                [matiz]="autorizacion.vigente ? null : 'eliminado'"
+                [conTexto]="true"
+              />
+
+              <h3 [class]="'mt-1 text-sm font-bold leading-snug ' + (autorizacion.vigente ? 'text-slate-800' : 'text-slate-400 line-through')">
+                {{ autorizacion.titulo }}
+              </h3>
+
+              <p class="mt-1 text-dato font-medium uppercase tracking-wider text-slate-400">
+                Otorgada el {{ autorizacion.fechaOtorgada | date:'d MMM y':'':'es-CO' }}
+                · versión {{ autorizacion.version }}
+                @if (autorizacion.fechaRevocacion) {
+                  · retirada el {{ autorizacion.fechaRevocacion | date:'d MMM y':'':'es-CO' }}
+                }
+              </p>
+            </div>
+
+            @if (autorizacion.sePuedeRevocar) {
+              <button
+                type="button"
+                (click)="retirar(autorizacion)"
+                [disabled]="retirando() === autorizacion.finalidad"
+                class="flex-shrink-0 cursor-pointer rounded-lg border border-slate-300 px-3 py-1.5 text-dato font-bold uppercase tracking-wider text-slate-600 transition-all hover:border-red-400 hover:text-red-600 disabled:opacity-50"
+              >
+                {{ retirando() === autorizacion.finalidad ? 'Retirando…' : 'Retirar' }}
+              </button>
+            }
+          </div>
+
+          <!--
+            LA PRUEBA DE LO ACEPTADO. Es lo que el art. 8 num. 2 de la Ley 1581 le da derecho a
+            pedir, y por eso está aquí entera y no resumida: «aceptaste el documento 2» no prueba
+            nada.
+          -->
+          <button
+            type="button"
+            (click)="alternarTexto(autorizacion.id)"
+            [attr.aria-expanded]="abierta"
+            class="mt-2 flex cursor-pointer items-center gap-1 text-dato font-bold uppercase tracking-wider text-morado underline underline-offset-2"
+          >
+            {{ abierta ? 'Ocultar el texto' : 'Ver el texto que acepté' }}
+            <svg lucideChevronDown size="12" [class]="abierta ? 'rotate-180 transition-transform' : 'transition-transform'" aria-hidden="true"></svg>
+          </button>
+
+          @if (abierta) {
+            <div class="mt-2 rounded-lg bg-slate-50 p-3">
+              <!--
+                UNA EVIDENCIA RECONSTRUIDA NO VALE LO MISMO QUE UNA CAPTURADA, y el sistema no debe
+                presentar las dos con la misma cara. Solo lo llevan las autorizaciones anteriores a
+                que el registro guardara el texto.
+              -->
+              @if (autorizacion.textoReconstruido) {
+                <p class="mb-2 flex items-start gap-1.5 text-dato leading-relaxed text-amber-700">
+                  <svg lucideTriangleAlert size="12" class="mt-px flex-shrink-0" aria-hidden="true"></svg>
+                  <span>
+                    Este texto se reconstruyó: cuando se registró esta autorización, el sistema
+                    guardaba a qué documento apuntaba pero no lo que decía.
+                  </span>
+                </p>
+              }
+              <p class="whitespace-pre-line text-dato leading-relaxed text-slate-600">{{ autorizacion.textoAceptado }}</p>
+            </div>
+          }
+
+          @if (autorizacion.vigente && autorizacion.motivoSinRevocar; as motivo) {
+            <p class="mt-2 text-dato leading-relaxed text-slate-500">{{ motivo }}</p>
+          }
+        </li>
+      }
+    </ul>
+  }
+</section>

@@ -1,0 +1,58 @@
+<div class="space-y-6 pb-8 xl:space-y-7">
+  <!--
+    EL AVISO DE CONFIRMACION VIVE EN UN SOLO COMPONENTE. Escrito aquí a mano, esta pantalla llegó a
+    decir «puedes seguir preparando tu registro» cuando el servidor ya no lo permitía: desde el 12
+    de septiembre de 2026 el correo sin confirmar bloquea también crear el proceso.
+  -->
+  <app-aviso-de-correo-sin-confirmar
+    queSeHabilita="registrar procesos y entregárselos al Programa" />
+
+  <!--
+    §15.2 Y §15.3, CON LA MISMA PIEZA. La bienvenida tras el primer ingreso y el indicador
+    permanente de información pendiente responden a la misma pregunta; separarlas en dos
+    componentes acabaría con la bienvenida invitando a completar algo que el indicador ya da por
+    puesto. VA DEBAJO DEL AVISO DE CORREO y no encima: mientras el correo no esté confirmado, lo
+    que bloquea es eso, y completar el teléfono no lo desbloquea.
+  -->
+  <app-invitacion-a-completar
+    [perfil]="perfil()"
+    [primerIngreso]="primerIngreso()"
+    [correoConfirmado]="correoConfirmado()"
+    [nombre]="nombreDeQuienEntro()" />
+
+  <div class="grid gap-8 xl:grid-cols-[minmax(0,1.35fr)_minmax(22rem,.9fr)] xl:gap-10">
+    <section aria-labelledby="prioridades-titulo" class="min-w-0">
+      <div class="flex flex-wrap items-end justify-between gap-3">
+        <h3 id="prioridades-titulo" class="font-alternate text-titulo font-bold uppercase tracking-wide text-morado">Tu siguiente acción</h3>
+        <a routerLink="/gestion/solicitudes" class="text-sm font-bold text-verde-texto hover:underline">Ver solicitudes</a>
+      </div>
+
+      @if (cargandoFestivales()) {
+        <p class="py-6 text-sm text-slate-500">Consultando procesos…</p>
+      } @else if (!festivales().length) {
+        <div class="pt-5"><p class="text-sm font-bold text-slate-800">Aún no tienes procesos registrados.</p><p class="mt-1 text-sm text-slate-500">Cuando registres uno, aquí verás las acciones que requiera.</p><a routerLink="/gestion/procesos" class="mt-3 inline-block text-sm font-bold text-verde-texto hover:underline">Explorar procesos disponibles</a></div>
+      } @else if (!conAjustes().length && !borradores().length) {
+        <p class="pt-5 text-sm text-slate-600">No tienes acciones pendientes.</p>
+      } @else {
+        <ul class="mt-4 space-y-3">
+          @for (festival of conAjustes(); track festival.id) {
+            <li class="flex flex-col gap-3 bg-violet-50/70 px-4 py-3 sm:flex-row sm:items-center sm:justify-between"><div class="min-w-0"><p class="text-sm font-bold text-slate-900">{{ festival.nombre }}</p><p class="mt-0.5 text-sm text-slate-600">Tiene ajustes sugeridos por atender.</p></div><a [routerLink]="['/gestion/procesos/festivales', festival.id]" [queryParams]="{ seccion: 'informacion', ajustes: '1' }" class="shrink-0 rounded-lg bg-morado px-4 py-2.5 text-center text-sm font-bold text-white transition hover:bg-[#3a195d] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-morado focus-visible:ring-offset-2">Resolver ajustes</a></li>
+          }
+          @for (festival of borradores(); track festival.id) {
+            <li class="flex flex-col gap-3 bg-white px-4 py-3 ring-1 ring-slate-200 sm:flex-row sm:items-center sm:justify-between"><div class="min-w-0"><p class="text-sm font-bold text-slate-900">{{ festival.nombre }}</p><p class="mt-0.5 text-sm text-slate-600">Está en borrador y aún no se ha enviado a revisión.</p></div><a [routerLink]="['/gestion/procesos/festivales', festival.id]" class="shrink-0 rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-center text-sm font-bold text-slate-700 transition hover:border-morado hover:text-morado focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-morado focus-visible:ring-offset-2">Continuar registro</a></li>
+          }
+        </ul>
+      }
+    </section>
+
+    <section aria-labelledby="indicadores-titulo" class="min-w-0 xl:border-l xl:border-slate-200 xl:pl-10">
+      <div class="flex flex-wrap items-end justify-between gap-3"><h3 id="indicadores-titulo" class="font-alternate text-titulo font-bold uppercase tracking-wide text-morado">Estado de los procesos</h3><a routerLink="/gestion/procesos" class="text-sm font-bold text-verde-texto hover:underline">Ver procesos</a></div>
+      <dl class="mt-4 grid grid-cols-2 gap-x-6 gap-y-5">
+        <div><dt class="font-alternate text-dato font-bold uppercase tracking-[0.18em] text-seccion">En borrador</dt><dd class="mt-1 font-alternate text-3xl font-bold text-morado">{{ borradoresSinEnviar() }}</dd><p class="mt-1 text-dato text-rotulo">Sin enviar.</p></div>
+        <div><dt class="font-alternate text-dato font-bold uppercase tracking-[0.18em] text-seccion">En revisión</dt><dd class="mt-1 font-alternate text-3xl font-bold text-morado">{{ enRevision() }}</dd><p class="mt-1 text-dato text-rotulo">Esperan decisión.</p></div>
+        <div><dt class="font-alternate text-dato font-bold uppercase tracking-[0.18em] text-seccion">Ajustes sugeridos</dt><dd class="mt-1 font-alternate text-3xl font-bold text-morado">{{ requierenAtencion() }}</dd><p class="mt-1 text-dato text-rotulo">Requieren atención.</p></div>
+        <div><dt class="font-alternate text-dato font-bold uppercase tracking-[0.18em] text-seccion">Publicados</dt><dd class="mt-1 font-alternate text-3xl font-bold text-morado">{{ publicados() }}</dd><p class="mt-1 text-dato text-rotulo">En el Ecosistema.</p></div>
+      </dl>
+    </section>
+  </div>
+</div>

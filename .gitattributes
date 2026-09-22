@@ -1,0 +1,41 @@
+# Normalizacion de finales de linea y clasificacion binaria.
+#
+# POR QUE EXISTE ESTE FICHERO. El repositorio tiene core.autocrlf=true, y git
+# decide si un fichero es texto buscando un byte nulo en los primeros 8000. Un
+# PDF generado con reportlab no lo tiene: git lo clasificaba como TEXTO y en el
+# siguiente checkout le habria convertido sus 206 saltos de linea a CRLF,
+# dejando el fichero ilegible. El blob guardado estaba intacto por casualidad,
+# no por diseno.
+#
+# `binary` es el macro de git para `-diff -merge -text`: desactiva la conversion.
+
+*                   text=auto
+
+# Entregables y material grafico: nunca se convierten.
+*.pdf               binary
+*.docx              binary
+*.doc               binary
+*.xlsx              binary
+*.xls               binary
+*.pptx              binary
+*.png               binary
+*.jpg               binary
+*.jpeg              binary
+*.gif               binary
+*.webp              binary
+*.ico               binary
+*.woff              binary
+*.woff2              binary
+*.ttf               binary
+*.otf               binary
+*.eot               binary
+*.zip               binary
+*.gz                binary
+*.mp4               binary
+*.webm              binary
+
+# Guiones de shell: siempre LF, o no arrancan dentro de un contenedor Linux.
+*.sh                text eol=lf
+
+# Los .sql en UTF-16 que vienen de SIMUS no se tocan.
+*.sql               text

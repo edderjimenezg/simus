@@ -1,0 +1,324 @@
+# =====================================================================================
+# SIMUS — verificación y despliegue al ambiente de pruebas
+#
+# POR QUÉ AZURE PIPELINES Y NO GITHUB ACTIONS: el Ministerio trabaja en Azure DevOps
+# (dev.azure.com/Mincultura2024). Lo que se entregue tiene que poder leerse y ejecutarse en
+# su organización sin traducir nada.
+#
+# LO QUE HAY QUE CREAR ANTES DE QUE ESTO CORRA:
+#   1. Una conexión de servicio de Azure Resource Manager con identidad de carga de trabajo
+#      (OIDC), llamada como diga `conexionDeAzure`. Sin contraseñas guardadas.
+#   2. Un grupo de variables `pnmc-pruebas` con `cadenaDeConexionSql` marcada como secreta.
+# =====================================================================================
+
+trigger:
+  branches:
+    include:
+      - main
+
+pr:
+  branches:
+    include:
+      - main
+
+variables:
+  # NODE 24 Y NO 22, y la diferencia está medida. `ci.yml` declara 22 y nunca llegó a
+  # ejecutarse —dispara sobre ramas a las que no se empuja—, mientras que la suite entera se
+  # verificó hoy sobre Node 24.16 en la máquina de desarrollo. Se fija la versión donde el
+  # código está probado de verdad. Alinear `ci.yml` es trabajo aparte.
+  versionDeNode: '24.x'
+  versionDeDotnet: '10.0.x'
+
+  # El nombre de la conexión de servicio y del sitio. Se cambian aquí y en ningún otro sitio.
+  conexionDeAzure: 'pnmc-azure'
+  nombreDelSitio: 'pnmc-pruebas'
+
+stages:
+  # ===================================================================================
+  - stage: verificar
+    displayName: Verificar
+    jobs:
+      # -----------------------------------------------------------------------------
+      - job: estructura
+        displayName: Estructura del repositorio
+        pool:
+          vmImage: ubuntu-latest
+        steps:
+          - script: ./scripts/verificar-estructura.sh
+            displayName: Rechazar vestigios y archivos regenerables
+
+      # -----------------------------------------------------------------------------
+      - job: web
+        displayName: Frontend (Angular)
+        pool:
+          vmImage: ubuntu-latest
+        steps:
+          - task: NodeTool@0
+            displayName: Node
+            inputs:
+              versionSpec: $(versionDeNode)
+
+          # `npm ci` respeta el lockfile; `npm install` podría resolver otras versiones y hacer
+          # que se verifique algo distinto de lo que se despliega.
+          - script: npm ci
+            displayName: Instalar dependencias
+            workingDirectory: pnmc-web
+
+          # PRIMERO LOS CANARIOS. Un trinquete que no puede ponerse en rojo pasa siempre, y
+          # entonces no protege: tranquiliza, que es peor. Estas pruebas inyectan un defecto a
+          # propósito y comprueban que la puerta muerde.
+          - script: npm run trinquete:prueba
+            displayName: Comprobar que los trinquetes pueden ponerse en rojo
+            workingDirectory: pnmc-web
+
+          - script: npm run lint
+            displayName: Lint (techo de avisos)
+            workingDirectory: pnmc-web
+
+          # Los techos viven en `trinquete/`. Una subida de deuda rompe esta puerta y exige
+          # corregir el cambio o volver a sellar el límite con una justificación revisable.
+          - script: npm run trinquete
+            displayName: Trinquetes de deuda
+            workingDirectory: pnmc-web
+
+          - script: npm test
+            displayName: Pruebas unitarias
+            workingDirectory: pnmc-web
+
+          # El catálogo que siembra la base es un artefacto GENERADO del registro TypeScript. Si
+          # alguien edita el registro y olvida regenerarlo, el sitio compila un texto y la base
+          # siembra otro. Pasó de verdad con `nav_mapa`.
+          - script: |
+              set -e
+              npm run cms:catalog
+              if ! git diff --quiet -- ../pnmc-api/src/PNMC.Infrastructure/Data/web-content-catalog.json; then
+                echo "##vso[task.logissue type=error]El catálogo está desactualizado. Ejecute 'npm run cms:catalog' y confirme el cambio."
+                git diff --stat -- ../pnmc-api/src/PNMC.Infrastructure/Data/web-content-catalog.json
+                exit 1
+              fi
+              echo "El catálogo coincide con el registro."
+            displayName: Verificar que el catálogo sembrado coincida con el registro
+            workingDirectory: pnmc-web
+
+          - script: npm run cms:huerfanas
+            displayName: Verificar que ninguna clave del panel se quede sin lector
+            workingDirectory: pnmc-web
+
+          - script: npm run cms:reservas
+            displayName: Verificar que ningún componente rellene un texto publicado en blanco
+            workingDirectory: pnmc-web
+
+          # El build de producción es parte de la verificación: aplica los `fileReplacements`
+          # que dejan fuera las herramientas de desarrollo.
+          - script: npm run build
+            displayName: Build de producción
+            workingDirectory: pnmc-web
+
+          - script: npx playwright install --with-deps chromium
+            displayName: Instalar navegador para las pruebas de extremo a extremo
+            workingDirectory: pnmc-web
+
+          - script: npm run e2e:ci
+            displayName: Pruebas de extremo a extremo sin backend (accesibilidad y contraste)
+            workingDirectory: pnmc-web
+
+          - task: PublishPipelineArtifact@1
+            displayName: Guardar evidencia si alguna prueba falla
+            condition: failed()
+            inputs:
+              targetPath: pnmc-web/test-results
+              artifact: evidencia-e2e
+
+          # Red de seguridad explícita: si algún día vuelve a colarse una herramienta de
+          # desarrollo o una credencial en el bundle, la corrida falla aquí.
+          - script: |
+              set -e
+              fail=0
+              for needle in "admin@pnmc.local" "gestor@pnmc.local" "react-dom/client" "agentation"; do
+                if grep -rqF "$needle" dist/pnmc-web/browser --include="*.js"; then
+                  echo "##vso[task.logissue type=error]'$needle' aparece en el bundle de producción"
+                  fail=1
+                fi
+              done
+              exit $fail
+            displayName: Verificar que el bundle no lleve artefactos de desarrollo
+            workingDirectory: pnmc-web
+
+          # El artefacto del front viaja a la etapa de despliegue en vez de reconstruirse: lo que
+          # se publica tiene que ser exactamente lo que se verificó.
+          - task: PublishPipelineArtifact@1
+            displayName: Publicar el front verificado
+            inputs:
+              targetPath: pnmc-web/dist/pnmc-web/browser
+              artifact: front
+
+      # -----------------------------------------------------------------------------
+      - job: api
+        displayName: Backend (.NET)
+        pool:
+          vmImage: ubuntu-latest
+
+        # SQL SERVER DE VERDAD, Y NO ES UN LUJO. Con la vía de SQLite se OMITEN 22 pruebas: la
+        # paridad de esquema, la estructura de la migración de SIMUS, el catálogo de permisos, la
+        # siembra re-ejecutable y el alta de usuarios. Todas miden cosas que SQLite no tiene.
+        #
+        # LA CONTRASEÑA NO ES UN SECRETO Y NO DEBE SERLO: contenedor efímero, sin datos, que vive
+        # lo que dura el trabajo. Ponerla en un grupo de variables daría la impresión contraria.
+        services:
+          sqlserver: sqlserver
+
+        resources:
+          containers:
+            - container: sqlserver
+              image: mcr.microsoft.com/mssql/server:2022-latest
+              env:
+                ACCEPT_EULA: 'Y'
+                MSSQL_SA_PASSWORD: 'PnmcLocal_2026!'
+              ports:
+                - 14334:1433
+
+        steps:
+          - task: UseDotNet@2
+            displayName: .NET
+            inputs:
+              version: $(versionDeDotnet)
+
+          - script: dotnet restore PNMC.Api.sln
+            displayName: Restaurar
+            workingDirectory: pnmc-api
+
+          - script: dotnet build PNMC.Api.sln --configuration Release --no-restore
+            displayName: Compilar
+            workingDirectory: pnmc-api
+
+          # LA COMPROBACIÓN EXPLÍCITA. Si el contenedor no llega a estar sano, el trabajo se cae
+          # con un mensaje que no menciona SQL Server por ningún lado. Este paso falla ANTES,
+          # diciendo exactamente qué pasa.
+          - script: |
+              for intento in $(seq 1 30); do
+                if (echo > /dev/tcp/127.0.0.1/14334) 2>/dev/null; then
+                  echo "SQL Server responde en 127.0.0.1:14334 (intento $intento)"
+                  exit 0
+                fi
+                sleep 5
+              done
+              echo "SQL Server no respondió en 150 s. Las pruebas del carril real no pueden correr."
+              exit 1
+            displayName: Esperar a SQL Server
+
+          # SIN `--filter`: se corren TODAS. Y que ninguna se OMITA lo vigila una prueba, no un
+          # paso de este fichero: `CarrilDeSqlServerNoSeOlvidaTests` falla si el contenedor
+          # responde y la variable no está puesta.
+          - script: dotnet test PNMC.Api.sln --configuration Release --no-build --verbosity normal
+            displayName: Pruebas
+            workingDirectory: pnmc-api
+            env:
+              PNMC_PRUEBAS_SQLSERVER: '1'
+
+          - script: dotnet publish src/PNMC.Api/PNMC.Api.csproj -c Release -o $(Build.ArtifactStagingDirectory)/api
+            displayName: Empaquetar el API
+            workingDirectory: pnmc-api
+
+          # LA MISMA RED DE SEGURIDAD QUE EL FRONT, SOBRE EL PAQUETE DEL SERVIDOR.
+          # `appsettings.Local.json` no está en git pero sí se copia a `bin/`, y con él la cadena
+          # con la contraseña de la base de desarrollo. El `.csproj` lo excluye del publish desde
+          # el 27 de agosto de 2026; esto comprueba que siga siendo verdad.
+          - script: |
+              set -e
+              fail=0
+              for needle in "PnmcLocal_2026" "User Id=sa" "User ID=sa"; do
+                if grep -rqF "$needle" "$(Build.ArtifactStagingDirectory)/api"; then
+                  echo "##vso[task.logissue type=error]'$needle' aparece en el paquete del API"
+                  fail=1
+                fi
+              done
+              if [ -f "$(Build.ArtifactStagingDirectory)/api/appsettings.Local.json" ]; then
+                echo "##vso[task.logissue type=error]appsettings.Local.json viajó dentro del paquete"
+                fail=1
+              fi
+              exit $fail
+            displayName: Verificar que el paquete no lleve credenciales locales
+
+          - task: PublishPipelineArtifact@1
+            displayName: Publicar el API verificado
+            inputs:
+              targetPath: $(Build.ArtifactStagingDirectory)/api
+              artifact: api
+
+  # ===================================================================================
+  - stage: desplegar
+    displayName: Desplegar al ambiente de pruebas
+    dependsOn: verificar
+    # SOLO DESDE `main`, Y SOLO SI LA VERIFICACIÓN PASÓ. Un pull request construye y prueba;
+    # no publica.
+    condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/main'))
+    variables:
+      - group: pnmc-pruebas
+    jobs:
+      - deployment: publicar
+        displayName: Publicar
+        pool:
+          vmImage: ubuntu-latest
+        environment: pnmc-pruebas
+        strategy:
+          runOnce:
+            deploy:
+              steps:
+                - download: current
+                  artifact: api
+                - download: current
+                  artifact: front
+
+                # EL FRONT VA DENTRO DEL PAQUETE DEL API, en `wwwroot`. Es lo que hace que los
+                # dos compartan origen, y con ello que la cookie de sesión —`SameSite=Lax`— viaje.
+                - script: |
+                    set -e
+                    mkdir -p "$(Pipeline.Workspace)/api/wwwroot"
+                    cp -r "$(Pipeline.Workspace)/front/." "$(Pipeline.Workspace)/api/wwwroot/"
+                    test -f "$(Pipeline.Workspace)/api/wwwroot/index.html"
+                    echo "Front copiado a wwwroot."
+                  displayName: Meter el front dentro del paquete
+
+                - task: UseDotNet@2
+                  inputs:
+                    version: $(versionDeDotnet)
+
+                # EL ESQUEMA LO APLICA EL MIGRADOR, NO LA APLICACIÓN AL ARRANCAR. `estado` sale
+                # con código 1 si hay guiones pendientes, así que sirve de puerta tal cual: deja
+                # escrito en el registro del pipeline qué se va a aplicar antes de aplicarlo.
+                - script: |
+                    set -e
+                    dotnet run --project pnmc-api/src/PNMC.Migrador -- estado || true
+                    dotnet run --project pnmc-api/src/PNMC.Migrador -- migrar
+                    dotnet run --project pnmc-api/src/PNMC.Migrador -- estado
+                  displayName: Migrar la base
+                  env:
+                    PNMC_MIGRADOR_CONEXION: $(cadenaDeConexionSql)
+
+                - task: AzureWebApp@1
+                  displayName: Publicar en el App Service
+                  inputs:
+                    azureSubscription: $(conexionDeAzure)
+                    appName: $(nombreDelSitio)
+                    appType: webAppLinux
+                    package: $(Pipeline.Workspace)/api
+                    runtimeStack: 'DOTNETCORE|10.0'
+
+                # HUMO, Y SOBRE HTTPS. Con `Security:ExigirHttps` activo, una llamada por HTTP
+                # plano recibe 307 y parecería una caída. Lo advierte `Program.cs`.
+                - script: |
+                    set -e
+                    sitio="https://$(nombreDelSitio).azurewebsites.net"
+                    for intento in $(seq 1 20); do
+                      codigo=$(curl -s -o /dev/null -w '%{http_code}' "$sitio/health/ready" || true)
+                      if [ "$codigo" = "200" ]; then
+                        echo "El sitio responde: $sitio"
+                        curl -s -o /dev/null -w 'raiz=%{http_code}\n' "$sitio/"
+                        exit 0
+                      fi
+                      echo "intento $intento: /health/ready devolvió $codigo"
+                      sleep 10
+                    done
+                    echo "El sitio no respondió 200 en /health/ready tras 200 s."
+                    exit 1
+                  displayName: Comprobación de humo

@@ -1,0 +1,11 @@
+# El fichero de parámetros real lleva la contraseña del administrador de la base.
+# Se versiona el ejemplo, nunca el que se usa.
+#
+# Va aquí y no en el .gitignore de la raíz a propósito: esta carpeta es nueva y su regla
+# vive con ella, de modo que quien se lleve `infra/` se lleva también la protección.
+parametros.json
+parametros.*.json
+!parametros.ejemplo.json
+
+# Credenciales del ambiente de pruebas. Nunca se versionan.
+*.local.md

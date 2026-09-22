@@ -1,0 +1,2779 @@
+<!--
+  TABLERO DE TRES COLUMNAS DEL GEOVISOR (PNMC-061).
+
+  Antes: el mapa era un lienzo a sangre y todo lo demas flotaba encima —barra de
+  herramientas, leyenda, y cinco paneles superpuestos que tapaban el propio mapa
+  que pretendian controlar—, con un unico panel lateral a la derecha.
+
+  Ahora: una rejilla donde cada cosa tiene su celda. Barra de lectura arriba,
+  panel de control a la izquierda (que se ve, en pestanas), mapa en el centro y
+  panel de lectura a la derecha (que hay). Solo siguen flotando las dos cosas
+  que son contextuales al cursor sobre el mapa: la ficha del departamento bajo el
+  puntero y la leyenda de color.
+
+  Por debajo de `lg` los tres bloques se apilan y la pagina se desplaza; el mapa
+  conserva una altura propia en vez de heredar `flex-1`, que sobre un flex en
+  columna resolvia a cero y dejaba el lienzo de Leaflet sin altura.
+-->
+<!--
+  A PANTALLA COMPLETA, DE VERDAD. `lg:h-screen` con `pt-20` daba una página 80 px más alta que la
+  ventana: el geovisor se salía por abajo y había que desplazar la página para ver el pie del mapa.
+  `h-[100dvh]` con el relleno DENTRO de la caja —`box-border`— hace que el conjunto mida exactamente
+  la ventana. `dvh` y no `vh` porque en móvil la barra del navegador aparece y desaparece, y `vh`
+  cuenta la que no está.
+-->
+<div class="relative box-border min-h-screen w-full bg-slate-50 pt-20 text-left font-sans text-slate-900 lg:h-[100dvh] lg:overflow-hidden">
+
+  <!--
+    AQUI ESTABA LA BARRA SUPERIOR, de 64 px de alto y tres columnas: «Limpiar» a la izquierda, las
+    seis capas en el centro y exportar/imprimir/ayuda a la derecha. Se retiró el 12 de septiembre de
+    2026 a petición de la dirección de producto, y lo que llevaba se repartió donde ya se mira:
+
+      · las capas y «Limpiar» -> ARRIBA DE LA COLUMNA IZQUIERDA, junto a los filtros. Elegir capa y
+        filtrar son el mismo gesto y estaban a 64 px de distancia vertical uno de otro.
+      · exportar, imprimir y ayuda -> AL PIE DE ESA MISMA COLUMNA, fijos. Son tres acciones sobre
+        lo que ya se está viendo, no controles de lectura: no compiten por el sitio de arriba.
+      · el conmutador Mapa/Gráfico/Tabla -> DENTRO DEL MAPA, como control flotante.
+      · el título y su descripción -> encima de las capas, en la columna izquierda.
+
+    Se ganan 64 px de alto en todas las pantallas, que en un geovisor es la diferencia entre ver
+    tres departamentos más o no verlos.
+  -->
+
+  <!--
+    LAS TRES COLUMNAS LLENAN LO QUE QUEDA. Restaba `4rem` de una barra superior que ya no existe:
+    el mapa se quedaba 64 px corto y por eso se veía flotando sobre un fondo gris.
+  -->
+  <div class="relative flex w-full flex-col lg:h-[calc(100dvh-5rem)] lg:flex-row lg:overflow-hidden">
+
+    <!-- ======================= PANEL DE CONTROL ======================= -->
+    <aside
+      [class]="'order-3 flex w-full flex-shrink-0 flex-col border-b border-slate-200 bg-white transition-all duration-500 lg:order-none lg:h-full lg:w-[300px] lg:border-b-0 lg:border-r ' + enfoqueDelTutorial('izquierda')"
+      aria-label="Controles del geovisor"
+    >
+      <!--
+        LA CABECERA SE QUEDA EN LAS PESTAÑAS. Llevaba encima el rótulo «Controles del
+        geovisor» y un párrafo —«Lectura territorial del ecosistema musical: procesos,
+        infraestructuras y agentes registrados en el país»— que no controlaba nada: la
+        columna se explica sola con las dos pestañas y los tres desplegables. Quitado el
+        29 de agosto de 2026, junto con el pie: «elimina esto, solo deja los filtros».
+      -->
+      <!--
+        EL TITULO Y LAS CAPAS, ARRIBA DE ESTA COLUMNA. Vivían en la barra superior; aquí quedan
+        pegados a los filtros, que es el otro control de la misma lectura.
+      -->
+      <!--
+        LA CABECERA PIERDE EL TITULO Y LAS CAPAS, y las dos cosas por el mismo motivo: el espacio.
+
+        El título «Circulación cultural en Colombia» repetía lo que ya dice la navegación del sitio y
+        ocupaba una línea grande en la columna donde más falta hace el alto. Las seis capas se van a
+        la columna derecha, justo bajo «Mapa ecosistémico», porque ahí es donde de verdad viven: la
+        capa dice QUE se está mirando, y esa columna es la que lee lo que se está mirando. La
+        izquierda queda para ACOTAR y REPRESENTAR —buscar, territorio, lente, dibujo, leyenda—, que
+        es una sola idea y ahora entra entera.
+
+        El criterio es este: «que la barra izquierda empiece con buscar, luego el
+        filtro de territorios, luego las opciones de lectura, luego los tipos de visualización, y la
+        nota de cómo leer el mapa presente, aprovechando ese nuevo espacio».
+      -->
+      <header class="flex-shrink-0 border-b border-slate-100 px-5 py-3.5">
+        <p class="text-[11px] leading-relaxed text-slate-500">
+          {{ configuracionDeLaCapa().description }}
+        </p>
+
+        <!--
+          LOS FILTROS PUESTOS, UNO A UNO Y QUITABLES DE UNO EN UNO.
+
+          Había un solo botón de «Limpiar filtros (3)»: decía cuántos y no cuáles, y sólo sabía
+          quitarlos los tres a la vez. Quien había acotado a un departamento, un municipio y una
+          búsqueda y quería soltar sólo la búsqueda tenía que quitarlo todo y rehacer dos pasos.
+
+          Cada ficha dice su VALOR y no el nombre del campo —«Nariño», no «Departamento»—, que es lo
+          que permite reconocer lo que se puso sin volver a abrir el desplegable.
+        -->
+        @let filtros = filtrosPuestos();
+        @if (filtros.length) {
+          <div class="mt-3 flex flex-wrap items-center gap-1">
+            @for (filtro of filtros; track filtro.clave) {
+              <button
+                type="button"
+                (click)="quitarFiltro(filtro.clave)"
+                [attr.title]="'Quitar el filtro de ' + filtro.etiqueta"
+                class="flex cursor-pointer items-center gap-1 rounded-full border border-morado/30 bg-morado/5 py-1 pl-2 pr-1.5 text-[9px] font-bold uppercase tracking-wider text-morado transition-all hover:border-morado hover:bg-morado/10"
+              >
+                <span class="max-w-[9rem] truncate">{{ filtro.valor }}</span>
+                <svg lucideX size="10"></svg>
+              </button>
+            }
+            @if (filtros.length > 1) {
+              <button
+                type="button"
+                (click)="limpiarFiltros()"
+                class="cursor-pointer rounded-full px-2 py-1 text-[9px] font-bold uppercase tracking-wider text-slate-400 underline underline-offset-2 transition-all hover:text-morado"
+              >
+                Quitar {{ filtros.length }}
+              </button>
+            }
+          </div>
+        }
+      </header>
+
+      <!--
+        AQUI HABIA DOS PESTAÑAS, «Territorio» y «Modos», y ese reparto era el problema. Los mismos
+        dos filtros —territorio sonoro y práctica— estaban enlazados en las DOS: las mismas señales,
+        dos controles, en pestañas distintas. Elegir en una cambiaba la otra donde nadie estaba
+        mirando, y llegar por «Modos» exigía dos decisiones previas para alcanzar el desplegable que
+        en «Territorio» estaba a la vista.
+
+        Ahora la columna se desplaza y agrupa por las CUATRO PREGUNTAS que de verdad son distintas:
+        qué se ve · dónde · de qué tipo · cómo se dibuja. Con todo a la vista, «Limpiar» tiene
+        delante lo que limpia.
+      -->
+      <div class="flex-1 overflow-y-auto px-5 py-4 custom-scrollbar">
+        <div class="space-y-5">
+          <section [class]="'space-y-3 transition-all duration-500 ' + enfoqueDelTutorial('filtros')" data-tuto="filtros" (pointerenter)="senalarApartado('filtros')" (focusin)="senalarApartado('filtros')" aria-labelledby="grupo-donde">
+            <!--
+              «FILTRAR» Y NO «UBICACION», porque el buscador se vino aquí. Estaba al final de «Cómo
+              leerlo», debajo del lente, y buscar por nombre no es una forma de leer el mapa: es
+              acotar lo que se ve, exactamente igual que el departamento y el municipio. Ya se
+              contaba como filtro en «Limpiar», así que estaba agrupado en un sitio y contado en
+              otro. Las tres preguntas de la columna quedan separadas y sin solaparse: qué se
+              filtra · con qué criterio se lee · cómo se dibuja.
+            -->
+            <p id="grupo-donde" class="text-[8px] font-black uppercase tracking-[0.18em] text-slate-400">Filtrar</p>
+
+            <!--
+              BUSCAR VA PRIMERO, ANTES DE LOS DESPLEGABLES. Lo pidió la dirección de producto —«dejar
+              al inicio el de buscar y el filtro por territorio»— y coincide con cómo se usa: quien
+              sabe qué busca escribe; quien no, explora por territorio. El camino directo delante
+              del camino largo, y además es lo único de la sección que no depende de nada anterior.
+            -->
+            <!--
+              EL BUSCADOR ESTABA EN LA COLUMNA DERECHA y «Limpiar» —que está aquí— lo borraba: quien
+              escribía algo y pulsaba «Limpiar» al otro lado de la pantalla veía desaparecer lo
+              tecleado sin que nada lo anunciara. Busca sobre lo mismo que acotan los desplegables de
+              arriba y ya se contaba como filtro; ponerlo con ellos hace visible lo que pasaba a
+              escondidas. La columna derecha se queda con lo que es: LEER lo que quedó.
+            -->
+            <label class="block">
+              <span class="text-[9px] font-bold uppercase tracking-widest text-slate-400">Buscar</span>
+              <span class="relative mt-1.5 block">
+                <input
+                  type="search"
+                  [ngModel]="busquedaDelDirectorio()"
+                  (ngModelChange)="busquedaDelDirectorio.set($event)"
+                  placeholder="Nombre, municipio o palabra…"
+                  class="h-10 w-full rounded-xl border border-slate-200 bg-white pl-3 pr-9 text-[11px] text-slate-800 outline-none focus:border-morado"
+                />
+                @if (busquedaDelDirectorio()) {
+                  <button type="button" (click)="busquedaDelDirectorio.set('')" aria-label="Borrar la búsqueda"
+                    class="absolute right-2 top-1/2 -translate-y-1/2 rounded-full p-1 text-slate-400 hover:text-morado cursor-pointer">
+                    <svg lucideX size="13"></svg>
+                  </button>
+                }
+              </span>
+            </label>
+            <label class="block">
+              <span class="text-[9px] font-bold uppercase tracking-widest text-slate-400">Departamento</span>
+              <select
+                [ngModel]="departamentoElegido()"
+                (ngModelChange)="departamentoElegido.set($event)"
+                class="mt-1.5 h-10 w-full rounded-xl border border-slate-200 bg-white px-3 text-[11px] font-bold uppercase text-[#291242] outline-none focus:border-[#291242] cursor-pointer"
+              >
+                @for (department of departmentsList(); track department) {
+                  <option [value]="department">{{ department | nombrePropio }}</option>
+                }
+              </select>
+            </label>
+
+            <!--
+              EL MUNICIPIO FALTABA, y el dato estaba: cada registro lo trae y el mapa ya sabe abrir
+              uno al pulsarlo. Se podía LLEGAR a un municipio con el ratón, no ELEGIRLO.
+
+              SOLO LOS QUE TIENEN REGISTROS. Un desplegable con los 1.122 de DIVIPOLA, de los que
+              novecientos dan cero, no es un filtro: es un catálogo.
+            -->
+            <!--
+              Y SOLO SI HAY ALGUNO. En un departamento sin registros la lista sale vacía y el
+              desplegable se quedaba con un «Todos» solitario: un control que no puede llevar a
+              ningún otro valor. Ocupa sitio, invita a desplegarlo y no ofrece nada.
+            -->
+            @if (departamentoElegido() !== 'Nacional' && municipiosConRegistros().length > 0) {
+              <label class="block">
+                <span class="text-[9px] font-bold uppercase tracking-widest text-slate-400">Municipio</span>
+                <select
+                  [ngModel]="municipioElegido()"
+                  (ngModelChange)="actualizarMunicipio($event)"
+                  class="mt-1.5 h-10 w-full rounded-xl border border-slate-200 bg-white px-3 text-[11px] font-bold uppercase text-morado outline-none focus:border-morado cursor-pointer"
+                >
+                  <option value="Todos">Todos</option>
+                  @for (municipio of municipiosConRegistros(); track municipio) {
+                    <option [value]="municipio">{{ municipio | nombrePropio }}</option>
+                  }
+                </select>
+              </label>
+            }
+
+          </section>
+
+          <section [class]="'space-y-3 transition-all duration-500 ' + enfoqueDelTutorial('lente')" data-tuto="lente" (pointerenter)="senalarApartado('lente')" (focusin)="senalarApartado('lente')" aria-labelledby="grupo-tipo">
+            <p id="grupo-tipo" class="text-[8px] font-black uppercase tracking-[0.18em] text-slate-400">Cómo leerlo</p>
+            <!--
+              AQUI HABIA DOS DESPLEGABLES —«Territorio Sonoro» y «Práctica / Género»— que FILTRABAN.
+              Eran el error de fondo, y está definido: «una cosa es cómo se
+              representa el mapa, y otra las gafas que me quiero poner para verlo».
+
+              Un filtro RESTA; un lente REAGRUPA. Con el filtro, lo que no estaba clasificado
+              desaparecía sin decirlo y la Agenda entera había que apagarla. Con el lente se ve
+              todo, y lo que no consta cae en «Sin clasificar», que es la verdad.
+            -->
+            <!--
+              TRES PASTILLAS EN UNA FILA, Y NO TRES BOTONES APILADOS.
+
+              Apilados ocupaban 120 px de alto para ofrecer tres opciones excluyentes, y eso —sumado
+              a la lista de catorce grupos que viene debajo— es lo que empujaba «Dibujo» fuera de la
+              pantalla y obligaba a deslizar sin que nada anunciara que ahí abajo había más. El
+              el criterio es este: «que se pueda tener en un solo vistazo, todo en una
+              sola vista».
+
+              Tres opciones que se excluyen son un conmutador, no una lista: en fila ocupan 32 px y
+              se leen igual. El icono repite la idea sin costar altura —un pin para el territorio
+              administrativo, ondas para el sonoro, una nota para la práctica— y el rótulo largo
+              sigue disponible en el `title` y en la frase de abajo.
+            -->
+            <!--
+              UN DIAL DE TRES CIRCULOS QUE GIRA, Y NO TRES PASTILLAS NI TRES BOTONES.
+
+              Tres pastillas en fila repartían el ancho de la columna entre las tres, así que ninguna
+              cabía entera —«Territorio · Sonoros · Prácticas», abreviaturas de lo que se elige— y
+              las tres competían por la atención aunque sólo una estuviera puesta.
+
+              Aquí el ICONO es el centro y el TEXTO va debajo apoyándolo: el nombre se lee entero,
+              una sola vez, y las otras dos opciones quedan a los lados como lo que son —lo que hay
+              si uno gira—. Elegir entre tres formas de mirar el país merece leerse así y no como
+              tres botones de una barra.
+
+              LOS TRES SE DIBUJAN SIEMPRE, y eso es lo que permite que gire: si sólo se pintara el
+              activo, cambiar sería un reemplazo —desaparece uno, aparece otro—. Con los tres en
+              pantalla y su POSICION como único dato que cambia, el navegador anima el recorrido y se
+              ve el dial rotando. La continuidad deja claro que son tres lecturas de lo mismo.
+
+              SE RESPETA `prefers-reduced-motion`: quien haya pedido menos movimiento recibe el
+              cambio instantáneo, con la misma información y sin el giro.
+            -->
+            <!--
+              SIN TARJETA. El dial tenía borde, fondo blanco y sombra en una columna donde todo lo
+              demás son secciones planas: el recuadro decía «esto es otro bloque» y no lo es —es la
+              segunda pregunta de la misma columna—. El propio dial ya se distingue por su forma; el
+              marco sólo añadía una frontera que no separa nada.
+            -->
+            <div class="py-1" role="group" aria-label="Con qué criterio se lee el mapa">
+              <div class="relative flex h-14 items-center justify-center">
+                @for (lente of dialDeLentes(); track lente.id) {
+                  @let activo = lente.posicion === 0;
+                  <button
+                    type="button"
+                    (click)="elegirLente(lente.id)"
+                    [attr.aria-pressed]="activo"
+                    [attr.aria-label]="lente.etiqueta"
+                    [attr.title]="lente.etiqueta"
+                    [attr.tabindex]="activo ? 0 : 0"
+                    [class]="'dial-del-lente absolute flex cursor-pointer items-center justify-center rounded-full transition-all duration-300 ' + (
+                      activo
+                        ? 'h-12 w-12 bg-morado text-white shadow-md shadow-morado/25 z-10'
+                        : 'h-8 w-8 bg-slate-100 text-slate-400 hover:bg-slate-200 hover:text-morado'
+                    )"
+                    [style.transform]="'translateX(' + (lente.posicion * 46) + 'px)'"
+                    [style.opacity]="activo ? 1 : 0.75"
+                  >
+                    @switch (lente.id) {
+                      @case ('territorial') { <svg lucideMapPin [size]="activo ? 20 : 13"></svg> }
+                      @case ('territorios-sonoros') { <svg lucideRadio [size]="activo ? 20 : 13"></svg> }
+                      @default { <svg lucideMusic [size]="activo ? 20 : 13"></svg> }
+                    }
+                  </button>
+                }
+              </div>
+
+              <!--
+                EL NOMBRE VA DEBAJO Y NO DENTRO DEL CIRCULO: dentro no cabe, y partido en dos
+                renglones deja de leerse como un nombre. `aria-live` porque quien no ve la pantalla
+                pulsa un círculo y necesita oír a qué llegó, no deducirlo del contenido de más abajo.
+              -->
+              <p class="mt-1.5 text-center text-[9.5px] font-bold uppercase tracking-wider text-morado"
+                 aria-live="polite">
+                {{ lenteActivo().etiqueta }}
+              </p>
+            </div>
+
+            <p class="text-[9.5px] leading-relaxed text-slate-500">{{ lenteActivo().invitacion }}</p>
+
+          </section>
+          <!--
+            EL ORDEN DE LA COLUMNA: filtrar · con qué criterio se lee · cómo se dibuja · leyenda.
+
+            Las tres primeras son controles cortos y caben juntas en pantalla; la leyenda, que es lo
+            único largo, va al final y se pliega. Antes «Cómo leerlo» arrastraba una lista de catorce
+            grupos que empujaba «Dibujo» fuera de la vista: esa lista es ahora la leyenda y vive con
+            ella, así que las tres secciones de control se ven de un vistazo.
+          -->
+          <!--
+            AQUI ESTABAN LOS TRES MODOS DE DIBUJO, y se fueron al mapa.
+
+            Coropletas, símbolos y calor sólo tienen efecto sobre el MAPA: en las vistas de gráfico y
+            tabla no dibujan nada. Un control que vive en la columna fija y no hace nada en dos de
+            las tres vistas está en el sitio equivocado, y además gastaba en la columna el alto que
+            hace falta para lo que sí acota siempre.
+
+            Ahora están DENTRO del mapa, justo encima del conmutador de vistas, que es donde ya vivía
+            la otra decisión sobre cómo se proyecta lo que se mira. Y se ocultan cuando la vista no es
+            el mapa, por el mismo motivo por el que se movieron.
+
+            LA LEYENDA SE QUEDA AQUI porque no es un control: es lo que hace legible el mapa, y se
+            lee mientras se mira, no mientras se elige.
+          -->
+          <section [class]="'space-y-2.5 transition-all duration-500 ' + enfoqueDelTutorial('leyenda')" data-tuto="leyenda" (pointerenter)="senalarApartado('leyenda')" (focusin)="senalarApartado('leyenda')" aria-labelledby="grupo-leyenda">
+
+            <!--
+              LOS TRES MODOS, Y LOS TRES DIBUJAN. El de calor estuvo anunciado y sin pulsar mientras
+              no hubo con qué dibujarlo: el importador de DIVIPOLA pedía el catálogo sin geometría y
+              los 1.122 municipios llegaban sin coordenada. Resuelto eso en el propio catálogo —que
+              es donde estaba el fallo—, el modo se encendió sin tocar esta sección, que era justo
+              para lo que se había dejado declarado.
+
+              Y EL MODO NO LLEVA FILTROS DENTRO. Colgaban de él los desplegables de territorio
+              sonoro y práctica, que son los MISMOS que estaban arriba: el modo elige el DIBUJO, y
+              con qué criterio se lee es el lente.
+            -->
+            <!--
+              CADA BOTON ENSEÑA LO QUE VA A DIBUJAR, en vez de nombrarlo y ya.
+
+              Eran tres rótulos de texto en una rejilla de tres columnas, y a 280 px de ancho no
+              cabían: «SÍMBOLOS PROPORCIONA…» y «MAPA DE CALOR» partido en dos. Elegir entre tres
+              formas de representar un mapa leyendo tres etiquetas truncadas obliga a probar las
+              tres para entender la diferencia.
+
+              La miniatura la enseña de un vistazo y es exacta, no decorativa: áreas teñidas de
+              distinto tono, círculos de distinto tamaño, una mancha difusa. Es la misma
+              codificación que usa el mapa —color de área, área de símbolo, densidad— dibujada en
+              veinte píxeles. Van marcadas `aria-hidden`: quien no las ve tiene el nombre y la
+              descripción, que dicen lo mismo con palabras.
+            -->
+            <!--
+              LA LEYENDA SE PUEDE PLEGAR, Y ESE BOTON GANA MEDIA COLUMNA.
+
+              Es lo que más altura ocupa de la sección —escalones, cifra del ámbito, avisos y la
+              procedencia— y no es un control: es referencia. Abierta empujaba fuera de la pantalla
+              lo que sí se pulsa, y nada anunciaba que abajo hubiera más; el criterio pide
+              justo esto: «poner un botón para mostrarla u ocultarla, y con eso ganar algo de
+              espacio».
+
+              ARRANCA ABIERTA a propósito. Un mapa por color sin su leyenda no se puede leer, así que
+              esconderla por omisión ahorraría espacio a costa de lo único que hace interpretable la
+              pantalla. Quien ya la conoce la pliega y el geovisor recuerda su elección mientras dure
+              la sesión.
+            -->
+            @let leyenda = leyendaDelModo();
+            <!--
+              LA LEYENDA SE INTEGRA CON LAS OTRAS SECCIONES EN VEZ DE FLOTAR SOBRE ELLAS.
+
+              Era una tarjeta con borde, fondo propio y esquinas redondeadas metida en una columna
+              donde todo lo demás son secciones planas con su rótulo: se leía como un bloque traído
+              de otra pantalla. El borde y el fondo decían «esto es otra cosa», y no lo es: es la
+              tercera pregunta de la misma columna —qué se filtra, con qué criterio se lee, cómo se
+              lee lo que salió—.
+
+              Ahora lleva el mismo rótulo que «Filtrar» y «Cómo leerlo», y lo único que la distingue
+              es que se puede plegar, porque es la única que es referencia y no control.
+            -->
+            <div>
+                <button
+                  type="button"
+                  id="grupo-leyenda"
+                  (click)="leyendaVisible.set(!leyendaVisible())"
+                  [attr.aria-expanded]="leyendaVisible()"
+                  aria-controls="leyenda-del-modo"
+                  class="flex min-h-6 w-full cursor-pointer items-center justify-between gap-2 text-left"
+                >
+                  <!--
+                    `min-h-6` Y PADDING: el botón medía 14 px de alto, por debajo del mínimo de
+                    objetivo que exige WCAG 2.2 (24 px). El margen negativo devuelve el espacio que
+                    el padding añade, así que el bloque se ve igual y el área pulsable crece.
+                  -->
+                  <span class="text-[8px] font-black uppercase tracking-[0.18em] text-slate-400">
+                    {{ comoSeLeeLaVista()?.titulo ?? 'Cómo leer el mapa' }}
+                  </span>
+                  <svg lucideChevronRight size="12"
+                       [class]="'text-slate-400 transition-transform ' + (leyendaVisible() ? 'rotate-90' : '')"></svg>
+                </button>
+                <div id="leyenda-del-modo" [hidden]="!leyendaVisible()" class="mt-2.5 space-y-2.5">
+                  <!--
+                    FUERA DEL MAPA, LA LEYENDA DEL MAPA NO APLICA. Explicar la rampa del coroplético
+                    mientras se está mirando una tabla describe una vista que no está en pantalla.
+                  -->
+                  @if (comoSeLeeLaVista(); as guia) {
+                    @for (parrafo of guia.parrafos; track parrafo) {
+                      <p class="text-[9.5px] leading-relaxed text-slate-500">{{ parrafo }}</p>
+                    }
+                  } @else {
+                  <!--
+                    LA DESCRIPCION DEL MODO VIVE AQUI Y NO SUELTA ENCIMA. Estaba entre las pastillas
+                    y la leyenda, repitiendo el sitio de «cómo se lee esto»: unida, se lee una vez y
+                    ahorra la altura de un párrafo huérfano.
+                  -->
+                  <p class="text-[9.5px] leading-relaxed text-slate-500">{{ loQueDibujaAhora() }}</p>
+
+                  <!--
+                    LA LEYENDA DE TAMAÑOS, dibujada a escala real. Es la del modo de símbolos: ahí
+                    el color no dice nada y lo que hay que poder calibrar es el área.
+                  -->
+                  @if (leyenda.tamanos.length > 0) {
+                    <ul class="flex items-end justify-start gap-3 pt-1">
+                      @for (talla of leyenda.tamanos; track talla.valor) {
+                        <li class="flex flex-col items-center gap-1">
+                          <span class="senalador-municipal-leyenda"
+                                [style.width.px]="talla.lado" [style.height.px]="talla.lado"
+                                [style.background-color]="colorCapaActiva()"></span>
+                          <span class="text-[9px] font-bold tabular-nums text-slate-500">{{ talla.valor }}</span>
+                        </li>
+                      }
+                    </ul>
+                    <p class="text-[9px] leading-relaxed text-slate-500">
+                      El área del círculo crece con la raíz de la cifra, no con la cifra: el ojo
+                      compara superficies, y escalar el diámetro haría que cuatro procesos se vieran
+                      dieciséis veces más grandes que uno.
+                    </p>
+                  }
+
+                  @if (leyenda.escalones.length > 0) {
+                    <ul class="space-y-1">
+                      @for (escalon of leyenda.escalones; track escalon.label) {
+                        <li class="flex items-center gap-2">
+                          <span class="h-2.5 w-4 flex-shrink-0 rounded-sm"
+                                [style.background-color]="escalon.color"
+                                [style.opacity]="escalon.opacity"></span>
+                          <span class="text-[10px] font-semibold text-slate-600">{{ escalon.label }}</span>
+                        </li>
+                      }
+                    </ul>
+                  }
+
+                  <!--
+                    LOS GRUPOS DEL LENTE, QUE SON A LA VEZ LEYENDA Y CONTROL. Pulsar uno RESALTA
+                    —atenúa los demás—, no esconde: es la diferencia entre ponerse unas gafas y
+                    taparse un ojo, y es lo que permite ver que el Joropo está en dieciocho
+                    departamentos sin perder de vista los otros once.
+                  -->
+                  @if (leyenda.grupos.length) {
+                    <ul class="space-y-0.5">
+                      @for (grupo of leyenda.grupos; track grupo.nombre) {
+                        @let resaltado = grupoResaltado() === grupo.nombre;
+                        <li>
+                          <button
+                            type="button"
+                            data-grupo-del-lente
+                            (click)="alternarGrupoResaltado(grupo.nombre)"
+                            [attr.aria-pressed]="resaltado"
+                            [class]="'flex min-h-6 w-full cursor-pointer items-center justify-between gap-2 rounded-lg px-1.5 py-1.5 text-left transition-all ' + (
+                              resaltado ? 'bg-morado/10 ring-1 ring-morado' : 'hover:bg-slate-50'
+                            )"
+                          >
+                            <span class="flex min-w-0 items-center gap-1.5">
+                              <span class="h-2 w-2 shrink-0 rounded-full"
+                                    [style.background-color]="coloresDelLente().get(grupo.nombre)"></span>
+                              <span [class]="'truncate text-[9.5px] font-semibold ' + (grupo.nombre === 'Sin clasificar' ? 'italic text-slate-400' : 'text-slate-700')">{{ grupo.nombre }}</span>
+                            </span>
+                            <span class="shrink-0 text-[9.5px] font-bold tabular-nums text-slate-500">{{ grupo.total }}</span>
+                          </button>
+                        </li>
+                      }
+                    </ul>
+                    @if (leyenda.gruposOcultos > 0) {
+                      <button type="button" (click)="gruposDelLenteCompletos.set(true)"
+                              class="min-h-6 w-full cursor-pointer rounded-lg border border-dashed border-slate-200 px-2 py-1.5 text-[8.5px] font-bold uppercase tracking-wider text-slate-500 transition-all hover:border-morado hover:text-morado">
+                        Ver los {{ leyenda.gruposOcultos }} restantes
+                      </button>
+                    } @else if (gruposDelLenteCompletos()) {
+                      <button type="button" (click)="gruposDelLenteCompletos.set(false)"
+                              class="min-h-6 w-full cursor-pointer px-2 py-1 text-[8.5px] font-bold uppercase tracking-wider text-slate-400 transition-all hover:text-morado">
+                        Ver menos
+                      </button>
+                    }
+                  }
+
+                  <!--
+                    AQUI IBA UNA LINEA DE RECUENTO —«Por territorios sonoros · 141 procesos · 29
+                    departamentos»— y se retira con el mismo criterio que el contador del pie: es la
+                    tercera vez que la misma cifra aparece en la columna. La pastilla de la capa ya
+                    dice cuántos procesos hay, la lista de grupos ya reparte esos procesos uno a uno,
+                    y el lente activo ya está escrito bajo el dial. Repetirlo alarga la leyenda sin
+                    añadir, y una leyenda larga es una leyenda que se pliega y deja de consultarse.
+                  -->
+
+                  @for (aviso of leyenda.avisos; track aviso.clave) {
+                    <p class="rounded-lg bg-amber-50 px-2.5 py-1.5 text-[9.5px] font-semibold leading-snug text-amber-900">
+                      {{ aviso.texto }}
+                    </p>
+                  }
+
+                  <!--
+                    LA PROCEDENCIA SE PLIEGA, PERO NO SE VA. Son dos párrafos de referencia —de
+                    dónde sale la posición y de dónde la clasificación— que hay que poder consultar
+                    y que nadie lee en cada mirada; desplegados se llevaban ciento y pico píxeles y
+                    empujaban fuera de la pantalla la sección de abajo, que sí son controles.
+
+                    NO se resumen ni se recortan: el mapa afirma dos cosas sobre cada proceso y
+                    quien las lea tiene derecho al texto entero. Sólo dejan de estar abiertas.
+                  -->
+                  <details class="group">
+                    <summary class="flex cursor-pointer list-none items-center gap-1 text-[9px] font-bold uppercase tracking-widest text-slate-400 hover:text-morado">
+                      <svg lucideChevronRight size="10" class="transition-transform group-open:rotate-90"></svg>
+                      De dónde salen estos datos
+                    </summary>
+                    <p class="mt-1.5 text-[9px] leading-relaxed text-slate-500">{{ leyenda.procedenciaDePosicion }}</p>
+                    <p class="mt-1 text-[9px] leading-relaxed text-slate-500">{{ leyenda.procedenciaDeClasificacion }}</p>
+                  </details>
+                  }
+                </div>
+            </div>
+          </section>
+
+            <!--
+              Aqui habia un boton «Vista nacional». Se quito
+              por triplicado: el mismo `volverAVistaNacional()` lo dispara
+              «Limpiar» y «Nacional» en la cabecera del panel de lectura. Tres botones
+              para una sola accion, y el del medio era el que menos se veia.
+            -->
+
+        </div>
+      </div>
+
+      <!--
+        Pie del panel: lo que esta activo ahora mismo, visible sea cual sea la
+        pestana abierta. Sin esto, al pasar a «Modos» dejas de ver que capa
+        estabas mirando.
+      -->
+      <!--
+        AQUÍ HABÍA UN PIE con dos bloques, y los dos se fueron
+        porque lo que decían ya se lee en otro sitio de la misma pantalla.
+
+        «COBERTURA 21% · 7 de 33 departamentos con registros» es exactamente lo que
+        muestra la vista Gráfico en su forma de Cobertura, con el mismo
+        `coberturaTerritorial()` detrás y además con la lista de los departamentos que
+        faltan, que es el dato accionable. Aquí era una barra sin salida.
+
+        «LECTURA ACTIVA · Vista: Nacional · Capa: Vista general» repetía el desplegable
+        de Departamento que está tres centímetros más arriba y la pastilla encendida de
+        la barra superior. Un recordatorio de lo que se ve sin apartar la vista.
+      -->
+
+      <!--
+        AQUI HABIA UN CONTADOR —«141 en el mapa · 16 sin territorio declarado»— y se retira.
+
+        Cuando se puso era necesario: la cifra de la capa decía «2» y «2» no distingue «hay dos» de
+        «quedan dos de veinte». Desde entonces esa información apareció en dos sitios mejores: la
+        línea de lectura de la leyenda la da con su desglose —procesos, municipios, departamentos—, y
+        los procesos que no se pueden situar tienen una lectura entera para ellos en la vista de
+        gráfico, con su causa y su responsable. Un tercer sitio que dice lo mismo con menos detalle
+        no añade; ocupa el pie de la columna y compite con los cuatro controles que sí viven ahí.
+      -->
+
+      <!--
+        EL PIE FIJO: tres acciones SOBRE lo que ya se está viendo, no controles de lectura.
+        Exportar, imprimir y la ayuda estaban arriba a la derecha compitiendo por el sitio que
+        necesitan las capas. Aquí quedan siempre a mano y nunca estorban: `mt-auto` los empuja al
+        fondo de la columna sea cual sea el alto de los filtros.
+      -->
+      <div class="mt-auto flex flex-shrink-0 items-center justify-center gap-2 border-t border-slate-100 px-5 py-3">
+        <button
+          type="button"
+          (click)="exportarCsvDeLaCapa()"
+          class="flex h-9 w-9 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-500 transition-all hover:border-morado hover:text-morado cursor-pointer"
+          title="Exportar CSV"
+          aria-label="Exportar CSV de la capa activa"
+        >
+          <svg lucideFileDown size="15"></svg>
+        </button>
+        <button
+          type="button"
+          (click)="printMap()"
+          class="flex h-9 w-9 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-500 transition-all hover:border-morado hover:text-morado cursor-pointer"
+          title="Imprimir"
+          aria-label="Imprimir el mapa"
+        >
+          <svg lucidePrinter size="15"></svg>
+        </button>
+        <button
+          type="button"
+          (click)="alternarPanel(MAP_PANEL_IDS_REF.tutorial)"
+          class="flex h-9 w-9 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-500 transition-all hover:border-morado hover:text-morado cursor-pointer"
+          title="Ayuda"
+          aria-label="Abrir el tutorial del geovisor"
+        >
+          <svg lucideCircleHelp size="15"></svg>
+        </button>
+
+        <!--
+          «MAS INFORMACION» NO ES LO MISMO QUE «AYUDA», y por eso son dos botones.
+
+          El tutorial de al lado enseña a USAR el mapa: dónde se pulsa, qué hace cada control. Esto
+          responde otra pregunta —por qué está hecho así: por qué tres formas de dibujar, por qué el
+          área crece con la raíz de la cifra, por qué la rampa no es el arcoíris— y esa respuesta no
+          cabe en un globo: son decisiones cartográficas con más de un siglo de discusión detrás.
+
+          ES UN ENLACE Y NO UN BOTON porque lleva a otra página: se puede abrir en otra pestaña,
+          compartir y volver con «Atrás», que es lo que alguien hace con una página de referencia.
+        -->
+        <a
+          routerLink="/mapa-ecosistemico/sobre-el-mapa"
+          class="flex h-9 w-9 cursor-pointer items-center justify-center rounded-full border border-slate-200 bg-white text-slate-500 no-underline transition-all hover:border-morado hover:text-morado"
+          title="Sobre este mapa"
+          aria-label="Sobre este mapa: cómo está hecho y en qué se apoya"
+        >
+          <svg lucideInfo size="15"></svg>
+        </a>
+      </div>
+    </aside>
+
+    <!-- ======================= COLUMNA CENTRAL ======================= -->
+    <!--
+      EL MAPA OCUPA TODO EL HUECO, SIN MARGEN Y SIN TARJETA. Tenía `px-4 pb-4 pt-2.5` y el lienzo
+      iba dentro de una caja con borde, esquinas redondeadas y sombra: el mapa se leía como un
+      cuadrito puesto sobre la página en vez de como el espacio de trabajo que es. Entre las dos
+      columnas no debe quedar aire; lo que separa ya son sus bordes.
+    -->
+    <section class="order-1 flex w-full min-w-0 flex-col lg:order-none lg:h-full lg:min-h-0 lg:flex-1" aria-label="Geovisor del ecosistema musical">
+
+      <!--
+        AQUI HABIA UNA CABECERA con el título, su descripción y el conmutador Mapa/Gráfico/Tabla.
+        El título y la descripción se fueron a la columna izquierda, encima de las capas; el
+        conmutador entró DENTRO del mapa, como control flotante, porque es una decisión sobre cómo
+        se proyecta lo que se está mirando y no un rótulo de la página.
+      -->
+
+      <!--
+        La tarjeta central. El lienzo de Leaflet vive aqui y NO se desmonta al
+        cambiar de vista: grafico y tabla se dibujan encima, en la misma caja.
+        Desmontarlo obligaria a reconstruir el mapa y a un `invalidateSize()` al
+        volver, que es exactamente por donde el lienzo acababa con altura cero.
+      -->
+      <div
+        [class]="'relative h-[60vh] min-h-[380px] w-full overflow-hidden bg-slate-100/40 transition-all duration-500 lg:h-auto lg:min-h-0 lg:flex-1 ' + enfoqueDelTutorial('centro')"
+        id="mapa-workspace"
+      >
+        <div [class]="'h-full w-full transition-all duration-500 ' + enfoqueDelTutorial('lienzo')" data-tuto="lienzo" (pointerenter)="senalarApartado('lienzo')" (focusin)="senalarApartado('lienzo')" [attr.inert]="vistaCentral() === 'mapa' ? null : ''">
+      @if (cargando()) {
+        <div class="absolute inset-0 z-10 flex flex-col items-center justify-center gap-4 text-[#291242]">
+          <svg lucideLoader2 class="animate-spin" size="32"></svg>
+          <span class="text-[0.6rem] uppercase tracking-widest font-bold">Preparando cartografía de Colombia...</span>
+        </div>
+      } @else if (cartografia() && limitesDeColombiaConMargen()) {
+        <div class="h-full w-full">
+          <!-- Raw Leaflet container binded in TS -->
+          <div #mapContainer class="map-edge-canvas h-full w-full" style="z-index: 1;"></div>
+        </div>
+      } @else {
+        <div class="absolute inset-0 flex items-center justify-center">
+          <div class="max-w-md rounded-2xl border border-slate-200 bg-white p-6 text-center shadow-sm">
+            <p class="text-[11px] font-bold uppercase tracking-widest text-slate-500">No fue posible cargar la cartografía.</p>
+            @if (errorDelMapa()) {
+              <p class="mt-3 text-sm text-slate-500">{{ errorDelMapa() }}</p>
+            }
+          </div>
+        </div>
+      }
+        </div>
+        <!--
+          CONTROLES BASICOS DEL MAPA. El mapa se crea con `zoomControl: false` y
+          hasta no se le devolvio nada a cambio: acercarse
+          solo se podia con la rueda, y con la rueda capturada por el lienzo la
+          pagina no se desplazaba cuando el puntero caia encima.
+
+          La mano suelta el mapa: con el suelto la rueda desplaza la pagina en vez de
+          acercar la cartografia. Va con `aria-pressed` porque es un interruptor, no
+          una accion.
+
+          Solo se pintan sobre la vista de mapa; en grafico y tabla no hay nada que
+          acercar.
+        -->
+        <!--
+          EL CONMUTADOR DE PROYECCION, DENTRO DEL MAPA. Estaba en una cabecera propia sobre la
+          tarjeta, ocupando una fila entera para tres botones. Aquí flota arriba a la izquierda del
+          lienzo, que es donde se mira al decidir «esto mejor lo veo en tabla».
+
+          SE PINTA EN LAS TRES VISTAS, a diferencia de los controles de zoom de al lado: es lo que
+          permite VOLVER del gráfico o de la tabla al mapa. Si desapareciera con el mapa, salir de
+          la tabla exigiría recargar.
+
+          Las tres leen los mismos datos; la tabla es además el desahogo de accesibilidad que exige
+          apoyarse en color para distinguir capas sobre el mapa.
+        -->
+        <!--
+          Z-950 Y NO Z-800, QUE ERA EL DEFECTO. El comentario de arriba dice que este control existe
+          «para volver del gráfico o de la tabla al mapa»; la intención era correcta y el apilado la
+          anulaba: las vistas de gráfico y tabla se dibujan `inset-0` en `z-[900]`, así que el único
+          control para salir de ellas quedaba DEBAJO de la vista que acababa de abrirse. Estaba en
+          pantalla y no se veía, que a efectos prácticos es no estar.
+
+          Y CAMBIA DE SITIO Y DE FORMA SEGUN DONDE ESTE, porque las dos situaciones no son la misma:
+            · Sobre el MAPA es un control flotante de tres iconos en la esquina, para no tapar
+              territorio. Es como lo pidió la dirección de producto.
+            · Sobre el GRAFICO o la TABLA no hay territorio que respetar y sí una pregunta que
+              responder —«¿cómo vuelvo?»—, así que sube arriba del todo y enseña los rótulos.
+              Un icono de mapa en una esquina no dice «volver»; «Mapa» sí.
+        -->
+        <div
+          [class]="'absolute z-[950] flex gap-1 rounded-2xl border border-slate-200 bg-white/95 p-1 shadow-lg backdrop-blur-sm ' + (
+            vistaCentral() === 'mapa' ? 'bottom-4 left-4 flex-col' : 'left-4 top-4 flex-row'
+          )"
+          role="group"
+          aria-label="Proyección de los datos"
+        >
+          <!--
+            LOS TRES MODOS, ENCIMA DE LAS TRES VISTAS Y SEPARADOS POR UNA LINEA.
+
+            Son dos decisiones distintas sobre lo mismo —cómo se proyecta lo que se está mirando— y
+            por eso comparten control; pero no son intercambiables: la de arriba elige CON QUE SE
+            DIBUJA el mapa y la de abajo SI se mira como mapa, como gráfico o como tabla. La línea
+            que las separa es lo que impide leerlas como seis opciones de una misma lista.
+
+            SOLO EXISTEN SOBRE EL MAPA. En gráfico y en tabla no dibujan nada, así que no se enseñan:
+            un control que no puede hacer nada enseña a desconfiar de los que sí.
+          -->
+          @if (vistaCentral() === 'mapa') {
+            <div [class]="'flex flex-col gap-1 border-b border-slate-200 pb-1 transition-all duration-500 ' + enfoqueDelTutorial('dibujo')" data-tuto="dibujo" (pointerenter)="senalarApartado('dibujo')" (focusin)="senalarApartado('dibujo')" role="group" aria-label="Cómo se dibuja el mapa">
+              @for (modo of modosDeDibujo; track modo.id) {
+                @let activo = modoDeDibujo() === modo.id;
+                <button
+                  type="button"
+                  (click)="elegirModoDeDibujo(modo.id)"
+                  [attr.aria-pressed]="activo"
+                  [attr.title]="modo.etiqueta + ' — ' + modo.descripcion"
+                  [class]="'flex h-9 w-9 cursor-pointer items-center justify-center rounded-xl transition-all ' + (
+                    activo ? 'bg-morado text-white shadow-sm' : 'text-slate-500 hover:bg-slate-100 hover:text-morado'
+                  )"
+                >
+                  <!--
+                    LA MISMA MINIATURA QUE TENIAN EN LA COLUMNA: áreas de distinto tono, círculos de
+                    distinto tamaño, una mancha difusa. Es la codificación real del mapa dibujada en
+                    veinte píxeles, no un icono genérico, y por eso sigue sirviendo aquí.
+                  -->
+                  <svg viewBox="0 0 28 18" class="h-[15px] w-[23px]" aria-hidden="true"
+                       [attr.fill]="activo ? 'var(--color-verde-claro)' : 'currentColor'">
+                    @switch (modo.id) {
+                      @case ('cobertura') {
+                        <rect x="1" y="2" width="8" height="14" rx="1" opacity="0.35"></rect>
+                        <rect x="10" y="2" width="8" height="14" rx="1" opacity="0.65"></rect>
+                        <rect x="19" y="2" width="8" height="14" rx="1"></rect>
+                      }
+                      @case ('practicas_territorios') {
+                        <circle cx="5" cy="12" r="3"></circle>
+                        <circle cx="14" cy="9" r="5"></circle>
+                        <circle cx="23" cy="11" r="4"></circle>
+                      }
+                      @default {
+                        <circle cx="11" cy="9" r="8" opacity="0.22"></circle>
+                        <circle cx="11" cy="9" r="5" opacity="0.45"></circle>
+                        <circle cx="11" cy="9" r="2.5"></circle>
+                        <circle cx="21" cy="12" r="5" opacity="0.22"></circle>
+                        <circle cx="21" cy="12" r="2.5" opacity="0.5"></circle>
+                      }
+                    }
+                  </svg>
+                  <span class="sr-only">{{ modo.etiqueta }}</span>
+                </button>
+              }
+            </div>
+          }
+          <!--
+            LAS TRES VISTAS. «Tabla» se retiró por compartir plantilla
+            con el directorio de la derecha, y se devuelve el mismo día: comparten el MARCADO, no el
+            uso. El directorio es una columna de 340 px donde se busca un registro concreto; la
+            tabla ocupa el ancho entero y sirve para LEER EL CONJUNTO —comparar municipios, recorrer
+            una lista larga, imprimirla—. Que dos presentaciones se dibujen con el mismo código no
+            las vuelve la misma pantalla.
+          -->
+          <div
+            [class]="'flex gap-1 transition-all duration-500 ' + (vistaCentral() === 'mapa' ? 'flex-col' : 'flex-row') + ' ' + enfoqueDelTutorial('vistas')"
+            data-tuto="vistas" (pointerenter)="senalarApartado('vistas')" (focusin)="senalarApartado('vistas')"
+            role="group"
+            aria-label="Cómo se mira lo que está puesto"
+          >
+          @for (vista of [
+            { id: 'mapa', label: 'Mapa' },
+            { id: 'grafico', label: 'Gráfico' },
+            { id: 'tabla', label: 'Tabla' }
+          ]; track vista.id) {
+            <button
+              type="button"
+              (click)="vistaCentral.set($any(vista.id))"
+              [attr.aria-pressed]="vistaCentral() === vista.id"
+              [attr.title]="'Ver como ' + vista.label"
+              [class]="'flex h-9 items-center justify-center gap-1.5 rounded-xl transition-all cursor-pointer ' + (
+                vistaCentral() === 'mapa' ? 'w-9' : 'px-2.5'
+              ) + ' ' + (
+                vistaCentral() === vista.id
+                  ? 'bg-morado text-white shadow-sm'
+                  : 'text-slate-500 hover:bg-slate-100 hover:text-morado'
+              )"
+            >
+              @if (vista.id === 'mapa') {
+                <svg lucideMap size="15"></svg>
+              } @else if (vista.id === 'grafico') {
+                <svg lucideBarChart3 size="15"></svg>
+              } @else {
+                <svg lucideTable size="15"></svg>
+              }
+              <!--
+                UN SOLO ROTULO, VISIBLE O NO SEGUN EL SITIO. Sobre el mapa va oculto —en vertical,
+                el texto obligaría a una columna de 90 px tapando territorio— y quien no ve la
+                pantalla lo sigue leyendo. Fuera del mapa se enseña, porque ahí la pregunta es
+                «¿cómo vuelvo?» y un icono de mapa en una esquina no la responde.
+
+                Antes había DOS: el `sr-only` de siempre y el que se añadió al sacarlo del mapa, así
+                que un lector de pantalla anunciaba «Mapa Mapa».
+              -->
+              <span [class]="vistaCentral() === 'mapa' ? 'sr-only' : 'text-[9px] font-bold uppercase tracking-widest'">
+                {{ vista.label }}
+              </span>
+            </button>
+          }
+          </div>
+        </div>
+
+        @if (vistaCentral() === 'mapa' && !cargando() && cartografia()) {
+          <div
+            class="absolute right-4 top-4 z-[800] flex flex-col gap-1.5 rounded-2xl border border-slate-200 bg-white/95 p-1.5 shadow-lg backdrop-blur-sm"
+            role="group"
+            aria-label="Controles del mapa"
+          >
+            <button
+              type="button"
+              (click)="acercarMapa()"
+              class="flex h-8 w-8 items-center justify-center rounded-xl text-slate-500 transition-all hover:bg-slate-100 hover:text-[#291242] cursor-pointer"
+              title="Acercar"
+              aria-label="Acercar el mapa"
+            >
+              <svg lucideZoomIn size="15"></svg>
+            </button>
+            <button
+              type="button"
+              (click)="alejarMapa()"
+              class="flex h-8 w-8 items-center justify-center rounded-xl text-slate-500 transition-all hover:bg-slate-100 hover:text-[#291242] cursor-pointer"
+              title="Alejar"
+              aria-label="Alejar el mapa"
+            >
+              <svg lucideZoomOut size="15"></svg>
+            </button>
+
+            <span class="mx-1 h-px bg-slate-200"></span>
+
+            <button
+              type="button"
+              (click)="alternarInteraccionDelMapa()"
+              [attr.aria-pressed]="mapaInteractivo()"
+              [attr.title]="mapaInteractivo() ? 'Soltar el mapa: la rueda pasará a desplazar la página' : 'Coger el mapa: arrastrar y acercar con la rueda'"
+              [attr.aria-label]="mapaInteractivo() ? 'Soltar el mapa' : 'Coger el mapa'"
+              [class]="'flex h-8 w-8 items-center justify-center rounded-xl transition-all cursor-pointer ' + (
+                mapaInteractivo()
+                  ? 'bg-[#291242] text-white shadow-sm'
+                  : 'text-slate-400 hover:bg-slate-100 hover:text-[#291242]'
+              )"
+            >
+              <svg lucideHand size="15"></svg>
+            </button>
+            <button
+              type="button"
+              (click)="alternarPanel(MAP_PANEL_IDS_REF.tutorial)"
+              class="flex h-8 w-8 items-center justify-center rounded-xl text-slate-500 transition-all hover:bg-slate-100 hover:text-[#291242] cursor-pointer"
+              title="Cómo se lee este mapa"
+              aria-label="Abrir la ayuda del geovisor"
+            >
+              <svg lucideCircleHelp size="15"></svg>
+            </button>
+          </div>
+        }
+
+        <!--
+          VISTA GRAFICO — TRES FORMAS DE LEER LO MISMO (29 de agosto de 2026).
+
+          Habia una sola forma: el ranking de departamentos en barras. Contesta
+          «quien tiene mas» y no sabe contestar nada mas. Faltaban las otras dos
+          preguntas que estos datos ya respondian en otras partes del tablero:
+          «de que esta hecho el total» y «cuanto pais falta».
+
+          LOS TRES INDICADORES DE ARRIBA SON EL SELECTOR. No hay una cinta de cifras
+          y ademas unas pestanas: la cifra ES la pestana, y pulsarla cambia la forma
+          de abajo. Asi el numero explica que se va a ver antes de verlo.
+
+          Y TODO FILTRA. Cada barra lleva el mapa a su departamento, cada segmento
+          activa su capa y cada departamento sin registros abre su ficha. Era el
+          pedido: mas indicadores, y poder filtrar desde ellos.
+        -->
+        <!--
+          VISTA GRAFICO — CINCO LECTURAS DEL MISMO DATO, y ninguna repite lo que ya
+          está en pantalla. La franja de capas dice cuántos hay por capa; el panel
+          lateral lleva el directorio y la agenda en lista; el mapa da el territorio.
+          Aquí va lo que ninguno de esos puede enseñar.
+
+          SE FUE «REPARTO POR CAPA», y conviene que quede escrito por qué: repartía el
+          total entre las cinco capas del geovisor, y cuatro de ellas son tablas que
+          retiró V20260904_01. Llegaban siempre a cero, el filtro de «mayor que cero»
+          las quitaba, y lo que se pintaba era una barra apilada de UN segmento al
+          100 %. La pregunta —de qué está hecho el total— sigue siendo buena; el eje
+          por el que se repartía había dejado de existir. Lo sustituye «Composición»,
+          que reparte por lo que los registros de verdad declaran.
+        -->
+        @if (vistaCentral() === 'grafico') {
+          <!-- `pt-20`: el conmutador flota arriba a la izquierda y no debe pisar el título. -->
+          <div [class]="'absolute inset-0 z-[900] overflow-y-auto bg-white px-5 pb-5 pt-20 custom-scrollbar sm:px-7 transition-all duration-500 ' + enfoqueDelTutorial('grafico')">
+            <p class="text-[9px] font-bold uppercase tracking-widest text-slate-400">Lectura de la capa</p>
+            <h2 class="mt-1.5 font-alternate text-base font-bold uppercase leading-none text-morado">
+              {{ configuracionDeLaCapa().label }}{{ departamentoElegido() === 'Nacional' ? ' en el país' : ' en ' + (nombreDelDepartamentoElegido() | nombrePropio) }}
+            </h2>
+
+            <!--
+              LAS LECTURAS, COMO UNA SOLA TIRA Y NO COMO SIETE TARJETAS.
+
+              Eran siete fichas con su borde, su fondo y su sombra, repartidas en una rejilla de
+              tres columnas: la última quedaba sola en su fila y el conjunto se leía como siete
+              objetos sueltos que había que comparar entre sí. Pero no son siete objetos: son UN
+              control con siete posiciones, y a la vez la cifra de cada una. Un borde alrededor de
+              cada posición dice lo contrario de lo que son.
+
+              Ahora es una tira continua, dividida por filetes, con la posición elegida marcada por
+              una barra superior y el color de la marca —no por un relleno morado que la convertía
+              otra vez en una tarjeta, esta vez oscura—. Se lee como las pestañas de un documento,
+              que es exactamente lo que hace: cambiar de lectura sin cambiar de página.
+
+              DESPLAZAMIENTO HORIZONTAL Y NO SALTO DE LINEA: siete posiciones en una fila no caben en
+              700 px, y dejarlas saltar reintroduce la fila coja. Con `overflow-x-auto` la tira se
+              recorre y sigue siendo una.
+            -->
+            <div [class]="'mt-4 -mx-5 border-y border-slate-200 sm:-mx-7 transition-all duration-500 ' + enfoqueDelTutorial('lecturas')" data-tuto="lecturas" (pointerenter)="senalarApartado('lecturas')" (focusin)="senalarApartado('lecturas')">
+              <div class="flex overflow-x-auto custom-scrollbar" role="group" aria-label="Lecturas disponibles">
+                @for (indicador of indicadoresDelGrafico(); track indicador.id) {
+                  @let elegido = formaDelGrafico() === indicador.id;
+                  <button
+                    type="button"
+                    (click)="elegirLectura(indicador.id)"
+                    [attr.aria-pressed]="elegido"
+                    [attr.title]="indicador.etiqueta + ': ' + indicador.valor + '. ' + indicador.pie"
+                    [class]="'group relative flex min-w-[6.75rem] flex-1 cursor-pointer flex-col justify-start gap-1 border-l border-slate-200 px-3 py-3 text-left transition-all first:border-l-0 ' + (
+                      elegido ? 'bg-morado/[0.04]' : 'hover:bg-slate-50'
+                    )"
+                  >
+                    <!-- LA MARCA DE LO ELEGIDO ES UNA BARRA, no un relleno: deja la cifra legible. -->
+                    <span
+                      [class]="'absolute inset-x-0 top-0 h-[3px] transition-all ' + (elegido ? 'bg-morado' : 'bg-transparent')"
+                      aria-hidden="true"
+                    ></span>
+
+                    <span class="flex items-center gap-1.5">
+                      @switch (indicador.id) {
+                        @case ('departamentos') { <svg lucideTrendingUp size="11"></svg> }
+                        @case ('composicion') { <svg lucidePieChart size="11"></svg> }
+                        @case ('cruce') { <svg lucideShapes size="11"></svg> }
+                        @case ('municipios') { <svg lucideMapPin size="11"></svg> }
+                        @case ('calendario') { <svg lucideBarChart3 size="11"></svg> }
+                        @case ('cobertura') { <svg lucideTarget size="11"></svg> }
+                        @default { <svg lucideTriangleAlert size="11"></svg> }
+                      }
+                      <span [class]="'truncate text-[8px] font-black uppercase tracking-[0.14em] ' + (elegido ? 'text-morado' : 'text-slate-400')">
+                        {{ indicador.corta }}
+                      </span>
+                    </span>
+
+                    <span [class]="'truncate text-[15px] font-extrabold leading-none tabular-nums ' + (elegido ? 'text-morado' : 'text-slate-700')">
+                      {{ indicador.valor }}
+                    </span>
+                  </button>
+                }
+              </div>
+            </div>
+
+            <!--
+              EL PIE DE LA LECTURA ELEGIDA, AQUI Y NO DENTRO DE CADA POSICION. Repetido en las siete
+              obligaba a leer siete frases para elegir una; aquí se lee solo la que corresponde, y
+              la tira se queda con lo que de verdad se compara de un vistazo: el rótulo y la cifra.
+            -->
+            @if (pieDeLaLectura(); as pie) {
+              <p class="mt-3 text-[10px] font-medium uppercase tracking-wider text-slate-400">{{ pie }}</p>
+            }
+
+            <!--
+              LECTURA 1 — DEPARTAMENTOS. Una sola serie: el valor es magnitud, no
+              identidad. Por eso todas comparten el color de la capa y quien distingue
+              cada fila es su rótulo y su cifra, nunca el color.
+            -->
+            @if (formaDelGrafico() === 'departamentos') {
+                <!--
+                  DOS FIGURAS PARA LA MISMA LECTURA, porque responden dos preguntas: la barra dice
+                  el orden y el valor; el área dice la parte del todo. Ninguna sustituye a la otra.
+                -->
+                <!--
+                  SELECTOR SEGMENTADO Y NO PILDORAS. Eran dos cápsulas redondeadas independientes,
+                  la elegida rellena de morado; no son dos objetos sueltos sino dos posiciones del
+                  mismo control, y la forma tiene que decirlo. Ver `SelectorSegmentadoComponent`.
+                -->
+                <app-selector-segmentado
+                  [class]="'mt-4 block transition-all duration-500 ' + enfoqueDelTutorial('figura-departamentos')"
+                  data-tuto="figura-departamentos" (pointerenter)="senalarApartado('figura-departamentos')" (focusin)="senalarApartado('figura-departamentos')"
+                  etiquetaDelGrupo="Figura de esta lectura"
+                  [opciones]="FIGURAS_DE_DEPARTAMENTOS"
+                  [elegida]="figuraDeDepartamentos()"
+                  (elegir)="figuraDeDepartamentos.set($any($event))"
+                />
+
+              <p class="mt-4 text-[11px] leading-relaxed text-slate-500">
+                @if (figuraDeDepartamentos() === 'barras') {
+                  {{ rankingDepartamental().length }} departamentos con registros, de mayor a menor.
+                  Pulsa uno para llevar el mapa hasta él.
+                } @else {
+                  El área de cada bloque es su parte del total: los bloques juntos son el país
+                  entero. Pulsa uno para llevar el mapa hasta él.
+                }
+              </p>
+
+              @if (rankingDepartamental().length === 0) {
+                <div class="mt-4 rounded-2xl border border-dashed border-slate-300 bg-slate-50 px-4 py-10 text-center">
+                  <p class="text-[11px] font-bold uppercase tracking-widest text-slate-400">Sin registros en esta capa</p>
+                </div>
+              } @else if (figuraDeDepartamentos() === 'treemap') {
+                <!--
+                  EL REPARTO SE CALCULA SOBRE UN LIENZO DE 100x100 Y SE ESTIRA EN PORCENTAJES: así
+                  la figura no necesita medir su contenedor ni recalcular al cambiar de tamaño, que
+                  es la parte frágil de dibujar áreas.
+                -->
+                <div class="relative mt-4 h-80 w-full overflow-hidden rounded-2xl bg-white ring-1 ring-slate-200">
+                  @for (bloque of treemapDepartamental(); track bloque.dato.clave) {
+                    <!--
+                      EL TONO SALE DEL ORDEN, NO DEL PORCENTAJE.
+
+                      Antes la opacidad era `0.45 + 0.55 · porcentaje`, y el porcentaje de un
+                      departamento sobre el país es casi siempre pequeño: con 16 registros de 141,
+                      el mayor salía al 0.51 y el menor al 0.45. Los veintinueve bloques quedaban
+                      prácticamente del mismo tono, que es como no tener escala de color: el área ya
+                      decía el tamaño y el color no añadía nada.
+
+                      Ahora el tono baja con la POSICION en el orden, de 1 a 0.3 repartido entre
+                      todos. El primero es el más saturado y el último el más claro, con la misma
+                      pendiente haya cinco bloques o cincuenta, así que el degradado se lee siempre.
+                    -->
+                    <button
+                      type="button"
+                      (click)="abrirDepartamento(bloque.dato.clave); vistaCentral.set('mapa');"
+                      [attr.title]="bloque.dato.etiqueta + ': ' + formatearCifra(bloque.dato.valor) + ' — ' + parteDelTotal(bloque.dato.valor) + ' % del total'"
+                      class="absolute cursor-pointer overflow-hidden p-1.5 text-left transition-all hover:z-10 hover:ring-2 hover:ring-morado focus-visible:z-10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-morado"
+                      [style.left.%]="bloque.x" [style.top.%]="bloque.y"
+                      [style.width.%]="bloque.ancho" [style.height.%]="bloque.alto"
+                      [style.background-color]="colorCapaActiva()"
+                      [style.opacity]="tonoDelBloque($index, treemapDepartamental().length)"
+                      [style.box-shadow]="'inset 0 0 0 1.5px #fff'"
+                    >
+                      <!--
+                        TRES TAMAÑOS DE ROTULO Y NO UNO. Antes el bloque o llevaba nombre y cifra o
+                        no llevaba nada, y el corte estaba en 14 % de ancho: los bloques medianos
+                        —que son la mayoría— se quedaban mudos aunque les cupiera la cifra sola.
+                      -->
+                      @if (bloque.ancho > 13 && bloque.alto > 13) {
+                        <span class="block truncate text-[8px] font-black uppercase leading-tight tracking-wider text-white/90">{{ bloque.dato.etiqueta }}</span>
+                        <span class="block text-[13px] font-extrabold leading-tight tabular-nums text-white">{{ formatearCifra(bloque.dato.valor) }}</span>
+                      } @else if (bloque.ancho > 7 && bloque.alto > 7) {
+                        <span class="block text-[10px] font-extrabold leading-none tabular-nums text-white">{{ formatearCifra(bloque.dato.valor) }}</span>
+                      }
+                    </button>
+                  }
+                </div>
+
+                <!--
+                  LA ESCALA DEL DEGRADADO, DICHA. Un color que varía sin leyenda invita a leer en él
+                  una magnitud que no lleva: aquí el tono es el PUESTO en el orden y el área es la
+                  cifra. Sin esta línea, quien vea dos bloques del mismo tamaño y distinto tono
+                  supondrá que valen cosas distintas.
+                -->
+                <p class="mt-2 flex items-center gap-2 text-[9px] font-medium uppercase tracking-wider text-slate-400">
+                  <span>Mayor</span>
+                  <span class="h-2 flex-1 rounded-full"
+                        [style.background]="'linear-gradient(to right, ' + colorCapaActiva() + ', ' + colorCapaActiva() + '6b)'"></span>
+                  <span>Menor</span>
+                </p>
+              } @else {
+                <!--
+                  LAS BARRAS, CON ESCALA Y SIN PISTA.
+
+                  Lo que había: cada barra sobre una pista gris que ocupaba el ancho entero. La
+                  pista no decía nada —el máximo no estaba rotulado en ninguna parte— y sí llenaba
+                  media figura de gris: leer «esta barra es el doble que aquella» exigía medirlas a
+                  ojo contra un fondo que no tenía marcas.
+
+                  Lo que hay: cuatro líneas verticales en los cuartos del máximo, con el máximo
+                  rotulado arriba. Son la referencia que permite decir «Boyacá está por la mitad»
+                  sin contar. La pista sobra en cuanto hay rejilla: el fondo blanco ya es el cero.
+                -->
+                @let topeDeLasBarras = rankingDepartamental()[0]?.valor ?? 0;
+                <div class="mt-4">
+                  <!-- LA ESCALA ARRIBA: rotula el cero y el máximo, que es lo que la pista callaba. -->
+                  <div class="mb-1.5 flex items-center gap-3 pl-24 sm:pl-32">
+                    <div class="relative flex-1">
+                      <span class="text-[8px] font-black uppercase tracking-[0.14em] text-slate-300">0</span>
+                      <span class="absolute right-0 top-0 text-[8px] font-black uppercase tracking-[0.14em] text-slate-400 tabular-nums">
+                        {{ formatearCifra(topeDeLasBarras) }}
+                      </span>
+                    </div>
+                    <span class="w-9 flex-shrink-0"></span>
+                  </div>
+
+                  <ol class="space-y-[3px]">
+                    @for (fila of rankingDepartamental(); track fila.clave) {
+                      <li>
+                        <button
+                          type="button"
+                          (click)="abrirDepartamento(fila.clave); vistaCentral.set('mapa');"
+                          class="group flex w-full cursor-pointer items-center gap-3 rounded-md py-[3px] text-left transition-all hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-morado/30"
+                          [title]="fila.etiqueta + ': ' + formatearCifra(fila.valor) + ' (' + fila.porcentaje + ' % del mayor)'"
+                        >
+                          <span class="w-24 flex-shrink-0 truncate text-right text-[9.5px] font-bold uppercase tracking-wider text-slate-500 transition-colors group-hover:text-morado sm:w-32 sm:text-[10px]">
+                            {{ fila.etiqueta }}
+                          </span>
+
+                          <span class="relative h-[13px] flex-1">
+                            <!-- La rejilla: cuartos del máximo. Detrás de la barra, no encima. -->
+                            @for (corte of [25, 50, 75, 100]; track corte) {
+                              <span class="absolute inset-y-0 w-px bg-slate-100" [style.left.%]="corte" aria-hidden="true"></span>
+                            }
+                            <span
+                              class="absolute inset-y-0 left-0 rounded-[2px] transition-all duration-500 group-hover:brightness-110"
+                              [style.width.%]="fila.porcentaje"
+                              [style.background-color]="colorCapaActiva()"
+                            ></span>
+                          </span>
+
+                          <span class="w-9 flex-shrink-0 text-right text-[11px] font-extrabold tabular-nums text-morado">
+                            {{ formatearCifra(fila.valor) }}
+                          </span>
+                        </button>
+                      </li>
+                    }
+                  </ol>
+                </div>
+              }
+            }
+
+            <!--
+              LECTURA 2 — COMPOSICION. De qué está hecho el ecosistema, por lo que los
+              registros declaran. Cada fila lleva SU color, el mismo que el lente le da
+              en el mapa: es la única de las cinco donde el color es identidad y no
+              magnitud, porque aquí cada fila es una cosa distinta y no más de lo mismo.
+            -->
+            @if (formaDelGrafico() === 'composicion') {
+              @let composicion = composicionDelEcosistema();
+
+              <app-selector-segmentado
+                [class]="'mt-5 block transition-all duration-500 ' + enfoqueDelTutorial('dimension')"
+                data-tuto="dimension" (pointerenter)="senalarApartado('dimension')" (focusin)="senalarApartado('dimension')"
+                etiquetaDelGrupo="Dimensión de la composición"
+                [opciones]="dimensionesDeComposicion"
+                [elegida]="dimensionDeComposicion()"
+                (elegir)="dimensionDeComposicion.set($any($event))"
+              />
+
+              @if (composicion.filas.length === 0) {
+                <div class="mt-4 rounded-2xl border border-dashed border-slate-300 bg-slate-50 px-4 py-10 text-center">
+                  <p class="text-[11px] font-bold uppercase tracking-widest text-slate-400">Sin registros que componer</p>
+                </div>
+              } @else {
+                <p class="mt-4 text-[11px] leading-relaxed text-slate-500">
+                  {{ formatearCifra(composicion.fichas) }} {{ composicion.fichas === 1 ? 'registro' : 'registros' }}
+                  repartidos en {{ composicion.filas.length }}
+                  {{ composicion.filas.length === 1 ? 'grupo' : 'grupos' }}.
+                  Pulsa uno para resaltarlo en el mapa.
+                </p>
+
+                <!--
+                  LA NOTA NO ES OPCIONAL cuando la suma pasa del total. Un festival
+                  puede declarar tres territorios sonoros y cuenta en los tres: quien
+                  sume las filas y no le cuadre con el total no sabe si el error es
+                  suyo o del tablero. Se enseña sólo cuando de verdad se solapa.
+                -->
+                @if (composicion.solapan) {
+                  <p class="mt-2 rounded-lg bg-amber-50 px-2.5 py-1.5 text-[9.5px] font-semibold leading-snug text-amber-900">
+                    Las cifras suman {{ formatearCifra(composicion.suma) }} y no
+                    {{ formatearCifra(composicion.fichas) }}: un registro puede declarar varios y cuenta en todos.
+                  </p>
+                }
+
+                <app-selector-segmentado
+                  [class]="'mt-4 block transition-all duration-500 ' + enfoqueDelTutorial('figura-composicion')"
+                  data-tuto="figura-composicion" (pointerenter)="senalarApartado('figura-composicion')" (focusin)="senalarApartado('figura-composicion')"
+                  etiquetaDelGrupo="Figura de esta lectura"
+                  [opciones]="FIGURAS_DE_COMPOSICION"
+                  [elegida]="figuraDeComposicion()"
+                  (elegir)="figuraDeComposicion.set($any($event))"
+                />
+
+                @if (figuraDeComposicion() === 'waffle') {
+                  @let waffle = celdasDelWaffle();
+                  <!--
+                    UNA CELDA POR DECLARACION. Lo que el waffle añade sobre la barra es que se puede
+                    CONTAR: diez celdas por fila, así que cuatro filas y media son cuarenta y cinco
+                    sin contar una a una. Y el solape deja de ser una nota al pie: se ve.
+                  -->
+                  <div class="mt-4 grid gap-[3px]" style="grid-template-columns: repeat(20, minmax(0, 1fr));" aria-hidden="true">
+                    @for (celda of waffle.celdas; track celda.clave) {
+                      <span class="aspect-square rounded-[2px]"
+                            [style.background-color]="celda.color"
+                            [attr.title]="celda.nombre"></span>
+                    }
+                  </div>
+                  <p class="mt-3 text-[10px] leading-relaxed text-slate-500">
+                    Cada cuadro es una declaración, agrupadas por grupo y en el mismo orden que la
+                    lista. Veinte por fila.
+                    @if (waffle.ocultas > 0) {
+                      Se dibujan las primeras {{ waffle.celdas.length }}; quedan {{ waffle.ocultas }} fuera,
+                      porque pasadas estas la figura deja de poder contarse y la lectura honesta son las barras.
+                    }
+                  </p>
+                }
+
+                <ol class="mt-4 space-y-1.5" [hidden]="figuraDeComposicion() === 'waffle'">
+                  @for (fila of composicion.filas; track fila.nombre) {
+                    @let resaltada = grupoResaltado() === fila.nombre;
+                    <li>
+                      <button
+                        type="button"
+                        (click)="alternarGrupoResaltado(fila.nombre)"
+                        [attr.aria-pressed]="resaltada"
+                        [class]="'group flex w-full cursor-pointer items-center gap-3 rounded-md py-[3px] text-left transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-morado/30 ' + (
+                          resaltada ? 'bg-slate-100' : 'hover:bg-slate-50'
+                        )"
+                        [title]="fila.nombre + ': ' + formatearCifra(fila.total) + ' · ' + fila.cuota + ' % de los registros'"
+                      >
+                        <span class="flex w-24 flex-shrink-0 items-center justify-end gap-1.5 sm:w-36">
+                          <span class="truncate text-right text-[9.5px] font-bold uppercase tracking-wider text-slate-500 sm:text-[10px]">
+                            {{ fila.nombre }}
+                          </span>
+                          <span class="h-2 w-2 flex-shrink-0 rounded-full" [style.background-color]="fila.color" aria-hidden="true"></span>
+                        </span>
+                        <!--
+                          MISMA REJILLA QUE EL RANKING DE DEPARTAMENTOS, y por el mismo motivo: la
+                          pista gris de ancho completo no decía nada —el máximo no estaba rotulado—
+                          y llenaba media figura. Que las dos gráficas de barras de esta vista se
+                          dibujen igual es lo que permite compararlas sin volver a aprenderlas.
+                        -->
+                        <span class="relative h-[13px] flex-1">
+                          @for (corte of [25, 50, 75, 100]; track corte) {
+                            <span class="absolute inset-y-0 w-px bg-slate-100" [style.left.%]="corte" aria-hidden="true"></span>
+                          }
+                          <span
+                            class="absolute inset-y-0 left-0 rounded-[2px] transition-all duration-500"
+                            [style.width.%]="fila.porcentaje"
+                            [style.background-color]="fila.color"
+                          ></span>
+                        </span>
+                        <span class="w-16 flex-shrink-0 text-right text-[11px] font-extrabold tabular-nums text-morado">
+                          {{ formatearCifra(fila.total) }}
+                          <span class="text-[9px] font-semibold text-slate-400">{{ fila.cuota }} %</span>
+                        </span>
+                      </button>
+                    </li>
+                  }
+                </ol>
+              }
+            }
+
+            <!--
+              LECTURA 3 — MUNICIPIOS. El ranking largo. No pasa por el catálogo de
+              coordenadas: se agrupa por el nombre que trae cada ficha, así que sale
+              completo aunque no se pueda situar nada. El departamento va al lado
+              porque «La Unión» está en cinco.
+            -->
+            <!--
+              LECTURA 4 — MUNICIPIOS, COMO PUNTOS ALINEADOS Y NO COMO BARRAS.
+
+              Con ciento veintitrés municipios, una barra por fila es un muro de cuatro pantallas
+              que nadie recorre: la barra gasta toda la anchura en repetir la misma información que
+              ya da su cifra, y a esa escala lo único que se quiere ver es la FORMA de la cola —dónde
+              se corta el ranking, cuántos empatan al fondo—.
+
+              El punto alineado gasta un píxel por fila y deja ver esa forma de un vistazo: los
+              puntos se alinean sobre un eje común y el ojo lee la curva sin tener que leer cifras.
+              Es la figura estándar para un ranking largo, y la que usaba el desarrollo de
+              septiembre para esto mismo.
+            -->
+            @if (formaDelGrafico() === 'municipios') {
+              @let municipios = rankingMunicipal();
+              <p class="mt-6 text-[11px] leading-relaxed text-slate-500">
+                {{ municipios.length }} {{ municipios.length === 1 ? 'municipio' : 'municipios' }} con registros, de mayor a menor.
+                El departamento va al lado porque hay nombres repetidos en el país.
+              </p>
+
+              @if (municipios.length === 0) {
+                <div class="mt-4 rounded-2xl border border-dashed border-slate-300 bg-slate-50 px-4 py-10 text-center">
+                  <p class="text-[11px] font-bold uppercase tracking-widest text-slate-400">Ninguna ficha declara municipio</p>
+                  <p class="mt-2 text-[10.5px] leading-relaxed text-slate-500">
+                    Los registros de esta capa dicen su departamento pero no su municipio.
+                  </p>
+                </div>
+              } @else {
+                @let visibles = rankingMunicipalVisible();
+                <ol class="mt-4">
+                  @for (fila of visibles.filas; track fila.clave) {
+                    <li class="flex items-center gap-3 py-[3px]">
+                      <span class="flex w-28 flex-shrink-0 items-baseline justify-end gap-1.5 sm:w-44">
+                        <span class="truncate text-[10px] font-bold uppercase tracking-wider text-slate-600">{{ fila.municipio | nombrePropio }}</span>
+                        <span class="flex-shrink-0 text-[8px] uppercase tracking-wider text-slate-400">{{ fila.departamento | nombrePropio }}</span>
+                      </span>
+                      <!--
+                        LA LINEA GUIA LLEGA HASTA EL PUNTO, no hasta el final: es lo que permite
+                        seguir la fila con la vista sin que la línea compita con el propio punto.
+                      -->
+                      <span class="relative h-3 flex-1">
+                        <span class="absolute inset-y-1/2 left-0 h-px bg-slate-200"
+                              [style.width.%]="fila.porcentaje"></span>
+                        <span class="absolute top-1/2 h-2.5 w-2.5 -translate-x-1/2 -translate-y-1/2 rounded-full"
+                              [style.left.%]="fila.porcentaje"
+                              [style.background-color]="colorCapaActiva()"></span>
+                      </span>
+                      <span class="w-7 flex-shrink-0 text-right text-[10.5px] font-extrabold tabular-nums text-morado">
+                        {{ formatearCifra(fila.total) }}
+                      </span>
+                    </li>
+                  }
+                </ol>
+
+                @if (visibles.ocultos > 0) {
+                  <p class="mt-3 flex flex-wrap items-baseline gap-2 text-[10.5px] leading-relaxed text-slate-500">
+                    <span>
+                      y {{ visibles.ocultos }} municipios más@if (visibles.valorDeLaCola) {,
+                        todos con {{ visibles.valorDeLaCola }}
+                        {{ visibles.valorDeLaCola === 1 ? 'proceso' : 'procesos' }}}.
+                    </span>
+                    <button type="button" (click)="rankingMunicipalCompleto.set(true)"
+                            class="cursor-pointer font-bold uppercase tracking-wider text-morado underline underline-offset-2 hover:text-verde-texto">
+                      Ver la lista completa
+                    </button>
+                  </p>
+                } @else if (rankingMunicipalCompleto() && municipios.length > 25) {
+                  <button type="button" (click)="rankingMunicipalCompleto.set(false)"
+                          class="mt-3 cursor-pointer text-[10.5px] font-bold uppercase tracking-wider text-morado underline underline-offset-2 hover:text-verde-texto">
+                    Volver a los primeros 25
+                  </button>
+                }
+              }
+            }
+
+            <!--
+              LECTURA 5 — EL CRUCE. Cada fila es un grupo del lente y cada columna un departamento.
+
+              ES LA UNICA PIEZA QUE DEMUESTRA LA TESIS DEL LENTE. El mapa puede pintar cuál
+              territorio predomina en cada departamento; no puede enseñar lo contrario —en cuántos
+              departamentos vive un mismo territorio— porque para eso habría que leer el mapa al
+              revés. Una fila con marcas repartidas de lado a lado es un territorio que cruza el
+              país, y eso es exactamente lo que el lente promete.
+            -->
+            @if (formaDelGrafico() === 'cruce') {
+              @let cruce = matrizDelLente();
+
+              @if (cruce.grupos.length === 0) {
+                <div class="mt-6 rounded-2xl border border-dashed border-slate-300 bg-slate-50 px-4 py-10 text-center">
+                  <p class="text-[11px] font-bold uppercase tracking-widest text-slate-400">Ponte un lente para cruzar</p>
+                  <p class="mt-2 text-[10.5px] leading-relaxed text-slate-500">
+                    Elige «Por territorios sonoros» o «Por prácticas y géneros» en la columna de la izquierda.
+                  </p>
+                </div>
+              } @else {
+                <p class="mt-6 text-[11px] leading-relaxed text-slate-500">
+                  {{ cruce.grupos.length }} grupos por {{ cruce.departamentos.length }} departamentos.
+                  Cuanto más llena la fila, más país cruza ese grupo. Pulsa uno para resaltarlo en el mapa.
+                </p>
+
+                <div class="mt-4 overflow-x-auto custom-scrollbar">
+                  <table class="w-full border-collapse text-[10px]">
+                    <caption class="sr-only">
+                      Cuántos procesos declara cada grupo en cada departamento
+                    </caption>
+                    <thead>
+                      <tr>
+                        <th scope="col" class="sticky left-0 z-10 bg-white pb-2 pr-2 text-left text-[8px] font-bold uppercase tracking-widest text-slate-400">
+                          Grupo
+                        </th>
+                        <th scope="col" class="pb-2 pr-2 text-right text-[8px] font-bold uppercase tracking-widest text-slate-400">
+                          Dptos.
+                        </th>
+                        @for (departamento of cruce.departamentos; track departamento.clave) {
+                          <th scope="col" class="pb-2 align-bottom">
+                            <!--
+                              EL ROTULO VA GIRADO porque treinta nombres de departamento en
+                              horizontal no caben en ninguna anchura, y abreviarlos a tres letras
+                              obliga a descifrarlos. Girado se leen enteros y la tabla cabe.
+                            -->
+                            <span class="block h-20 w-4 origin-bottom-left translate-x-3 -rotate-60 whitespace-nowrap text-[8px] font-bold uppercase tracking-wider text-slate-500">
+                              {{ departamento.etiqueta | nombrePropio }}
+                            </span>
+                          </th>
+                        }
+                      </tr>
+                    </thead>
+                    <tbody>
+                      @for (grupo of cruce.grupos; track grupo.nombre) {
+                        @let resaltada = grupoResaltado() === grupo.nombre;
+                        <tr [class]="resaltada ? 'bg-slate-100' : ''">
+                          <th scope="row" class="sticky left-0 z-10 max-w-[9rem] bg-white py-1 pr-2 text-left font-semibold"
+                              [class.bg-slate-100]="resaltada">
+                            <button type="button" (click)="alternarGrupoResaltado(grupo.nombre)"
+                                    [attr.aria-pressed]="resaltada"
+                                    class="flex w-full cursor-pointer items-center gap-1.5 text-left hover:text-morado">
+                              <span class="h-2 w-2 flex-shrink-0 rounded-full" [style.background-color]="grupo.color" aria-hidden="true"></span>
+                              <span class="truncate text-[9.5px] uppercase tracking-wide text-slate-600">{{ grupo.nombre }}</span>
+                            </button>
+                          </th>
+                          <td class="py-1 pr-2 text-right text-[10px] font-extrabold tabular-nums text-morado">
+                            {{ grupo.departamentos }}
+                          </td>
+                          @for (celda of grupo.celdas; track celda.clave) {
+                            <td class="p-0.5 text-center">
+                              <!--
+                                LA CELDA DICE CUANTOS Y NO SOLO SI. Una matriz de presencia igualaría
+                                un departamento con un proceso y otro con veinte.
+                              -->
+                              <span class="mx-auto block h-4 w-4 rounded-[3px]"
+                                    [style.background-color]="celda.total ? grupo.color : 'transparent'"
+                                    [style.opacity]="celda.total ? (0.25 + 0.75 * celda.total / cruce.maximo) : 1"
+                                    [class.bg-slate-50]="!celda.total"
+                                    [attr.title]="celda.etiqueta + ': ' + celda.total"></span>
+                            </td>
+                          }
+                        </tr>
+                      }
+                    </tbody>
+                  </table>
+                </div>
+              }
+            }
+
+            <!--
+              LECTURA 6 — LA AGENDA EN EL TIEMPO.
+
+              EL GEOVISOR NO TENIA NINGUNA LECTURA TEMPORAL, y la circulación cultural es tanto
+              cuándo como dónde. El panel derecho responde «qué hay ahora aquí»; esto responde «cómo
+              se reparte el año», que es lo que distingue un ecosistema con temporada de uno con
+              actividad continua.
+
+              DOCE MESES SIEMPRE, INCLUIDOS LOS VACIOS: enseñar sólo los meses con eventos esconde
+              justo lo que hay que ver, que son los huecos.
+            -->
+            @if (formaDelGrafico() === 'calendario') {
+              @let tiempo = agendaEnElTiempo();
+              <p class="mt-6 text-[11px] leading-relaxed text-slate-500">
+                {{ tiempo.total }} {{ tiempo.total === 1 ? 'evento' : 'eventos' }} de la Agenda
+                {{ departamentoElegido() === 'Nacional' ? 'en el país' : 'en ' + (nombreDelDepartamentoElegido() | nombrePropio) }},
+                repartidos por mes.
+              </p>
+
+              @if (tiempo.total === 0) {
+                <div class="mt-4 rounded-2xl border border-dashed border-slate-300 bg-slate-50 px-4 py-10 text-center">
+                  <p class="text-[11px] font-bold uppercase tracking-widest text-slate-400">Sin eventos en este ámbito</p>
+                </div>
+              } @else {
+                <!--
+                  `items-stretch` Y `h-full` EN LA COLUMNA. Con `items-end`, cada columna se
+                  encogía a su contenido y el `flex-1` del carril no tenía altura que repartir: se
+                  veían las cifras y los rótulos, y ni una sola barra.
+                -->
+                <div class="mt-5 flex h-40 items-stretch gap-1.5">
+                  @for (mes of tiempo.meses; track mes.indice) {
+                    <span class="flex h-full flex-1 flex-col items-center gap-1.5">
+                      <span class="text-[9px] font-extrabold tabular-nums text-morado">{{ mes.total || '' }}</span>
+                      <!--
+                        Un mes vacío conserva su columna con un hilo de fondo: sin él, los huecos se
+                        leerían como si el mes no existiera en vez de como un mes sin actividad.
+                      -->
+                      <span class="relative w-full flex-1 rounded-t bg-slate-100">
+                        <span class="absolute bottom-0 left-0 w-full rounded-t transition-all duration-500"
+                              [style.height.%]="mes.altura"
+                              [style.background-color]="colorCapaActiva()"></span>
+                      </span>
+                      <span [class]="'text-[8px] font-bold uppercase tracking-wider ' + (mes.esActual ? 'text-morado' : 'text-slate-400')">
+                        {{ mes.etiqueta }}
+                      </span>
+                    </span>
+                  }
+                </div>
+                <p class="mt-3 text-[9px] leading-relaxed text-slate-500">
+                  El mes en curso va marcado. Un evento cuenta en el mes de su fecha de inicio.
+                </p>
+              }
+            }
+
+            <!--
+              LECTURA 4 — COBERTURA. Cuánto país falta. El arco da la proporción de un
+              vistazo y la lista de vacíos da el nombre, que es lo accionable.
+            -->
+            @if (formaDelGrafico() === 'cobertura') {
+              @let cobertura = coberturaTerritorial();
+              @let vacios = departamentosSinRegistros();
+
+              <div class="mt-6 flex flex-col items-center gap-5 sm:flex-row sm:gap-7">
+                <div class="relative h-32 w-32 flex-shrink-0">
+                  <svg viewBox="0 0 36 36" class="h-full w-full -rotate-90" aria-hidden="true">
+                    <circle cx="18" cy="18" r="15.9" fill="none" stroke="#e2e8f0" stroke-width="3.4"></circle>
+                    <circle
+                      cx="18" cy="18" r="15.9" fill="none"
+                      [attr.stroke]="colorCapaActiva()"
+                      stroke-width="3.4"
+                      stroke-linecap="round"
+                      [attr.stroke-dasharray]="cobertura.porcentaje + ', 100'"
+                      class="transition-all duration-700"
+                    ></circle>
+                  </svg>
+                  <div class="absolute inset-0 flex flex-col items-center justify-center">
+                    <span class="text-2xl font-extrabold leading-none tabular-nums text-morado">{{ cobertura.porcentaje }}%</span>
+                    <span class="mt-1 text-[8px] font-bold uppercase tracking-widest text-slate-400">Cobertura</span>
+                  </div>
+                </div>
+
+                <div class="min-w-0 flex-1 space-y-2.5 text-center sm:text-left">
+                  <p class="text-[11px] leading-relaxed text-slate-500">
+                    <span class="font-extrabold text-morado">{{ cobertura.conRegistros }}</span>
+                    de <span class="font-extrabold text-morado">{{ cobertura.total }}</span>
+                    departamentos de la cartografía tienen al menos un registro.
+                  </p>
+                  <p class="text-[11px] leading-relaxed text-slate-500">
+                    <span class="font-extrabold text-morado">{{ pulsoTerritorial().impactedCount }}</span>
+                    {{ pulsoTerritorial().impactedLabel.toLowerCase() }}.
+                  </p>
+                </div>
+              </div>
+
+              <p class="mt-7 text-[9px] font-bold uppercase tracking-widest text-slate-400">
+                Sin ningún registro ({{ vacios.length }})
+              </p>
+              @if (vacios.length === 0) {
+                <p class="mt-2 text-[11px] leading-relaxed text-slate-500">
+                  Todos los departamentos de la cartografía tienen registros.
+                </p>
+              } @else {
+                <div class="mt-2.5 flex flex-wrap gap-1.5">
+                  @for (vacio of vacios; track vacio.clave) {
+                    <button
+                      type="button"
+                      (click)="abrirDepartamento(vacio.etiqueta); vistaCentral.set('mapa');"
+                      class="cursor-pointer rounded-full border border-dashed border-slate-300 bg-white px-2.5 py-1 text-[9px] font-bold uppercase tracking-wider text-slate-500 transition-all hover:border-morado hover:text-morado"
+                      [title]="'Ver ' + vacio.etiqueta + ' en el mapa'"
+                    >
+                      {{ vacio.etiqueta }}
+                    </button>
+                  }
+                </div>
+              }
+            }
+
+            <!--
+              LECTURA 5 — LO QUE NO SE PUEDE SITUAR. Es calidad del dato, y está aquí y
+              no escondida en un aviso porque saber cuánto del ecosistema NO se ve es
+              parte de leer el ecosistema. Tres causas separadas, con tres responsables
+              distintos: fundirlas en «N sin ubicar» las vuelve inarreglables.
+            -->
+            @if (formaDelGrafico() === 'sin-situar') {
+              @let calidad = procesosSinSituar();
+
+              <p class="mt-6 text-[11px] leading-relaxed text-slate-500">
+                De {{ formatearCifra(calidad.total) }} {{ calidad.total === 1 ? 'proceso' : 'procesos' }} en esta lectura,
+                <span class="font-extrabold text-morado">{{ formatearCifra(calidad.situados) }}</span>
+                se pueden poner en el mapa.
+              </p>
+
+              <div class="mt-4 flex h-7 w-full overflow-hidden rounded-lg bg-slate-100" aria-hidden="true">
+                <span class="h-full transition-all duration-500"
+                      [style.width.%]="calidad.porcentaje"
+                      [style.background-color]="colorCapaActiva()"></span>
+              </div>
+
+              @if (calidad.causas.length === 0) {
+                <div class="mt-5 rounded-2xl border border-dashed border-slate-300 bg-slate-50 px-4 py-8 text-center">
+                  <p class="text-[11px] font-bold uppercase tracking-widest text-slate-400">Nada queda fuera del mapa</p>
+                  <p class="mt-2 text-[10.5px] leading-relaxed text-slate-500">
+                    Todos los procesos de esta lectura tienen dónde ponerse.
+                  </p>
+                </div>
+              } @else {
+                <ul class="mt-5 space-y-2.5">
+                  @for (causa of calidad.causas; track causa.clave) {
+                    <li class="rounded-2xl border border-slate-200 bg-white px-3.5 py-3">
+                      <p class="flex items-baseline gap-2">
+                        <span class="text-lg font-extrabold leading-none tabular-nums text-morado">{{ formatearCifra(causa.cifra) }}</span>
+                        <span class="text-[10.5px] font-bold uppercase tracking-wider text-slate-600">{{ causa.titulo }}</span>
+                      </p>
+                      <p class="mt-1.5 text-[10.5px] leading-relaxed text-slate-500">{{ causa.explicacion }}</p>
+                    </li>
+                  }
+                </ul>
+              }
+            }
+          </div>
+        }
+
+        <!--
+          VISTA TABLA — el directorio. Antes vivia comprimido en el panel
+          derecho, a 380 px y una tarjeta por fila; aqui tiene el ancho de la
+          columna central y se reparte en rejilla. Es ademas la lectura sin
+          color que necesita quien no distingue las capas por su tono.
+        -->
+        @if (vistaCentral() === 'tabla') {
+          <!-- `pt-20` por lo mismo que en el gráfico: el conmutador va encima. -->
+          <div class="absolute inset-0 z-[900] overflow-y-auto bg-white px-5 pb-5 pt-20 custom-scrollbar sm:px-7">
+            <ng-container *ngTemplateOutlet="plantillaDirectorio; context: { compacto: false }"></ng-container>
+          </div>
+        }
+      </div>
+    </section>
+
+    <!-- ======================= PANEL DE LECTURA ======================= -->
+    <aside
+      [class]="'order-2 flex w-full flex-shrink-0 flex-col border-t border-slate-200 bg-white transition-all duration-500 lg:order-none lg:h-full lg:w-[340px] lg:border-l lg:border-t-0 ' + enfoqueDelTutorial('derecha')"
+      aria-label="Lectura rápida del territorio"
+    >
+      <header class="flex-shrink-0 border-b border-slate-100 px-5 py-4">
+        <div class="flex items-start justify-between gap-3">
+          <div class="min-w-0">
+            <p class="text-[9px] font-bold uppercase tracking-[0.16em] text-slate-400">Mapa ecosistémico</p>
+            <h2 class="mt-1 truncate text-xl font-extrabold uppercase leading-tight text-morado">
+              {{ nombreDelDepartamentoElegido() }}
+            </h2>
+          </div>
+        </div>
+
+        <!--
+          LAS SEIS CAPAS, AQUI Y NO EN LA OTRA COLUMNA.
+
+          Estaban arriba a la izquierda, entre el título y los filtros. Pero una capa no es un
+          filtro: no acota lo que se ve, DICE QUE SE ESTA MIRANDO, y esta columna es precisamente la
+          que lee lo que se está mirando —su título dice el ámbito y debajo va el directorio de ese
+          ámbito—. Puestas aquí, la cifra de cada capa queda pegada a la lista que la desarrolla, y
+          la columna izquierda se queda con una sola idea: acotar y representar.
+        -->
+        <div [class]="'mt-3.5 grid grid-cols-3 gap-1.5 transition-all duration-500 ' + enfoqueDelTutorial('capas')" data-tuto="capas" (pointerenter)="senalarApartado('capas')" (focusin)="senalarApartado('capas')" role="group" aria-label="Capas del mapa">
+          <!--
+            LAS SEIS CAPAS, EN EL SITIO DONDE VAN A QUEDAR.
+
+            Había una pastilla suelta para la única consultable y, debajo, una línea de texto
+            diciendo «en preparación: escuelas · mercados · redes doc. · lutieres». Dos sitios para
+            una sola idea —qué procesos hay y cuáles vendrán— y una franja que habría que rehacer el
+            día que vuelva uno.
+
+            Ahora son seis botones en su rejilla definitiva, con los que todavía no se pueden
+            consultar desactivados y con su motivo en el `title`. Sin cifra: un «0» junto a Escuelas
+            es indistinguible de «no hay ninguna escuela registrada», y lo cierto es que su tabla se
+            retiró y el proceso volverá con su modelo propio.
+          -->
+          @for (capa of capasDelGeovisor(); track capa.layerKey) {
+            @let activa = capa.disponible && (capa.layerKey === 'General' ? esCapaGeneral() : capaActiva() === capa.layerKey);
+            <button
+              type="button"
+              (click)="seleccionarCapa(capa.layerKey)"
+              [disabled]="!capa.disponible"
+              [attr.aria-pressed]="capa.disponible ? activa : null"
+              [attr.title]="capa.motivo || capa.label"
+              [class]="'flex h-11 flex-col items-center justify-center rounded-xl border px-1 text-center transition-all ' + (
+                !capa.disponible
+                  ? 'cursor-not-allowed border-dashed border-slate-200 bg-slate-50/60 text-slate-300'
+                  : activa
+                    ? 'cursor-pointer border-morado bg-morado text-white shadow-sm'
+                    : 'cursor-pointer border-slate-200 bg-white text-slate-500 hover:border-slate-300 hover:bg-slate-50 hover:text-morado'
+              )"
+            >
+              @if (capa.disponible) {
+                <span class="text-sm font-extrabold leading-none tabular-nums">{{ formatearCifra(capa.valor) }}</span>
+              } @else {
+                <span class="text-[7px] font-bold uppercase tracking-wider">Pronto</span>
+              }
+              <span class="mt-0.5 flex items-center justify-center gap-1">
+                @if (capa.layerKey !== 'General') {
+                  <span class="h-1.5 w-1.5 flex-shrink-0 rounded-full"
+                        [style.background-color]="capa.color"
+                        [style.opacity]="capa.disponible ? 1 : 0.35"></span>
+                }
+                <span class="text-[7px] font-bold uppercase tracking-widest">{{ capa.label }}</span>
+              </span>
+            </button>
+          }
+        </div>
+
+
+        <!--
+          AQUI HABIA UN BOTON «NACIONAL», y era el último superviviente de un trío. El 29 de agosto
+          de 2026 ya se quitó uno de los tres que disparaban `volverAVistaNacional()`; el 12
+          de septiembre la dirección de producto señaló que el que quedaba sigue sobrando: «una vez se
+          filtra un departamento, se quita el filtro hacia la izquierda, pero también hay un botón
+          de volver a vista nacional, lo cual es totalmente innecesario y redundante».
+
+          Y es exacto: deshacer un filtro se hace donde se puso. El desplegable de Departamento
+          vuelve a «Nacional» y «Limpiar filtros» —que está junto a los filtros, dice cuántos quita y
+          sólo se enciende cuando hay alguno— hace lo mismo. Un botón en la otra punta de la
+          pantalla para deshacer lo que se eligió en esta obliga a aprender dos sitios para una
+          acción.
+        -->
+
+        </header>
+
+      <!--
+        DOS PESTANAS EN LA COLUMNA DE LECTURA.
+
+        Apilaba dos cosas de naturaleza distinta: el directorio —buscador y listado,
+        que se consulta— y la llamada «Ser parte del ecosistema» —icono, dos parrafos
+        y un boton, que se lee una vez—. La segunda quedaba DEBAJO del listado, o sea
+        despues de un numero de tarjetas que crece con los datos: medido a 1280x639,
+        su borde superior caia en y=1498, a mil pixeles del pliegue.
+
+        Misma semantica que las pestanas del Festival: `role="tablist"`,
+        `aria-selected` y `aria-controls`, y los paneles ocultos con `hidden` para no
+        reconstruir el buscador ni perder lo tecleado al ir y volver.
+      -->
+      <div [class]="'flex flex-shrink-0 gap-1 border-b border-slate-100 bg-white px-5 py-3 transition-all duration-500 ' + enfoqueDelTutorial('listado')" data-tuto="listado" (pointerenter)="senalarApartado('listado')" (focusin)="senalarApartado('listado')" role="tablist" aria-label="Secciones del panel de lectura">
+        <button type="button" role="tab" id="pestana-directorio"
+                [attr.aria-selected]="pestanaDeLectura() === 'directorio'"
+                aria-controls="panel-directorio"
+                (click)="pestanaDeLectura.set('directorio')"
+                [class]="'flex-1 rounded-xl px-3 py-2 text-[9px] font-bold uppercase tracking-widest transition-all cursor-pointer ' + (
+                  pestanaDeLectura() === 'directorio'
+                    ? 'bg-[#291242] text-white shadow-sm'
+                    : 'bg-slate-100 text-slate-500 hover:text-[#291242]'
+                )">
+          Directorio
+        </button>
+        <!--
+          AQUI ESTABA «SER PARTE», y era un apartado entero para un icono, dos párrafos y un botón
+          que se lee una vez. Ocupaba media columna de lectura de forma permanente. Ahora es un
+          botón de invitación al pie, y su sitio lo ocupa lo que sí cambia con lo que se está
+          mirando: la agenda del territorio abierto.
+
+          SE DESHABILITA CON LOS FILTROS DE CLASIFICACION. Con «Bambuco» puesto, la pregunta es por
+          prácticas musicales y un evento no se clasifica así; la pestaña lo dice en vez de enseñar
+          una lista vacía que se leería como «aquí no pasa nada».
+        -->
+        <button type="button" role="tab" id="pestana-agenda"
+                [attr.aria-selected]="pestanaDeLectura() === 'agenda'"
+                aria-controls="panel-agenda"
+                [disabled]="!agendaDisponible()"
+                [attr.title]="agendaDisponible() ? null : 'Los eventos no se clasifican por práctica ni por territorio sonoro. Quita el grupo resaltado para verlos.'"
+                (click)="pestanaDeLectura.set('agenda')"
+                [class]="'flex-1 rounded-xl px-3 py-2 text-[9px] font-bold uppercase tracking-widest transition-all ' + (
+                  !agendaDisponible()
+                    ? 'cursor-not-allowed bg-slate-50 text-slate-300'
+                    : pestanaDeLectura() === 'agenda'
+                      ? 'cursor-pointer bg-verde-medio text-white shadow-sm'
+                      : 'cursor-pointer bg-slate-100 text-slate-500 hover:text-verde-texto'
+                )">
+          Agenda
+          @if (agendaDisponible() && eventosDelAmbito().length) {
+            <span class="ml-1 rounded-full bg-white/25 px-1.5 py-0.5 text-[8px] font-extrabold tabular-nums">{{ eventosDelAmbito().length }}</span>
+          }
+        </button>
+      </div>
+
+      <!--
+        LAS FICHAS SIGUEN A SUS PESTAÑAS EN EL RECORRIDO. Sin esta marca se quedaban nítidas en los
+        nueve pasos —no llevaban ninguna—, de modo que el paso de las capas dejaba a la vista media
+        columna de registros que no estaba explicando.
+      -->
+      <div
+        [class]="'flex-1 overflow-y-auto bg-slate-50/50 px-5 py-4 custom-scrollbar transition-all duration-500 ' + enfoqueDelTutorial('fichas')"
+        data-tuto="fichas"
+        (pointerenter)="senalarApartado('fichas')"
+        (focusin)="senalarApartado('fichas')"
+      >
+        <!--
+          El directorio, para ver el listado al filtrar. Es la misma plantilla
+          que la vista «tabla» del centro, en su version de una sola columna:
+          un solo trozo de marcado, dos sitios donde se muestra.
+        -->
+        <div role="tabpanel" id="panel-directorio" aria-labelledby="pestana-directorio"
+             [hidden]="pestanaDeLectura() !== 'directorio'">
+          <ng-container *ngTemplateOutlet="plantillaDirectorio; context: { compacto: true }"></ng-container>
+        </div>
+
+        <!--
+          LA AGENDA DEL TERRITORIO ABIERTO. Sigue al departamento: al entrar en META el resto de la
+          columna se acota a META, y una agenda que siguiera enseñando el país entero sería el único
+          bloque hablando de otra cosa.
+        -->
+        <div role="tabpanel" id="panel-agenda" aria-labelledby="pestana-agenda"
+             [hidden]="pestanaDeLectura() !== 'agenda'">
+          @if (!agendaDisponible()) {
+            <p class="rounded-xl border border-slate-200 bg-white px-4 py-3 text-[11px] leading-relaxed text-slate-500">
+              Los eventos no se clasifican por práctica musical ni por territorio sonoro. Quita ese
+              filtro para ver la agenda de este territorio.
+            </p>
+          } @else {
+            <!--
+              EL UNICO FILTRO QUE LA AGENDA NO COMPARTE CON LOS PROCESOS. Un Festival no tiene fecha
+              y un evento sí, y acotar por fecha es lo primero que se le pide a una agenda.
+
+              SI EL TRAMO ELEGIDO NO TIENE NINGUNO, SE ENSEÑAN TODOS. Septiembre dejó escrito el
+              defecto: «un panel de eventos próximos filtrado por fecha futura sale vacío siempre que
+              la base no tenga eventos por venir, y un panel vacío se lee como una agenda rota».
+            -->
+            <div class="mb-3 flex gap-1" role="group" aria-label="Tramo de la agenda">
+              @for (rango of rangosDeAgenda; track rango.id) {
+                <button
+                  type="button"
+                  (click)="rangoDeAgenda.set(rango.id)"
+                  [attr.aria-pressed]="rangoDeAgenda() === rango.id"
+                  [class]="'flex-1 rounded-lg px-2 py-1.5 text-[8.5px] font-bold uppercase tracking-widest transition-all cursor-pointer ' + (
+                    rangoDeAgenda() === rango.id
+                      ? 'bg-verde-medio text-white shadow-sm'
+                      : 'bg-slate-100 text-slate-500 hover:text-verde-texto'
+                  )"
+                >{{ rango.etiqueta }}</button>
+              }
+            </div>
+          }
+
+          @if (agendaDisponible() && !eventosDelAmbito().length) {
+            <p class="rounded-xl border border-slate-200 bg-white px-4 py-3 text-[11px] leading-relaxed text-slate-500">
+              No hay eventos publicados en
+              {{ departamentoElegido() === 'Nacional' ? 'el país' : (nombreDelDepartamentoElegido() | nombrePropio) }}.
+            </p>
+          } @else if (agendaDisponible()) {
+            <!-- LA LISTA SOLO CUANDO LA AGENDA APLICA. Sin esta condición, con un filtro de
+                 clasificación puesto se pintaba una lista vacía DEBAJO del aviso que explicaba por
+                 qué no hay nada: el aviso y el vacío diciendo lo mismo dos veces. -->
+            <ul class="space-y-2">
+              @for (evento of eventosDelAmbito(); track evento.id) {
+                <li class="rounded-xl border border-slate-200 bg-white p-3 shadow-sm">
+                  <p class="text-[7.5px] font-extrabold uppercase tracking-widest text-verde-texto">
+                    {{ evento.categoria || 'Evento' }}
+                  </p>
+                  <h3 class="mt-1 text-[11px] font-bold leading-snug text-morado">{{ evento.name }}</h3>
+                  <p class="mt-1 text-[9px] leading-snug text-slate-500">
+                    {{ evento.fecha }}@if (evento.municipality) { · {{ evento.municipality | nombrePropio }} }@if (evento.lugar) { · {{ evento.lugar }} }
+                  </p>
+                  @if (evento.organizer) {
+                    <button
+                      type="button"
+                      data-abrir-organizacion
+                      (click)="abrirOrganizacion(evento.organizer)"
+                      [attr.aria-label]="'Ver los procesos de ' + evento.organizer + ' en este mapa'"
+                      class="mt-1.5 rounded-sm text-[9px] font-bold text-slate-600 underline decoration-verde decoration-2 underline-offset-2 transition hover:text-verde-texto"
+                    >{{ evento.organizer }}</button>
+                  }
+                </li>
+              }
+            </ul>
+          }
+
+          <!--
+            LA INVITACION, COMO UN BOTON Y NO COMO UN APARTADO. Lo que era media columna de lectura
+            permanente —icono, dos párrafos y un botón— cabe en una línea, al pie de lo que se estaba
+            consultando, que es donde tiene sentido invitar a registrarse.
+          -->
+          <!--
+            VA POR `NavigationService` Y NO POR UN `href` CRUDO: un enlace duro recarga la página
+            entera y tira el mapa que se acaba de cargar, con sus tres consultas. El servicio conoce
+            la ruta del registro —cambió una vez, de `/colaboradores` a `/registro`— y es el único
+            sitio donde eso está escrito.
+          -->
+          <button
+            type="button"
+            (click)="onOpenParticipation()"
+            class="mt-4 flex w-full items-center justify-center gap-2 rounded-xl border border-verde-medio/30 bg-verde/10 px-4 py-2.5 text-[9px] font-bold uppercase tracking-widest text-verde-texto transition hover:bg-verde/20 cursor-pointer"
+          >
+            Inscribe tu proceso en SIMUS
+            <svg lucideArrowRight size="13"></svg>
+          </button>
+        </div>
+
+      </div>
+    </aside>
+
+  </div>
+
+
+  <!--
+    PLANTILLA COMPARTIDA DEL DIRECTORIO.
+    Se declara una vez y se instancia en dos sitios —la columna central en
+    rejilla y el panel derecho en una columna—, en vez de duplicar cien lineas
+    de marcado que luego se irian separando cambio a cambio. Ambas instancias
+    leen las mismas senales, asi que buscar en una se refleja en la otra.
+  -->
+  <ng-template #plantillaDirectorio let-compacto="compacto">
+          <div class="space-y-4">
+            
+            <!--
+              AQUI HABIA SEIS PASTILLAS DE CATEGORIA —Todos, Festivales, Escuelas,
+              Mercados, Redes Doc., Lutieres— cada una con su cifra al lado. Se
+              quitaron por duplicadas: la barra superior ofrece
+              exactamente las mismas seis con exactamente las mismas cifras, y desde
+              ese mismo dia se ven como botones. Las dos tiras estaban ademas
+              enlazadas, asi que eran dos mandos para un solo interruptor, uno encima
+              del otro en la misma pantalla.
+
+              Con ellas se fueron `directoryCounts`, `seleccionarCategoriaDelDirectorio`
+              y `CAPA_POR_CATEGORIA`, que no tenian otro consumidor. El enlace en el
+              sentido que sobrevive —elegir capa arriba arrastra el directorio— sigue en
+              `seleccionarCapa`.
+            -->
+
+            <!--
+              EL BUSCADOR SUBIO A LA COLUMNA IZQUIERDA, con los demás filtros. Estaba aquí y
+              «Limpiar» —que está allí— lo borraba: quien escribía algo y pulsaba «Limpiar» al otro
+              lado de la pantalla veía desaparecer lo tecleado sin que nada lo anunciara. Esta
+              columna se queda con lo que es: LEER lo que quedó, no elegirlo.
+            -->
+
+            <!--
+              DOS PRESENTACIONES DE LOS MISMOS REGISTROS.
+
+              `compacto` es el panel derecho, 340 px: ahi solo cabe un naipe por fila
+              y el naipe esta bien.
+
+              La vista «Tabla» ocupa toda la columna central, y hasta el 29 de agosto
+              de 2026 pintaba EL MISMO NAIPE en una rejilla de dos o tres columnas.
+              Un naipe deja todas las variables en una sola cadena —«MEDELLÍN ·
+              Activa · 320 estudiantes»— que no se puede comparar entre filas: para
+              saber cuantas escuelas hay en Medellin habia que leerse los naipes uno
+              a uno. Ahora es un listado con cada variable en su columna.
+
+              Es una `<table>` de verdad, con `scope="col"`, y no una rejilla de
+              `div`: en un listado de variables la relacion celda-encabezado es
+              informacion, y un lector de pantalla solo la anuncia si esta escrita.
+            -->
+            @if (compacto) {
+              <!--
+                EL DIRECTORIO ES UN ATAJO DEL MAPA (29 de agosto de 2026)
+
+                Cada tarjeta abria un modal a pantalla completa —`fixed inset-0`, velo y
+                desenfoque— justo encima del mapa que tiene al lado. Medido en el
+                navegador a 1280x639: al pulsar la primera tarjeta salia un dialogo que
+                ocupaba los 1280x639 y el mapa dejaba de verse.
+
+                El criterio es este: «que se vaya al mapa y se ubique en el municipio,
+                y se abra la pestana que se usa dentro del mapa para ubicar, la idea es
+                que sea un directorio de navegacion que funciona como atajo en el mapa».
+
+                La ficha sigue a un clic de distancia: la tarjeta del municipio lleva
+                «Ver detalle» —el mismo modal— y «Ficha completa» donde esa pagina
+                existe.
+              -->
+              <!--
+                Y SOLO SI HAY ALGUNO QUE PULSAR. Sobre la lista vacía, esta pista instruía sobre un
+                gesto imposible justo encima del cartel que dice que no hay nada: dos mensajes
+                seguidos que se contradicen.
+              -->
+              @if (fichasFiltradasDelDirectorio().length > 0) {
+                <p class="text-[9px] leading-relaxed text-slate-500">
+                  Pulsa un registro para ubicarlo en el mapa.
+                </p>
+              }
+              <div class="space-y-2">
+                @if (fichasFiltradasDelDirectorio().slice(0, limiteDelDirectorio()).length > 0) {
+                  <!--
+                    EL SEGUIMIENTO VA POR CAPA MAS ID, y no por `id` a secas. El API
+                    numera cada modulo por su cuenta: los tres primeros festivales,
+                    escuelas, mercados, redes y lutieres son todos `1`, `2` y `3`. Con la
+                    categoria en «Todos», `track item.id` repite claves y Angular
+                    reutiliza el nodo equivocado al reordenar la lista.
+                  -->
+                  @for (item of fichasFiltradasDelDirectorio().slice(0, limiteDelDirectorio()); track claveDeFicha(item)) {
+                    @let municipioDelItem = item.record?.municipality || item.record?.municipio || '';
+                    <button
+                      type="button"
+                      (click)="irAlMunicipioDelRegistro(item)"
+                      [attr.aria-label]="'Ubicar ' + item.name + ' en el mapa' + (municipioDelItem ? ', en ' + municipioDelItem : '')"
+                      class="group relative flex w-full flex-col items-start rounded-2xl border border-slate-200/80 bg-white p-3.5 text-left shadow-sm transition-all duration-300 hover:-translate-y-[1.5px] hover:border-slate-300 hover:shadow-md cursor-pointer"
+                    >
+                      <span class="flex w-full items-center justify-between gap-2">
+                        <span
+                          class="inline-flex items-center rounded px-1.5 py-0.5 text-[8px] font-extrabold uppercase tracking-wider"
+                          [style.background-color]="item.color + '15'"
+                          [style.color]="item.color"
+                        >
+                          {{ item.type }}
+                        </span>
+                        @if (departamentoElegido() === 'Nacional' && item.department) {
+                          <span class="text-[9px] font-extrabold uppercase tracking-wide text-slate-400">
+                            {{ item.department }}
+                          </span>
+                        }
+                      </span>
+                      <h4 class="mt-2 text-[11px] font-bold text-[#291242] leading-snug group-hover:text-[#4f267a] transition-all">
+                        {{ item.name }}
+                      </h4>
+                      <p class="mt-1 text-[9px] font-semibold text-slate-500 line-clamp-2 leading-relaxed">
+                        {{ item.meta | nombrePropio }}
+                      </p>
+                      <!--
+                        El pie dice adonde lleva el clic. Sin el, la tarjeta se parece a
+                        la de ayer y sigue prometiendo la ficha.
+                      -->
+                      <span class="mt-2 inline-flex items-center gap-1 text-[8px] font-bold uppercase tracking-widest text-[#291242]/60 transition-colors group-hover:text-[#291242]">
+                        <svg lucideMapPin size="10"></svg>
+                        Ubicar en el mapa
+                      </span>
+                    </button>
+                  }
+                } @else {
+                  <div class="rounded-2xl border border-dashed border-slate-300 bg-white px-4 py-8 text-center shadow-sm">
+                    <p class="text-[10px] font-bold uppercase tracking-widest text-slate-400">Sin registros encontrados</p>
+                    <p class="mt-1 text-[9px] leading-relaxed text-slate-500">{{ consejoSinResultados() }}</p>
+                  </div>
+                }
+              </div>
+            } @else {
+              @let filas = filasDelListado();
+              @if (filas.length === 0) {
+                <div class="rounded-2xl border border-dashed border-slate-300 bg-white px-4 py-10 text-center shadow-sm">
+                  <p class="text-[10px] font-bold uppercase tracking-widest text-slate-400">Sin registros encontrados</p>
+                  <p class="mt-1 text-[10px] leading-relaxed text-slate-500">{{ consejoSinResultados() }}</p>
+                </div>
+              } @else {
+                <p class="text-[10px] leading-relaxed text-slate-500">
+                  {{ filas.length }} de {{ fichasFiltradasDelDirectorio().length }} registros.
+                  Pulsa una fila para ver su ficha.
+                </p>
+
+                <div class="mt-2.5 overflow-x-auto rounded-2xl border border-slate-200">
+                  <table class="w-full min-w-[640px] border-collapse text-left">
+                    <caption class="sr-only">
+                      Registros del ecosistema musical con su capa, territorio y datos principales
+                    </caption>
+                    <thead>
+                      <tr class="bg-slate-50">
+                        <th scope="col" class="px-3 py-2.5 text-[8px] font-bold uppercase tracking-widest text-slate-400">Capa</th>
+                        <th scope="col" class="px-3 py-2.5 text-[8px] font-bold uppercase tracking-widest text-slate-400">Nombre</th>
+                        <th scope="col" class="px-3 py-2.5 text-[8px] font-bold uppercase tracking-widest text-slate-400">Departamento</th>
+                        <th scope="col" class="px-3 py-2.5 text-[8px] font-bold uppercase tracking-widest text-slate-400">Municipio</th>
+                        <th scope="col" class="px-3 py-2.5 text-[8px] font-bold uppercase tracking-widest text-slate-400">Datos principales</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      @for (fila of filas; track claveDeFicha(fila)) {
+                        <!--
+                          EL RESALTADO DEL LENTE SE VE AQUI, Y ATENUA EN VEZ DE ESCONDER. Pulsar
+                          «Joropo» en la columna no quita las demás filas: las apaga. Es lo que
+                          permite ver dónde está el Joropo SIN perder de vista el resto, que es la
+                          diferencia entre un lente y un filtro.
+                        -->
+                        <tr
+                          [class]="'border-t border-slate-100 transition-all hover:bg-slate-50/80 focus-within:bg-slate-50 '
+                            + (estaResaltada(fila) ? '' : 'opacity-30')"
+                        >
+                          <td class="px-3 py-2.5 align-top">
+                            <span
+                              class="inline-flex items-center whitespace-nowrap rounded px-1.5 py-0.5 text-[8px] font-extrabold uppercase tracking-wider"
+                              [style.background-color]="fila.color + '15'"
+                              [style.color]="fila.color"
+                            >
+                              {{ fila.type }}
+                            </span>
+                          </td>
+                          <td class="px-3 py-2.5 align-top">
+                            <!--
+                              El boton va en la celda del nombre y no envolviendo la fila:
+                              un `<button>` alrededor de un `<tr>` no es HTML valido, y una
+                              fila entera marcada como control obliga al teclado a pasar por
+                              cada celda antes de llegar a la siguiente.
+                            -->
+                            <button
+                              type="button"
+                              (click)="fichaEnDetalle.set(fila)"
+                              class="text-left text-[11px] font-bold leading-snug text-[#291242] underline-offset-2 transition-colors hover:text-[#4f267a] hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#291242]/30 cursor-pointer"
+                            >
+                              {{ fila.name }}
+                            </button>
+                          </td>
+                          <td class="px-3 py-2.5 align-top text-[10px] font-semibold uppercase tracking-wide text-slate-500">
+                            {{ fila.department || '—' | nombrePropio }}
+                          </td>
+                          <td class="px-3 py-2.5 align-top text-[10px] font-semibold uppercase tracking-wide text-slate-500">
+                            {{ fila.municipio || '—' | nombrePropio }}
+                          </td>
+                          <td class="px-3 py-2.5 align-top text-[10px] leading-snug text-slate-500">
+                            {{ fila.detalle || '—' }}
+                          </td>
+                        </tr>
+                      }
+                    </tbody>
+                  </table>
+                </div>
+              }
+            }
+
+            <!-- Pagination Load More -->
+            @if (fichasFiltradasDelDirectorio().length > limiteDelDirectorio()) {
+              <button
+                type="button"
+                (click)="limiteDelDirectorio.set(limiteDelDirectorio() + 12)"
+                class="mt-2 flex w-full items-center justify-center gap-1.5 rounded-xl border border-slate-200 bg-white py-2.5 text-[9px] font-bold uppercase tracking-wider text-slate-500 hover:bg-slate-50 hover:text-[#291242] transition-all shadow-sm cursor-pointer"
+              >
+                Ver más registros ({{ fichasFiltradasDelDirectorio().length - limiteDelDirectorio() }} restantes)
+              </button>
+            }
+          </div>
+  </ng-template>
+      <!--
+        MODO EXPLORAR: SEÑALA Y TE DIGO QUE ES.
+
+        Lo pidió la dirección de producto para el botón de ayuda: «en lugar de darme todo el recorrido,
+        que me permita con el mouse apuntar un apartado y que ahí sea cuando me explique qué es».
+        Quien llega al botón de ayuda ya está en el mapa y tiene UNA duda; pasar por dieciocho pasos
+        para resolverla es el camino largo.
+
+        AQUI NO SE DESENFOCA NADA, al revés que en el recorrido: la persona está buscando, y buscar
+        con el resto borroso es imposible porque lo que hay que encontrar es justo lo que todavía no
+        se está señalando. Solo se ilumina lo que tiene el puntero encima.
+      -->
+      @if (modoExplorar()) {
+        <!-- La barra de modo: dice qué hacer y cómo salir. No tapa nada: vive abajo del todo. -->
+        <div class="pointer-events-none fixed inset-x-0 bottom-5 z-[9999] flex justify-center px-4">
+          <div data-barra-de-explorar class="pointer-events-auto flex max-w-[min(92vw,560px)] flex-wrap items-center justify-center gap-x-4 gap-y-2 rounded-2xl border border-slate-200 bg-white/95 px-5 py-3 shadow-2xl backdrop-blur-md">
+            <span class="flex items-center gap-2 text-[11px] font-medium text-slate-600">
+              <svg lucideMousePointer2 size="14" class="flex-shrink-0 text-morado"></svg>
+              Señala cualquier parte del mapa y te digo qué es.
+            </span>
+            <span class="flex flex-shrink-0 gap-2">
+              <button
+                type="button"
+                (click)="abrirElRecorrido()"
+                data-abrir-el-recorrido
+                class="cursor-pointer rounded-xl border border-slate-200 bg-white px-3 py-1.5 text-[9px] font-bold uppercase tracking-wider text-slate-600 transition-colors hover:text-morado"
+              >
+                Ver el recorrido
+              </button>
+              <button
+                type="button"
+                (click)="cerrarModoExplorar()"
+                class="cursor-pointer rounded-xl bg-morado px-3.5 py-1.5 text-[9px] font-bold uppercase tracking-wider text-white transition-all hover:bg-morado-claro"
+              >
+                Salir
+              </button>
+            </span>
+          </div>
+        </div>
+
+        <!-- La explicación del apartado señalado, pegada a él. -->
+        @if (explicacionSenalada(); as explicacion) {
+          @let anclaExplorar = anclaDelTutorial();
+          @if (anclaExplorar) {
+            <div class="pointer-events-none fixed inset-0 z-[9998]">
+              <div
+                role="status"
+                data-tarjeta-del-recorrido
+                class="absolute rounded-2xl border border-slate-200 bg-white/97 p-4 shadow-2xl backdrop-blur-md transition-all duration-200"
+                [style.top.px]="anclaExplorar.top"
+                [style.left.px]="anclaExplorar.left"
+                [style.width.px]="anchoDeLaTarjeta()"
+              >
+                <span
+                  aria-hidden="true"
+                  [class]="'absolute h-3 w-3 rotate-45 bg-white ' + (
+                    anclaExplorar.lado === 'derecha' ? '-left-[7px] border-b border-l border-slate-200'
+                    : anclaExplorar.lado === 'izquierda' ? '-right-[7px] border-r border-t border-slate-200'
+                    : anclaExplorar.lado === 'abajo' ? '-top-[7px] border-l border-t border-slate-200'
+                    : '-bottom-[7px] border-b border-r border-slate-200'
+                  )"
+                  [style.top.px]="anclaExplorar.lado === 'derecha' || anclaExplorar.lado === 'izquierda' ? anclaExplorar.flecha - 6 : null"
+                  [style.left.px]="anclaExplorar.lado === 'abajo' || anclaExplorar.lado === 'arriba' ? anclaExplorar.flecha - 6 : null"
+                ></span>
+                <p class="text-[11.5px] leading-relaxed text-slate-600">{{ explicacion }}</p>
+              </div>
+            </div>
+          }
+        }
+      }
+
+      <!-- TUTORIAL DIALOG -->
+      @if (tutorialAbierto()) {
+        <!--
+          LA TARJETA SE PEGA AL ELEMENTO QUE EXPLICA, Y LO SEÑALA.
+
+          Vivía centrada abajo, siempre en el mismo sitio, y el único vínculo entre lo que decía y
+          lo que explicaba era el desenfoque del resto. Con tres columnas y una decena de controles
+          eso no basta: está definido —«a veces no es tan claro qué es lo que está
+          mostrando»—. Ahora `ubicarLaTarjeta` mide el elemento marcado con `data-tuto` y coloca la
+          tarjeta a su lado, con una flecha que apunta a su centro.
+
+          SIN ANCLA VUELVE AL CENTRO: la bienvenida no señala nada, y si un elemento no se encuentra
+          es preferible una tarjeta centrada que una en la esquina señalando el vacío.
+        -->
+        @let ancla = anclaDelTutorial();
+        <div
+          [class]="ancla
+            ? 'fixed inset-0 z-[9999] pointer-events-none'
+            : 'fixed inset-0 z-[9999] flex items-center justify-center bg-slate-950/40 backdrop-blur-[1.5px] animate-in fade-in duration-300 pointer-events-auto'"
+        >
+          <div
+            appDialogo
+            (cerrar)="cerrarTutorial()"
+            [dialogoBloqueaElFondo]="false"
+            role="dialog"
+            aria-modal="true"
+            aria-label="Tutorial del geovisor ecosistémico"
+            data-tarjeta-del-recorrido
+            [style.top.px]="ancla ? ancla.top : null"
+            [style.left.px]="ancla ? ancla.left : null"
+            [style.width.px]="ancla ? anchoDeLaTarjeta() : null"
+            [class]="ancla
+              ? 'pointer-events-auto absolute rounded-3xl border border-slate-200 bg-white/97 p-5 shadow-2xl backdrop-blur-md transition-all duration-300'
+              : 'relative w-[min(92vw,380px)] rounded-3xl border border-slate-100 bg-white/95 p-6 shadow-2xl backdrop-blur-md animate-in zoom-in-95 duration-300 pointer-events-auto'"
+          >
+            @if (ancla) {
+              <!--
+                LA FLECHA. Un cuadrado girado 45° con dos de sus lados con borde: es lo que hace que
+                se lea como una punta saliendo de la tarjeta y no como un rombo suelto. Va en el
+                lado CONTRARIO a donde está la tarjeta respecto del elemento.
+              -->
+              <span
+                aria-hidden="true"
+                [class]="'absolute h-3 w-3 rotate-45 bg-white ' + (
+                  ancla.lado === 'derecha' ? '-left-[7px] border-b border-l border-slate-200'
+                  : ancla.lado === 'izquierda' ? '-right-[7px] border-r border-t border-slate-200'
+                  : ancla.lado === 'abajo' ? '-top-[7px] border-l border-t border-slate-200'
+                  : '-bottom-[7px] border-b border-r border-slate-200'
+                )"
+                [style.top.px]="ancla.lado === 'derecha' || ancla.lado === 'izquierda' ? ancla.flecha - 6 : null"
+                [style.left.px]="ancla.lado === 'abajo' || ancla.lado === 'arriba' ? ancla.flecha - 6 : null"
+              ></span>
+            }
+            
+            <!-- Step Header -->
+            <div class="flex items-center justify-between">
+              <span class="rounded-full bg-slate-100 px-3 py-1 text-[9px] font-bold uppercase tracking-wider text-slate-500">
+                Tutorial · Paso {{ pasoDelTutorial() + 1 }} de {{ TUTORIAL_STEPS().length }}
+              </span>
+              <button
+                type="button"
+                (click)="cerrarTutorial()"
+                aria-label="Cerrar tutorial"
+                class="rounded-full p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition-colors cursor-pointer"
+              >
+                <svg lucideX size="14"></svg>
+              </button>
+            </div>
+
+            <!-- Dynamic Content -->
+            <div class="mt-5 space-y-3">
+              <div class="flex items-center gap-3">
+                <div class="flex h-9 w-9 items-center justify-center rounded-2xl bg-[#291242]/5 text-[#291242]">
+                  <!--
+                    EL ICONO DE CADA PASO. Va por nombre y no por índice: así el orden de los pasos
+                    se puede cambiar en el componente sin que los iconos se descoloquen.
+                  -->
+                  @switch (pasoTutorial().iconClass) {
+                    @case ('Globe') { <svg lucideGlobe size="18"></svg> }
+                    @case ('Layers3') { <svg lucideLayers3 size="18"></svg> }
+                    @case ('Search') { <svg lucideSearch size="18"></svg> }
+                    @case ('Aperture') { <svg lucideAperture size="18"></svg> }
+                    @case ('Shapes') { <svg lucideShapes size="18"></svg> }
+                    @case ('Map') { <svg lucideMap size="18"></svg> }
+                    @case ('BookOpen') { <svg lucideBookOpen size="18"></svg> }
+                    @case ('LayoutGrid') { <svg lucideLayoutGrid size="18"></svg> }
+                    @case ('List') { <svg lucideList size="18"></svg> }
+                    @case ('PieChart') { <svg lucidePieChart size="18"></svg> }
+                    @case ('BarChart3') { <svg lucideBarChart3 size="18"></svg> }
+                    @case ('Table') { <svg lucideTable size="18"></svg> }
+                    @case ('CalendarDays') { <svg lucideCalendarDays size="18"></svg> }
+                    @default { <svg lucideCircleHelp size="18"></svg> }
+                  }
+                </div>
+                <h3 class="text-sm font-extrabold uppercase tracking-wide text-[#291242]">
+                  {{ pasoTutorial().title }}
+                </h3>
+              </div>
+              <p class="text-[11.5px] leading-relaxed text-slate-600">
+                {{ pasoTutorial().description }}
+              </p>
+
+              <!--
+                LA ELECCION SE OFRECE UNA VEZ, EN LA BIENVENIDA.
+
+                Quien llega por primera vez no sabe todavía qué preguntar, así que verlo andar solo
+                le sirve; quien ya sabe algo prefiere su ritmo. Ofrecerlo en cada paso sería ruido:
+                aquí es donde se decide cómo se va a recorrer.
+              -->
+              @if (pasoDelTutorial() === 0 && !reproduccionAutomatica()) {
+                <div class="flex flex-wrap gap-2 pt-1">
+                  <button
+                    type="button"
+                    (click)="verElRecorridoSolo()"
+                    class="flex cursor-pointer items-center gap-1.5 rounded-xl bg-morado px-3.5 py-2 text-[9px] font-bold uppercase tracking-wider text-white transition-all hover:bg-morado-claro"
+                  >
+                    <svg lucidePlay size="11"></svg>
+                    Verlo solo
+                  </button>
+                  <button
+                    type="button"
+                    (click)="handleGoToStep(1)"
+                    class="cursor-pointer rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-[9px] font-bold uppercase tracking-wider text-slate-600 transition-colors hover:text-morado"
+                  >
+                    Ir a mi ritmo
+                  </button>
+                </div>
+              }
+            </div>
+
+            <!-- Footer Progress Dots & Nav -->
+            <div class="mt-6 flex items-center justify-between border-t border-slate-100 pt-4">
+              <!--
+                UNA BARRA Y NO DIECIOCHO PUNTOS.
+
+                Eran un punto por paso, que funciona hasta seis o siete: a partir de ahí nadie los
+                cuenta y solo ocupan sitio. Con dieciocho medían 220 px dentro de una caja de 340 y
+                empujaban «Siguiente» DIECISEIS PIXELES FUERA de la tarjeta en escritorio y treinta
+                en móvil —medido—. La barra dice la misma proporción en el espacio que sobre, y
+                cuántos pasos son ya lo dice la cabecera: «Paso 4 de 18».
+
+                `min-w-0` en el contenedor flexible y `flex-shrink-0` en los botones: sin lo
+                primero, un hijo flexible se niega a encoger por debajo de su contenido y vuelve a
+                empujar; sin lo segundo, lo que se encoge es el botón.
+              -->
+              <div class="mr-4 h-1 min-w-0 flex-1 overflow-hidden rounded-full bg-slate-100">
+                <span
+                  class="block h-full rounded-full bg-morado transition-all duration-300"
+                  [style.width.%]="(pasoDelTutorial() + 1) / TUTORIAL_STEPS().length * 100"
+                ></span>
+              </div>
+
+              <div class="flex flex-shrink-0 gap-2">
+                <!--
+                  MIENTRAS SE VE SOLO, EL CONTROL ES OTRO. Con el recorrido andando por su cuenta,
+                  «Siguiente» no es lo que hace falta: lo que hace falta es poder pararlo para
+                  releer o para mirar el mapa con calma. Al pararlo se devuelve el paso a paso, que
+                  es el mismo de siempre.
+                -->
+                @if (reproduccionAutomatica() && !reproduccionEnPausa()) {
+                  <!--
+                    ADELANTAR Y RETROCEDER SIN DETENERLO. Quien lo está viendo solo y quiere volver
+                    a una sección o saltarse una no quiere por eso tomar el control: quiere seguir
+                    viéndolo desde otro punto.
+                  -->
+                  <button
+                    type="button"
+                    (click)="saltarEnElRecorrido(-1)"
+                    [disabled]="pasoDelTutorial() === 0"
+                    aria-label="Apartado anterior"
+                    class="flex h-7 w-7 cursor-pointer items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-600 transition-colors hover:text-morado disabled:cursor-not-allowed disabled:opacity-40"
+                  >
+                    <svg lucideChevronLeft size="14"></svg>
+                  </button>
+                  <button
+                    type="button"
+                    (click)="tomarElControl()"
+                    class="cursor-pointer rounded-xl border border-slate-200 bg-white px-3 py-1.5 text-[9px] font-bold uppercase tracking-wider text-slate-600 transition-colors hover:text-morado"
+                  >
+                    Pausar
+                  </button>
+                  <button
+                    type="button"
+                    (click)="saltarEnElRecorrido(1)"
+                    [disabled]="pasoDelTutorial() === TUTORIAL_STEPS().length - 1"
+                    aria-label="Apartado siguiente"
+                    class="flex h-7 w-7 cursor-pointer items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-600 transition-colors hover:text-morado disabled:cursor-not-allowed disabled:opacity-40"
+                  >
+                    <svg lucideChevronRight size="14"></svg>
+                  </button>
+                } @else {
+                  @if (pasoDelTutorial() > 0) {
+                    <button
+                      type="button"
+                      (click)="handleGoToStep(pasoDelTutorial() - 1)"
+                      class="cursor-pointer rounded-xl border border-slate-200 bg-white px-3 py-1.5 text-[9px] font-bold uppercase tracking-wider text-slate-600 transition-colors hover:text-morado"
+                    >
+                      Atrás
+                    </button>
+                  }
+                  @if (reproduccionAutomatica() && reproduccionEnPausa()) {
+                    <button
+                      type="button"
+                      (click)="reanudarElRecorrido()"
+                      class="cursor-pointer rounded-xl border border-slate-200 bg-white px-3 py-1.5 text-[9px] font-bold uppercase tracking-wider text-slate-600 transition-colors hover:text-morado"
+                    >
+                      Seguir solo
+                    </button>
+                  }
+                  <!--
+                    EN LA BIENVENIDA NO HAY «SIGUIENTE»: la elección está arriba, con sus dos
+                    botones, y «Siguiente» repetía «Ir a mi ritmo» con otro nombre. Tres botones
+                    para dos caminos hacen dudar cuál es cuál.
+                  -->
+                  @if (pasoDelTutorial() > 0 || reproduccionAutomatica()) {
+                    <button
+                      type="button"
+                      (click)="pasoDelTutorial() < TUTORIAL_STEPS().length - 1 ? handleGoToStep(pasoDelTutorial() + 1) : cerrarTutorial()"
+                      class="cursor-pointer rounded-xl bg-morado px-4 py-1.5 text-[9px] font-bold uppercase tracking-wider text-white shadow-md transition-all hover:bg-morado-claro"
+                    >
+                      {{ pasoDelTutorial() < TUTORIAL_STEPS().length - 1 ? 'Siguiente' : 'Finalizar' }}
+                    </button>
+                  }
+                }
+              </div>
+            </div>
+
+          </div>
+        </div>
+      }
+
+  <!--
+    TARJETA DE MUNICIPIO. NO ES UN MODAL, Y ESA ES LA CORRECCION DEL 29 DE AGOSTO DE 2026.
+
+    ERA un modal: `fixed inset-0`, velo `bg-[#0f172a]/50`, `backdrop-blur-sm` y una caja
+    de 560 px centrada. Pulsar Amalfi para leer sus procesos hacia desaparecer Amalfi, y
+    el mapa entero detras. No se podia comparar con el municipio vecino ni ver donde
+    estaba lo que se acababa de pulsar.
+
+    AHORA sale al lado del poligono, mide 232 px y no tapa nada mas que su propio hueco.
+    La posicion la calcula `territoryPopupPosition` y se recalcula al mover o acercar el
+    mapa, para que la tarjeta no se despegue de su territorio.
+
+    POR QUE SE FUE `aria-modal` Y LA TRAMPA DE FOCO. Las dos decian que todo lo de fuera
+    estaba inerte. Con el velo era cierto. Sin el velo seria mentira —el mapa sigue vivo,
+    se puede arrastrar y pulsar otro municipio— y ademas dejaria al teclado encerrado en
+    una tarjeta de 232 px sin manera de volver al mapa. Queda `role="dialog"` con nombre
+    accesible, que es lo que corresponde a un dialogo no modal. Escape lo sigue cerrando
+    (`onEscapeKey`), y tambien lo cierra pulsar el mapa por fuera.
+  -->
+  <!--
+    EL PANEL DEL MUNICIPIO: DOS NIVELES EN EL MISMO SITIO, Y NINGUNO ENCIMA DEL OTRO.
+
+    Antes eran DOS MODALES APILADOS. Al pulsar un municipio se abría una tarjeta de 232 px con sus
+    procesos, cada uno en su propio recuadro con dos botones; «Ver detalle» abría ENCIMA el modal
+    grande del registro. El de abajo quedaba tapado, cerrar el de arriba no era evidente, y comparar
+    dos procesos del mismo municipio obligaba a abrir, leer, cerrar y volver a buscar en una lista
+    que ya no se veía.
+
+    Ahora el panel tiene dos niveles y se va y se vuelve entre ellos:
+      · LISTA — una fila por proceso, no una tarjeta. Sin botones repetidos: la fila entera es el
+        control, que es lo que una lista debe ser.
+      · FICHA — el mismo contenido que el modal del directorio, con «volver» arriba.
+
+    Y ES MAS ANCHO: 320 px en vez de 232. A 232 px cada nombre de festival se partía en tres
+    renglones y los dos botones no cabían en fila; con el ancho de una columna de lectura, la lista
+    se lee de un vistazo.
+  -->
+  @if (municipioSeleccionado(); as municipio) {
+    @let fichaAbierta = fichaAbiertaEnElMunicipio();
+    <section
+      role="dialog"
+      [attr.aria-label]="'Procesos registrados en ' + municipio.nombre"
+      [attr.data-lado]="municipio.popup.side"
+      class="fixed z-[3100] flex max-h-[340px] w-[320px] flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-xl ring-1 ring-black/5"
+      [style.left.px]="municipio.popup.left"
+      [style.top.px]="municipio.popup.top"
+    >
+      <header class="flex items-start justify-between gap-2 bg-gradient-to-br from-morado to-morado-claro px-3 py-2.5 text-white">
+        <div class="min-w-0">
+          @if (fichaAbierta) {
+            <!--
+              VOLVER, Y NO CERRAR. Es el control que sustituye al modal apilado: dice de dónde se
+              viene y cuántos quedan por mirar, que es la información que hacía falta para decidir.
+            -->
+            <button
+              type="button"
+              (click)="volverALaListaDelMunicipio()"
+              class="flex cursor-pointer items-center gap-1 text-[7px] font-bold uppercase tracking-[0.16em] text-verde-claro hover:text-white"
+            >
+              <svg lucideArrowRight size="9" class="rotate-180"></svg>
+              {{ municipio.nombre | nombrePropio }} · {{ municipio.fichas.length }}
+              {{ municipio.fichas.length === 1 ? 'proceso' : 'procesos' }}
+            </button>
+            <h2 class="mt-0.5 text-[13px] font-extrabold leading-tight">{{ fichaAbierta.name }}</h2>
+          } @else {
+            <p class="text-[7px] font-bold uppercase tracking-[0.16em] text-verde-claro">Municipio</p>
+            <h2 class="mt-0.5 truncate text-[13px] font-extrabold uppercase leading-tight">{{ municipio.nombre | nombrePropio }}</h2>
+            <p class="mt-0.5 truncate text-[9px] leading-snug text-white/70">
+              {{ municipio.fichas.length }} {{ municipio.fichas.length === 1 ? 'proceso' : 'procesos' }} · {{ configuracionDeLaCapa().label }}
+            </p>
+          }
+        </div>
+        <button
+          type="button"
+          (click)="municipioSeleccionado.set(null); volverALaListaDelMunicipio()"
+          class="flex h-6 w-6 flex-shrink-0 cursor-pointer items-center justify-center rounded-full border border-white/20 bg-white/10 text-white transition-all hover:bg-white/20"
+          aria-label="Cerrar la lista de procesos del municipio"
+        >
+          <svg lucideX size="12"></svg>
+        </button>
+      </header>
+
+      @if (fichaAbierta) {
+        <!-- NIVEL 2 — LA FICHA, con el mismo contenido que el modal del directorio. -->
+        <div class="min-h-0 flex-1 space-y-3 overflow-y-auto px-3 py-3 custom-scrollbar">
+          @for (seccion of contenidoEnElMunicipio().sections; track seccion.title) {
+            <section>
+              <h3 class="text-[7.5px] font-bold uppercase tracking-[0.16em] text-slate-400">{{ seccion.title }}</h3>
+              @if (seccion.body) {
+                <p class="mt-1 text-[10px] leading-relaxed text-slate-600">{{ seccion.body }}</p>
+              }
+              @if (seccion.items?.length) {
+                <dl class="mt-1.5 space-y-1">
+                  @for (item of seccion.items; track item.label) {
+                    <div class="flex items-baseline justify-between gap-2">
+                      <dt class="flex-shrink-0 text-[9px] uppercase tracking-wider text-slate-400">{{ item.label }}</dt>
+                      <dd class="min-w-0 truncate text-right text-[10px] font-semibold text-morado">{{ item.value }}</dd>
+                    </div>
+                  }
+                </dl>
+              }
+            </section>
+          }
+          @if (rutaDeFicha(fichaAbierta)) {
+            <button
+              type="button"
+              (click)="irAFicha(fichaAbierta)"
+              class="flex w-full cursor-pointer items-center justify-center gap-1 rounded-lg bg-morado px-2 py-2 text-[8px] font-bold uppercase tracking-widest text-white transition-all hover:bg-morado-claro"
+            >
+              Ficha completa
+              <svg lucideArrowRight size="11"></svg>
+            </button>
+          }
+        </div>
+      } @else {
+        <!-- NIVEL 1 — LA LISTA. Una fila por proceso; la fila entera es el control. -->
+        <ul class="min-h-0 flex-1 divide-y divide-slate-100 overflow-y-auto custom-scrollbar">
+          @for (ficha of municipio.fichas; track claveDeFicha(ficha)) {
+            <!--
+              SE MARCA EL REGISTRO DESDE EL QUE SE LLEGO. Se pulsa un festival en el directorio y se
+              abre el panel con los procesos de su municipio: sin marca, no hay nada que diga cuál de
+              todos era el que se pidió, y el atajo parece haber llevado a otro sitio.
+
+              `data-resaltado` no es decoración: es lo que lee `npm run mapa:atajo` para comprobar
+              que el registro pulsado es el que el panel señala.
+            -->
+            @let vieneDelDirectorio = !!municipio.resaltado && claveDeFicha(ficha) === municipio.resaltado;
+            <li>
+              <button
+                type="button"
+                [attr.data-resaltado]="vieneDelDirectorio ? 'si' : null"
+                (click)="procesoAbiertoEnElMunicipio.set(claveDeFicha(ficha))"
+                [class]="'flex w-full cursor-pointer items-start gap-2 px-3 py-2 text-left transition-all hover:bg-slate-50 ' + (
+                  vieneDelDirectorio ? 'bg-morado/5' : ''
+                )"
+              >
+                <span class="mt-[3px] h-2 w-2 flex-shrink-0 rounded-full" [style.background-color]="ficha.color"></span>
+                <span class="min-w-0 flex-1">
+                  <span class="block truncate text-[11px] font-bold leading-snug text-morado">{{ ficha.name }}</span>
+                  <span class="mt-0.5 block truncate text-[9px] leading-snug text-slate-500">{{ ficha.meta }}</span>
+                  @if (vieneDelDirectorio) {
+                    <span class="mt-1 inline-flex items-center rounded bg-morado px-1 py-0.5 text-[7px] font-extrabold uppercase tracking-wider text-white">
+                      Pulsado en el directorio
+                    </span>
+                  }
+                </span>
+                <svg lucideArrowRight size="12" class="mt-1 flex-shrink-0 text-slate-300"></svg>
+              </button>
+            </li>
+          } @empty {
+            <li class="px-3 py-5 text-center">
+              <p class="text-[8px] font-bold uppercase tracking-widest text-slate-400">Sin procesos de esta capa</p>
+              <p class="mt-1 text-[9px] leading-snug text-slate-500">
+                Cambia de capa en la columna derecha para ver si tiene registros de otro tipo.
+              </p>
+            </li>
+          }
+        </ul>
+      }
+    </section>
+  }
+  <!-- REGISTRATION DETAIL MODAL -->
+  @if (fichaEnDetalle(); as detail) {
+    <div class="fixed inset-0 z-[3200] flex items-center justify-center bg-[#0f172a]/50 p-4 backdrop-blur-sm">
+      <section class="w-[min(92vw,680px)] overflow-hidden rounded-[2.5rem] border border-white/20 bg-white/95 backdrop-blur-xl shadow-2xl">
+        
+        <!-- Header -->
+        <header class="relative overflow-hidden bg-gradient-to-br from-[#291242] to-[#361757] px-8 py-8 text-white">
+          <div class="relative flex items-start justify-between gap-5">
+            <div class="min-w-0 flex-1">
+              <p class="text-[0.52rem] font-bold uppercase tracking-[0.25em] text-[#8BF784]">
+                Detalle de {{ detail.type }}
+              </p>
+              @if (detail.type === 'Festival') {
+                <h3 class="mt-3 font-alternate text-[1.4rem] font-bold uppercase leading-tight text-white tracking-wide">
+                  {{ detail.name || 'Festival sin nombre visible' }}
+                  @let loc = [detail.record?.municipality, detail.record?.department].filter(Boolean).join(', ');
+                  @if (loc) {
+                    ({{ loc }})
+                  }
+                </h3>
+                @if (detail.record?.organizer) {
+                  <!--
+                    LA ORGANIZACION SE CONSULTA DESDE AQUI. Era texto muerto: se leía el nombre de
+                    quien responde por el proceso y no se podía saber nada más de ella sin salir del
+                    mapa. Lo que abre NO es su ficha —las organizaciones no son una capa del mapa—,
+                    sino lo que los procesos de este mapa saben de ella.
+                  -->
+                  <p class="mt-2.5 text-[0.82rem] font-semibold text-slate-200">
+                    Organiza:
+                    <button
+                      type="button"
+                      data-abrir-organizacion
+                      (click)="abrirOrganizacion(detail.record.organizer)"
+                      [attr.aria-label]="'Ver los procesos de ' + detail.record.organizer + ' en este mapa'"
+                      class="rounded-sm underline decoration-verde decoration-2 underline-offset-4 transition hover:text-verde-claro focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-verde"
+                    >{{ detail.record.organizer }}</button>
+                  </p>
+                }
+                @if (detail.record?.versions) {
+                  <p class="mt-1 text-[0.76rem] font-medium text-slate-300">
+                    {{ detail.record.versions }} ediciones
+                  </p>
+                }
+              } @else {
+                <h3 class="mt-3 font-alternate text-[1.4rem] font-bold uppercase leading-tight text-white tracking-wide">
+                  {{ detail.name || 'Registro sin nombre visible' }}
+                </h3>
+                @if (metadatosDeLaFicha()) {
+                  <p class="mt-3.5 text-[0.78rem] font-medium leading-relaxed text-slate-300">
+                    {{ metadatosDeLaFicha() }}
+                  </p>
+                }
+                <!-- UN EVENTO TAMBIEN LO ORGANIZA ALGUIEN, y hasta ahora no se decía. -->
+                @if (detail.record?.organizer) {
+                  <p class="mt-2.5 text-[0.82rem] font-semibold text-slate-200">
+                    Organiza:
+                    <button
+                      type="button"
+                      data-abrir-organizacion
+                      (click)="abrirOrganizacion(detail.record.organizer)"
+                      [attr.aria-label]="'Ver los procesos de ' + detail.record.organizer + ' en este mapa'"
+                      class="rounded-sm underline decoration-verde decoration-2 underline-offset-4 transition hover:text-verde-claro focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-verde"
+                    >{{ detail.record.organizer }}</button>
+                  </p>
+                }
+              }
+            </div>
+            <button
+              type="button"
+              (click)="fichaEnDetalle.set(null)"
+              class="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full border border-white/15 bg-white/10 text-white hover:bg-white/15 transition-all cursor-pointer"
+              aria-label="Cerrar detalle de registro"
+            >
+              <svg lucideX size="16"></svg>
+            </button>
+          </div>
+        </header>
+
+        <!-- Body -->
+        <div class="max-h-[min(68vh,620px)] overflow-y-auto bg-transparent px-6 py-5 custom-scrollbar">
+          <div class="space-y-5">
+            @for (section of contenidoDeLaFichaEnDetalle().sections; track section.title) {
+              <section class="border-b border-slate-100 pb-5 last:border-b-0 last:pb-0">
+                <p class="text-[0.55rem] font-bold uppercase tracking-[0.18em] text-slate-400">{{ section.title }}</p>
+                @if (section.body) {
+                  <p class="mt-3 text-[0.82rem] leading-relaxed text-slate-600">{{ section.body }}</p>
+                }
+                @if (section.items && section.items.length > 0) {
+                  <dl class="mt-4 divide-y divide-slate-100">
+                    @for (item of section.items; track item.label) {
+                      <div class="grid grid-cols-[minmax(110px,0.72fr)_minmax(0,1fr)] gap-4 py-2.5">
+                        <dt class="text-[0.58rem] font-bold uppercase tracking-[0.14em] text-slate-400">{{ item.label }}</dt>
+                        <dd class="text-[0.76rem] font-semibold leading-snug text-[#291242]">
+                          {{ formatRecordDetailValue(item.value) }}
+                        </dd>
+                      </div>
+                    }
+                  </dl>
+                }
+              </section>
+            }
+          </div>
+          
+          <!-- Contact buttons inside modal -->
+          @if (detail.record?.contact || detail.record?.websiteUrl) {
+            @let record = detail.record;
+            <div class="mt-6 flex justify-end gap-2 border-t border-slate-100 pt-4 bg-slate-50/50">
+              @if (record?.websiteUrl) {
+                <a
+                  [href]="record.websiteUrl.startsWith('http') ? record.websiteUrl : 'https://' + record.websiteUrl"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="inline-flex items-center justify-center gap-2 rounded-2xl bg-white border border-slate-200 px-5 py-3 text-xs font-bold uppercase tracking-wider text-[#291242] shadow-sm transition-all hover:bg-slate-50"
+                >
+                  <svg lucideGlobe size="14"></svg>
+                  Visita la web oficial
+                </a>
+              }
+              @if (record?.contact) {
+                @let contactLink = record.contact.includes('@')
+                  ? 'mailto:' + record.contact.split('·')[0].trim()
+                  : 'tel:' + (record.contact.split('·')[1]?.replace('\\D+', '') || record.contact.replace('\\D+', ''));
+                <a
+                  [href]="contactLink"
+                  class="inline-flex items-center justify-center gap-2 rounded-2xl bg-[#291242] px-5 py-3 text-xs font-bold uppercase tracking-wider text-white shadow-md transition-all hover:bg-[#3d1a62]"
+                >
+                  <svg lucideMail size="14"></svg>
+                  Contactar Entidad
+                </a>
+              }
+            </div>
+          }
+        </div>
+      </section>
+    </div>
+  }
+
+  <!--
+    LO QUE LOS PROCESOS SABEN DE UNA ORGANIZACION.
+    
+    NO ES SU FICHA. No trae su correo, ni su estado, ni su sede: nada de eso lo sabe el mapa, y
+    pedirlo exigiría una lectura pública de organizaciones que hoy no existe y que no se va a
+    estrenar para esto. Lo que sí sabe el mapa es qué procesos lleva y dónde, porque son los que
+    está dibujando. Eso es lo que se enseña.
+
+    VA POR ENCIMA DE LA FICHA DEL PROCESO —`z-[3300]` frente a `3200`— porque se abre DESDE ella y
+    al cerrarlo hay que volver al proceso que se estaba mirando, no a la nada.
+  -->
+  @if (resumenDeLaOrganizacion(); as org) {
+    <!-- LA VENTANA LLEVA LA DIRECTIVA DEL PROYECTO: foco dentro, foco retenido, Escape y fondo
+         bloqueado. Sin ella, quien navega con teclado abría esto y se quedaba fuera, recorriendo
+         un mapa que el velo oscurece. -->
+    <div class="fixed inset-0 z-[3300] flex items-center justify-center bg-[#0f172a]/60 p-4 backdrop-blur-sm"
+         role="dialog" aria-modal="true" aria-labelledby="organizacion-del-proceso-titulo"
+         appDialogo (cerrar)="cerrarOrganizacion()">
+      <section class="w-[min(92vw,520px)] overflow-hidden rounded-[2rem] border border-slate-200 bg-white shadow-2xl">
+        <header class="flex items-start justify-between gap-4 border-b border-slate-100 px-6 py-5">
+          <div class="min-w-0">
+            <p class="text-[0.52rem] font-bold uppercase tracking-[0.25em] text-verde-texto">Organización responsable</p>
+            <h3 id="organizacion-del-proceso-titulo" class="mt-1.5 font-alternate text-lg font-bold uppercase leading-tight text-morado">
+              {{ org.nombre }}
+            </h3>
+          </div>
+          <button type="button" (click)="cerrarOrganizacion()"
+            class="shrink-0 rounded-xl border border-slate-200 px-3 py-2 text-xs font-bold text-slate-600 hover:border-morado hover:text-morado">Cerrar</button>
+        </header>
+
+        <div class="px-6 py-5">
+          <dl class="grid grid-cols-3 gap-3 text-center">
+            <div><dt class="text-[0.55rem] font-bold uppercase tracking-widest text-slate-400">Festivales</dt><dd class="mt-1 font-alternate text-2xl font-bold tabular-nums text-morado">{{ org.festivales }}</dd></div>
+            <div><dt class="text-[0.55rem] font-bold uppercase tracking-widest text-slate-400">Eventos</dt><dd class="mt-1 font-alternate text-2xl font-bold tabular-nums text-morado">{{ org.eventos }}</dd></div>
+            <div><dt class="text-[0.55rem] font-bold uppercase tracking-widest text-slate-400">Territorios</dt><dd class="mt-1 font-alternate text-2xl font-bold tabular-nums text-morado">{{ org.territorios }}</dd></div>
+          </dl>
+
+          <!--
+            LAS CIFRAS SON DE ESTE MAPA Y SE DICE, porque el mapa está filtrado: con un departamento
+            abierto son sus procesos AQUI, no todos los que tiene. Callarlo haría leer «1 festival»
+            como «solo tiene uno».
+          -->
+          <p class="mt-3 text-center text-[0.68rem] leading-relaxed text-slate-500">
+            Contado sobre lo que muestra el mapa ahora mismo.
+          </p>
+
+          @if (org.procesos.length) {
+            <ul class="mt-5 max-h-64 divide-y divide-slate-100 overflow-y-auto border-y border-slate-100">
+              @for (proceso of org.procesos; track proceso.nombre) {
+                <li class="py-2.5">
+                  <p class="text-[0.55rem] font-bold uppercase tracking-widest text-slate-400">{{ proceso.tipo }}</p>
+                  <p class="mt-0.5 text-sm font-bold text-slate-800">{{ proceso.nombre }}</p>
+                  @if (proceso.territorio) {
+                    <p class="mt-0.5 text-xs text-slate-500">{{ proceso.territorio }}</p>
+                  }
+                </li>
+              }
+            </ul>
+          }
+        </div>
+      </section>
+    </div>
+  }
+
+</div>

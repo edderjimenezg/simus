@@ -1,0 +1,557 @@
+<div class="space-y-5">
+  <!--
+    SIN ENCABEZADO PROPIO Y SIN LA CIFRA TRES VECES.
+
+    Aquí había, de arriba abajo: un segundo título «GESTIÓN DE USUARIOS» con su descripción bajo la
+    que ya pone la consola; dos casillas «CUENTAS 21 / ACTIVAS 21» —el mismo número dos veces
+    mientras nadie esté desactivado—; y, dentro de la tarjeta, una tercera línea «Usuarios (21)».
+    La cifra se dice UNA vez, en la barra de la lista, que es donde se dice en toda la consola.
+  -->
+  <h2 id="usuarios-consola-titulo" class="sr-only">Gestión de usuarios</h2>
+
+  <app-barra-de-lista>
+    <app-buscador-de-lista identificador="buscar-usuario" etiqueta="Buscar usuario"
+      marcador="Buscar por nombre o correo…" [espera]="0"
+      [valor]="busqueda()" (cambiar)="busqueda.set($event)" />
+    <app-filtro-desplegable identificador="rol" etiqueta="Filtrar cuentas por rol"
+      [opciones]="filtroDeRol()" [elegida]="filtroRol()" (cambiar)="filtroRol.set($event)" />
+    <app-filtro-desplegable identificador="estado" etiqueta="Filtrar cuentas por estado"
+      [opciones]="FILTRO_DE_ESTADO" [elegida]="filtroEstado()" (cambiar)="filtrarPorEstado($event)" />
+    <p class="barra-de-lista__resumen">
+      <b>{{ usuariosFiltrados().length }}</b>
+      {{ usuariosFiltrados().length === 1 ? 'cuenta' : 'cuentas' }}
+      @if (usuariosFiltrados().length !== totalDelAmbito()) { <span>de {{ totalDelAmbito() }}</span> }
+      · {{ totalActivos() }} {{ totalActivos() === 1 ? 'activa' : 'activas' }}
+    </p>
+    <ng-container extremo>
+      <app-boton importancia="principal" (accion)="startCreate()">Nuevo usuario</app-boton>
+    </ng-container>
+  </app-barra-de-lista>
+
+  <!--
+    DOS POBLACIONES QUE NO SE GESTIONAN IGUAL. Una cuenta administrativa se crea, se le da rol y se
+    desactiva; una externa llega sola desde el ecosistema y se vincula a su organización. Verlas
+    mezcladas hacía que las tres internas se perdieran entre dieciocho externas.
+
+    DEBAJO DE LA BARRA Y FUERA DE ELLA, que es el orden estandarizado de la consola: buscador,
+    luego lo que acota la lista, la acción de crear a la derecha, y las pestañas debajo. Estaban
+    DENTRO, en la misma fila que el buscador y «Nuevo usuario», así que la fila crecía y no se
+    distinguía qué acotaba la lista de qué la modificaba.
+  -->
+  <app-selector-segmentado
+    [opciones]="pestanasDeAmbito()"
+    [elegida]="ambito()"
+    etiquetaDelGrupo="Ver cuentas administrativas o externas"
+    (elegir)="cambiarAmbito($event)" />
+
+  <div class="grid gap-5 items-start">
+    <!--
+      LA TABLA NO VA DENTRO DE UNA TARJETA. El lienzo de esta sección ya es blanco, así que el
+      recuadro con borde y sombra no separaba nada de nada: dibujaba un objeto donde no lo hay.
+    -->
+    <div class="overflow-x-auto">
+      <div>
+        <table class="tabla-administrativa tabla-de-usuarios">
+          <!-- Anchos declarados: al filtrar por rol la tabla no debe recolocarse entera. -->
+          <colgroup>
+            <col class="tabla-de-usuarios__usuario" />
+            <col class="tabla-de-usuarios__rol" />
+            <col class="tabla-de-usuarios__apartados" />
+            <col class="tabla-de-usuarios__estado" />
+            <col class="tabla-de-usuarios__acciones" />
+          </colgroup>
+          <thead class="tabla-administrativa__cabecera">
+            <tr><app-cabecera-de-tabla [columnas]="COLUMNAS" [orden]="orden" (ordenarPor)="orden.alternar($event)" /></tr>
+          </thead>
+          <tbody>
+            @for (user of usuariosVisibles(); track user.id) {
+              <tr class="tabla-administrativa__fila">
+                <td>
+                  <div class="flex items-center gap-3">
+                    <div class="h-8 w-8 rounded-full flex items-center justify-center shrink-0" [ngClass]="colorDeAvatar(user.fullName)">
+                      <span class="text-dato font-black text-white">{{ inicialesDe(user.fullName) }}</span>
+                    </div>
+                    <div class="min-w-0">
+                      <span class="tabla-administrativa__principal">{{ user.fullName }}</span>
+                      <span class="tabla-administrativa__secundaria">{{ user.email }}</span>
+                    </div>
+                  </div>
+                </td>
+                <td>
+                  <!--
+                    TODOS LOS ROLES, NO EL PRINCIPAL. Desde la transicion una persona puede tener
+                    varios; pintar solo uno haria que el panel dijera «Gestor» de alguien que
+                    tambien es webmaster, y quien administra usuarios no tendria forma de verlo.
+                    Una cuenta sin ningun rol se dice con todas las letras en vez de dejar el
+                    hueco en blanco: es un estado que hay que arreglar, no un detalle de estilo.
+                  -->
+                  <!--
+                    LOS ROLES ERAN CAPSULAS DE COLOR, una por rol y hasta tres en la misma celda.
+                    El proyecto no usa píldoras, y aquí además competían con el indicador de estado
+                    de la columna de al lado: dos formas redondeadas seguidas se leen como dos
+                    estados. Se escriben como lo que son —una clasificación— con el rótulo del
+                    proyecto; «Sin rol» sí se marca, porque es algo que hay que arreglar.
+                  -->
+                  <span class="flex flex-wrap items-center gap-x-2 gap-y-0.5">
+                    @for (rol of rolesDe(user); track rol) {
+                      <span class="font-alternate text-dato font-bold uppercase tracking-[0.12em] text-seccion">{{ nombreDelRol(rol) }}</span>
+                    }
+                    @if (rolesDe(user).length === 0) {
+                      <span class="font-alternate text-dato font-bold uppercase tracking-[0.12em] text-amber-700">Sin rol</span>
+                    }
+                  </span>
+                </td>
+                <td>
+                  <!--
+                    LA CIFRA DICE LO QUE HAY DETRAS DEL CLIC, y «solo lo mínimo» se marca porque es
+                    un estado que normalmente hay que arreglar: una cuenta recién creada a la que
+                    nadie decidió qué darle no puede hacer su trabajo.
+                  -->
+                  <span class="tabla-administrativa__cifra" [class.es-minimo]="soloLoMinimo(user)"
+                    [attr.data-apartados]="user.id">{{ apartadosDe(user) }}</span>
+                </td>
+                <td>
+                  <app-indicador-de-estado
+                    [etiqueta]="user.isActive ? 'Activo' : 'Inactivo'"
+                    [tono]="tonoDelEstado(user.isActive ? 'activo' : 'inactivo')"
+                    [matiz]="matizDelEstado(user.isActive ? 'activo' : 'inactivo')"
+                    [conTexto]="true"></app-indicador-de-estado>
+                </td>
+                <!--
+                  EL MISMO MENU QUE EL RESTO DE LA CONSOLA. Aquí había dos botones sueltos —uno de
+                  ellos un icono sin rótulo, que obliga a adivinar— y «Desactivar» escondido dentro
+                  del diálogo de la ficha. Festivales, organizaciones, noticias, agenda y catálogo
+                  usan todos este menú; usuarios era el único que no.
+                -->
+                <td class="tabla-administrativa__acciones">
+                  <app-menu-de-acciones
+                    [acciones]="accionesDe(user)"
+                    [descripcion]="user.fullName || user.email"
+                    (elegida)="ejecutarAccion(user, $event)"></app-menu-de-acciones>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+        @if (cargando() && users().length === 0) {
+          <app-estado-de-lista tipo="cargando" titulo="Consultando las cuentas…" />
+        } @else if (errorDeLaLista()) {
+          <app-estado-de-lista tipo="error" titulo="No fue posible leer el registro de cuentas"
+            [detalle]="errorDeLaLista()" />
+        } @else if (usuariosFiltrados().length === 0) {
+          <app-lista-sin-filas entidad="cuentas" [hayFiltros]="hayFiltrosPuestos()" [ambito]="ambitoDeLaLista()"
+            comoLlegan="Las cuentas administrativas las crea el Programa con «Nuevo usuario»; las externas nacen cuando una organización se registra."
+            (limpiar)="limpiarFiltros()">
+            <app-boton importancia="principal" tamano="menudo" (accion)="startCreate()">Nuevo usuario</app-boton>
+          </app-lista-sin-filas>
+        }
+      </div>
+    </div>
+
+  </div>
+
+  <!--
+    LA FICHA, EN EL CAJON LATERAL DE TODA LA CONSOLA. Era una tarjeta a la derecha de la tabla, que
+    le quitaba 22 rem a la lista y se componía a mano: botones sueltos, rótulos con sus propios
+    grises, la gestión de módulos como una lista plana de dieciséis casillas al pie. Ahora es el
+    mismo cajón que abre una organización o un mercado, con los datos en la pieza de lectura, las
+    acciones que aplican al estado, y la gestión de módulos como un apartado propio, ordenado por
+    las familias de la barra izquierda y con lo que abre cada uno.
+  -->
+  @if (usuarioSeleccionado(); as usuario) {
+    <app-panel-lateral [titulo]="usuario.fullName || usuario.email"
+      [contexto]="esAdministrativa(usuario) ? 'Cuenta administrativa' : 'Cuenta externa'"
+      (cerrar)="cerrarFicha()">
+      <ng-container bajo-titulo>
+        <span class="text-dato text-prosa">{{ usuario.email }}</span>
+        <app-indicador-de-estado
+          [etiqueta]="usuario.isActive ? 'Activa' : 'Inactiva'"
+          [tono]="tonoDelEstado(usuario.isActive ? 'activo' : 'inactivo')"
+          [matiz]="matizDelEstado(usuario.isActive ? 'activo' : 'inactivo')"
+          [conTexto]="true" />
+      </ng-container>
+
+      <dl class="grid gap-4 sm:grid-cols-2" data-datos-de-la-cuenta>
+        <div class="flex flex-col"><app-dato-en-lectura rotulo="Roles" [valor]="etiquetasDeRol(usuario)" /></div>
+        <div class="flex flex-col"><app-dato-en-lectura rotulo="Último acceso" [valor]="usuario.lastLoginAt ? (usuario.lastLoginAt | date: 'd MMM y, HH:mm':'':'es-CO') : 'Sin acceso registrado'" /></div>
+        <!--
+          QUIEN ES, Y NO SOLO CON QUE CORREO ENTRA. El tipo de documento EN PALABRAS y no su código:
+          «cc» no es un tipo de documento para quien lee la ficha. Lo que falta se dice, no se deja
+          en blanco: un hueco haría dudar de si el dato no está o si la ficha no lo carga.
+        -->
+        <div class="flex flex-col" data-documento-de-la-cuenta><app-dato-en-lectura rotulo="Documento" [valor]="usuario.identificacion ? (usuario.tipoDocumentoEtiqueta || usuario.tipoDocumento) + ' ' + usuario.identificacion : 'Sin documento registrado'" /></div>
+        <div class="flex flex-col"><app-dato-en-lectura rotulo="Teléfono" [valor]="usuario.telefono || 'Sin teléfono registrado'" /></div>
+      </dl>
+
+      <!-- LAS ACCIONES QUE APLICAN AL ESTADO, con los botones de la consola. -->
+      <div class="mt-5 flex flex-wrap gap-2" data-acciones-de-la-cuenta>
+        <app-boton importancia="secundaria" (accion)="startEdit(usuario)">Editar</app-boton>
+        @if (usuario.isActive) {
+          <app-boton importancia="destructiva" (accion)="desactivar(usuario)">Desactivar</app-boton>
+        } @else {
+          <app-boton importancia="confirmar" [deshabilitado]="guardando()" (accion)="reactivar(usuario)">Reactivar</app-boton>
+          <app-boton importancia="destructiva" (accion)="eliminar(usuario)">Eliminar la cuenta</app-boton>
+        }
+        <app-boton importancia="terciaria" data-abrir-historial (accion)="historialAbierto.set(usuario)">Ver historial de la cuenta</app-boton>
+      </div>
+
+      @if (message()) {
+        <p class="mt-3 text-dato font-semibold text-prosa" role="status">{{ message() }}</p>
+      }
+
+      <!--
+        QUE PUEDE ABRIR ESTA CUENTA. Los permisos de la consola se conceden POR CUENTA desde el 15
+        de septiembre de 2026, y la unidad es el apartado que la persona ve en la barra izquierda.
+
+        <b>ESTO NO ES UN MENU RECORTADO.</b> Lo que se decide aquí lo aplica el servidor: sin el
+        módulo, la ruta responde 403 aunque se escriba a mano. Ocultar sin cerrar sería decoración.
+
+        POR FAMILIAS Y CON LO QUE ABRE CADA UNO, como se ve en la barra; los que no se pueden tocar se
+        ven puestos y deshabilitados, no desaparecen: si desaparecieran parecería que no existen.
+      -->
+      @if (esAdministrativa(usuario)) {
+        <section class="mt-6" aria-labelledby="gestion-de-modulos" data-gestion-de-modulos>
+          <h3 id="gestion-de-modulos" class="titulo-de-apartado">Qué puede abrir</h3>
+
+          @if (errorDeModulos()) {
+            <p class="text-dato font-semibold text-amber-800" role="alert">{{ errorDeModulos() }}</p>
+          }
+
+          @if (modulosDeLaCuenta(); as suyos) {
+            @if (suyos.todosPorSerWebmaster) {
+              <!--
+                UN WEBMASTER LOS TIENE TODOS Y NO SE LE PUEDEN QUITAR. Si se pudieran, la última
+                cuenta capaz de administrar usuarios podría dejar al Programa sin forma de
+                conceder permisos a nadie, y eso no se arregla desde la interfaz.
+              -->
+              <p class="text-dato leading-relaxed text-prosa">
+                Esta cuenta es <b>webmaster</b> y tiene todos los apartados. No se le pueden quitar:
+                si se pudiera, la última cuenta capaz de administrar usuarios podría dejar al
+                Programa sin forma de conceder permisos a nadie.
+              </p>
+            } @else {
+              <p class="text-dato text-prosa" data-resumen-de-modulos>
+                Puede abrir <b>{{ resumenDeModulos().activos }}</b> de {{ resumenDeModulos().total }} apartados.
+                Resumen operativo y Solicitudes y revisiones van siempre: sin ellos no habría dónde ver lo que espera una decisión.
+              </p>
+
+              <!--
+                CONCEDER ES UNA DECISION DE CONJUNTO, no catorce. Quien entrega una cuenta nueva
+                decide «esta persona lleva Publicaciones», no apartado por apartado; hacerlo casilla
+                a casilla eran catorce gestos y catorce peticiones, y a media faena la cuenta quedaba
+                con un conjunto que nadie había decidido.
+              -->
+              <div class="modulos__atajos">
+                <app-boton importancia="secundaria" tamano="menudo" [deshabilitado]="guardandoModulos()"
+                  identificador="conceder-todo" (accion)="concederTodo()">Marcar todos</app-boton>
+                <app-boton importancia="terciaria" tamano="menudo" [deshabilitado]="guardandoModulos()"
+                  identificador="dejar-lo-minimo" (accion)="dejarSoloLoMinimo()">Dejar solo lo mínimo</app-boton>
+              </div>
+            }
+
+            @for (grupo of gruposDeModulos(); track grupo.id) {
+              <div class="modulos__familia">
+                <p class="modulos__familia-nombre">{{ grupo.titulo }}</p>
+                @if (!suyos.todosPorSerWebmaster && grupoSeDecide(grupo.id)) {
+                  <app-boton importancia="terciaria" tamano="menudo" [deshabilitado]="guardandoModulos()"
+                    [identificador]="'grupo-' + grupo.id"
+                    (accion)="alternarGrupo(grupo.id, !grupoCompleto(grupo.id))">
+                    {{ grupoCompleto(grupo.id) ? 'Quitar el grupo' : 'Todo el grupo' }}
+                  </app-boton>
+                }
+              </div>
+              <ul class="modulos__lista">
+                @for (casilla of grupo.modulos; track casilla.codigo) {
+                  <li>
+                    <label class="modulos__modulo" [class.esta-fijo]="casilla.fijo">
+                      <input type="checkbox" [checked]="casilla.activo" [disabled]="casilla.fijo || guardandoModulos()"
+                        [attr.data-modulo]="casilla.codigo"
+                        (change)="alternarModulo(casilla.codigo)" />
+                      <span class="modulos__texto">
+                        <span class="modulos__nombre">{{ casilla.etiqueta }}</span>
+                        <span class="modulos__descripcion">{{ casilla.descripcion }}</span>
+                      </span>
+                      @if (casilla.fijo && !suyos.todosPorSerWebmaster) {
+                        <span class="modulos__nota">Siempre</span>
+                      }
+                    </label>
+                  </li>
+                }
+              </ul>
+            }
+
+            <!--
+              SE DICE QUE SE GUARDO, no solo que se estaba guardando. Un «Guardando…» que desaparece
+              deja a quien concedió permisos sin saber si llegaron: es lo mismo que una lista vacía
+              haciéndose pasar por respuesta.
+            -->
+            @if (guardandoModulos()) {
+              <p class="modulos__aviso" role="status">Guardando…</p>
+            } @else if (apartadosGuardados()) {
+              <p class="modulos__aviso es-hecho" role="status" data-apartados-guardados>
+                Guardado. La cuenta ya puede abrir lo que está marcado.
+              </p>
+            }
+          } @else if (!errorDeModulos()) {
+            <p class="text-dato text-rotulo" role="status">Consultando sus apartados…</p>
+          }
+        </section>
+      }
+    </app-panel-lateral>
+  }
+
+  <!-- Admin User Editor Modal -->
+  @if (editorAbierto()) {
+    <!--
+      El clic en el fondo cierra el cuadro: comodidad del ratón, no un control.
+      Con teclado se cierra con Escape, que atiende `appDialogo` desde el propio
+      diálogo —donde está el foco—, y con el botón de cerrar del propio cuadro.
+      Darle tabindex y role lo anunciaría como un botón.
+    -->
+    <!-- eslint-disable-next-line @angular-eslint/template/click-events-have-key-events -->
+    <!--
+      EL EDITOR DE UNA CUENTA, EN EL DIALOGO DEL PROYECTO. Tenía su propio velo, su propio tope de
+      alto y —lo único que de verdad cambiaba— <b>se cerraba al pulsar fuera</b>: con el formulario
+      a medio escribir, un clic de más en el velo lo tiraba entero. Ningún otro diálogo de la
+      consola hace eso, y ninguno debería: lo que cierra es Escape, «Cancelar» y la cruz.
+    -->
+    <app-dialogo-de-formulario
+      [titulo]="cuentaEnEdicion() ? 'Editar usuario' : 'Nuevo usuario'"
+      proposito="Los cambios se aplican en la tabla Usuarios."
+      [verbo]="cuentaEnEdicion() ? 'Actualizar usuario' : 'Crear usuario'"
+      [guardando]="guardando()"
+      identificador="guardar-usuario"
+      (guardar)="enviarElFormulario()"
+      (cerrar)="cerrarElEditor()">
+      <!-- Full Name -->
+      <div>
+        <label class="block mb-1.5 campo__rotulo" for="new-user-name">
+          Nombre completo <span class="text-red-500">*</span>
+        </label>
+        <input
+          id="new-user-name"
+          type="text"
+          name="fullName"
+          [(ngModel)]="valoresDelFormulario().fullName"
+          required
+          class="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-900 placeholder-slate-400 focus:border-morado focus:ring-1 focus:ring-morado transition outline-hidden"
+        />
+        @if (valoresDelFormulario().fullName) {
+          <div class="mt-2 flex items-center gap-2">
+            <div class="h-8 w-8 rounded-full flex items-center justify-center" [ngClass]="colorDeAvatar(valoresDelFormulario().fullName)">
+              <span class="text-dato font-black text-white">{{ inicialesDe(valoresDelFormulario().fullName) }}</span>
+            </div>
+            <span class="text-xs text-slate-400">Vista previa del avatar</span>
+          </div>
+        }
+      </div>
+
+      <!-- Email -->
+      <div>
+        <label class="block mb-1.5 campo__rotulo" for="new-user-email">
+          Correo electrónico <span class="text-red-500">*</span>
+        </label>
+        <input
+          id="new-user-email"
+          type="email"
+          name="email"
+          [(ngModel)]="valoresDelFormulario().email"
+          required
+          class="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-900 placeholder-slate-400 focus:border-morado focus:ring-1 focus:ring-morado transition outline-hidden"
+        />
+      </div>
+
+      <!--
+        QUIEN ES LA PERSONA LO DICE ELLA, NO QUIEN CREA LA CUENTA. Una cuenta administrativa se
+        ENTREGA con correo y contraseña por omisión, y en su primer ingreso quien la recibe
+        cambia la clave y llena sus datos. Por eso estos campos SOLO aparecen al editar: para
+        corregir lo que ya escribió, no para escribirlo por ella.
+
+        El criterio es este: «a ellos se les registra
+        simplemente un correo y una contraseña por defecto… una vez cambien la contraseña se les
+        pide completar esos datos básicos».
+
+        EL TIPO DE DOCUMENTO ES UNA LISTA Y NO TEXTO LIBRE, como todo vocabulario controlado del
+        proyecto, y sale de la tabla del catálogo del país. El número y su tipo van juntos.
+      -->
+      @if (cuentaEnEdicion()) {
+      <div class="grid gap-4 sm:grid-cols-2">
+        <label class="campo">
+          <span class="campo__rotulo">Tipo de documento</span>
+          <select name="tipoDocumento" [ngModel]="valoresDelFormulario().tipoDocumento"
+            (ngModelChange)="campoDelPerfil('tipoDocumento', $event)" data-tipo-documento>
+            <option value="">Sin documento registrado</option>
+            @for (tipo of tiposDeDocumento(); track tipo.codigo) {
+              <option [value]="tipo.codigo">{{ tipo.etiqueta }}</option>
+            }
+          </select>
+        </label>
+
+        <label class="campo">
+          <span class="campo__rotulo">Número de documento</span>
+          <input type="text" name="identificacion" inputmode="numeric" data-identificacion
+            [ngModel]="valoresDelFormulario().identificacion"
+            (ngModelChange)="campoDelPerfil('identificacion', $event)" />
+        </label>
+      </div>
+
+      <label class="campo">
+        <span class="campo__rotulo">Teléfono de contacto</span>
+        <input type="tel" name="telefono" data-telefono
+          [ngModel]="valoresDelFormulario().telefono"
+          (ngModelChange)="campoDelPerfil('telefono', $event)" />
+      </label>
+
+      @if (errorDelPerfil()) {
+        <p class="text-dato font-semibold text-amber-800" role="alert">{{ errorDelPerfil() }}</p>
+      }
+      } @else {
+        <!--
+          LO QUE SE ENTREGA, DICHO EN LA PROPIA PANTALLA. Sin esto, quien crea la cuenta se queda
+          esperando un formulario de datos personales que no va a aparecer.
+        -->
+        <p class="text-cuerpo leading-relaxed text-prosa" data-como-se-entrega>
+          La cuenta se entrega con este correo y esta contraseña. En su primer ingreso, la
+          persona tendrá que cambiarla y completar su nombre y su documento.
+          <b>Los módulos que podrá abrir se activan desde su ficha, antes de entregársela.</b>
+        </p>
+      }
+
+      <!--
+        ROLES — CASILLAS, NO UN DESPLEGABLE.
+
+        Hasta el modelo vigente una persona tenia UN rol y un `select` era
+        la forma correcta de pedirlo. Ahora puede tener varios, y un `select multiple` es
+        hostil: se opera con Ctrl y no se ve cuantos hay marcados sin desplegarlo. Un
+        `fieldset` de casillas dice cuantos hay, cuales, y se recorre con el tabulador.
+
+        LA COMBINACION PROHIBIDA SE AVISA AQUI Y SE RECHAZA EN EL API. Marcar «externo»
+        junto a un rol interno da a la misma persona los dos ambitos de acceso; el aviso de
+        abajo lo explica antes de gastar un viaje al servidor, pero quien decide es la ruta
+        de asignacion (Permisos.MezclaExternoConInterno), no esta pantalla.
+      -->
+      <fieldset>
+        <legend class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1.5">
+          Roles <span class="text-red-500">*</span>
+        </legend>
+        <div class="space-y-2">
+          @for (role of adminRoles; track role.id) {
+            <label class="flex items-start gap-2.5 rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 cursor-pointer hover:border-slate-300 transition">
+              <input
+                type="checkbox"
+                class="mt-0.5 h-4 w-4 rounded border-slate-300"
+                [name]="'rol-' + role.id"
+                [ngModel]="tieneRol(role.id)"
+                (ngModelChange)="alternarRol(role.id, $event)"
+              />
+              <span class="min-w-0">
+                <span class="block text-sm font-semibold text-slate-900">{{ role.label }}</span>
+                <span class="block text-dato text-slate-400 leading-relaxed">{{ descripcionDelRol(role.id) }}</span>
+              </span>
+            </label>
+          }
+        </div>
+        @if (valoresDelFormulario().roles.length === 0) {
+          <p class="mt-1.5 text-dato font-semibold text-red-600" role="alert">
+            Hay que marcar al menos un rol: una cuenta sin ninguno no puede iniciar sesion.
+          </p>
+        }
+        @if (mezclaProhibida()) {
+          <p class="mt-1.5 text-dato font-semibold text-red-600" role="alert">
+            «Usuario externo» no puede combinarse con un rol interno del Ministerio: son dos
+            ámbitos de acceso distintos y el sistema lo rechaza al guardar.
+          </p>
+        }
+      </fieldset>
+
+      <!-- Password -->
+      <div>
+        <label class="block mb-1.5 campo__rotulo" for="new-user-password">
+          {{ cuentaEnEdicion() ? 'Nueva contraseña (dejar en blanco para no cambiar)' : 'Contraseña inicial' }}
+          @if (!cuentaEnEdicion()) { <span class="text-red-500">*</span> }
+        </label>
+        <input
+          id="new-user-password"
+          type="password"
+          name="password"
+          [(ngModel)]="valoresDelFormulario().password"
+          [required]="!cuentaEnEdicion()"
+          [minLength]="cuentaEnEdicion() ? 0 : 10"
+          class="w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-900 placeholder-slate-400 focus:border-morado focus:ring-1 focus:ring-morado transition outline-hidden"
+        />
+        @if (valoresDelFormulario().password) {
+          <div class="space-y-1.5 mt-1">
+            <div class="flex gap-1">
+              @for (i of [0, 1, 2, 3]; track i) {
+                <div class="h-1 flex-1 rounded-full transition-colors"
+                     [ngClass]="i < fuerzaDeLaClaveEscrita(valoresDelFormulario().password) ? colorDeLaFuerza(valoresDelFormulario().password) : 'bg-slate-200'">
+                </div>
+              }
+            </div>
+            <p class="text-dato font-bold text-slate-400 uppercase tracking-wider">{{ fuerzaDeLaClave(valoresDelFormulario().password) }}</p>
+          </div>
+        }
+        <p class="mt-1 text-dato text-slate-400">La contraseña debe tener mínimo 10 caracteres.</p>
+      </div>
+
+      <!-- Is Active toggle (only on Edit) -->
+      @if (cuentaEnEdicion()) {
+        <div class="flex items-center gap-2">
+          <input
+            id="edit-user-active"
+            type="checkbox"
+            name="isActive"
+            [(ngModel)]="valoresDelFormulario().isActive"
+            class="rounded-sm border-slate-300 text-morado focus:ring-morado"
+          />
+          <label for="edit-user-active" class="campo__rotulo">
+            Usuario Activo
+          </label>
+        </div>
+      }
+
+      <!--
+        EL RESULTADO DE GUARDAR O BORRAR UNA CUENTA, ANUNCIADO. Este aviso aparece justo después
+        de una acción que quien lo pulsó necesita saber si funcionó —«usuario creado», «no fue
+        posible guardar»— y hasta ahora se pintaba sin `aria-live`: para quien usa lector de
+        pantalla, la acción se quedaba sin respuesta. `aria-live="polite"` y no `assertive`
+        porque llega cuando la acción ya terminó, no mientras se escribe.
+      -->
+      @if (message()) {
+        <div aria-live="polite" class="flex items-center gap-2 rounded-xl bg-slate-50 border border-slate-200 px-3 py-2.5 text-xs font-medium text-slate-600">
+          {{ message() }}
+        </div>
+      }
+    </app-dialogo-de-formulario>
+  }
+
+  @if (historialAbierto(); as elegido) {
+    <app-historial-de-registro
+      [titulo]="elegido.fullName || elegido.email"
+      [registro]="{ tabla: tablaDeAuditoria, id: elegido.id }"
+      (cerrar)="historialAbierto.set(null)"></app-historial-de-registro>
+  }
+
+  <!--
+    LAS TRES DECISIONES QUE NO SE DESHACEN, EN EL DIALOGO DEL PROYECTO. Va por encima («encima»)
+    porque las dos primeras se piden desde la ficha lateral, que ya es una capa.
+  -->
+  @if (confirmacion(); as pendiente) {
+    <app-confirmacion
+      encima
+      [titulo]="tituloDeLaConfirmacion()"
+      [detalle]="detalleDeLaConfirmacion()"
+      [accion]="accionDeLaConfirmacion()"
+      [error]="errorDeLaConfirmacion()"
+      [ocupado]="guardando()"
+      identificador="confirmar-decision-de-cuenta"
+      (confirmar)="confirmarLaDecision()"
+      (cancelar)="cerrarLaConfirmacion()">
+      <p class="mt-3 text-xs font-bold text-slate-600">{{ pendiente.usuario.fullName || pendiente.usuario.email }}</p>
+      @if (pendiente.usuario.fullName && pendiente.usuario.email) {
+        <p class="text-xs text-slate-500">{{ pendiente.usuario.email }}</p>
+      }
+    </app-confirmacion>
+  }
+
+</div>

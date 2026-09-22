@@ -1,0 +1,235 @@
+<div class="relative">
+  <section>
+    <app-page-hero
+      [tag]="getWebText('home_tag')"
+      [title]="getWebText('home_title')"
+      [titleAccent]="getWebText('home_title_accent')"
+      [description]="getWebText('home_description')"
+      [bgImage]="homeHeroBgImage()"
+      bgImageClassName="scale-[1.24] md:scale-[1.16] opacity-30"
+      [fullScreen]="true"
+    >
+      <!--
+        El atributo `buttons` no es decorativo: `page-hero` proyecta con
+        <ng-content select="[buttons]">, y Angular DESCARTA en silencio el
+        contenido que no casa con ningún selector. Sin él, estos dos botones no
+        llegaban a la página —comprobado renderizando el sitio— aunque el panel
+        siguiera ofreciendo editar su texto. Si se copia este bloque a otro
+        hero, el atributo va con él.
+
+        El rótulo de cada botón es fijo y vive aquí, al lado del destino al que
+        lleva. Fue editable desde el panel hasta agosto de 2026; se retiró porque
+        son rótulos de navegación, no copia: cambiar «Explorar Ejes» sin cambiar
+        el `navigateTo('ejes')` de la línea de abajo produce un botón que miente
+        sobre a dónde va, y el panel nunca gobernó los destinos.
+      -->
+      <button
+        buttons
+        type="button"
+        (click)="navigateTo('pnmc')"
+        class="bg-[#00DA5E] hover:bg-[#8BF784] text-[#291242] font-bold px-8 py-3.5 rounded-xl text-[0.7rem] uppercase font-alternate tracking-widest flex items-center gap-3 hover:scale-105 active:scale-95 transition-all cursor-pointer border-0 shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-[#291242]"
+      >
+        Sobre el PNMC
+        <svg lucideArrowRight [size]="14"></svg>
+      </button>
+      <button
+        buttons
+        type="button"
+        (click)="navigateTo('ejes')"
+        class="bg-transparent hover:bg-white/10 text-white font-bold border border-white/20 hover:border-white px-8 py-3.5 rounded-xl text-[0.7rem] uppercase font-alternate tracking-widest flex items-center gap-3 transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-[#291242]"
+      >
+        Explorar Ejes
+      </button>
+    </app-page-hero>
+  </section>
+
+  <section class="min-h-screen">
+    <div class="pt-8 md:pt-12" #previewSection>
+      <app-pnmc-preview-section [scrollTargetElement]="previewSection" (navegacionSolicitada)="navigateTo($event)"></app-pnmc-preview-section>
+    </div>
+
+    <app-home-strategies-section></app-home-strategies-section>
+
+    <div class="relative w-full h-auto min-h-[460px] md:h-[58svh] bg-[#291242] overflow-hidden border-y border-white/5">
+      <app-home-media-banner></app-home-media-banner>
+    </div>
+
+    <app-mapa-ecosistemico-preview
+      (navigateToMapLayer)="navigateToMapLayer($event)"
+    ></app-mapa-ecosistemico-preview>
+
+    <!-- Bulletin / Newsletter / Social links banner -->
+    <!--
+      FONDO PLANO, COMO EN EL DISEÑO APROBADO. Aquí había cuatro capas de fondo superpuestas —dos
+      degradados radiales verdes, una trama de líneas de 34x58 px y un degradado diagonal de tres
+      paradas— más tres circunferencias decorativas de hasta 320 px asomando por los costados. En
+      el diseño aprobado del portal esta banda es `bg-[#291242]` a secas, y es la única del Inicio que se salía de eso:
+      la del banner de medios, justo encima, ya era plana. El criterio es este: «el
+      fondo de este panel no corresponde al estilo del desarrollo, debe ser un fondo plano».
+    -->
+    <div
+      data-testid="home-bulletin-banner"
+      class="relative w-full overflow-hidden border-y border-white/5 bg-[#291242] py-20 lg:py-24"
+    >
+      <!--
+        UNA FILA, DOS GRUPOS. A la izquierda la etiqueta, el título y la descripción; a la derecha
+        un solo grupo que lleva el formulario y las redes pegados con `md:gap-6`. Las redes estaban
+        en una segunda fila propia, debajo y centradas tras un `border-t`; suben al renglón del
+        formulario porque se pidió «pon las redes sociales al lado de registrarme».
+
+        NO ES LA MAQUETACIÓN DE TRES COLUMNAS QUE SE RETIRÓ EL 27 DE AGOSTO. Aquella tenía tres
+        hijos disputándose el renglón con `justify-between`, y las redes quedaban clavadas contra
+        el borde derecho, separadas por un filete vertical, como una nota al margen del boletín.
+        Esta fila tiene DOS hijos: las redes viajan DENTRO del grupo del formulario, a 24 px del
+        botón, y el filete vertical no vuelve.
+
+        EL MARGEN. `max-w-[100rem]` son 1600 px, así que por debajo de esa anchura no recorta nada:
+        el único margen que existe es el relleno, y eran 48 px de `lg:px-12`. Con `xl:px-16` pasan a
+        64 px. `max-w-[100rem]` no se toca —es el riel común del sitio: footer.component.html:2,
+        navigation.component.html:6, section-intro.component.ts— y no se añade tramo `2xl`: a
+        partir de 1536 px el riel ya deja 160 px libres a cada lado por sí solo, y más relleno solo
+        desalinearía esta banda del pie de página.
+
+        LAS MEDIDAS DE ABAJO ESTÁN MEDIDAS, no estimadas: se imprimieron con
+        `getBoundingClientRect()` desde el Chrome de las pruebas, con el texto de fábrica y el
+        formulario montado de verdad.
+
+          1280 px  riel 1260, relleno 64 · izquierda 450 + hueco 48 + acciones 634 = 1132, que es
+                   exactamente el contenido disponible (1260 − 2×64). Sin holgura de sobra.
+          1920 px  riel 1600 (aquí sí recorta), relleno 64 · izquierda 490, hueco 349, acciones 634.
+          1024 px  la fila está APILADA, no en renglón. Ver el porqué en el comentario del grupo.
+      -->
+      <div
+        data-testid="home-bulletin-rail"
+        class="max-w-[100rem] mx-auto px-6 md:px-10 lg:px-12 xl:px-16 relative z-10"
+      >
+        <div
+          data-testid="home-bulletin-row"
+          class="flex flex-col xl:flex-row items-center justify-between gap-8 xl:gap-12"
+        >
+          <!--
+            ESTE BLOQUE YA NO LLEVA `shrink-0`: con el renglón horizontal, quien cede ancho es el
+            texto, que puede partirse en dos líneas —`leading-tight` ya estaba puesto para eso—, no
+            el campo de correo, que tiene 280 px escritos. La etiqueta sí lo lleva: «BOLETÍN»
+            partido en dos líneas no es una degradación aceptable.
+
+            El título conserva su `lg:text-3xl` de siempre. Se probó subirlo a `xl:text-3xl` para
+            ganar ancho entre 1024 y 1279 px, y ya no hace falta: en esa franja la fila está
+            apilada y el bloque dispone de los 490 px que pide.
+          -->
+          <div class="flex flex-col sm:flex-row items-center gap-4 sm:gap-6 text-center sm:text-left">
+            <app-tag text="BOLETÍN" class="bg-white/10 text-[#00DA5E] rounded-md shrink-0"></app-tag>
+            <div class="space-y-0.5">
+              <h4 data-testid="home-bulletin-title" class="font-alternate text-2xl font-bold uppercase leading-tight tracking-wide text-white lg:text-3xl">
+                {{ getWebText('home_bulletin_title') }}
+              </h4>
+              <p class="font-nunito text-white/50 text-[0.7rem] leading-relaxed">
+                {{ getWebText('home_bulletin_desc') }}
+              </p>
+            </div>
+          </div>
+
+          <!--
+            EL GRUPO DERECHO: formulario y redes en el mismo renglón desde 768 px. Mide 634 px, y
+            ese ancho no depende de la anchura de la pantalla.
+
+            `md:flex-row` y no `sm:flex-row`: a 640 px el riel ofrece 592 px de contenido y el grupo
+            pide 634, no cabe. A 768 px ofrece 688 y sobran 54.
+
+            LA FILA EXTERIOR SE PONE HORIZONTAL EN `xl` (1280) Y NO EN `lg` (1024), y es una
+            corrección medida, no una preferencia. A 1024 px el riel ofrece 908 px de contenido; el
+            grupo pide 634 y el bloque de texto no baja de 286, así que con el hueco de 32 px la
+            fila pedía 952 y se comía 44 px de relleno. No se veía como desborde —la banda lleva
+            `overflow-hidden` (:63), así que recorta en vez de empujar la página—: se veía como que
+            el margen derecho desaparecía, que es justo lo que se pidió arreglar. Apilando en esa
+            franja, el grupo queda centrado y sobran 195 px a cada lado.
+
+            AQUÍ HUBO UN `md:flex-wrap` Y SE RETIRÓ. Se le atribuía ser la válvula para un
+            `home_bulletin_btn` largo —el panel admite 40 caracteres,
+            core/cms/registro-de-textos-web.ts—, pero un mutante que lo borraba dejaba las nueve
+            pruebas en verde, incluida la que monta los textos del CMS en su tope. No hacía nada.
+          -->
+          <div
+            data-testid="home-bulletin-actions"
+            class="flex w-full flex-col items-center gap-8 md:w-auto md:flex-row md:items-center md:justify-center md:gap-6"
+          >
+            <!--
+              El campo y el boton vivian aqui sueltos, sin manejador: se escribia un correo, se
+              pulsaba y no pasaba nada. Ahora son un componente propio con su paso de autorizacion
+              de tratamiento de datos, porque un correo es dato personal y la Ley 1581 de 2012 pide
+              un acto expreso de la persona antes de usarlo. Los textos siguen saliendo del CMS.
+            -->
+            <div class="flex w-full justify-center sm:w-auto">
+              <app-boletin-form
+                class="block w-full min-w-0 sm:w-auto"
+                [placeholder]="getWebText('home_bulletin_placeholder')"
+                [textoDelBoton]="getWebText('home_bulletin_btn')"
+              ></app-boletin-form>
+            </div>
+
+            <!--
+              ANCHO FIJO DE 10rem (160 px) DESDE 768 px, Y ES LA PIEZA QUE SOSTIENE EL RENGLÓN.
+
+              Sin `md:w-40` esta columna se dimensiona a `max-content`: «Síguenos en nuestras redes
+              oficiales» ronda los 175 px en una línea, y un `home_social_desc` en el tope del campo
+              —120 caracteres, core/cms/registro-de-textos-web.ts— pasa de 550 px. Eso empujaría al
+              formulario y le comería el sitio al botón, que es justo lo que hay que evitar. Con el
+              ancho fijo el texto se parte dentro de la columna y crece hacia abajo. Los tres
+              iconos miden 136 px (3 x 40 + 2 x 8 de `gap-2`) y caben con 24 px de sobra;
+              `md:items-end` los deja a ras del margen derecho de la banda.
+
+              LAS DOS CLAVES SIGUEN LEYÉNDOSE DESDE AQUÍ, y es obligatorio: `npm run cms:huerfanas`
+              (tools/claves-sin-lector.mjs) se pone en rojo si `home_social_title` u
+              `home_social_desc` se quedan sin nadie que los nombre en `src/app`.
+
+              `tracking-[0.2em]` del h5 se deja como estaba, y conviene saber que NO hace nada:
+              `.font-alternate` fija `letter-spacing: 0.04em !important` en styles.css:87, y gana.
+            -->
+            <div
+              data-testid="home-social-block"
+              class="flex w-full flex-col items-center gap-3 text-center md:w-40 md:shrink-0 md:items-end md:text-right"
+            >
+              <div class="space-y-0.5">
+                <h5 class="font-alternate text-[0.65rem] font-bold uppercase leading-tight tracking-[0.2em] text-[#00DA5E]">
+                  {{ getWebText('home_social_title') }}
+                </h5>
+                <p class="text-[0.62rem] leading-snug text-white/40 font-nunito tracking-wide">
+                  {{ getWebText('home_social_desc') }}
+                </p>
+              </div>
+              <div data-testid="home-social-links" class="flex items-center justify-center gap-2 md:justify-end">
+                <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" class="w-10 h-10 rounded-xl bg-white/5 border border-white/10 hover:border-[#00DA5E] hover:text-[#00DA5E] transition-all flex items-center justify-center text-white/70 hover:shadow-[0_0_15px_rgba(0,218,94,0.25)]" aria-label="Síguenos en Instagram">
+                  <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <rect width="20" height="20" x="2" y="2" rx="5" ry="5"/>
+                    <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/>
+                    <line x1="17.5" x2="17.51" y1="6.5" y2="6.5"/>
+                  </svg>
+                </a>
+                <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" class="w-10 h-10 rounded-xl bg-white/5 border border-white/10 hover:border-[#00DA5E] hover:text-[#00DA5E] transition-all flex items-center justify-center text-white/70 hover:shadow-[0_0_15px_rgba(0,218,94,0.25)]" aria-label="Síguenos en Facebook">
+                  <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/>
+                  </svg>
+                </a>
+                <a href="https://youtube.com" target="_blank" rel="noopener noreferrer" class="w-10 h-10 rounded-xl bg-white/5 border border-white/15 hover:border-[#00DA5E] hover:text-[#00DA5E] transition-all flex items-center justify-center text-white/70 hover:shadow-[0_0_15px_rgba(0,218,94,0.25)]" aria-label="Síguenos en YouTube">
+                  <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M2.5 17a24.12 24.12 0 0 1 0-10 2 2 0 0 1 1.4-1.4 49.56 49.56 0 0 1 16.2 0A2 2 0 0 1 21.5 7a24.12 24.12 0 0 1 0 10 2 2 0 0 1-1.4 1.4 49.55 49.55 0 0 1-16.2 0A2 2 0 0 1 2.5 17z"/>
+                    <polygon points="10 15 15 12 10 9"/>
+                  </svg>
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="absolute top-1/2 left-0 w-full h-px bg-white/5 -translate-y-1/2 pointer-events-none opacity-50"></div>
+    </div>
+
+    <app-noticias-agenda-preview
+      (navigate)="navigateTo($event)"
+      (navegarANoticia)="navigateToArticle($event)"
+      (navegarAEvento)="navigateToAgendaEvent($event)"
+    ></app-noticias-agenda-preview>
+
+    <app-footer></app-footer>
+  </section>
+</div>

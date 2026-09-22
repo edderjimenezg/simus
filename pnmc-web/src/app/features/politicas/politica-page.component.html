@@ -1,0 +1,66 @@
+<!--
+  `pt-28` Y NO `py-12`: LA CABECERA ES `fixed`. Con doce de separación el título quedaba debajo de
+  la barra de navegación —medido a 390 px, la tilde de «Autorización» aparecía cortada—. La
+  cabecera mide unos 80 px y flota sobre el documento, así que el contenido tiene que empezar por
+  debajo de ella y no en el borde del documento.
+-->
+<main class="mx-auto w-full max-w-3xl px-5 pb-16 pt-28 sm:px-8">
+  @if (cargando()) {
+    <p class="text-[11px] font-bold uppercase tracking-wider text-slate-400" role="status">Cargando…</p>
+  } @else if (noExiste()) {
+    <p class="text-[9px] font-black uppercase tracking-[0.18em] text-slate-400">No encontrado</p>
+    <h1 class="mt-2 font-alternate text-2xl font-bold uppercase leading-tight text-morado">
+      Este sistema no pide esa autorización
+    </h1>
+    <p class="mt-3 text-sm leading-relaxed text-slate-600">
+      Solo se pide autorización para lo que el sistema hace de verdad con los datos. Estas son las
+      finalidades vigentes:
+    </p>
+    <ul class="mt-4 space-y-1.5">
+      <li><a routerLink="/politicas/tratamiento" class="text-sm font-bold text-verde-texto underline underline-offset-2">Tratamiento de datos personales</a></li>
+      <li><a routerLink="/politicas/terminos" class="text-sm font-bold text-verde-texto underline underline-offset-2">Términos de uso</a></li>
+      <li><a routerLink="/politicas/boletin" class="text-sm font-bold text-verde-texto underline underline-offset-2">Boletín del PNMC</a></li>
+    </ul>
+  } @else if (politica(); as texto) {
+    <p class="text-[9px] font-black uppercase tracking-[0.18em] text-slate-400">
+      Sistema de Información de la Música · PNMC
+    </p>
+    <h1 class="mt-2 font-alternate text-2xl font-bold uppercase leading-tight text-morado sm:text-3xl">
+      {{ texto.titulo }}
+    </h1>
+
+    <p class="mt-3 text-[10px] font-medium uppercase tracking-wider text-slate-400">
+      Versión {{ texto.version }}
+    </p>
+
+    <!--
+      EL TEXTO, TAL COMO LO SIRVE EL SERVIDOR. `whitespace-pre-line` conserva los párrafos que la
+      base guarda; no se reescribe aquí ni se le añade formato que cambie lo que dice.
+    -->
+    <div class="mt-7 whitespace-pre-line text-[15px] leading-relaxed text-slate-700">{{ texto.texto }}</div>
+
+    @if (texto.urlOficial) {
+      <!--
+        EL DOCUMENTO DEL MINISTERIO ES SUYO Y SE ENLAZA, no se copia. Lo que esta página muestra es
+        el consentimiento informado que el sistema pide; la política institucional completa es otro
+        documento, con su propia vida y sus propias versiones.
+      -->
+      <aside class="mt-9 rounded-xl border border-slate-200 bg-slate-50 p-5">
+        <p class="text-[9px] font-black uppercase tracking-[0.18em] text-slate-400">Documento institucional</p>
+        <p class="mt-1.5 text-[13px] leading-relaxed text-slate-600">
+          Este texto remite a la política del Ministerio de las Culturas, las Artes y los Saberes
+          @if (texto.referenciaOficial) { ({{ texto.referenciaOficial }}) }, que puedes consultar completa:
+        </p>
+        <a [href]="texto.urlOficial" target="_blank" rel="noopener noreferrer"
+           class="mt-2 inline-block text-[13px] font-bold text-verde-texto underline underline-offset-2 break-all">
+          Abrir el documento del Ministerio
+        </a>
+      </aside>
+    }
+
+    <p class="mt-9 border-t border-slate-200 pt-5 text-[12px] leading-relaxed text-slate-500">
+      Si tienes una cuenta, puedes ver qué autorizaste y cuándo —y retirar lo que sea voluntario—
+      desde <a routerLink="/gestion/cuenta-seguridad" class="font-bold text-verde-texto underline underline-offset-2">Cuenta y seguridad</a>.
+    </p>
+  }
+</main>

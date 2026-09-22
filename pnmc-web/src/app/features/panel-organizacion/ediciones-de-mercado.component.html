@@ -1,0 +1,162 @@
+<section class="space-y-5" aria-labelledby="ediciones-de-mercado-titulo">
+  <header class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+    <div>
+      <!--
+        SIN SUBTITULO: la cabecera de la sección, que la ficha pinta justo encima, ya dice qué es una
+        edición. Decirlo aquí y otra vez dentro del estado vacío eran TRES textos seguidos
+        explicando lo mismo.
+      -->
+      <h2 id="ediciones-de-mercado-titulo" class="font-alternate text-titulo font-bold uppercase tracking-wide text-morado">Ediciones del mercado</h2>
+    </div>
+    <!--
+      UNA SOLA ALTA A LA VEZ. Cuando no hay ninguna edición, la acción vive DENTRO del estado vacío
+      —que es donde la persona está mirando—, así que enseñarla también aquí arriba eran dos botones
+      que hacen lo mismo a diez centímetros uno de otro.
+    -->
+    @if (mercadoPublicado && !formulario() && ediciones().length > 0) {
+      <button type="button" data-nueva-edicion (click)="nueva()"
+              class="shrink-0 rounded-lg bg-morado px-4 py-2 text-sm font-bold text-white transition hover:bg-violet-800">Registrar edición</button>
+    }
+  </header>
+
+  <!--
+    LA REGLA DEL SERVIDOR, DICHA ANTES DE PULSAR. Una edición solo existe sobre un mercado
+    publicado; ofrecer el botón y responder 409 es hacer perder el trabajo ya escrito.
+  -->
+  @if (!mercadoPublicado) {
+    <p class="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm leading-relaxed text-amber-900" data-aun-sin-publicar>
+      Las ediciones se registran cuando el mercado ya está publicado en el portal. Envíalo a revisión
+      y, una vez el Programa lo publique, podrás anunciar aquí cada realización.
+    </p>
+  }
+
+  @if (error()) { <p role="alert" class="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-800">{{ error() }}</p> }
+  @if (aviso()) { <p role="status" class="rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-900">{{ aviso() }}</p> }
+
+  @if (formulario(); as f) {
+    <form class="space-y-5 rounded-2xl border border-slate-200 bg-white p-6" (ngSubmit)="guardar()" aria-label="Datos de la edición">
+      <div class="grid gap-4 sm:grid-cols-3">
+        <div class="space-y-1.5">
+          <label for="edicion-anio" class="block text-sm font-bold text-slate-800">Año</label>
+          <input id="edicion-anio" type="number" min="1900" max="2100" required [ngModel]="f.anio" name="anio"
+                 (ngModelChange)="campo('anio', +$event)"
+                 class="w-full rounded-lg border border-slate-300 bg-white p-3 text-sm text-slate-900 focus:border-verde-medio focus:outline-none focus-visible:ring-2 focus-visible:ring-verde-medio">
+        </div>
+        <div class="space-y-1.5">
+          <label for="edicion-numero" class="block text-sm font-bold text-slate-800">Número de edición</label>
+          <input id="edicion-numero" type="number" min="1" [ngModel]="f.numeroEdicion" name="numeroEdicion"
+                 (ngModelChange)="campo('numeroEdicion', $event === null || $event === '' ? null : +$event)"
+                 class="w-full rounded-lg border border-slate-300 bg-white p-3 text-sm text-slate-900 focus:border-verde-medio focus:outline-none focus-visible:ring-2 focus-visible:ring-verde-medio">
+        </div>
+        <div class="space-y-1.5">
+          <label for="edicion-realizacion" class="block text-sm font-bold text-slate-800">Estado de realización</label>
+          <select id="edicion-realizacion" [ngModel]="f.estado" name="estado" (ngModelChange)="campo('estado', $event)"
+                  class="w-full rounded-lg border border-slate-300 bg-white p-3 text-sm text-slate-900 focus:border-verde-medio focus:outline-none focus-visible:ring-2 focus-visible:ring-verde-medio">
+            @for (opcion of REALIZACION; track opcion.id) { <option [value]="opcion.id">{{ opcion.etiqueta }}</option> }
+          </select>
+        </div>
+      </div>
+
+      <div class="space-y-1.5">
+        <label for="edicion-nombre" class="block text-sm font-bold text-slate-800">Nombre de la edición</label>
+        <input id="edicion-nombre" type="text" maxlength="240" [ngModel]="f.nombre" name="nombre" (ngModelChange)="campo('nombre', $event || null)"
+               placeholder="Si no tiene nombre propio, se identifica por su año"
+               class="w-full rounded-lg border border-slate-300 bg-white p-3 text-sm text-slate-900 focus:border-verde-medio focus:outline-none focus-visible:ring-2 focus-visible:ring-verde-medio">
+      </div>
+
+      <div class="space-y-1.5">
+        <label for="edicion-descripcion" class="block text-sm font-bold text-slate-800">Descripción</label>
+        <textarea id="edicion-descripcion" rows="3" [ngModel]="f.descripcion" name="descripcion" (ngModelChange)="campo('descripcion', $event || null)"
+                  class="w-full rounded-lg border border-slate-300 bg-white p-3 text-sm text-slate-900 focus:border-verde-medio focus:outline-none focus-visible:ring-2 focus-visible:ring-verde-medio"></textarea>
+      </div>
+
+      <div class="grid gap-4 sm:grid-cols-3">
+        <div class="space-y-1.5">
+          <label for="edicion-inicio" class="block text-sm font-bold text-slate-800">Fecha de inicio</label>
+          <input id="edicion-inicio" type="date" [ngModel]="f.fechaInicio" name="fechaInicio" (ngModelChange)="campo('fechaInicio', $event || null)"
+                 class="w-full rounded-lg border border-slate-300 bg-white p-3 text-sm text-slate-900 focus:border-verde-medio focus:outline-none focus-visible:ring-2 focus-visible:ring-verde-medio">
+        </div>
+        <div class="space-y-1.5">
+          <label for="edicion-fin" class="block text-sm font-bold text-slate-800">Fecha de cierre</label>
+          <input id="edicion-fin" type="date" [ngModel]="f.fechaFin" name="fechaFin" (ngModelChange)="campo('fechaFin', $event || null)"
+                 class="w-full rounded-lg border border-slate-300 bg-white p-3 text-sm text-slate-900 focus:border-verde-medio focus:outline-none focus-visible:ring-2 focus-visible:ring-verde-medio">
+        </div>
+        <div class="space-y-1.5">
+          <label for="edicion-lugar" class="block text-sm font-bold text-slate-800">Lugar</label>
+          <input id="edicion-lugar" type="text" maxlength="300" [ngModel]="f.lugarEspecifico" name="lugarEspecifico" (ngModelChange)="campo('lugarEspecifico', $event || null)"
+                 placeholder="Recinto o sede de esta edición"
+                 class="w-full rounded-lg border border-slate-300 bg-white p-3 text-sm text-slate-900 focus:border-verde-medio focus:outline-none focus-visible:ring-2 focus-visible:ring-verde-medio">
+        </div>
+      </div>
+
+      <div class="flex flex-wrap items-center gap-3">
+        <button type="button" (click)="cerrar()"
+                class="rounded-lg border border-slate-300 px-4 py-2.5 text-sm font-bold text-slate-700 transition hover:bg-white">Cancelar</button>
+        <button type="submit" [disabled]="guardando()" data-guardar-edicion
+                class="rounded-lg bg-morado px-4 py-2.5 text-sm font-bold text-white transition hover:bg-violet-800 disabled:opacity-50">
+          {{ guardando() ? 'Guardando…' : 'Guardar edición' }}
+        </button>
+      </div>
+    </form>
+  }
+
+  @if (cargando()) {
+    <app-estado-de-lista tipo="cargando" titulo="Consultando ediciones…" />
+  } @else if (!ediciones().length) {
+    @if (mercadoPublicado && !formulario()) {
+      <app-estado-de-lista titulo="Todavía no hay ediciones de este mercado"
+        detalle="Cada edición es una realización concreta: su año, sus fechas y dónde ocurrió. Lo permanente del mercado se queda arriba.">
+        <app-boton importancia="principal" tamano="menudo" identificador="nueva-edicion" (accion)="nueva()">Registrar la primera</app-boton>
+      </app-estado-de-lista>
+    }
+  } @else {
+    <ol class="divide-y divide-slate-200 border-y border-slate-200">
+      @for (edicion of ediciones(); track edicion.id) {
+        <li class="grid gap-4 py-5 md:grid-cols-[minmax(12rem,1.4fr)_minmax(9rem,.8fr)_minmax(9rem,.8fr)_auto] md:items-start" data-edicion-del-mercado>
+          <div class="min-w-0">
+            <h3 class="font-semibold text-slate-900">{{ nombreDe(edicion) }}</h3>
+            <p class="mt-1 text-cuerpo leading-relaxed text-prosa">{{ edicion.descripcion || 'Sin descripción registrada.' }}</p>
+          </div>
+          <div class="text-sm text-slate-700">
+            <p>{{ fechasDe(edicion) }}</p>
+            <p class="mt-1 text-xs text-slate-500">{{ edicion.lugarEspecifico || edicion.nombreMunicipio || 'Lugar por definir' }}</p>
+          </div>
+          <div class="text-sm">
+            <!-- La visibilidad primero: es la que decide si el portal la enseña. -->
+            <span data-visibilidad-de-la-edicion>
+              <app-indicador-de-estado
+                [etiqueta]="etiquetaDeVisibilidad(edicion.estadoVisibilidad)"
+                [tono]="tonoDelEstado(edicion.estadoVisibilidad)"
+                [matiz]="matizDelEstado(edicion.estadoVisibilidad)"
+                [conTexto]="true" />
+            </span>
+            <p class="mt-1 text-xs text-slate-500">{{ etiquetaDeRealizacion(edicion.estado) }}</p>
+          </div>
+          <div class="md:text-right">
+            <app-menu-de-acciones
+              [acciones]="accionesDe(edicion)"
+              [descripcion]="nombreDe(edicion)"
+              (elegida)="ejecutarAccion(edicion, $event)" />
+          </div>
+        </li>
+      }
+    </ol>
+  }
+</section>
+
+<!--
+  CONFIRMAR EL BORRADO. Es la única acción de esta pantalla que no se deshace, y por eso se pregunta
+  en una ventana de verdad —que cierra con Escape y retiene el foco— y no con un diálogo del
+  navegador.
+-->
+@if (eliminacionPedida(); as edicion) {
+  <app-confirmacion
+    titulo="Eliminar la edición"
+    [detalle]="'«' + nombreDe(edicion) + '» se borra y no se puede recuperar. Solo se ofrece porque nunca estuvo en el portal: lo que se publicó alguna vez se archiva.'"
+    accion="Eliminar la edición"
+    [error]="error()"
+    [ocupado]="guardando()"
+    identificador="confirmar-eliminar-edicion"
+    (confirmar)="eliminarLaEdicion()"
+    (cancelar)="cancelarLaEliminacion()" />
+}

@@ -1,0 +1,62 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <IsPackable>false</IsPackable>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <!--
+      PNMC-013: la auditoria de NuGet deja de ser un aviso decorativo.
+      NU1903 salia en cada compilacion y nadie lo miraba. Escalado a error, la
+      restauracion RECHAZA el paquete vulnerable en vez de anunciarlo.
+      Solo ALTA (NU1903) y CRITICA (NU1904) rompen la compilacion. BAJA (NU1901)
+      y MEDIA (NU1902) siguen saliendo como aviso: se ven, pero un aviso menor
+      nuevo en cualquiera de los 106 paquetes del grafo no tumba la compilacion
+      de madrugada. NU1900 queda FUERA a proposito: significa "no pude leer el
+      origen de auditoria" (red caida) y no debe romper una compilacion sin conexion.
+    -->
+    <NuGetAudit>true</NuGetAudit>
+    <NuGetAuditMode>all</NuGetAuditMode>
+    <NuGetAuditLevel>low</NuGetAuditLevel>
+    <WarningsAsErrors>$(WarningsAsErrors);NU1903;NU1904</WarningsAsErrors>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" Version="10.0.9" />
+    <!--
+      El proveedor SQLite vive AQUI y no en PNMC.Infrastructure. Es el motor
+      sobre el que corre la suite —el arnes lo registra en
+      TestWebApplicationFactory— y no se ejecuta en ningun despliegue. Tenerlo
+      en el proyecto de produccion metia un binario nativo entero en cada
+      publicacion para no usarlo nunca.
+    -->
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="10.0.9" />
+    <!--
+      PNMC-013 / CVE-2025-6965 (GHSA-2m69-gcr7-jv3q, CVSS 9.8).
+      Referencia directa a un paquete que de otro modo llegaria solo de forma
+      transitiva: EF Core Sqlite 10.0.9 -> Microsoft.Data.Sqlite.Core ->
+      SQLitePCLRaw.bundle_e_sqlite3 2.1.11 -> SQLitePCLRaw.lib.e_sqlite3 2.1.11,
+      que empaqueta SQLite 3.49.1 (corrupcion de memoria por debajo de 3.50.2).
+      2.1.12 empaqueta SQLite 3.53.3. El paquete NO declara dependencias: solo
+      contiene binarios nativos, asi que la subida no mueve ninguna API gestionada.
+      El bundle pide "2.1.11" como MINIMO (no [2.1.11]), asi que 2.1.12 lo satisface
+      sin NU1608. Se quita cuando EF Core suba a 10.0.11+, que ya trae 2.1.12.
+
+      Viaja junto a la referencia de SQLite: el pin existe por ella, y separarlos
+      dejaria el CVE sin tapar en cuanto alguien moviera uno de los dos.
+    -->
+    <PackageReference Include="SQLitePCLRaw.lib.e_sqlite3" Version="2.1.12" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.11.1" />
+    <PackageReference Include="xunit" Version="2.9.2" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.8.2">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../../src/PNMC.Api/PNMC.Api.csproj" />
+    <ProjectReference Include="../../src/PNMC.Contracts/PNMC.Contracts.csproj" />
+    <ProjectReference Include="../../src/PNMC.Infrastructure/PNMC.Infrastructure.csproj" />
+    <ProjectReference Include="../../src/PNMC.Domain/PNMC.Domain.csproj" />
+  </ItemGroup>
+</Project>

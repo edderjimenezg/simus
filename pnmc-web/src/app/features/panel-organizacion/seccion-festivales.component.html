@@ -1,0 +1,67 @@
+<section aria-labelledby="seccion-festivales-titulo">
+  <div class="flex flex-wrap items-end justify-between gap-3 border-b border-slate-200 pb-3">
+    <div><h3 id="seccion-festivales-titulo" class="font-alternate text-base font-bold uppercase text-morado">Festivales de la organización</h3><p class="mt-2 text-cuerpo leading-relaxed text-prosa">Cada registro reúne su perfil permanente, sus propuestas y sus ediciones.</p></div>
+    <span class="text-xs font-bold text-slate-500">{{ festivales.length }} registrado{{ festivales.length === 1 ? '' : 's' }}</span>
+  </div>
+
+  @if (!festivales.length) {
+    <div class="py-8"><p class="text-sm font-bold text-slate-800">Esta organización todavía no tiene Festivales registrados.</p><p class="mt-1 text-sm text-slate-500">Crea el primero desde la acción principal de esta página.</p></div>
+  } @else {
+    <ul class="divide-y divide-slate-200">
+      @for (festival of festivales; track festival.id) {
+        <li class="py-5">
+          <div class="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+            <div class="min-w-0 flex-1">
+              <div class="flex flex-wrap items-center gap-2">
+                <h4 class="text-lectura font-semibold text-valor">{{ festival.nombre }}</h4>
+                <app-indicador-de-estado
+                  [etiqueta]="etiquetaEstado(festival)"
+                  [tono]="tonoDelEstado(festival.estado)"
+                  [matiz]="matizDelEstado(festival.estado)"
+                  [conTexto]="true"></app-indicador-de-estado>
+                @if (festival.estadoPropuesta) {
+                  <app-indicador-de-estado
+                    [etiqueta]="'Propuesta ' + etiquetaEstadoPropuesta(festival)"
+                    [tono]="tonoDelEstado(festival.estadoPropuesta)"
+                    [conTexto]="true"></app-indicador-de-estado>
+                }
+                @if (festival.estadoSolicitudRetiro) {
+                  <app-indicador-de-estado
+                    [etiqueta]="'Eliminación ' + (festival.estadoSolicitudRetiro === 'pendiente' ? 'solicitada' : festival.estadoSolicitudRetiro)"
+                    tono="adverso"
+                    matiz="eliminado"
+                    [conTexto]="true"></app-indicador-de-estado>
+                }
+              </div>
+              <p class="mt-2 text-sm text-slate-600">{{ festival.organizacionPrincipalNombre || 'Organización administradora por confirmar' }} · {{ territorioDe(festival) }}</p>
+              <div class="mt-2 flex flex-wrap gap-x-3 gap-y-1 text-xs text-slate-500">
+                <span>{{ (festival.cuantasEdiciones ?? 0) === 1 ? '1 edición registrada' : (festival.cuantasEdiciones ?? 0) + ' ediciones registradas' }}</span>
+                <span>Actualizado {{ festival.fechaActualizacion ? (festival.fechaActualizacion | date: 'd MMM y') : 'sin fecha disponible' }}</span>
+                @if ((festival.cambiosPedidos ?? 0) > 0) { <span class="font-bold text-amber-800">{{ festival.cambiosPedidos }} ajuste{{ festival.cambiosPedidos === 1 ? '' : 's' }} pendiente{{ festival.cambiosPedidos === 1 ? '' : 's' }}</span> }
+              </div>
+              @if (festival.descripcion) { <p [attr.data-testid]="'descripcion-festival-' + festival.id" class="mt-3 line-clamp-2 text-sm leading-relaxed text-slate-600">{{ festival.descripcion }}</p> }
+              @if (festival.observacionRevision) { <p class="mt-3 border-l-2 border-amber-400 pl-3 text-sm text-amber-900">{{ festival.observacionRevision }}</p> }
+              @if (festival.observacionPropuesta) { <p class="mt-3 border-l-2 border-violet-300 pl-3 text-sm text-violet-900">{{ festival.observacionPropuesta }}</p> }
+            </div>
+
+            <div data-testid="acciones-festival" class="flex items-center gap-2 lg:shrink-0">
+              <button type="button" [attr.data-testid]="'abrir-ficha-' + festival.id" [attr.aria-label]="nombreAccesible('Ver ficha', festival)" (click)="abrirFicha.emit(festival)" class="rounded-lg border border-slate-300 bg-white px-4 py-2 text-xs font-bold text-slate-700 transition hover:border-morado hover:text-morado focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-morado">Ver ficha</button>
+              <details class="group relative">
+                <summary class="flex cursor-pointer list-none items-center gap-2 rounded-lg bg-morado px-4 py-2 text-xs font-bold text-white transition hover:bg-violet-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-morado">Acciones <svg aria-hidden="true" viewBox="0 0 16 16" class="h-3.5 w-3.5 transition-transform group-open:rotate-180"><path d="m3 6 5 5 5-5" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"/></svg></summary>
+                <div role="menu" class="absolute right-0 z-20 mt-2 w-64 overflow-hidden rounded-xl border border-slate-200 bg-white py-1 shadow-xl">
+                  @if (puedeEditar(festival)) { <button type="button" role="menuitem" [disabled]="ocupado" (click)="editar.emit(festival)" class="block w-full px-4 py-2.5 text-left text-sm hover:bg-slate-50 disabled:opacity-50">{{ rotuloEditarFestival(festival) }}</button> }
+                  @if (estadoDe(festival) === 'Publicado' && (puedeProponerCambios(festival) || puedeEditarPropuesta(festival))) { <button type="button" role="menuitem" [disabled]="ocupado" (click)="proponerCambios.emit(festival)" class="block w-full px-4 py-2.5 text-left text-sm hover:bg-slate-50 disabled:opacity-50">{{ puedeEditarPropuesta(festival) ? rotuloEditarPropuesta(festival) : 'Editar Festival' }}</button> }
+                  @if (puedeEnviarARevision(festival)) { <button type="button" role="menuitem" [disabled]="ocupado || faltanCambiosPorAtender(festival)" (click)="enviarARevision.emit(festival)" class="block w-full px-4 py-2.5 text-left text-sm hover:bg-slate-50 disabled:opacity-50">{{ rotuloEnviarARevision(festival) }}</button> }
+                  @if (estadoDe(festival) === 'Publicado' && puedeEnviarPropuesta(festival)) { <button type="button" role="menuitem" [disabled]="ocupado" (click)="enviarPropuesta.emit(festival)" class="block w-full px-4 py-2.5 text-left text-sm hover:bg-slate-50 disabled:opacity-50">Enviar propuesta a revisión</button> }
+                  <button type="button" role="menuitem" [disabled]="ocupado" (click)="verEdiciones.emit(festival)" class="block w-full px-4 py-2.5 text-left text-sm hover:bg-slate-50 disabled:opacity-50">{{ rotuloVerEdiciones(festival) }}</button>
+                  @if (puedeRetirar(festival)) { <div class="my-1 border-t border-slate-200"></div><button type="button" role="menuitem" [disabled]="ocupado" (click)="retirar.emit(festival)" class="block w-full px-4 py-2.5 text-left text-sm font-bold text-red-700 hover:bg-red-50 disabled:opacity-50">{{ rotuloRetiro(festival) }}</button> }
+                  @if (puedeSolicitarRetiro(festival)) { <div class="my-1 border-t border-slate-200"></div><button type="button" role="menuitem" [disabled]="ocupado" (click)="solicitarRetiro.emit(festival)" class="block w-full px-4 py-2.5 text-left text-sm font-bold text-red-700 hover:bg-red-50 disabled:opacity-50">Solicitar eliminación</button> }
+                </div>
+              </details>
+            </div>
+          </div>
+        </li>
+      }
+    </ul>
+  }
+</section>

@@ -1,0 +1,206 @@
+<section data-simus-form class="space-y-8" aria-labelledby="ficha-edicion-titulo">
+  <!--
+    LA CABECERA DICE EN QUE MODO SE ABRIO. Consultar y editar se ven casi igual —los mismos campos,
+    en el mismo orden— y quien abre una edicion archivada tiene que saber, antes de leer nada, que
+    lo que ve no se puede cambiar. Si no, lo descubre al escribir y no pasar nada.
+  -->
+  <header>
+    <p class="text-xs font-bold uppercase tracking-widest text-verde-texto">{{ soloLectura ? 'Solo consulta' : (edicionId ? 'Edición registrada' : 'Nueva realización') }}</p>
+    <h2 id="ficha-edicion-titulo" class="mt-1 font-alternate text-titulo font-bold uppercase tracking-wide text-morado">{{ soloLectura ? 'Consultar Edición' : (edicionId ? 'Editar Edición' : 'Registrar Edición') }}</h2>
+    <p class="mt-2 max-w-3xl text-cuerpo leading-relaxed text-prosa">
+      @if (soloLectura) {
+        Así quedó registrada esta realización. En su estado actual no admite cambios directos.
+      } @else {
+        Identifica esta realización y registra su operación, caracterización, localizaciones, entidades aliadas y materiales.
+      }
+    </p>
+  </header>
+
+  @if (error()) { <p role="alert" class="border-l-4 border-rose-500 bg-rose-50 p-3 text-sm text-rose-800">{{ error() }}</p> }
+  @if (cargando()) {
+    <p role="status" class="py-5 text-sm text-slate-500">Consultando la Edición…</p>
+  } @else {
+    <!--
+      UN SOLO `fieldset` APAGA LOS CINCUENTA CAMPOS. `disabled` en un `fieldset` se propaga a todo
+      control que contenga: no hay que acordarse de ponerlo campo por campo, ni volver a acordarse
+      cada vez que se añada uno nuevo. Lo que si hace falta es que ADEMAS SE LEA como una ficha y no
+      como un formulario apagado, y de eso se encarga `data-consulta`, que quita marcos y fondos a
+      lo deshabilitado y esconde los botones de añadir y quitar.
+    -->
+    <fieldset class="space-y-8 border-0 p-0" [disabled]="soloLectura" [attr.data-consulta]="soloLectura ? '' : null">
+    <section aria-labelledby="edicion-identificacion-titulo">
+      <h3 id="edicion-identificacion-titulo" class="font-alternate text-sm font-bold uppercase tracking-wide text-morado">Identificación y operación</h3>
+      <div class="mt-4 grid gap-4 md:grid-cols-2">
+        <label class="text-sm font-semibold text-slate-700">Año, si aplica<input class="mt-1 w-full rounded-lg border border-slate-300 p-2" type="number" [(ngModel)]="form.anio"></label>
+        <label class="text-sm font-semibold text-slate-700">Número de Edición, si aplica<input class="mt-1 w-full rounded-lg border border-slate-300 p-2" type="number" min="1" [(ngModel)]="form.numeroEdicion"></label>
+        <label class="text-sm font-semibold text-slate-700">Nombre, si aplica<input class="mt-1 w-full rounded-lg border border-slate-300 p-2" [(ngModel)]="form.nombre"></label>
+        <label class="text-sm font-semibold text-slate-700">Director o directora<input class="mt-1 w-full rounded-lg border border-slate-300 p-2" [(ngModel)]="form.director"></label>
+        <label class="text-sm font-semibold text-slate-700">Fecha de inicio<input class="mt-1 w-full rounded-lg border border-slate-300 p-2" type="date" [(ngModel)]="form.fechaInicio" (ngModelChange)="alCambiarLasFechas()"></label>
+        <label class="text-sm font-semibold text-slate-700">Fecha de cierre<input class="mt-1 w-full rounded-lg border border-slate-300 p-2" type="date" [(ngModel)]="form.fechaFin" (ngModelChange)="alCambiarLasFechas()"></label>
+        <!--
+          MES Y DURACIÓN NO SE ESCRIBEN: SE CALCULAN. La historia de usuario los marca obligatorios
+          y automáticos —«estos campos son automáticos y se diligencian teniendo en cuenta la fecha
+          inicio y fecha fin»— y no existían en ninguna parte. Se pintan como dato, no como campo,
+          porque un `<input readonly>` invita a intentar escribirlo.
+        -->
+        <p class="text-sm font-semibold text-slate-700">Mes de realización
+          <span data-testid="edicion-mes" class="mt-1 block rounded-lg bg-slate-50 p-2 font-normal text-slate-800">{{ tiempo().mes || 'Se calcula con las fechas' }}</span>
+        </p>
+        <p class="text-sm font-semibold text-slate-700">Duración en días
+          <span data-testid="edicion-duracion" class="mt-1 block rounded-lg bg-slate-50 p-2 font-normal text-slate-800">{{ tiempo().duracionDias === null ? 'Se calcula con las fechas' : tiempo().duracionDias }}</span>
+        </p>
+        <label class="text-sm font-semibold text-slate-700">Descripción<textarea class="mt-1 min-h-28 w-full rounded-lg border border-slate-300 p-2" rows="4" [(ngModel)]="form.descripcion"></textarea></label>
+        <label class="text-sm font-semibold text-slate-700">Estado operativo<select class="mt-1 w-full rounded-lg border border-slate-300 p-2" [(ngModel)]="form.estado"><option value="en_preparacion">En preparación</option><option value="programada">Programada</option><option value="realizada">Realizada</option><option value="cancelada">Cancelada</option></select><span class="mt-2 block text-xs font-normal leading-relaxed text-slate-500">Describe la situación de la realización. La visibilidad pública se gestiona por separado.</span></label>
+      </div>
+    </section>
+
+    <section class="border-t border-slate-200 pt-7" aria-labelledby="edicion-caracterizacion-titulo">
+      <h3 id="edicion-caracterizacion-titulo" class="font-alternate text-sm font-bold uppercase tracking-wide text-morado">Caracterización</h3>
+      <div class="mt-4 grid gap-4 md:grid-cols-2">
+        <label class="text-sm font-semibold text-slate-700">Tipología<select class="mt-1 w-full rounded-lg border border-slate-300 p-2" [(ngModel)]="form.tipologiaFestivalId"><option [ngValue]="null">Sin definir</option>@for (x of catalogos()?.tipologias || []; track x.id) { <option [ngValue]="x.id">{{ x.nombre }}</option> }</select></label>
+        <label class="text-sm font-semibold text-slate-700">Otra tipología<input class="mt-1 w-full rounded-lg border border-slate-300 p-2" [(ngModel)]="form.otraTipologia"></label>
+        <label class="text-sm font-semibold text-slate-700">Fuente de financiación principal<select class="mt-1 w-full rounded-lg border border-slate-300 p-2" [(ngModel)]="form.fuenteFinanciacionPrimariaId"><option [ngValue]="null">Sin definir</option>@for (x of catalogos()?.fuentesFinanciacion || []; track x.id) { <option [ngValue]="x.id">{{ x.nombre }}</option> }</select></label>
+        <label class="text-sm font-semibold text-slate-700">Otra fuente principal<input class="mt-1 w-full rounded-lg border border-slate-300 p-2" [(ngModel)]="form.otraFuenteFinanciacionPrimaria"></label>
+        <label class="text-sm font-semibold text-slate-700">Fuente de financiación secundaria<select class="mt-1 w-full rounded-lg border border-slate-300 p-2" [(ngModel)]="form.fuenteFinanciacionSecundariaId"><option [ngValue]="null">Sin definir</option>@for (x of catalogos()?.fuentesFinanciacion || []; track x.id) { <option [ngValue]="x.id">{{ x.nombre }}</option> }</select></label>
+        <label class="text-sm font-semibold text-slate-700">Otra fuente secundaria<input class="mt-1 w-full rounded-lg border border-slate-300 p-2" [(ngModel)]="form.otraFuenteFinanciacionSecundaria"></label>
+      </div>
+      <label class="mt-4 flex min-h-11 items-center gap-3 text-sm font-semibold text-slate-700"><input type="checkbox" class="h-4 w-4" [checked]="form.usaEstampillaProcultura === true" (change)="form.usaEstampillaProcultura = $any($event.target).checked"> Usa estampilla Procultura</label>
+    </section>
+
+    <section class="border-t border-slate-200 pt-7" aria-labelledby="edicion-practicas-titulo">
+      <h3 id="edicion-practicas-titulo" class="font-alternate text-sm font-bold uppercase tracking-wide text-morado">Prácticas, expresiones y participación</h3>
+      <div class="mt-4 grid gap-x-8 gap-y-6 md:grid-cols-2 xl:grid-cols-3">
+        <div><p class="text-sm font-semibold text-slate-700">Prácticas musicales</p>@for (x of catalogos()?.practicasMusicales || []; track x.id) { <div class="mt-2 flex items-start gap-2 text-sm"><label class="flex min-w-0 gap-2"><input type="checkbox" class="mt-0.5 h-4 w-4 shrink-0" [checked]="form.practicasMusicalesIds?.includes(x.id)" (change)="alternar('practicasMusicalesIds', x.id)"><span>{{ x.nombre }}</span></label><app-ayuda-conceptual-catalogo class="shrink-0 pt-0.5" tipo="practica" [nombre]="x.nombre" /></div> }</div>
+        <div><p class="text-sm font-semibold text-slate-700">Territorios sonoros</p>@for (x of catalogos()?.territoriosSonoros || []; track x.id) { <div class="mt-2 flex items-start gap-2 text-sm"><label class="flex min-w-0 gap-2"><input type="checkbox" class="mt-0.5 h-4 w-4 shrink-0" [checked]="form.territoriosSonorosIds?.includes(x.id)" (change)="alternar('territoriosSonorosIds', x.id)"><span>{{ x.nombre }}</span></label><app-ayuda-conceptual-catalogo class="shrink-0 pt-0.5" tipo="territorio" [nombre]="x.nombre" /></div> }</div>
+        <div><p class="text-sm font-semibold text-slate-700">Expresiones artísticas</p>@for (x of catalogos()?.expresionesArtisticas || []; track x.id) { <label class="mt-2 flex gap-2 text-sm"><input type="checkbox" class="mt-0.5 h-4 w-4 shrink-0" [checked]="form.expresionesArtisticasIds?.includes(x.id)" (change)="alternar('expresionesArtisticasIds', x.id)">{{ x.nombre }}</label> }</div>
+        <div><p class="text-sm font-semibold text-slate-700">Modalidades de participación</p>@for (x of catalogos()?.modalidadesParticipacion || []; track x.id) { <label class="mt-2 flex gap-2 text-sm"><input type="checkbox" class="mt-0.5 h-4 w-4 shrink-0" [checked]="form.modalidadesParticipacionIds?.includes(x.id)" (change)="alternar('modalidadesParticipacionIds', x.id)">{{ x.nombre }}</label> }</div>
+        <div><p class="text-sm font-semibold text-slate-700">Tipos de ingreso</p>@for (x of catalogos()?.tiposIngreso || []; track x.id) { <label class="mt-2 flex gap-2 text-sm"><input type="checkbox" class="mt-0.5 h-4 w-4 shrink-0" [checked]="form.tiposIngresoIds?.includes(x.id)" (change)="alternar('tiposIngresoIds', x.id)">{{ x.nombre }}</label> }</div>
+        <label class="text-sm font-semibold text-slate-700">Prácticas musicales que congrega<textarea class="mt-1 min-h-24 w-full rounded-lg border border-slate-300 p-2" [(ngModel)]="form.practicasMusicalesQueCongrega"></textarea></label>
+        <label class="text-sm font-semibold text-slate-700">Otra modalidad de participación<input class="mt-1 w-full rounded-lg border border-slate-300 p-2" [(ngModel)]="form.otraModalidadParticipacion"></label>
+        <label class="text-sm font-semibold text-slate-700">Otra expresión artística<input class="mt-1 w-full rounded-lg border border-slate-300 p-2" [(ngModel)]="form.otraExpresionArtistica"></label>
+      </div>
+    </section>
+
+    <section class="border-t border-slate-200 pt-7" aria-labelledby="edicion-localizaciones-titulo">
+      <div class="flex flex-wrap items-center justify-between gap-3"><h3 id="edicion-localizaciones-titulo" class="font-alternate text-sm font-bold uppercase tracking-wide text-morado">Localizaciones</h3><button type="button" class="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-semibold text-morado hover:border-verde-medio" data-solo-edicion (click)="agregarLocalizacion()">Añadir localización</button></div>
+      @if (!(form.localizaciones || []).length) { <app-estado-de-lista denso titulo="Todavía no hay localizaciones"
+        detalle="Añade los lugares donde ocurre esta edición: cada uno aparece después en el mapa del Ecosistema." /> }
+      <div class="mt-4 divide-y divide-slate-200 border-y border-slate-200">
+        @for (lugar of form.localizaciones || []; track $index) {
+          <div class="grid gap-3 py-4 md:grid-cols-2 xl:grid-cols-[1fr_1fr_1fr_1fr_1fr_auto]">
+            <label class="text-xs font-semibold text-slate-600">Departamento<select class="mt-1 w-full rounded-lg border border-slate-300 p-2 text-sm" [(ngModel)]="lugar.codigoDepartamento"><option value="">Selecciona</option>@for (x of departamentos(); track x.departmentCode) { <option [value]="x.departmentCode">{{ x.departmentName | nombrePropio }}</option> }</select></label>
+            <label class="text-xs font-semibold text-slate-600">Municipio<select class="mt-1 w-full rounded-lg border border-slate-300 p-2 text-sm" [(ngModel)]="lugar.codigoMunicipio"><option value="">Selecciona</option>@for (x of municipios(lugar.codigoDepartamento); track x.municipalityCode) { <option [value]="x.municipalityCode">{{ x.municipalityName | nombrePropio }}</option> }</select></label>
+            <label class="text-xs font-semibold text-slate-600">Zona<select class="mt-1 w-full rounded-lg border border-slate-300 p-2 text-sm" [(ngModel)]="lugar.zonaUrbanoRuralId"><option [ngValue]="null">Sin definir</option>@for (x of catalogos()?.zonasUrbanoRural || []; track x.id) { <option [ngValue]="x.id">{{ x.nombre }}</option> }</select></label>
+            <label class="text-xs font-semibold text-slate-600">Titulación colectiva<select class="mt-1 w-full rounded-lg border border-slate-300 p-2 text-sm" [(ngModel)]="lugar.titulacionColectivaId"><option [ngValue]="null">Sin definir</option>@for (x of catalogos()?.titulacionesColectivas || []; track x.id) { <option [ngValue]="x.id">{{ x.nombre }}</option> }</select></label>
+            <!--
+              LA REGIÓN OCAD NO SE ELIGE. La historia de usuario la marca «campo automático, lo
+              definen los campos seleccionados en Departamento y Municipio», y sale de la
+              correspondencia oficial del Sistema General de Regalías. Se muestra como dato para que
+              quien diligencia la vea, y no como un desplegable donde equivocarse.
+            -->
+            <p class="text-xs font-semibold text-slate-600">Región OCAD
+              <span [attr.data-testid]="'edicion-region-ocad-' + $index" class="mt-1 block rounded-lg bg-slate-50 p-2 text-sm font-normal text-slate-800">{{ regionOcadDe(lugar.codigoDepartamento) }}</span>
+            </p>
+            <button type="button" class="self-end px-2 py-2 text-sm font-semibold text-rose-700 underline underline-offset-4" data-solo-edicion (click)="quitarLocalizacion($index)">Quitar</button>
+          </div>
+        }
+      </div>
+    </section>
+
+    <section class="border-t border-slate-200 pt-7" aria-labelledby="edicion-aliadas-titulo">
+      <div class="flex flex-wrap items-center justify-between gap-3"><h3 id="edicion-aliadas-titulo" class="font-alternate text-sm font-bold uppercase tracking-wide text-morado">Entidades aliadas</h3><button type="button" class="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-semibold text-morado hover:border-verde-medio" data-solo-edicion (click)="agregarAliada()">Añadir entidad</button></div>
+      @if (!(form.entidadesAliadas || []).length) { <app-estado-de-lista denso titulo="Todavía no hay entidades aliadas"
+        detalle="Son las organizaciones que acompañan esta edición sin ser la responsable del Festival." /> }
+      <div class="mt-4 divide-y divide-slate-200 border-y border-slate-200">
+        @for (aliada of form.entidadesAliadas || []; track $index) {
+          <div class="grid gap-3 py-4 md:grid-cols-2 xl:grid-cols-[1.2fr_1fr_1fr_auto]">
+            <label class="text-xs font-semibold text-slate-600">Nombre<input class="mt-1 w-full rounded-lg border border-slate-300 p-2 text-sm" [(ngModel)]="aliada.nombre"></label>
+            <label class="text-xs font-semibold text-slate-600">Correo electrónico<input class="mt-1 w-full rounded-lg border border-slate-300 p-2 text-sm" type="email" [(ngModel)]="aliada.correo"></label>
+            <label class="text-xs font-semibold text-slate-600">Naturaleza<select class="mt-1 w-full rounded-lg border border-slate-300 p-2 text-sm" [(ngModel)]="aliada.naturalezaEntidadId"><option [ngValue]="null">Sin definir</option>@for (x of catalogos()?.naturalezasEntidad || []; track x.id) { <option [ngValue]="x.id">{{ x.nombre }}</option> }</select></label>
+            <button type="button" class="self-end px-2 py-2 text-sm font-semibold text-rose-700 underline underline-offset-4" data-solo-edicion (click)="quitarAliada($index)">Quitar</button>
+          </div>
+        }
+      </div>
+    </section>
+
+    <section class="border-t border-slate-200 pt-7" aria-labelledby="edicion-materiales-titulo">
+      <div class="flex flex-wrap items-center justify-between gap-3"><h3 id="edicion-materiales-titulo" class="font-alternate text-sm font-bold uppercase tracking-wide text-morado">Materiales</h3><button type="button" class="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-semibold text-morado hover:border-verde-medio" data-solo-edicion (click)="agregarMaterial()">Añadir material</button></div>
+      @if (!(form.materiales || []).length) { <p class="mt-4 text-sm text-slate-500">No hay materiales registrados.</p> }
+      <div class="mt-4 divide-y divide-slate-200 border-y border-slate-200">
+        @for (material of form.materiales || []; track $index) {
+          <!--
+            SUBIR O PEGAR, LAS DOS COSAS. La historia de usuario pide adjuntar el programa, el
+            afiche y el logo; hasta lo único que se podía aportar era
+            una URL a un sitio ajeno, que es confiar en que el fichero siga ahí el año que viene.
+            Se conserva la URL porque hay material que de verdad vive fuera —un video, una nota de
+            prensa— y obligar a descargarlo para volver a subirlo no ayuda a nadie.
+          -->
+          <div class="grid gap-3 py-4 md:grid-cols-[1fr_1fr_auto]">
+            <div class="md:col-span-2">
+              <p class="text-xs font-semibold text-slate-600">Archivo</p>
+              @if (material.url) {
+                <div class="mt-1 flex flex-wrap items-center gap-3">
+                  <a [href]="material.url" target="_blank" rel="noopener" class="break-all text-sm text-verde-texto underline underline-offset-2">{{ material.url }}</a>
+                  <button type="button" class="text-xs font-semibold text-rose-700 underline underline-offset-4" data-solo-edicion (click)="material.url = null">Cambiar</button>
+                </div>
+              } @else {
+                <div class="mt-1 flex flex-wrap items-center gap-3">
+                  <label data-solo-edicion class="cursor-pointer rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-semibold text-morado hover:border-verde-medio">
+                    {{ subiendoMaterial() === $index ? 'Subiendo…' : 'Subir archivo' }}
+                    <input type="file" class="hidden" accept="image/png,image/jpeg,image/webp"
+                           [disabled]="subiendoMaterial() !== null"
+                           (change)="subirMaterial($index, $any($event.target))">
+                  </label>
+                  <span class="text-xs text-slate-500">o</span>
+                  <!--
+                    EL ROTULO EXISTE Y NO ES EL `placeholder`. Este campo se quedó con un marcador de
+                    posición haciendo de etiqueta —«pega una dirección https://…»—, que desaparece en
+                    cuanto se escribe y que ningún lector de pantalla anuncia. Es la misma regla que
+                    ya cumple el resto del panel; aquí faltaba.
+                  -->
+                  <label class="min-w-0 flex-1 text-xs font-semibold text-slate-600">
+                    Dirección del material, si vive fuera
+                    <input class="mt-1 w-full rounded-lg border border-slate-300 p-2 text-sm" type="url"
+                           placeholder="https://…" [(ngModel)]="material.url"
+                           [attr.name]="'urlMaterial' + $index">
+                  </label>
+                </div>
+              }
+              @if (errorDeMaterial()[$index]; as fallo) {
+                <p role="alert" class="mt-2 text-xs text-rose-700">{{ fallo }}</p>
+              }
+            </div>
+            <label class="text-xs font-semibold text-slate-600 md:col-span-2">Descripción<input class="mt-1 w-full rounded-lg border border-slate-300 p-2 text-sm" [(ngModel)]="material.descripcionArchivo" [attr.name]="'descMaterial' + $index"></label>
+            <button type="button" class="self-end px-2 py-2 text-sm font-semibold text-rose-700 underline underline-offset-4" data-solo-edicion (click)="quitarMaterial($index)">Quitar</button>
+          </div>
+        }
+      </div>
+    </section>
+
+    </fieldset>
+
+    <footer class="sticky bottom-0 z-10 flex flex-wrap justify-end gap-3 border-t border-slate-200 bg-white/95 py-4 backdrop-blur">
+      @if (soloLectura) {
+        <!-- EN CONSULTA HAY UNA SOLA SALIDA. «Cancelar» no describe cerrar algo que no se tocó. -->
+        <button type="button" data-cerrar-consulta
+                class="rounded-lg bg-morado px-4 py-2 text-sm font-bold text-white" (click)="cancelar.emit()">Volver a las Ediciones</button>
+      } @else {
+        <!--
+          DOS SALIDAS CLARAMENTE DISTINTAS, y antes solo había una. «Guardar borrador» conserva la
+          edición sin hacerla pública y deja seguir trabajando; «Publicar edición» guarda y la hace
+          visible. Al terminar de diligenciar una edición no había ninguna forma de decir «ya está»:
+          había que guardar, cerrar el formulario y buscar un enlace subrayado en la lista.
+        -->
+        <button type="button" class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700" (click)="cancelar.emit()">Cancelar</button>
+        <button type="button" data-guardar-borrador
+                class="rounded-lg border border-morado bg-white px-4 py-2 text-sm font-bold text-morado disabled:opacity-50"
+                [disabled]="guardando() || publicando()" (click)="guardar()">{{ guardando() ? 'Guardando…' : 'Guardar borrador' }}</button>
+        @if (festivalPublicado) {
+          <button type="button" data-publicar-edicion
+                  class="rounded-lg bg-morado px-4 py-2 text-sm font-bold text-white disabled:opacity-50"
+                  [disabled]="guardando() || publicando()" (click)="publicar()">{{ publicando() ? 'Publicando…' : 'Publicar edición' }}</button>
+        }
+      }
+    </footer>
+  }
+</section>

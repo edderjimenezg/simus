@@ -1,0 +1,37 @@
+<!--
+  UN ICONO Y EL TEXTO COMO ALTERNATIVA. El icono es decorativo para la tecnología asistiva
+  —`aria-hidden`— porque el significado lo lleva la etiqueta de al lado; declararlo en los dos sitios
+  haría que el estado se anunciara dos veces.
+-->
+<span class="relative inline-flex items-center gap-1.5 align-middle"
+      data-indicador-de-estado
+      (mouseenter)="encima.set(true)" (mouseleave)="encima.set(false)">
+  @switch (icono) {
+    @case ('logrado') { <svg lucideCircleCheckBig [class]="clase" class="h-4 w-4 shrink-0" aria-hidden="true"></svg> }
+    @case ('en_curso') { <svg lucideClock3 [class]="clase" class="h-4 w-4 shrink-0" aria-hidden="true"></svg> }
+    @case ('accion') { <svg lucideTriangleAlert [class]="clase" class="h-4 w-4 shrink-0" aria-hidden="true"></svg> }
+    @case ('archivo') { <svg lucideArchive [class]="clase" class="h-4 w-4 shrink-0" aria-hidden="true"></svg> }
+    @case ('adverso') { <svg lucideCircleX [class]="clase" class="h-4 w-4 shrink-0" aria-hidden="true"></svg> }
+    @case ('pausa') { <svg lucidePause [class]="clase" class="h-4 w-4 shrink-0" aria-hidden="true"></svg> }
+    @case ('eliminado') { <svg lucideTrash2 [class]="clase" class="h-4 w-4 shrink-0" aria-hidden="true"></svg> }
+    @case ('correo') { <svg lucideMailQuestion [class]="clase" class="h-4 w-4 shrink-0" aria-hidden="true"></svg> }
+    @default { <svg lucidePencilLine [class]="clase" class="h-4 w-4 shrink-0" aria-hidden="true"></svg> }
+  }
+
+  @if (conTexto) {
+    <span class="text-xs font-bold" [class]="clase">{{ etiqueta }}</span>
+  } @else {
+    <span class="sr-only">{{ etiqueta }}</span>
+
+    @if (encima()) {
+      <!--
+        SOLO CUANDO EL TEXTO NO ESTA YA ESCRITO. Con `conTexto` el tooltip repetiría lo que se lee al
+        lado, que es ruido y no ayuda.
+      -->
+      <span role="tooltip" data-tooltip-de-estado
+            class="pointer-events-none absolute bottom-full left-1/2 z-40 mb-1.5 -translate-x-1/2 whitespace-nowrap rounded-md bg-morado px-2 py-1 text-dato font-bold text-white shadow-lg">
+        {{ etiqueta }}
+      </span>
+    }
+  }
+</span>

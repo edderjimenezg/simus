@@ -1,0 +1,468 @@
+<!--
+  LA BARRA DE LA BANDEJA: FILTRAR Y SABER CUANTO QUEDA.
+
+  Antes eran dos `<select>` desnudos rotulados «Mostrar» y «Módulo», sin recuento: había
+  que elegir una opción a ciegas y ver si la lista quedaba vacía. Ahora el filtro por tipo
+  es el selector segmentado del proyecto -mismo control que el mapa- con el número de
+  asuntos en cada posición, y el filtro por módulo desapareció: solo tenía dos opciones y
+  una de ellas, «Festivales», no descarta nada mientras Festivales sea el único módulo con
+  cola. Volverá cuando haya un segundo módulo que separar.
+-->
+<div class="revision-barra">
+  <!--
+    EL ORDEN, QUE NO EXISTIA. La cola concatenaba ocho listas tal como llegaban; ahora se
+    ordena ENTERA por el criterio elegido, y viene puesto «lo más antiguo primero» porque
+    es el orden de trabajo de una bandeja. Va en su propia fila, arriba a la derecha y
+    sobre las pestañas: al lado de ellas, en la misma línea, se veía como una pestaña más.
+    Lo pidió la dirección de producto.
+  -->
+  <div class="revision-barra__orden">
+    <app-filtro-desplegable identificador="orden-de-la-bandeja" etiqueta="Ordenar la bandeja"
+      [opciones]="OPCIONES_DE_ORDEN" [elegida]="ordenDeLaBandeja()"
+      (cambiar)="ordenDeLaBandeja.set($any($event))" />
+  </div>
+  <!--
+    DUPLICADOS Y ALERTAS SON DOS POSICIONES MAS, no una puerta aparte.
+
+    Aquí había un enlace «Duplicados y calidad de datos» que escondía la bandeja y montaba
+    otra pantalla entera -«Calidad y coincidencias»- con cinco pestañas. Tres de ellas
+    -Eliminaciones, Reclamaciones, Vinculaciones- listaban los MISMOS trámites que esta
+    bandeja, leídos de los mismos dos endpoints, con otra interfaz de decisión: dos
+    caminos al mismo asunto, listos para divergir. Las otras dos entraron aquí.
+  -->
+  <app-selector-segmentado
+    [opciones]="filtrosDeLaBandeja()"
+    [elegida]="bandeja.filtro()"
+    etiquetaDelGrupo="Filtrar la bandeja por tipo de asunto"
+    [conFilete]="false"
+    (elegir)="cambiarFiltroDeBandeja($event)"
+  ></app-selector-segmentado>
+</div>
+<!-- Lo que contiene la posición elegida: el nombre corto va arriba, la explicación aquí. -->
+@if (descripcionDelFiltro(); as que) {
+  <p class="revision-barra__que" data-que-contiene>{{ que }}</p>
+}
+
+  <!--
+    PANEL DE REVISION: LA LISTA A LA IZQUIERDA, LO SELECCIONADO AL LADO.
+
+    Antes esto era una tabla de seis columnas donde cada fila se desplegaba hacia abajo, y
+    tenía tres problemas de fondo:
+
+      · Al abrir una solicitud, las demás se empujaban fuera de la vista. Revisar una cola
+        consiste en pasar de una a otra, y el diseño obligaba a cerrar para volver a ver
+        dónde estabas.
+      · Media tabla decía lo mismo en todas las filas —«Registro inicial de Festival» ocho
+        veces, «Festivales» nueve— y aun así se llevaba la mitad del ancho.
+      · Todo iba al tamaño mínimo: rótulos de 10 px, valores de 12, controles de 16 de alto.
+
+    Ahora la lista es un índice compacto —registro, tipo y cuánto lleva esperando— y la
+    previsualización vive a su lado, fija, para que al elegir otra solicitud solo cambie el
+    panel derecho. Es lo que se pidió: verlas todas listadas y previsualizar cada una de
+    manera ágil.
+  -->
+  <div class="revision" [class.hay-eleccion]="tramiteElegido()" [class.esta-revisando]="vistaDelTramite() === 'ficha'">
+
+    <!-- ── El índice ─────────────────────────────────────────────────── -->
+    <div class="revision-lista" role="list" aria-label="Solicitudes en espera">
+      @for (item of colaVisible(); track item.id) {
+        <button type="button" role="listitem" class="revision-item"
+          [class.esta-elegida]="tramiteElegidoId() === item.id"
+          [attr.aria-current]="tramiteElegidoId() === item.id ? 'true' : null"
+          (click)="elegirTramite(item)">
+          <span class="revision-item__registro">{{ item.record }}</span>
+          <span class="revision-item__tipo">{{ item.type }}</span>
+          <span class="revision-item__pie">
+            <span class="revision-item__organizacion">{{ item.organization }}</span>
+            <!-- Cuánto lleva esperando, no la marca de tiempo: es lo que ordena el trabajo. -->
+            <span class="revision-item__espera" [class.es-vieja]="llevaDemasiado(item.createdAt)"
+              [title]="item.createdAt ? (item.createdAt | date: FECHA_Y_HORA_ADMINISTRATIVA:'':'es-CO') : ''">
+              {{ haceCuanto(item.createdAt) }}
+            </span>
+          </span>
+        </button>
+      } @empty {
+        <!--
+          EL VACIO DICE DE QUE ESTA VACIO. Desde que las nueve posiciones se ven siempre
+          -antes se ocultaban las que están en cero, y eso dejó seis capacidades
+          invisibles-, entrar en una de ellas tiene que explicar qué no hay, o el cero de
+          la pestaña y la lista en blanco se leen como que la pantalla falló.
+        -->
+        <p class="revision-vacio">{{ nadaQueVerAqui() }}</p>
+      }
+    </div>
+
+    <!-- ── La previsualización ───────────────────────────────────────── -->
+    <!--
+      UNA SOLA SUPERFICIE, DOS CONTENIDOS.
+
+      Hasta esto eran dos cosas: un panel con el resumen y,
+      al pulsar «Revisar la ficha completa», OTRO bloque que lo sustituía con su propio
+      encabezado y su propio marco. Se leía como si se hubiera abierto algo distinto.
+
+      Ahora el encabezado del trámite —qué es, qué registro, cerrar— se queda quieto, y
+      debajo un selector segmentado cambia lo que se mira: el resumen o la ficha entera.
+      Es la misma pantalla cambiando de contenido, que es lo que se pidió: «que se sienta
+      como un todo y no como fichas dentro de fichas […] que cambie la pantalla en una
+      misma interfaz, no que se abre otra cosa diferente».
+    -->
+    @if (tramiteElegido(); as elegida) {
+      <div class="revision-detalle" aria-label="Resumen del trámite">
+        <!--
+          EL REGRESO A LA LISTA, SOLO EN PANTALLA ESTRECHA. Por debajo de 1080 px las dos
+          columnas no caben y la previsualización OCUPA el sitio de la lista: enseñar las
+          dos apiladas dejaba el panel a media pantalla de distancia del trámite que se
+          acababa de pulsar. Con una sola a la vista hace falta la puerta de vuelta.
+        -->
+        @if (vistaDelTramite() === 'ficha') {
+          <button type="button" class="revision-volver es-siempre" (click)="cambiarVistaDelTramite('resumen')">
+            <svg lucideArrowLeft [size]="16" aria-hidden="true"></svg>Volver al resumen del trámite
+          </button>
+        } @else {
+          <button type="button" class="revision-volver" (click)="cerrarTramite()">
+            <svg lucideArrowLeft [size]="16" aria-hidden="true"></svg>Volver a la lista
+          </button>
+        }
+        <div class="revision-detalle__cabecera">
+          <div>
+            <p class="revision-detalle__tipo">{{ elegida.type }}</p>
+            <h3 class="revision-detalle__titulo">{{ elegida.record }}</h3>
+          </div>
+          <!-- Icono dibujado y no el glifo «✕», que se pinta con la tipografía del texto y no casa
+               con los demás controles de la consola. -->
+          <button type="button" class="revision-cerrar" (click)="cerrarTramite()" aria-label="Cerrar la previsualización">
+            <svg lucideX [size]="16" aria-hidden="true"></svg>
+          </button>
+        </div>
+
+        @if (vistaDelTramite() === 'ficha' && edicionEnRevisionAbierta(); as edicion) {
+          <div class="revision-vista">
+          <app-admin-edition-review-panel [comoPanel]="true" [edicionId]="edicion.id" [nombre]="edicion.nombre"
+            (cerrar)="alCerrarEdicionEnRevision()" (enviada)="alEnviarDesdeEdicionEnRevision()" />
+          </div>
+        } @else if (vistaDelTramite() === 'ficha' && elegida.kind === 'propuesta' && detallePropuestaDeMercado(); as propuesta) {
+          <div class="revision-vista">
+          <!--
+            UN MERCADO NO TIENE VERSIONES: su ficha publicada ES el registro, así que aquí no se
+            compara contra la versión N.º tantos, sino contra lo que la ficha decía cuando la
+            propuesta se envió. Lo que no aparece en esta lista es lo que NO cambia, y eso lo dice
+            la frase de arriba en vez de pintar treinta filas iguales.
+          -->
+          <p class="tramite-seccion">Comparación con la ficha publicada</p>
+          <p class="tramite-nota">{{ resumenDeLaComparacion() }}</p>
+          @if (propuesta.motivo) {
+            <p class="tramite-seccion">Por qué lo propone</p>
+            <p class="tramite-descripcion">{{ propuesta.motivo }}</p>
+          }
+          <dl class="revision-comparacion">
+            @for (fila of propuestaComparacion(); track fila.etiqueta) {
+              <div [class.cambia]="fila.cambia">
+                <dt>{{ fila.etiqueta }}</dt>
+                <dd class="revision-comparacion__vigente">{{ fila.vigente }}</dd>
+                <dd class="revision-comparacion__propuesto">{{ fila.propuesto }}</dd>
+              </div>
+            }
+          </dl>
+          </div>
+        } @else if (vistaDelTramite() === 'ficha' && elegida.kind === 'propuesta' && detallePropuesta(); as detalle) {
+          <div class="revision-vista">
+          <!--
+            LA COMPARACION ENTERA, CAMPO A CAMPO. Vivía en un diálogo superpuesto que ya
+            no existe. SE PINTAN TAMBIEN LAS FILAS QUE NO CAMBIAN: un listado de solo
+            diferencias deja sin respuesta si el resto se revisó o simplemente no estaba.
+          -->
+          <p class="tramite-seccion">Comparación con la versión publicada N.º{{ detalle.versionVigente.numeroVersion }}</p>
+          <p class="tramite-nota">Cambia {{ propuestaCamposQueCambian() }} de {{ propuestaComparacion().length }} campos.</p>
+          <dl class="revision-comparacion">
+            @for (fila of propuestaComparacion(); track fila.etiqueta) {
+              <div [class.cambia]="fila.cambia">
+                <dt>{{ fila.etiqueta }}</dt>
+                <dd class="revision-comparacion__vigente">{{ fila.vigente }}</dd>
+                <dd class="revision-comparacion__propuesto">{{ fila.propuesto }}</dd>
+              </div>
+            }
+          </dl>
+          @if (detalle.historial.length) {
+            <p class="tramite-seccion">Historial</p>
+            <ul class="revision-historial">
+              @for (entrada of detalle.historial; track $index) {
+                <li>
+                  <b>{{ entrada.accion || 'Cambio' }}</b>
+                  <span>{{ entrada.fecha }}</span>
+                  @if (entrada.comentario) { <p>{{ entrada.comentario }}</p> }
+                </li>
+              }
+            </ul>
+          }
+          </div>
+        } @else if (vistaDelTramite() === 'ficha' && fichaEnRevisionAbierta(); as asunto) {
+          <div class="revision-vista">
+          <app-ficha-en-revision
+            [comoPanel]="true"
+            [sinEncabezado]="true"
+            [festivalId]="asunto.festivalId"
+            [nombreFestival]="asunto.nombreFestival"
+            [nombreOrganizacion]="asunto.organizacion"
+            (cerrar)="alCerrarFichaEnRevision()"
+            (enviada)="alEnviarDesdeFichaEnRevision()"
+            (decidida)="alDecidirDesdeFichaEnRevision($event)" />
+          </div>
+        } @else {
+          <div class="revision-vista">
+
+        <!--
+          LAS ACCIONES, JUNTO AL REGISTRO. Estaban al final del panel, a 276 px del inicio:
+          había que recorrerlo entero para decidir y al decidir ya no se veía sobre qué.
+
+          Y SE DICE ANTES SI ESTO SE DECIDE AQUI: nueve de cada diez filas son registros
+          completos que se revisan en su propia ficha, y ofrecer «Aprobar» al lado sería
+          prometer una decisión que esta pantalla no toma.
+        -->
+        <!--
+          LA CONFIRMACION, EN EL SITIO. Eran tres ventanas del navegador —un `prompt` para el motivo
+          y dos `confirm` para lo irreversible—: sin el estilo del proyecto, sin rótulo accesible,
+          sin límite de texto y sin decir sobre qué asunto se estaba decidiendo. Aquí se ve el
+          verbo, el registro, lo que va a pasar y lo que la organización va a leer.
+        -->
+        @if (confirmacion(); as pendiente) {
+          <div class="confirmacion-de-decision" role="group" [attr.aria-label]="tituloDeLaConfirmacion()">
+            <p class="confirmacion-de-decision__titulo">{{ tituloDeLaConfirmacion() }}</p>
+            @if (avisoDeLaConfirmacion()) {
+              <p class="confirmacion-de-decision__aviso">{{ avisoDeLaConfirmacion() }}</p>
+            }
+            @if (pideMotivo()) {
+              <label for="motivo-de-la-decision" class="campo__rotulo confirmacion-de-decision__rotulo">
+                @if (pendiente.accion === 'aclaracion') { Qué aclaración necesitas }
+                @else if (pendiente.item.kind === 'evento') { Qué hay que corregir }
+                @else { Por qué }
+              </label>
+              <textarea id="motivo-de-la-decision" rows="3" maxlength="2400"
+                        [(ngModel)]="motivoDeLaDecision" name="motivoDeLaDecision"
+                        aria-describedby="ayuda-motivo-de-la-decision"
+                        class="confirmacion-de-decision__texto"></textarea>
+              <small id="ayuda-motivo-de-la-decision" class="campo__ayuda">Es lo que leerá la organización, y queda en el historial con tu nombre y la fecha.</small>
+            }
+            <div class="confirmacion-de-decision__acciones">
+              <app-boton importancia="secundaria" (accion)="cancelarLaConfirmacion()">Cancelar</app-boton>
+              <app-boton [importancia]="pendiente.accion === 'rechazar' ? 'destructiva' : 'confirmar'"
+                         [deshabilitado]="pideMotivo() && !motivoDeLaDecision.trim()"
+                         (accion)="confirmarLaAccion()" data-confirmar-decision>
+                {{ tituloDeLaConfirmacion() }}
+              </app-boton>
+            </div>
+          </div>
+        }
+
+        <div class="revision-acciones">
+          @if (seDecideAqui(elegida) && !confirmacion()) {
+            @if (elegida.kind === 'propuesta' || elegida.kind === 'solicitud') {
+              <app-boton importancia="confirmar" [deshabilitado]="accionRapidaOcupada()" (accion)="accionRapida(elegida, 'aprobar')">Aprobar</app-boton>
+              <app-boton importancia="secundaria" [deshabilitado]="accionRapidaOcupada()" (accion)="accionRapida(elegida, 'ajustes')">Pedir ajustes</app-boton>
+              <app-boton importancia="destructiva" [deshabilitado]="accionRapidaOcupada()" (accion)="accionRapida(elegida, 'rechazar')">Rechazar</app-boton>
+            } @else if (elegida.kind === 'retiro') {
+              <app-boton importancia="confirmar" [deshabilitado]="accionRapidaOcupada()" (accion)="accionRapida(elegida, 'aprobar')">Aprobar retiro</app-boton>
+              <app-boton importancia="destructiva" [deshabilitado]="accionRapidaOcupada()" (accion)="accionRapida(elegida, 'rechazar')">Rechazar</app-boton>
+            } @else if (elegida.kind === 'reclamacion') {
+              <app-boton importancia="confirmar" [deshabilitado]="accionRapidaOcupada()" (accion)="accionRapida(elegida, 'aprobar')">Aprobar (transferir)</app-boton>
+              <app-boton importancia="secundaria" [deshabilitado]="accionRapidaOcupada()" (accion)="accionRapida(elegida, 'aclaracion')">Pedir aclaración</app-boton>
+              <app-boton importancia="destructiva" [deshabilitado]="accionRapidaOcupada()" (accion)="accionRapida(elegida, 'rechazar')">Rechazar</app-boton>
+            } @else if (elegida.kind === 'duplicado') {
+              <!--
+                NI «APROBAR» NI «RECHAZAR»: un duplicado no es una petición de nadie. Se
+                decide si los dos registros son el mismo o no lo son, y esos son los dos
+                verbos. «Marcar para fusión» es la confirmadora porque es la que tiene
+                consecuencia; «Son registros distintos» solo cierra el hallazgo.
+              -->
+              <app-boton importancia="confirmar" [deshabilitado]="accionRapidaOcupada()" (accion)="accionRapida(elegida, 'fusionar')">Marcar para fusión</app-boton>
+              <app-boton importancia="secundaria" [deshabilitado]="accionRapidaOcupada()" (accion)="accionRapida(elegida, 'ignorar')">Son registros distintos</app-boton>
+            } @else if (elegida.kind === 'alerta') {
+              <app-boton importancia="confirmar" [deshabilitado]="accionRapidaOcupada()" (accion)="accionRapida(elegida, 'resolver')">Marcar como resuelta</app-boton>
+            } @else if (elegida.kind === 'evento') {
+              <!--
+                UN EVENTO SE DECIDE AQUI, Y NO EN AGENDA. El trabajo de fondo ocurre en el
+                panel donde está la lista: mandar a otra sección para decidir obliga a
+                perder el sitio en la cola. Y hay una razón de permisos: la bandeja la
+                tiene toda cuenta de consola; el módulo Agenda, no.
+
+                «PUBLICAR» SE APAGA CUANDO FALTA EL DATO QUE LA BASE EXIGE, y el motivo se
+                dice debajo: un presencial sin lugar o un virtual sin enlace no se puede
+                publicar, y enterarse al pulsar es lo que convierte una bandeja en una
+                sucesión de intentos.
+              -->
+              <app-boton importancia="confirmar"
+                [deshabilitado]="accionRapidaOcupada() || !!elegida.raw?.loQueFaltaParaPublicar"
+                (accion)="accionRapida(elegida, 'aprobar')" data-publicar-evento>Publicar</app-boton>
+              <app-boton importancia="secundaria" [deshabilitado]="accionRapidaOcupada()"
+                (accion)="accionRapida(elegida, 'rechazar')" data-devolver-evento>Devolver para corregir</app-boton>
+            }
+          }
+          @if (tieneFichaCompleta(elegida)) {
+            <!--
+              UN BOTON, NO UNA PESTAÑA. El criterio es este: «la vista
+              debería ser el resumen, simplemente debería haber un botón que dice ver
+              ficha completa […] que haga como una transición dentro de esa misma
+              estructura». Una pestaña dice «hay dos vistas equivalentes»; aquí hay una
+              vista y una acción que lleva a mirar el trámite entero.
+            -->
+            <!--
+              SECUNDARIA Y NO PRINCIPAL: esto navega, no compromete. La principal del
+              proyecto va en versalitas y peso negro, que es el tratamiento de «Enviar
+              sugerencias de ajuste» o «Publicar Festival» —decisiones con consecuencia—.
+              Aquí el equivalente es «Abrir la bandeja» del Resumen operativo, que es un
+              botón de contorno tranquilo.
+            -->
+            <app-boton importancia="secundaria" (accion)="cambiarVistaDelTramite('ficha')">{{ etiquetaDeLaFichaCompleta() }}</app-boton>
+          } @else if (!seDecideAqui(elegida)) {
+            <span class="tramite-nota">Este trámite no tiene una ficha que revisar aquí.</span>
+          }
+          @if (accionRapidaOcupada()) { <span class="tramite-nota">Guardando…</span> }
+        </div>
+
+        <!--
+          UN HALLAZGO NO ES UN TRAMITE, Y LOS ROTULOS LO DICEN. Un duplicado no lo
+          «envió» nadie ni tiene organización solicitante: escribir «Organización ·
+          Detectado por el sistema» y «Enviado» sobre la hora en que el sistema lo
+          detectó sería rotular el dato con el nombre de otro.
+        -->
+        <!--
+          LA NEGATIVA DEL SERVIDOR, DONDE SE DECIDIO. `accionRapidaError` se escribía y no se pintaba
+          en ninguna parte: una decisión rechazada —«el registro ya no está en revisión»— dejaba la
+          pantalla igual que una aceptada.
+        -->
+        @if (accionRapidaError()) {
+          <p class="text-cuerpo font-semibold text-amber-800" role="alert">{{ accionRapidaError() }}</p>
+        }
+
+        @if (elegida.kind === 'evento') {
+          <p class="tramite-seccion">El evento</p>
+          <dl class="tramite-datos">
+            <div><dt>Cuándo</dt><dd>{{ elegida.raw?.fechaInicio | date: FECHA_ADMINISTRATIVA:'':'es-CO' }}</dd></div>
+            <div><dt>Modalidad</dt><dd>{{ elegida.raw?.modalidad }}</dd></div>
+            <div><dt>Dónde</dt><dd>{{ elegida.raw?.lugar || elegida.raw?.url || 'Sin registrar' }}</dd></div>
+            <div><dt>En el marco de</dt><dd>{{ elegida.raw?.festivalNombre || 'Sin proceso' }}</dd></div>
+          </dl>
+          <p class="tramite-nota">{{ elegida.raw?.descripcion }}</p>
+
+          @if (elegida.raw?.loQueFaltaParaPublicar; as falta) {
+            <!-- LO QUE FALTA SE DICE AL ABRIR LA FICHA, no al intentar publicar. -->
+            <p class="text-cuerpo font-semibold text-amber-800" data-falta-para-publicar>{{ falta }}</p>
+          }
+
+        }
+
+        @let esHallazgo = elegida.kind === 'duplicado' || elegida.kind === 'alerta';
+        <p class="tramite-seccion">{{ esHallazgo ? 'Datos del hallazgo' : 'Datos del trámite' }}</p>
+        <dl class="tramite-datos">
+          <div><dt>{{ esHallazgo ? 'Origen' : 'Organización' }}</dt><dd>{{ elegida.organization }}</dd></div>
+          <div><dt>Módulo</dt><dd>{{ etiquetaModulo(elegida.module) }}</dd></div>
+          <div><dt>{{ esHallazgo ? 'Detectado' : 'Enviado' }}</dt><dd>{{ elegida.createdAt ? (elegida.createdAt | date: FECHA_Y_HORA_ADMINISTRATIVA:'':'es-CO') : '—' }}</dd></div>
+        </dl>
+
+        @if (detalleCargando()) {
+          <p class="tramite-nota">Cargando…</p>
+        } @else if (detalleError()) {
+          <p class="revision-error" role="alert">{{ detalleError() }}</p>
+        } @else if (elegida.kind === 'revision' && detalleFestival(); as ficha) {
+          <p class="tramite-seccion">Ficha del registro</p>
+          @if (ficha.descripcion) { <p class="tramite-descripcion">{{ ficha.descripcion }}</p> }
+          <dl class="tramite-datos">
+            <div><dt>Cobertura</dt><dd>{{ ficha.nivelCoberturaEtiqueta || ficha.nivelCobertura || '—' }}</dd></div>
+            <div><dt>Ubicación</dt><dd>{{ ficha.municipioNombre || ficha.departamentoNombre || '—' | nombrePropio }}</dd></div>
+            <div><dt>Periodicidad</dt><dd>{{ etiquetaDePeriodicidad(ficha.periodicidad) || '—' }}</dd></div>
+            <div><dt>Ediciones registradas</dt><dd>{{ ficha.ediciones.length }}</dd></div>
+          </dl>
+          @if (ficha.practicasMusicales.length || ficha.territoriosSonoros.length) {
+            <dl class="tramite-datos">
+              @if (ficha.practicasMusicales.length) { <div><dt>Prácticas musicales</dt><dd>{{ nombresCatalogo(ficha.practicasMusicales) }}</dd></div> }
+              @if (ficha.territoriosSonoros.length) { <div><dt>Territorios sonoros</dt><dd>{{ nombresCatalogo(ficha.territoriosSonoros) }}</dd></div> }
+            </dl>
+          }
+        } @else if (elegida.kind === 'propuesta' && (detallePropuesta() || detallePropuestaDeMercado())) {
+          <p class="tramite-seccion">Qué cambia</p>
+          <p class="tramite-nota">{{ resumenDeLaComparacion() }}</p>
+          @if (detallePropuestaDeMercado(); as dm) {
+            @if (dm.motivo) {
+              <p class="tramite-seccion">Por qué lo propone</p>
+              <p class="tramite-descripcion">{{ dm.motivo }}</p>
+            }
+          }
+          @if (propuestaCamposQueCambian() > 0) {
+            <ul class="revision-cambios">
+              @for (fila of propuestaComparacion(); track fila.etiqueta) {
+                @if (fila.cambia) {
+                  <li>
+                    <b>{{ fila.etiqueta }}</b>
+                    <span class="revision-cambios__antes">{{ fila.vigente }}</span>
+                    <span class="revision-cambios__despues">{{ fila.propuesto }}</span>
+                  </li>
+                }
+              }
+            </ul>
+          }
+        } @else if (elegida.kind === 'solicitud' || elegida.kind === 'retiro') {
+          <p class="tramite-seccion">Motivo</p>
+          <p class="tramite-descripcion">{{ elegida.raw?.reason || '—' }}</p>
+          @if (elegida.raw?.evidenceText) {
+            <p class="tramite-seccion">Evidencia</p>
+            <p class="tramite-descripcion">{{ elegida.raw.evidenceText }}</p>
+          }
+          @if (elegida.raw?.reviewComment) {
+            <p class="tramite-seccion">Comentario de revisión</p>
+            <p class="tramite-descripcion">{{ elegida.raw.reviewComment }}</p>
+          }
+        } @else if (elegida.kind === 'duplicado') {
+          <p class="tramite-seccion">Por qué se parecen</p>
+          <dl class="tramite-datos">
+            <div><dt>Registro origen</dt><dd>{{ elegida.raw?.sourceRecordId || '—' }}</dd></div>
+            <div><dt>Registro candidato</dt><dd>{{ elegida.raw?.candidateRecordId || '—' }}</dd></div>
+            <div><dt>Coincidencia</dt><dd>{{ etiquetaDeEstado(elegida.raw?.similarityLevel) }}@if (elegida.raw?.similarityScore !== null && elegida.raw?.similarityScore !== undefined) { · {{ elegida.raw.similarityScore }}}</dd></div>
+          </dl>
+          <!--
+            LA FRONTERA, ESCRITA DONDE SE DECIDE. El contrato registra el juicio; no
+            combina los dos registros. Quien pulsa tiene que saberlo antes.
+          -->
+          <p class="tramite-nota">Marcar para fusión registra la decisión: no combina ni modifica los registros.</p>
+        } @else if (elegida.kind === 'alerta') {
+          <p class="tramite-seccion">Qué detectó el sistema</p>
+          <dl class="tramite-datos">
+            <div><dt>Tipo</dt><dd>{{ etiquetaDeEstado(elegida.raw?.flagType) }}</dd></div>
+            <div><dt>Prioridad</dt><dd>{{ etiquetaDeEstado(elegida.raw?.severity) }}</dd></div>
+          </dl>
+          @if (elegida.raw?.detail) {
+            <p class="tramite-descripcion">{{ elegida.raw.detail }}</p>
+          }
+        } @else if (elegida.kind === 'reclamacion') {
+          <p class="tramite-seccion">Justificación</p>
+          <p class="tramite-descripcion">{{ elegida.raw?.justificacion || elegida.raw?.reason || '—' }}</p>
+          @if (elegida.raw?.motivoDecision) {
+            <p class="tramite-seccion">Motivo de la decisión</p>
+            <p class="tramite-descripcion">{{ elegida.raw.motivoDecision }}</p>
+          }
+        } @else if (elegida.raw?.owner || elegida.raw?.metadata) {
+          <p class="tramite-seccion">Detalle</p>
+          <dl class="tramite-datos">
+            <div><dt>Responsable</dt><dd>{{ elegida.raw?.owner || '—' }}</dd></div>
+            @if (elegida.raw?.metadata; as metadata) {
+              @for (par of (metadata | keyvalue); track par.key) {
+                @if (par.value) { <div><dt>{{ par.key }}</dt><dd>{{ par.value }}</dd></div> }
+              }
+            }
+          </dl>
+        }
+          </div>
+        }
+      </div>
+    } @else {
+      <!-- Sin nada elegido se dice qué hacer, no se deja un hueco. -->
+      <div class="revision-detalle esta-vacia">
+        <p>Elige una solicitud de la lista para previsualizarla.</p>
+      </div>
+    }
+  </div>
+
+@if (avisoTemporal()) {
+  <p data-testid="aviso-temporal-bandeja" role="status" aria-live="polite"
+     class="fixed bottom-6 right-6 z-[120] max-w-sm rounded-lg border border-verde-texto/30 bg-white px-4 py-3 text-sm font-semibold text-verde-texto shadow-xl">
+    {{ avisoTemporal() }}
+  </p>
+}

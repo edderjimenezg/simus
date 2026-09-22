@@ -1,0 +1,147 @@
+<app-content-wrapper class="bg-white block" [id]="anclaId">
+  <!--
+    El titulo, la entradilla y «Ver en el mapa» son el mobiliario del Inicio. En /ecosistema el
+    bloque entra sin ellos: alli la seccion ya trae su titulo del CMS y el mapa tiene su propia
+    tarjeta. Ver `mostrarEncabezado` en el componente.
+  -->
+  @if (mostrarEncabezado) {
+    <div class="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+      <app-section-header [backgroundText]="getWebText('home_eco_bg_word')" [foregroundText]="getWebText('home_eco_title')" [compact]="true"></app-section-header>
+      <div class="flex flex-wrap gap-3 lg:mb-8">
+        <button
+          type="button"
+          (click)="onNavigateToMapLayer('General')"
+          class="inline-flex shrink-0 cursor-pointer items-center gap-2 rounded-xl border-0 bg-[#00DA5E] px-6 py-3.5 font-alternate text-[0.68rem] font-bold uppercase tracking-widest text-[#291242] shadow-md transition-all hover:bg-[#8BF784]"
+        >
+          Ver en el mapa
+          <svg lucideArrowRight [size]="14"></svg>
+        </button>
+      </div>
+    </div>
+
+    <p class="mt-2 mb-6 max-w-3xl text-[0.8rem] leading-relaxed text-slate-500">
+      {{ getWebText('home_eco_intro') }}
+    </p>
+  }
+
+  @if (isLoading || isRefreshing) {
+    <div class="mb-6">
+      <app-loading-state
+        title="Actualizando el ecosistema..."
+        description="Estamos consolidando los datos territoriales más recientes."
+      ></app-loading-state>
+    </div>
+  }
+
+  @if (isError) {
+    <div class="mb-6">
+      <app-error-state
+        title="No pudimos sincronizar el preview del ecosistema"
+        [description]="error?.message || 'Intenta de nuevo para recargar los datos.'"
+        (retry)="retryMapData()"
+      ></app-error-state>
+    </div>
+  }
+
+  <div class="overflow-hidden rounded-[1.75rem] border border-slate-200 bg-[#291242] shadow-sm">
+  <!--
+    Tres columnas y no cuatro: son seis tarjetas y la rejilla no tiene separacion, asi que en
+    cuatro columnas la ultima fila dejaria dos huecos vacios dentro del recuadro. En tres, dos
+    filas de tres llenan la caja.
+  -->
+  <div data-testid="ecosystem-category-grid" class="grid grid-cols-2 md:grid-cols-3">
+    @for (category of categories(); track category.title) {
+      <button
+        type="button"
+        data-proceso-tarjeta
+        [attr.data-proceso]="category.route"
+        (click)="openCategory(category)"
+        class="group relative min-h-[13rem] overflow-hidden border-0 bg-slate-900 text-left outline outline-1 -outline-offset-1 outline-white/10 transition-all duration-300 hover:z-10 hover:scale-[1.015] hover:shadow-2xl focus-visible:z-20 focus-visible:outline-2 focus-visible:outline-[#00DA5E] cursor-pointer"
+      >
+        <!--
+          EL FILTRO, MUCHO MAS SUAVE. La fotografía iba al 30 % de opacidad DEBAJO de un degradado
+          de tres paradas que cubría el 90 % arriba y el 95 % abajo: apenas se distinguía qué se
+          estaba mirando y las seis tarjetas se leían como seis rectángulos morados. El dueño del
+          proyecto lo pidió: «que el filtro no sea tan agresivo, que se
+          sienta más sutil pero que garantice la legibilidad».
+
+          LA LEGIBILIDAD SE GARANTIZA DONDE HACE FALTA, que es debajo del texto y no en toda la
+          caja: la imagen sube al 70 % y el degradado se concentra en el tercio inferior, donde
+          viven la cifra y el título. Arriba queda casi limpio, que es donde se ve la foto.
+        -->
+        <img
+          data-testid="ecosystem-category-image"
+          [src]="category.img"
+          alt=""
+          class="absolute inset-0 h-full w-full object-cover opacity-70 transition-all duration-500 group-hover:scale-105 group-hover:opacity-100"
+        />
+        <div data-testid="ecosystem-category-tint" class="absolute inset-0 bg-[#00DA5E]/0 transition-colors duration-500 group-hover:bg-[#00DA5E]/20 group-hover:mix-blend-color"></div>
+        <div class="absolute inset-0 bg-gradient-to-b from-[#291242]/20 via-[#291242]/45 to-[#291242]/95 transition-opacity duration-500 group-hover:opacity-90"></div>
+
+        <!--
+          LA CIFRA MANDA Y EL TEXTO LA ACOMPAÑA, TODO EN UN BLOQUE ABAJO.
+
+          El título iba arriba, la cifra abajo y `justify-between` dejaba un hueco vacío de más de
+          cien píxeles en medio; además la cifra —que es el dato que esta previsualización existe
+          para enseñar— quedaba como la última línea de la tarjeta y en el cuerpo más pequeño de
+          los dos. Ahora los dos renglones son un solo grupo anclado abajo, con la cifra de
+          protagonista, igual que en el Resumen operativo.
+
+          SIN CLAVE DE RECUENTO NO SE PINTA CIFRA. Escenarios llegaba aquí con el número de Lutería
+          (31, cuando su endpoint devolvía 0). La raya dice «no hay dato
+          publicado», que es lo que ocurre; un 0 diría «no hay escenarios».
+
+          Y NO SE PINTA «PROXIMAMENTE» EN SU LUGAR, aunque el modelo guarde ese estado: estas seis
+          tarjetas se homogeneizaron a propósito y se les retiraron los rótulos de estado, que es
+          lo que vigila la prueba de este componente. Se probó y se descartó aquí mismo.
+        -->
+        <div class="relative z-10 flex min-h-[13rem] flex-col justify-end gap-1 p-5 md:p-6">
+          <span
+            data-testid="ecosystem-category-count"
+            [attr.data-category]="category.icon"
+            [attr.data-sin-recuento]="count(category) === null ? '' : null"
+            class="block font-gregor text-4xl font-bold leading-none text-[#8BF784] drop-shadow-md transition-colors md:text-5xl"
+          >
+            @if (isLoading) { ··· } @else if (count(category) === null) {
+              <span class="text-[#8BF784]/45">—</span>
+              <span class="sr-only">sin recuento publicado</span>
+            } @else { {{ formatMetricValue(count(category)!) }} }
+          </span>
+          <span data-testid="ecosystem-category-title" class="block max-w-[14rem] font-alternate text-xl font-bold uppercase leading-[1.05] tracking-wide text-white drop-shadow-md transition-colors md:text-2xl">
+            {{ category.title }}
+          </span>
+        </div>
+      </button>
+    }
+  </div>
+
+  @if (mostrarSalida) {
+  <div class="flex flex-col gap-6 bg-[#291242] p-8 md:flex-row md:items-end md:justify-between md:p-10">
+    <div>
+      <p class="font-alternate text-[0.62rem] font-bold uppercase tracking-[0.25em] text-[#8BF784]">{{ getWebText('home_eco_simus_tag') }}</p>
+      <h4 class="mt-2 font-gregor text-2xl font-bold uppercase leading-tight tracking-normal text-white md:text-3xl">
+        {{ getWebText('home_eco_simus_title') }}
+      </h4>
+    </div>
+    <!--
+      Segunda salida, y no la misma que la de arriba. «Ver en el mapa» abre el mapa con sus
+      capas; esta lleva a la portada del Ecosistema, que es el listado con directorios y rutas
+      de consulta. Son dos destinos distintos y por eso son dos botones.
+
+      Fondo blanco y letra oscura, no el contorno translucido que tenia: sobre el bloque
+      #291242 aquel `border-white/20` con texto blanco se leia como texto suelto y no como
+      boton. #291242 sobre blanco da 14.9:1.
+    -->
+    <button
+      type="button"
+      data-testid="ecosystem-overview-cta"
+      (click)="verEcosistema()"
+      class="inline-flex shrink-0 cursor-pointer items-center gap-2 self-start rounded-xl border border-white bg-white px-6 py-3.5 font-alternate text-[0.68rem] font-bold uppercase tracking-widest text-[#291242] transition-all hover:border-[#8BF784] hover:bg-[#8BF784] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00DA5E] focus-visible:ring-offset-2 focus-visible:ring-offset-[#291242] md:self-auto"
+    >
+      Ver ecosistema
+      <svg lucideArrowRight [size]="14"></svg>
+    </button>
+  </div>
+  }
+  </div>
+</app-content-wrapper>

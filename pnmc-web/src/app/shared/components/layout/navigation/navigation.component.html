@@ -1,0 +1,531 @@
+<nav
+  [ngClass]="getNavClass()"
+  class="fixed w-full z-[3000] transition-all duration-300 px-6 lg:px-12"
+  aria-label="Navegación principal"
+>
+  <div class="max-w-[100rem] mx-auto flex justify-between items-center h-12">
+    <div class="flex items-center gap-10 min-w-0">
+      <button
+        type="button"
+        class="flex items-center gap-4 cursor-pointer shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00DA5E] focus-visible:ring-offset-2 focus-visible:ring-offset-[#291242] rounded-lg border-0 bg-transparent"
+        (click)="onPageChange('home')"
+        aria-label="Ir al inicio"
+      >
+        <img [src]="imagen('marca_pnmc_blanco')" class="h-10 sm:h-12 md:h-14 lg:h-16 w-auto object-contain transition-all" [alt]="imagenAlt('marca_pnmc_blanco')" />
+      </button>
+
+      <div class="hidden lg:flex items-center gap-8">
+        @for (link of primaryNavigationLinks(); track link.id) {
+          <div
+            class="relative"
+            (mouseenter)="isDropdownLink(link.id) ? setActiveNavDropdown(link.id) : null"
+            (mouseleave)="isDropdownLink(link.id) ? setActiveNavDropdown(null) : null"
+            (focusin)="onDropdownFocusIn(link.id)"
+            (focusout)="onDropdownFocusOut(link.id, $event)"
+          >
+            <button
+              type="button"
+              (click)="onPageChange(link.id)"
+              class="inline-flex items-center gap-2 text-[0.72rem] font-bold uppercase font-alternate tracking-widest transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00DA5E] focus-visible:ring-offset-2 focus-visible:ring-offset-[#291242] rounded-md border-0 bg-transparent cursor-pointer"
+              [ngClass]="getPrimaryLinkClass(link.id)"
+              [attr.aria-expanded]="isDropdownLink(link.id) ? (activeNavDropdown() === link.id) : null"
+            >
+              {{ link.name }}
+              @if (isDropdownLink(link.id)) {
+                <svg lucideChevronDown [size]="13" class="transition-transform" [class.rotate-180]="activeNavDropdown() === link.id"></svg>
+              }
+            </button>
+
+            @if (link.id === 'ejes' && activeNavDropdown() === link.id) {
+              <div class="absolute left-0 top-full w-[min(48rem,calc(100vw-4rem))] pt-5 animate-in fade-in slide-in-from-top-2 duration-200" (mouseleave)="clearEjeMenuHover()">
+                <div class="max-h-[calc(100vh-6rem)] overflow-y-auto overflow-x-hidden rounded-[2rem] border border-slate-200/80 bg-white/95 p-5 shadow-2xl backdrop-blur-xl">
+                  <div class="mb-3 flex items-end justify-between gap-6">
+                    <div>
+                      <p class="font-alternate text-[0.62rem] font-bold uppercase tracking-[0.24em] text-[#00A849]">Plan Nacional de Música</p>
+                      <p class="mt-1 font-alternate text-xl font-bold uppercase tracking-tight text-[#291242]">{{ link.name }}</p>
+                    </div>
+                    <button type="button" (click)="onNavigateToPath('ejes')" class="border-0 bg-transparent font-alternate text-[0.65rem] font-bold uppercase tracking-widest text-slate-500 hover:text-[#00A849] cursor-pointer">Ver todos los ejes →</button>
+                  </div>
+
+                  <div class="grid grid-cols-[18rem_minmax(0,1fr)] gap-5">
+                    <!-- Columna fija: nunca cambia de tamaño, así el cursor puede recorrerla sin que el hover se corte -->
+                    <div class="divide-y divide-slate-100">
+                      @for (group of ejeNavigationGroups(); track group.id; let i = $index) {
+                        <button
+                          type="button"
+                          (mouseenter)="setActiveEjeMenuId(group.id)"
+                          (focus)="setActiveEjeMenuId(group.id)"
+                          (click)="onNavigateToPageSection(link.id, group.sectionId)"
+                          class="group relative flex w-full items-center gap-3 overflow-hidden border-l-2 py-2.5 pl-3 pr-4 text-left transition-all border-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00DA5E] focus-visible:ring-offset-2 cursor-pointer"
+                          [ngClass]="getEjeGroupClass(group.id)"
+                        >
+                          <span
+                            class="pointer-events-none absolute -right-1 top-1/2 -translate-y-1/2 select-none font-gregor text-4xl leading-none opacity-70"
+                            style="color: #E6DAE5"
+                          >0{{ i + 1 }}</span>
+                          <span class="relative flex-1 font-alternate text-[0.72rem] font-bold uppercase leading-snug tracking-[0.06em] text-[#291242] group-hover:text-[#00A849]">{{ group.name }}</span>
+                        </button>
+                      }
+                    </div>
+
+                    <!-- Panel de componentes: cambia de contenido, no de posición -->
+                    <div class="min-h-[11rem] border-l border-slate-100 pl-5">
+                      @if (hoveredEjeGroup(); as eje) {
+                        <!--
+                          El encabezado del panel. `nav_components_title` estaba
+                          declarada en el registro y no la leía nadie: el panel
+                          ofrecía editar un rótulo que la página nunca pintaba.
+                        -->
+                        <p class="mb-2 px-2.5 font-alternate text-[0.55rem] font-bold uppercase tracking-[0.2em] text-slate-400">{{ getWebText('nav_components_title') }}</p>
+                        <div class="space-y-0.5">
+                          @for (component of eje.components; track component.id) {
+                            <button
+                              type="button"
+                              (click)="onNavigateToComponentFromMenu(component.id)"
+                              class="group/comp flex w-full items-center justify-between gap-2 rounded-lg px-2.5 py-1.5 text-left transition-colors hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00DA5E] focus-visible:ring-offset-2 cursor-pointer"
+                            >
+                              <span class="font-nunito text-[0.72rem] font-semibold leading-snug text-slate-600 group-hover/comp:text-[#00A849]">{{ component.name }}</span>
+                              <svg lucideArrowUpRight [size]="12" class="shrink-0 text-slate-300 transition-transform group-hover/comp:translate-x-0.5 group-hover/comp:text-[#00A849]"></svg>
+                            </button>
+                          }
+                        </div>
+                      } @else {
+                        <div class="flex h-full min-h-[11rem] items-center">
+                          <p class="font-nunito text-[0.72rem] leading-relaxed text-slate-400">Pasa el cursor sobre un eje para ver sus componentes.</p>
+                        </div>
+                      }
+                    </div>
+                  </div>
+                </div>
+              </div>
+            }
+
+          </div>
+        }
+      </div>
+    </div>
+
+    <div class="hidden lg:flex items-center gap-5">
+      @for (link of featuredNavigationLinks(); track link.id) {
+        <div
+          data-testid="enlace-destacado"
+          class="relative"
+          (mouseenter)="isDropdownLink(link.id) ? setActiveNavDropdown(link.id) : null"
+          (mouseleave)="isDropdownLink(link.id) ? setActiveNavDropdown(null) : null"
+          (focusin)="onDropdownFocusIn(link.id)"
+          (focusout)="onDropdownFocusOut(link.id, $event)"
+        >
+          <button
+            type="button"
+            (click)="onFeaturedLinkClick(link.id)"
+            class="inline-flex items-center gap-1.5 border-0 text-[0.72rem] font-bold uppercase font-alternate tracking-widest transition-all cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-[#291242]"
+            [ngClass]="getFeaturedLinkClass(link.id)"
+            [attr.aria-expanded]="isDropdownLink(link.id) ? (activeNavDropdown() === link.id) : null"
+          >
+            {{ link.name }}
+          </button>
+
+          <!-- El panel es igual al del repositorio de referencia: el rotulo lleva su propio
+               enlace a la portada del ecosistema, ademas de la puerta que ya es el boton. -->
+          @if (link.id === 'ecosistema' && activeNavDropdown() === link.id) {
+            <div class="absolute right-0 top-full w-[min(34rem,calc(100vw-4rem))] pt-5 animate-in fade-in slide-in-from-top-2 duration-200">
+              <div class="max-h-[calc(100vh-6rem)] overflow-y-auto overflow-x-hidden rounded-[2rem] border border-slate-200/80 bg-white/95 p-5 shadow-2xl backdrop-blur-xl">
+                <div class="mb-4 border-b border-slate-100 pb-4">
+                  <a
+                    routerLink="/ecosistema"
+                    (click)="setActiveNavDropdown(null)"
+                    class="group block rounded-sm text-left no-underline cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00DA5E] focus-visible:ring-offset-2"
+                    aria-label="Ir a Ecosistema Musical de Colombia"
+                  >
+                    <p class="font-alternate text-[0.62rem] font-bold uppercase tracking-[0.24em] text-[#00A849]">Sistema de Información de la Música</p>
+                    <p class="mt-1 font-alternate text-xl font-bold uppercase tracking-tight text-[#291242] group-hover:text-[#00A849]">Ecosistema Musical de Colombia</p>
+                  </a>
+                </div>
+
+                <p class="mb-2 px-2 font-alternate text-[0.56rem] font-bold uppercase tracking-[0.18em] text-slate-400">Directorios del ecosistema</p>
+                <div data-testid="ecosystem-tool-grid" class="grid gap-0.5 sm:grid-cols-2">
+                  <!--
+                    SE SIGUE POR EL ROTULO Y NO POR EL DESTINO: los procesos que todavia no tienen
+                    directorio publico no tienen ruta, asi que `track item.page` daba `undefined`
+                    repetido y Angular avisaba con NG0955. El titulo es unico y existe siempre.
+
+                    Y SE DESACTIVA EN VEZ DE ESCONDERSE, igual que la tarjeta de la portada del
+                    Ecosistema: la entrada dice que el proceso existe, y «Proximamente» dice que
+                    todavia no tiene a donde llevar, en lugar de un enlace que no hace nada.
+                  -->
+                  @for (item of ecosystemMenuItems; track item.label) {
+                    <button
+                      type="button"
+                      data-testid="ecosystem-tool-item"
+                      [disabled]="!item.page"
+                      (click)="onNavigateToPath(item.page)"
+                      class="group/item flex w-full items-start justify-between gap-2 rounded-xl border-0 bg-transparent px-3 py-2.5 text-left transition-colors enabled:cursor-pointer enabled:hover:bg-slate-50 disabled:cursor-default disabled:opacity-60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00DA5E] focus-visible:ring-offset-2"
+                    >
+                      <span class="min-w-0">
+                        <span class="block font-nunito text-[0.74rem] font-semibold leading-snug text-slate-600 group-enabled/item:group-hover/item:text-[#00A849]">{{ item.label }}</span>
+                        <span class="mt-0.5 block font-nunito text-[0.68rem] leading-relaxed text-slate-400">{{ item.detail }}</span>
+                      </span>
+                      @if (item.page) {
+                        <svg lucideArrowUpRight [size]="12" class="mt-1 shrink-0 text-slate-300 transition-transform group-hover/item:translate-x-0.5 group-hover/item:text-[#00A849]"></svg>
+                      } @else {
+                        <span class="mt-1 shrink-0 font-alternate text-[0.48rem] font-bold uppercase tracking-widest text-slate-400">Próximamente</span>
+                      }
+                    </button>
+                  }
+                </div>
+              </div>
+            </div>
+          }
+        </div>
+      }
+      <!--
+        LA PUERTA PUBLICA ES LA DEL ECOSISTEMA, NO LA DE LA CONSOLA. Este boton llevaba a
+        `admin`, que es la entrada institucional: quien lo pulsaba desde el sitio publico
+        —una organizacion que viene a registrar su festival— aterrizaba en el formulario del
+        equipo interno, que su cuenta no puede cruzar. La consola rechaza por lista blanca a
+        todo el que no traiga rol interno, asi que el error no se veia como un enlace mal
+        puesto sino como «mi contraseña no sirve».
+        El equipo interno entra por /admin escribiendolo, que es como se entra a una consola.
+      -->
+      @if (sesionExterna.dentro()) {
+        <!--
+          EL CHIP ES EL DISPARADOR DE UN MENU, no un enlace. Antes eran dos botones sueltos en la
+          barra —«Mi panel» y «Salir»—: cada destino nuevo de la cuenta habria anadido otro boton
+          a una barra que ya compite por sitio. `aria-haspopup` y `aria-expanded` van en el
+          disparador porque sin ellos un lector de pantalla anuncia «boton» y no dice que al
+          pulsarlo aparece algo; y el menu se cierra al SALIR EL FOCO, no al salir el raton.
+          Escape lo cierra gratis: comparte señal con los demas desplegables de esta barra.
+        -->
+        <div class="relative" data-panel-sesion-externa (focusout)="alSalirElFocoDelMenuDeCuenta($event)">
+          <button
+            type="button"
+            (click)="alternarMenuDeCuenta()"
+            data-menu-de-cuenta
+            aria-haspopup="menu"
+            [attr.aria-expanded]="menuDeCuentaAbierto()"
+            class="flex cursor-pointer items-center gap-2 rounded-full px-2 py-1.5 text-left transition-colors hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00DA5E] focus-visible:ring-offset-2 focus-visible:ring-offset-[#291242]"
+          >
+            <span aria-hidden="true" class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-white font-alternate text-[0.68rem] font-bold text-[#291242]">{{ sesionExterna.iniciales() }}</span>
+            <span class="flex min-w-0 flex-col leading-tight">
+              <!-- El nombre completo conserva la identidad de la organización, sin el subtítulo
+                   redundante «Mi cuenta». En pantallas estrechas se oculta antes de competir con
+                   los enlaces de navegación. -->
+              <span data-testid="chip-nombre-organizacion" class="hidden max-w-[13rem] text-[0.74rem] font-normal leading-tight text-white sm:block">{{ sesionExterna.rotulo() }}</span>
+            </span>
+            <svg lucideChevronDown [size]="13" aria-hidden="true" class="shrink-0 text-white/70 transition-transform" [class.rotate-180]="menuDeCuentaAbierto()"></svg>
+          </button>
+
+          @if (menuDeCuentaAbierto()) {
+            <div
+              role="menu"
+              data-menu-de-cuenta-panel
+              class="absolute right-0 top-full z-[60] mt-2 w-72 overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-2xl animate-in fade-in slide-in-from-top-1 duration-150"
+            >
+              <!--
+                QUIEN ESTA DENTRO, ARRIBA DEL TODO. El chip solo cabe el nombre de la organizacion;
+                con varias personas responsables de la misma, ese rotulo no dice quien eres tu.
+              -->
+              <div class="border-b border-slate-100 px-4 py-3">
+                <p class="truncate text-sm font-normal text-[#291242]">{{ sesionExterna.actual()?.fullName }}</p>
+                <p class="mt-0.5 truncate text-[0.7rem] text-slate-500">{{ sesionExterna.rotulo() }}</p>
+              </div>
+
+              <button
+                type="button"
+                role="menuitem"
+                data-menu-gestion
+                (click)="irAMiPanel()"
+                class="flex w-full cursor-pointer items-center gap-2.5 border-0 bg-transparent px-4 py-3 text-left text-sm font-normal text-[#291242] transition-colors hover:bg-slate-50 focus-visible:outline-none focus-visible:bg-slate-50"
+              >
+                Gestión
+              </button>
+
+              <!--
+                DOS ACCESOS DIRECTOS MAS, sumados con el rediseño del
+                panel: «Organización» y «Cuenta y seguridad» son ahora rutas propias
+                (`/gestion/organizacion`, `/gestion/cuenta-seguridad`), así que este menú puede
+                llevar directo sin pasar por Gestión primero. Reutilizan `onNavigateToPath()`, el
+                mismo método que ya usa Gestión.
+                nuevo.
+              -->
+              <button
+                type="button"
+                role="menuitem"
+                data-menu-organizacion
+                (click)="onNavigateToPath('gestion/organizacion')"
+                class="flex w-full cursor-pointer items-center gap-2.5 border-0 bg-transparent px-4 py-3 text-left text-sm font-normal text-[#291242] transition-colors hover:bg-slate-50 focus-visible:outline-none focus-visible:bg-slate-50"
+              >
+                Datos de la organización
+              </button>
+
+              <button
+                type="button"
+                role="menuitem"
+                data-menu-cuenta-seguridad
+                (click)="onNavigateToPath('gestion/cuenta-seguridad')"
+                class="flex w-full cursor-pointer items-center gap-2.5 border-0 bg-transparent px-4 py-3 text-left text-sm font-normal text-[#291242] transition-colors hover:bg-slate-50 focus-visible:outline-none focus-visible:bg-slate-50"
+              >
+                Cuenta y seguridad
+              </button>
+
+              <!--
+                EN ROJO, A PROPÓSITO. Es la única acción de salida del menú -las demás son
+                navegación normal (Mi panel, Organización, Cuenta y seguridad)-, y se define
+                que se distinguiera de esas con el tratamiento habitual
+                para cerrar sesión: texto en rojo discreto, no un botón de alarma. `border-t` ya la
+                separaba visualmente del resto; el color termina de decir que es una acción distinta.
+              -->
+              <button
+                type="button"
+                role="menuitem"
+                data-menu-cerrar-sesion
+                (click)="cerrarSesionExterna()"
+                class="flex w-full cursor-pointer items-center gap-2.5 border-t border-slate-100 bg-transparent px-4 py-3 text-left text-sm font-normal text-red-600 transition-colors hover:bg-red-50 hover:text-red-700 focus-visible:outline-none focus-visible:bg-red-50"
+              >
+                Cerrar sesión
+              </button>
+            </div>
+          }
+        </div>
+      } @else {
+        <!--
+          ES UN ICONO LIMPIO, SIN CIRCULO NI BORDE, igual que en el repositorio de
+          referencia: «Ecosistema» ya es el boton verde solido de la barra, asi que este
+          icono se queda como una accion secundaria y discreta, no como un segundo boton.
+          El nombre accesible va en `aria-label` porque no hay texto visible que leer: sin el,
+          un lector de pantalla anuncia «boton» y nada mas. El `title` es para el raton.
+        -->
+        <!--
+          DOS PUERTAS, NO UNA. Este boton llevaba directo a la pantalla de acceso, que abre por la
+          pestaña de entrar: quien venia a registrar su organizacion aterrizaba en un formulario de
+          correo y contraseña que todavia no tiene. Ahora abre un menu con las dos entradas, como
+          pidio el usuario.
+
+          COMPARTE `activeNavDropdown` con el menu de cuenta y con los desplegables de la barra:
+          abrir uno cierra los demas y `Escape` los cierra todos, sin una linea mas.
+        -->
+        <div class="relative" data-panel-acceso (focusout)="alSalirElFocoDelMenuDeCuenta($event)">
+          <button
+            type="button"
+            data-testid="iniciar-sesion"
+            (click)="alternarMenuDeAcceso()"
+            aria-haspopup="menu"
+            [attr.aria-expanded]="menuDeAccesoAbierto()"
+            aria-label="Acceso externo"
+            title="Acceso externo"
+            [class]="'inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-md border-0 bg-transparent transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00DA5E] focus-visible:ring-offset-2 focus-visible:ring-offset-[#291242] ' + (menuDeAccesoAbierto() ? 'text-[#00DA5E]' : 'text-white/80 hover:text-[#00DA5E]')"
+          >
+            <svg lucideLogIn [size]="20" aria-hidden="true"></svg>
+          </button>
+
+          @if (menuDeAccesoAbierto()) {
+            <div
+              role="menu"
+              data-testid="menu-de-acceso"
+              class="absolute right-0 top-full z-[60] mt-3 w-[19rem] overflow-hidden rounded-2xl border border-slate-200/80 bg-white p-2 shadow-2xl animate-in fade-in slide-in-from-top-1 duration-150"
+            >
+              <p class="px-3 pb-1 pt-2 font-alternate text-[0.55rem] font-bold uppercase tracking-[0.22em] text-slate-400">Acceso externo</p>
+
+              <button
+                type="button"
+                role="menuitem"
+                data-testid="acceso-ingresar"
+                (click)="irAIngresar()"
+                class="flex w-full cursor-pointer items-start gap-3 rounded-xl border-0 bg-transparent px-3 py-2.5 text-left transition-colors hover:bg-slate-50 focus-visible:outline-none focus-visible:bg-slate-50"
+              >
+                <svg lucideLogIn [size]="17" aria-hidden="true" class="mt-0.5 shrink-0 text-[#00A849]"></svg>
+                <span class="min-w-0">
+                  <span class="block font-alternate text-[0.86rem] font-bold text-[#291242]">Ingresar</span>
+                  <span class="mt-0.5 block font-nunito text-[0.72rem] leading-snug text-slate-500">Accede a tu cuenta del PNMC.</span>
+                </span>
+              </button>
+
+              <button
+                type="button"
+                role="menuitem"
+                data-testid="acceso-registrarse"
+                (click)="irARegistrarse()"
+                class="flex w-full cursor-pointer items-start gap-3 rounded-xl border-0 bg-transparent px-3 py-2.5 text-left transition-colors hover:bg-slate-50 focus-visible:outline-none focus-visible:bg-slate-50"
+              >
+                <svg lucideUserPlus [size]="17" aria-hidden="true" class="mt-0.5 shrink-0 text-[#00A849]"></svg>
+                <span class="min-w-0">
+                  <span class="block font-alternate text-[0.86rem] font-bold leading-snug text-[#291242]">Crear cuenta o registrar organización</span>
+                  <span class="mt-0.5 block font-nunito text-[0.72rem] leading-snug text-slate-500">Participa y gestiona información del ecosistema musical.</span>
+                </span>
+              </button>
+            </div>
+          }
+        </div>
+      }
+    </div>
+
+    <button
+      type="button"
+      class="lg:hidden text-white cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00DA5E] focus-visible:ring-offset-2 focus-visible:ring-offset-[#291242] rounded-md border-0 bg-transparent"
+      (click)="toggleMobileMenu()"
+      [attr.aria-expanded]="mobileMenuOpen()"
+      [attr.aria-label]="mobileMenuOpen() ? 'Cerrar menú' : 'Abrir menú'"
+    >
+      @if (mobileMenuOpen()) {
+        <svg lucideX [size]="28"></svg>
+      } @else {
+        <svg lucideMenu [size]="28"></svg>
+      }
+    </button>
+  </div>
+
+  @if (mobileMenuOpen()) {
+    <div class="lg:hidden absolute top-full left-0 w-full max-h-[calc(100vh-3.5rem)] overflow-y-auto bg-[#291242] border-t border-white/10 p-8 flex flex-col gap-2 shadow-2xl animate-in slide-in-from-top duration-300">
+      @for (link of resolvedNavigationLinks(); track link.id) {
+        @if (isDropdownLink(link.id)) {
+          <div class="border-b border-white/5 pb-2">
+            @if (link.id === 'ecosistema') {
+              <div class="flex items-center gap-2">
+                <button
+                  type="button"
+                  (click)="onPageChange(link.id)"
+                  data-testid="ecosystem-mobile-portada"
+                  class="min-w-0 flex-1 py-2 text-left text-[0.9rem] font-bold uppercase font-alternate tracking-widest focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00DA5E] focus-visible:ring-offset-2 focus-visible:ring-offset-[#291242] rounded-md border-0 bg-transparent cursor-pointer"
+                  [ngClass]="getMobileLinkClass(link.id)"
+                >{{ link.name }}</button>
+                <button
+                  type="button"
+                  (click)="toggleMobileSection(link.id)"
+                  class="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-md border-0 bg-transparent text-white/70 transition hover:bg-white/10 hover:text-[#00DA5E] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00DA5E] focus-visible:ring-offset-2 focus-visible:ring-offset-[#291242] cursor-pointer"
+                  [attr.aria-label]="mobileExpandedSection() === link.id ? 'Cerrar directorios del Ecosistema' : 'Abrir directorios del Ecosistema'"
+                  [attr.aria-expanded]="mobileExpandedSection() === link.id"
+                ><svg lucideChevronDown [size]="18" class="transition-transform" [class.rotate-180]="mobileExpandedSection() === link.id"></svg></button>
+              </div>
+            } @else {
+              <button
+                type="button"
+                (click)="toggleMobileSection(link.id)"
+                class="flex w-full items-center justify-between gap-4 py-2 text-[0.9rem] font-bold uppercase font-alternate text-left tracking-widest focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00DA5E] focus-visible:ring-offset-2 focus-visible:ring-offset-[#291242] rounded-md border-0 bg-transparent cursor-pointer"
+                [ngClass]="getMobileLinkClass(link.id)"
+                [attr.aria-expanded]="mobileExpandedSection() === link.id"
+              >
+                <span>{{ link.name }}</span>
+                <svg lucideChevronDown [size]="18" class="shrink-0 transition-transform" [class.rotate-180]="mobileExpandedSection() === link.id"></svg>
+              </button>
+            }
+            @if (mobileExpandedSection() === link.id) {
+              <div class="mt-1 flex flex-col gap-1 pl-3 pb-2 animate-in fade-in slide-in-from-top-1 duration-200">
+                @if (link.id === 'ejes') {
+                  <button
+                    type="button"
+                    (click)="onPageChange(link.id)"
+                    class="py-2 text-left text-[0.7rem] font-bold uppercase font-alternate tracking-widest text-white/50 hover:text-[#00DA5E] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00DA5E] focus-visible:ring-offset-2 focus-visible:ring-offset-[#291242] rounded-md border-0 bg-transparent cursor-pointer"
+                  >
+                    Ver todos los ejes →
+                  </button>
+                  @for (sub of mobileSubItems(link.id); track sub.label) {
+                    <button
+                      type="button"
+                      (click)="sub.action()"
+                      class="py-2 text-left text-[0.82rem] font-semibold font-nunito tracking-wide text-white/75 hover:text-[#00DA5E] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00DA5E] focus-visible:ring-offset-2 focus-visible:ring-offset-[#291242] rounded-md border-0 bg-transparent cursor-pointer"
+                    >
+                      {{ sub.label }}
+                    </button>
+                  }
+                } @else {
+                  <!--
+                    Aqui estuvo la misma tarjeta «Herramienta principal» que en el desplegable de
+                    escritorio, y se fue por el mismo motivo: el mapa tiene boton propio en la
+                    barra. En movil ese boton es la entrada «Ver Mapa» de esta misma lista.
+                  -->
+                  <!-- Lista plana: los grupos existian para partir el panel de escritorio en columnas. -->
+                  <div class="mt-2">
+                    @for (item of ecosystemMenuItems; track item.label) {
+                      <button
+                        type="button"
+                        data-testid="ecosystem-mobile-item"
+                        [disabled]="!item.page"
+                        (click)="onNavigateToPath(item.page)"
+                        class="flex w-full items-center justify-between gap-3 rounded-lg border-0 bg-transparent px-1 py-2 text-left text-[0.82rem] font-semibold font-nunito tracking-wide text-white/75 enabled:cursor-pointer enabled:hover:text-[#00DA5E] disabled:cursor-default disabled:text-white/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00DA5E]"
+                      >
+                        {{ item.label }}
+                        @if (item.page) {
+                          <svg lucideArrowUpRight [size]="12" class="shrink-0 text-white/30"></svg>
+                        } @else {
+                          <span class="shrink-0 font-alternate text-[0.48rem] font-bold uppercase tracking-widest text-white/35">Próximamente</span>
+                        }
+                      </button>
+                    }
+                  </div>
+                  <!--
+                    AQUI ESTUVO «Ver el ecosistema completo», la version movil de la misma tarjeta
+                    que se retiro del desplegable de escritorio. Se fue por el mismo motivo: desde
+                    el propio rotulo «Ecosistema» lleva a la portada, y
+                    esto era un segundo camino al mismo sitio dentro del mismo menu.
+                  -->
+                }
+              </div>
+            }
+          </div>
+        } @else {
+          <button
+            type="button"
+            (click)="onPageChange(link.id)"
+            class="border-b border-white/5 py-3 text-[0.9rem] font-bold uppercase font-alternate text-left tracking-widest focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00DA5E] focus-visible:ring-offset-2 focus-visible:ring-offset-[#291242] rounded-md border-0 bg-transparent cursor-pointer"
+            [ngClass]="getMobileLinkClass(link.id)"
+          >
+            {{ link.name }}
+          </button>
+        }
+      }
+      <!--
+        LA PUERTA PUBLICA ES LA DEL ECOSISTEMA, NO LA DE LA CONSOLA. Este boton llevaba a
+        `admin`, que es la entrada institucional: quien lo pulsaba desde el sitio publico
+        —una organizacion que viene a registrar su festival— aterrizaba en el formulario del
+        equipo interno, que su cuenta no puede cruzar. La consola rechaza por lista blanca a
+        todo el que no traiga rol interno, asi que el error no se veia como un enlace mal
+        puesto sino como «mi contraseña no sirve».
+        El equipo interno entra por /admin escribiendolo, que es como se entra a una consola.
+      -->
+      @if (sesionExterna.dentro()) {
+        <div class="mt-4 flex flex-col gap-2" data-panel-sesion-externa>
+          <button
+            type="button"
+            (click)="irAMiPanel()"
+            class="flex cursor-pointer items-center gap-3 rounded-xl border border-white/20 bg-white/10 px-4 py-3 text-left transition-colors hover:border-[#00DA5E]/60 hover:bg-white/[0.16] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00DA5E]"
+          >
+            <span aria-hidden="true" class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[#00DA5E] font-alternate text-[0.8rem] font-bold text-[#291242]">{{ sesionExterna.iniciales() }}</span>
+            <span class="flex min-w-0 flex-col leading-tight">
+              <span class="truncate font-alternate text-[0.85rem] font-bold uppercase tracking-wide text-white">{{ sesionExterna.rotulo() }}</span>
+              <span class="font-alternate text-[0.6rem] font-bold uppercase tracking-widest text-[#00DA5E]">Mi panel</span>
+            </span>
+          </button>
+          <button
+            type="button"
+            (click)="cerrarSesionExterna()"
+            class="cursor-pointer rounded-xl border border-white/15 bg-transparent px-5 py-3 text-left font-alternate text-[0.72rem] font-bold uppercase tracking-widest text-white/70 transition-colors hover:border-white/40 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00DA5E]"
+          >
+            Cerrar sesión
+          </button>
+        </div>
+      } @else {
+        <!--
+          LAS DOS PUERTAS TAMBIEN EN MOVIL. En escritorio el icono abre un menu con «Ingresar» y
+          «Crear cuenta»; aqui no hace falta menu porque el espacio es vertical y caben las dos.
+          Dejar solo «Iniciar sesion» en movil habria dejado la mitad de la promesa sin cumplir.
+        -->
+        <button
+          type="button"
+          data-testid="movil-ingresar"
+          (click)="irAIngresar()"
+          class="mt-4 rounded-xl border-0 bg-[#00DA5E] px-5 py-3 text-left font-alternate text-[0.9rem] font-bold uppercase tracking-widest text-[#291242] transition-colors hover:bg-[#8BF784] cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-[#291242]"
+        >
+          Ingresar
+        </button>
+        <button
+          type="button"
+          data-testid="movil-registrarse"
+          (click)="irARegistrarse()"
+          class="mt-2 rounded-xl border border-white/25 bg-transparent px-5 py-3 text-left font-alternate text-[0.9rem] font-bold uppercase tracking-widest text-white transition-colors hover:border-[#00DA5E] hover:text-[#00DA5E] cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-[#291242]"
+        >
+          Crear cuenta
+        </button>
+      }
+    </div>
+  }
+</nav>

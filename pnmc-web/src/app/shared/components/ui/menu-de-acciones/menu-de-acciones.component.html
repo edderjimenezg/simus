@@ -1,0 +1,79 @@
+<!--
+  UN SOLO CONTROL POR FILA. La acción principal sale fuera —lo más frecuente no debería costar dos
+  clics— y el resto vive en el desplegable, con las irreversibles separadas al final.
+-->
+<div class="relative inline-flex items-center gap-1.5">
+  @if (hayAcciones) {
+    <button type="button" data-disparador-acciones
+            [attr.aria-label]="descripcion ? etiqueta + ' de ' + descripcion : etiqueta"
+            aria-haspopup="menu" [attr.aria-expanded]="abierto()"
+            (click)="alternar()"
+            (keydown.arrowdown)="abierto() ? mover($event, 1) : alternar()"
+            [class]="clasesDeBoton('terciaria', 'menudo') + ' !px-2'">
+      <svg lucideEllipsis [size]="18" aria-hidden="true"></svg>
+    </button>
+
+    @if (abierto()) {
+      <!--
+        LAS FLECHAS VAN EN CADA OPCION Y NO EN EL CONTENEDOR. Un `div` con manejadores de teclado
+        que no puede recibir el foco nunca los oye: quien navega con teclado está sobre el botón,
+        no sobre la caja. Es además lo que exige `interactive-supports-focus`.
+      -->
+      <div role="menu" [attr.aria-label]="descripcion ? etiqueta + ' de ' + descripcion : etiqueta"
+           data-menu-de-acciones
+           [class]="alineacion === 'derecha' ? 'right-0' : 'left-0'"
+           class="absolute top-full z-30 mt-1 min-w-[11rem] rounded-xl border border-slate-200 bg-white py-1 shadow-lg">
+        @if (principal; as p) {
+          <!--
+            LA ACCION ESPERADA VA DENTRO, PRIMERA Y DESTACADA. Hasta
+            salía fuera como un segundo botón, y eso dejaba la columna de acciones distinta en cada
+            fila: unas con dos controles y otras con uno, con anchos que cambiaban según el verbo.
+            Conserva `data-accion-principal` porque sigue siendo la principal; lo que cambia es
+            dónde se lee.
+          -->
+          <button type="button" role="menuitem" data-opcion-accion data-accion-principal
+                  [disabled]="p.deshabilitada" [attr.title]="p.deshabilitada ? p.motivo : null"
+                  (keydown.arrowdown)="mover($event, 1)" (keydown.arrowup)="mover($event, -1)"
+                  (click)="elegir(p)"
+                  class="block w-full px-3 py-2 text-left text-xs font-bold text-morado transition hover:bg-hueso disabled:opacity-40">
+            {{ p.etiqueta }}
+          </button>
+          @if (secundarias.length > 0 || peligrosas.length > 0) { <hr aria-hidden="true" class="my-1 border-slate-100" /> }
+        }
+        @for (accion of secundarias; track accion.id) {
+          @if (accion.enlace) {
+            <a role="menuitem" data-opcion-accion [href]="accion.enlace"
+               [attr.target]="accion.nuevaPestana ? '_blank' : null" [attr.rel]="accion.nuevaPestana ? 'noopener' : null"
+               (keydown.arrowdown)="mover($event, 1)" (keydown.arrowup)="mover($event, -1)"
+               (click)="cerrar()"
+               class="block w-full px-3 py-2 text-left text-xs font-semibold text-slate-700 no-underline transition hover:bg-hueso hover:text-morado">
+              {{ accion.etiqueta }}
+            </a>
+          } @else {
+            <button type="button" role="menuitem" data-opcion-accion
+                    [disabled]="accion.deshabilitada" [attr.title]="accion.deshabilitada ? accion.motivo : null"
+                    (keydown.arrowdown)="mover($event, 1)" (keydown.arrowup)="mover($event, -1)"
+                    (click)="elegir(accion)"
+                    class="block w-full px-3 py-2 text-left text-xs font-semibold text-slate-700 transition hover:bg-hueso hover:text-morado disabled:opacity-40">
+              {{ accion.etiqueta }}
+            </button>
+          }
+        }
+
+        @if (peligrosas.length > 0) {
+          <!-- LA LINEA NO ES ADORNO: separa lo que se puede deshacer de lo que no. -->
+          @if (secundarias.length > 0) { <hr aria-hidden="true" class="my-1 border-slate-100" /> }
+          @for (accion of peligrosas; track accion.id) {
+            <button type="button" role="menuitem" data-opcion-accion
+                    [disabled]="accion.deshabilitada" [attr.title]="accion.deshabilitada ? accion.motivo : null"
+                    (keydown.arrowdown)="mover($event, 1)" (keydown.arrowup)="mover($event, -1)"
+                    (click)="elegir(accion)"
+                    class="block w-full px-3 py-2 text-left text-xs font-semibold text-rose-700 transition hover:bg-rose-50 disabled:opacity-40">
+              {{ accion.etiqueta }}
+            </button>
+          }
+        }
+      </div>
+    }
+  }
+</div>

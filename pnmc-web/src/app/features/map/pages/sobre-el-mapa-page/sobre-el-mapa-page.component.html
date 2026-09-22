@@ -1,0 +1,165 @@
+<section class="min-h-screen bg-hueso pb-24 font-nunito text-slate-700">
+  <app-compact-hero
+    backLabel="Mapa ecosistémico"
+    current="Sobre este mapa"
+    title="Sobre este mapa"
+    subtitle="Por qué el geovisor se dibuja como se dibuja."
+    (regresoSolicitado)="volver()"
+  ></app-compact-hero>
+
+  <div class="mx-auto max-w-7xl px-6 pt-10 lg:px-8">
+
+    <!--
+      LA APERTURA DICE QUE ES Y QUE NO ES. Un mapa que no declara sus límites invita a leer en él
+      cosas que no contiene, y este contiene lo que las organizaciones han registrado y publicado:
+      ni el ecosistema musical entero ni una muestra estadística de él.
+    -->
+    <div class="max-w-3xl">
+      <p class="font-alternate text-xs font-bold uppercase tracking-[.22em] text-verde-texto">Qué es y qué no es</p>
+      <h2 class="mt-2 font-gregor text-3xl uppercase text-morado">Una lectura, no un censo</h2>
+      <p class="mt-4 leading-relaxed text-slate-600">
+        El Mapa Ecosistémico enseña los procesos musicales que las organizaciones han registrado en
+        SIMUS y que están publicados. No es un censo del ecosistema musical colombiano ni una muestra
+        estadística de él: es lo que hay registrado, que crece a medida que las organizaciones
+        registran.
+      </p>
+      <p class="mt-4 leading-relaxed text-slate-600">
+        Esa distinción cambia cómo se lee. Un departamento en blanco no dice que ahí no pase nada:
+        dice que ahí todavía no hay registros. Por eso el mapa cuenta aparte cuántos procesos no
+        puede situar y por qué, en vez de dejarlos caer en silencio.
+      </p>
+    </div>
+
+    <!-- ═══════════ Las tres formas de dibujar ═══════════ -->
+    <div class="mt-16 max-w-3xl">
+      <p class="font-alternate text-xs font-bold uppercase tracking-[.22em] text-verde-texto">Cómo se dibuja</p>
+      <h2 class="mt-2 font-gregor text-3xl uppercase text-morado">Tres formas, tres preguntas</h2>
+      <p class="mt-4 leading-relaxed text-slate-600">
+        No existe una forma neutral de dibujar un mapa: cada técnica destaca algo y deforma otra cosa.
+        Por eso el geovisor ofrece tres y dice, en cada una, qué responde y qué deforma. Elegir entre
+        ellas es parte de la lectura, no un ajuste de presentación.
+      </p>
+    </div>
+
+    <div class="mt-8 grid gap-4 lg:grid-cols-3">
+      @for (forma of formasDeDibujar; track forma.nombre) {
+        <article class="flex flex-col rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+          <h3 class="font-alternate text-base font-bold uppercase text-morado">{{ forma.nombre }}</h3>
+          <p class="mt-3 font-alternate text-sm font-bold text-verde-texto">{{ forma.responde }}</p>
+          <p class="mt-3 text-sm leading-relaxed text-slate-600">{{ forma.como }}</p>
+
+          <!--
+            EL SESGO VA EN SU PROPIO BLOQUE Y CON SU ROTULO. Escondido en el párrafo se lee como una
+            salvedad menor; separado se lee como lo que es: la condición para usar bien la técnica.
+          -->
+          <div class="mt-4 rounded-xl bg-amber-50/70 px-4 py-3">
+            <p class="font-alternate text-[10px] font-bold uppercase tracking-[.18em] text-amber-800">Lo que deforma</p>
+            <p class="mt-1.5 text-[13px] leading-relaxed text-amber-900">{{ forma.sesgo }}</p>
+          </div>
+
+          <div class="mt-4 border-t border-slate-100 pt-4">
+            <p class="font-alternate text-[10px] font-bold uppercase tracking-[.18em] text-slate-400">De dónde viene</p>
+            <p class="mt-1.5 text-[13px] leading-relaxed text-slate-500">{{ forma.referente }}</p>
+          </div>
+        </article>
+      }
+    </div>
+
+    <!-- ═══════════ Los lentes ═══════════ -->
+    <div class="mt-16 max-w-3xl">
+      <p class="font-alternate text-xs font-bold uppercase tracking-[.22em] text-verde-texto">Con qué criterio se lee</p>
+      <h2 class="mt-2 font-gregor text-3xl uppercase text-morado">El lente no es un filtro</h2>
+      <p class="mt-4 leading-relaxed text-slate-600">
+        Una cosa es cómo se representa el mapa y otra las gafas con las que se mira. Un filtro RESTA:
+        esconde lo que no encaja, y lo que no está clasificado desaparece sin decirlo. Un lente
+        REAGRUPA: se sigue viendo todo, sólo que ordenado por otro criterio, y lo que no consta cae
+        en «Sin clasificar», que es la verdad.
+      </p>
+    </div>
+
+    <div class="mt-8 grid gap-4 md:grid-cols-3">
+      @for (lente of lentes; track lente.nombre) {
+        <article class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+          <h3 class="font-alternate text-base font-bold uppercase text-morado">{{ lente.nombre }}</h3>
+          <p class="mt-3 text-sm leading-relaxed text-slate-600">{{ lente.que }}</p>
+          <p class="mt-3 text-[13px] leading-relaxed text-slate-500">{{ lente.porque }}</p>
+        </article>
+      }
+    </div>
+
+    <p class="mt-6 max-w-3xl text-sm leading-relaxed text-slate-500">
+      Las fichas conceptuales de cada territorio sonoro y de cada práctica viven en el
+      <a routerLink="/ecosistema/territorios-sonoros" class="font-bold text-verde-texto underline underline-offset-2 hover:text-morado">catálogo de territorios sonoros</a>
+      y en el
+      <a routerLink="/ecosistema/practicas-musicales" class="font-bold text-verde-texto underline underline-offset-2 hover:text-morado">catálogo de prácticas musicales</a>.
+    </p>
+
+    <!-- ═══════════ La procedencia ═══════════ -->
+    <div class="mt-16 max-w-3xl">
+      <p class="font-alternate text-xs font-bold uppercase tracking-[.22em] text-verde-texto">De dónde salen los datos</p>
+      <h2 class="mt-2 font-gregor text-3xl uppercase text-morado">Qué afirma el mapa, y con qué respaldo</h2>
+      <p class="mt-4 leading-relaxed text-slate-600">
+        Un mapa afirma al menos dos cosas sobre cada proceso —dónde está y de qué es— y quien lo lee
+        tiene derecho a saber de dónde salen las dos.
+      </p>
+    </div>
+
+    <div class="mt-8 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+      <table class="w-full border-collapse text-left">
+        <caption class="sr-only">Procedencia de cada dato que el mapa representa</caption>
+        <thead>
+          <tr class="border-b border-slate-200 bg-slate-50">
+            <th scope="col" class="px-6 py-3 font-alternate text-[10px] font-bold uppercase tracking-[.18em] text-slate-400">Dato</th>
+            <th scope="col" class="px-6 py-3 font-alternate text-[10px] font-bold uppercase tracking-[.18em] text-slate-400">Fuente</th>
+            <th scope="col" class="px-6 py-3 font-alternate text-[10px] font-bold uppercase tracking-[.18em] text-slate-400">Alcance</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (fila of procedencias; track fila.dato) {
+            <tr class="border-b border-slate-100 last:border-0 align-top">
+              <th scope="row" class="px-6 py-4 font-alternate text-sm font-bold text-morado">{{ fila.dato }}</th>
+              <td class="px-6 py-4 text-[13px] font-semibold text-verde-texto">{{ fila.fuente }}</td>
+              <td class="px-6 py-4 text-[13px] leading-relaxed text-slate-600">{{ fila.detalle }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <!-- ═══════════ Los marcos ═══════════ -->
+    <div class="mt-16 max-w-3xl">
+      <p class="font-alternate text-xs font-bold uppercase tracking-[.22em] text-verde-texto">Referentes</p>
+      <h2 class="mt-2 font-gregor text-3xl uppercase text-morado">En qué se apoya</h2>
+    </div>
+
+    <div class="mt-8 grid gap-4 md:grid-cols-2">
+      @for (marco of marcos; track marco.titulo) {
+        <article class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+          <p class="font-alternate text-[10px] font-bold uppercase tracking-[.18em] text-slate-400">{{ marco.ambito }}</p>
+          <h3 class="mt-2 font-alternate text-base font-bold uppercase text-morado">{{ marco.titulo }}</h3>
+          <p class="mt-3 text-[13px] leading-relaxed text-slate-600">{{ marco.detalle }}</p>
+        </article>
+      }
+    </div>
+
+    <!--
+      LA SALIDA DEVUELVE AL MAPA. Una página que explica una herramienta y no lleva de vuelta a ella
+      obliga a usar el botón del navegador, que es pedirle al lector que deshaga lo que hizo en vez
+      de continuar.
+    -->
+    <div class="mt-16 rounded-2xl border border-slate-200 bg-white p-8 text-center shadow-sm">
+      <h2 class="font-gregor text-2xl uppercase text-morado">Volver al mapa</h2>
+      <p class="mx-auto mt-3 max-w-xl text-sm leading-relaxed text-slate-600">
+        Las cifras viven allí y cambian con los registros. Aquí sólo está el razonamiento, que no
+        cambia.
+      </p>
+      <a
+        routerLink="/mapa-ecosistemico"
+        class="mt-6 inline-flex items-center gap-2 rounded-full bg-morado px-6 py-3 font-alternate text-xs font-bold uppercase tracking-widest text-white no-underline transition hover:bg-morado-claro"
+      >
+        Abrir el Mapa Ecosistémico
+      </a>
+    </div>
+
+  </div>
+</section>

@@ -1,0 +1,203 @@
+.foundation-layout{display:grid;/* 17,25rem y no 15,5: al añadir el icono, la mitad de los rótulos partían en dos
+   líneas —«Solicitudes y revisiones», «Organizaciones y responsables»— y una lista
+   de navegación con renglones de altura desigual se recorre peor. */grid-template-columns:17.25rem minmax(0,1fr);min-height:calc(100vh - 4.65rem)}/* LA NAVEGACION SE QUEDA, EL CONTENIDO SE DESPLAZA.
+   Al subir la tipografía a la escala, las diecisiete secciones pasaron a medir
+   más que la ventana y era la BARRA —no el contenido— la que obligaba a
+   desplazar la página entera: se perdía de vista el menú justo cuando se
+   quería cambiar de sección. Fijada arriba y con su propio desplazamiento, el
+   alto de la página vuelve a depender de lo que hay que leer.
+
+   Se usa `dvh` y no `vh` a propósito: en móvil, `vh` no descuenta las barras
+   dinámicas del navegador y recorta el final del menú. */
+/* ALTO FIJO Y NO MAXIMO. Con `max-height`, la barra medía lo que midiera su contenido y solo al
+   crecer llegaba al alto de la ventana: el enlace del pie subía o bajaba según la sección, y el
+   bloque entero parecía moverse. Con `height`, la columna es siempre la misma y lo único que se
+   desplaza es la lista de secciones, dentro de `.sidebar-secciones`.
+   `dvh` y no `vh` a propósito: en móvil, `vh` no descuenta las barras dinámicas del navegador. */
+/* EL RELLENO LATERAL NO VA AQUI, VA EN LOS HIJOS, y esa es la corrección. Con el relleno en la
+   barra, el contenedor que se desplaza quedaba metido 13,6 px hacia dentro y SU barra de
+   desplazamiento se dibujaba ENCIMA de los botones de sección en vez de en el borde. Antes no
+   pasaba porque se desplazaba la barra entera. Lo reportó la dirección de producto: «la barra se corrió hacia la izquierda e incluso está superponiendo algunas secciones».
+   Con el relleno en los hijos, el contenedor llega al borde y la barra de desplazamiento se dibuja
+   donde le corresponde. */
+.foundation-sidebar{position:sticky;top:var(--alto-cabecera,0px);align-self:start;display:flex;flex-direction:column;height:calc(100dvh - var(--alto-cabecera,0px));overflow:hidden;border-right:1px solid var(--color-filete);background:var(--color-hueso);padding:1.9rem 0}
+/* `scrollbar-gutter: stable` RESERVA SU SITIO SIEMPRE. Sin esto, en los navegadores que dibujan la
+   barra ocupando espacio, el menú entero se estrecha 15 px en cuanto hay una sección de más y los
+   rótulos se recolocan solos. */
+.sidebar-secciones{flex:1 1 auto;min-height:0;overflow-y:auto;overscroll-behavior:contain;padding-inline:.85rem;scrollbar-gutter:stable}/* LA SEGMENTACION SE VE, NO SE PLIEGA. Se valoró convertir los grupos en
+   secciones plegables y se descartó: esconde diecisiete destinos detrás de un
+   clic en una consola cuyo criterio ha sido tener rutas muy claras, y obliga a
+   recordar en qué grupo vive cada sección. Lo que faltaba no era ocultar el
+   contenido sino que los grupos se leyeran como grupos, y eso lo resuelve un
+   filete y el aire. */
+.sidebar-group{margin:0 0 1.35rem;border-top:1px solid #eef0f4;padding-top:1.25rem}.sidebar-group:first-child{border-top:0;padding-top:0}/* EL PIE FIJO TAPABA LAS ULTIMAS SECCIONES. Al anclar el enlace al portal con
+   fondo opaco, «Usuarios y roles» y «Salud del sistema» quedaban debajo y no se
+   podía llegar a ellas ni desplazando: el pie viaja con el desplazamiento. Se le
+   reserva su altura al final de la lista. */
+.sidebar-group:last-of-type{margin-bottom:.5rem}.sidebar-group>p{margin:0 0 .5rem;padding:0 .7rem;color:#9aa4b2;font-size:var(--text-dato);font-weight:700;letter-spacing:.07em;text-transform:uppercase}/* ICONO + ROTULO + AVISO. Con diecisiete secciones seguidas, un icono permite
+   reconocer la sección por forma antes que por lectura; los iconos ya estaban
+   declarados en el modelo de navegación y nadie los pintaba. */
+.sidebar-group button{display:grid;grid-template-columns:1.15rem minmax(0,1fr) auto;width:100%;align-items:center;gap:.7rem;min-height:var(--spacing-control);border:0;border-radius:.6rem;background:none;padding:.52rem .7rem;color:#5f6b80;font-size:var(--text-cuerpo);font-weight:500;text-align:left;transition:background .12s,color .12s}.sidebar-icono{display:grid;place-items:center;color:#97a1b1}.sidebar-group button:hover .sidebar-icono{color:var(--color-morado-claro)}.sidebar-group button.is-active .sidebar-icono{color:#fff}.sidebar-rotulo{min-width:0}.sidebar-group button:hover{background:#f2f0f7;color:#32184d}.sidebar-group button.is-active{background:var(--color-morado);color:#fff;font-weight:700}.sidebar-group button.is-active:hover{background:var(--color-morado);color:#fff}.sidebar-group em{display:grid;min-width:1.4rem;height:1.4rem;place-items:center;border-radius:99px;background:#f0e9d3;color:#6b4c10;font-size:var(--text-dato);font-weight:800;font-style:normal}.sidebar-group button.is-active em{background:rgba(255,255,255,.22);color:#fff}/* El relleno inferior era de 5rem: ochenta píxeles de aire muerto bajo el contenido, que en una
+   consola se traducen en tener que desplazar para ver el final de la pantalla. */
+.foundation-main{width:min(100%,106rem);margin:0;padding:3rem clamp(1.7rem,4vw,5rem) 3.5rem}.workspace-title{display:flex;flex-direction:column;gap:.55rem;margin-bottom:2.2rem}.workspace-kicker{margin:0;color:var(--color-seccion);font-size:var(--text-dato);font-weight:900;letter-spacing:.12em;text-transform:uppercase}.workspace-title h1{margin:0;color:#19213a;/* Bajado de clamp(2rem,4vw,4rem) —que a 1440 px daba 57 px— a una escala de consola: hay que ver la lista, no el título. */font-weight:800;font-size:clamp(1.6rem,2.2vw,2.2rem);line-height:1.05;font-family:var(--font-alternate);letter-spacing:-.04em}.workspace-title p:not(.workspace-kicker){max-width:38rem;margin:.75rem 0 0;color:#707b90;font-size:.86rem;line-height:1.55}.summary-grid{display:grid;grid-template-columns:repeat(4,1fr);border-top:1px solid #e0e4eb;border-bottom:1px solid #e0e4eb;background:#fff}.summary-grid button{padding:1.25rem 1rem;border:0;border-right:1px solid var(--color-filete);background:none;text-align:left}.summary-grid strong{display:block;color:#2e194a;font-weight:800;font-size:2rem;line-height:1;font-family:var(--font-alternate)}.summary-grid span{display:block;margin-top:.45rem;color:#737e91;font-size:.67rem;font-weight:800}.command-canvas{min-height:25rem;border-top:2px solid #382050;background:#fff;padding:3rem}.empty-index{color:#c7cddd;font-size:4rem;font-weight:900}.empty-copy h2{color:#202b48;font-size:2rem}.empty-copy p{color:#6f7b91}.empty-grid{display:none}@media(max-width:800px){.foundation-header{grid-template-columns:1fr auto;padding:0 1.2rem}.system-pulse,.visit-site{display:none}.foundation-layout{display:block}.foundation-main{width:100%;padding:2.3rem 1.2rem 3rem}.workspace-title{display:block}.workspace-title .workspace-kicker{margin-bottom:.8rem}.summary-grid{grid-template-columns:repeat(2,1fr)}.summary-grid button:nth-child(2){border-right:0}.summary-grid button:nth-child(-n+2){border-bottom:1px solid var(--color-filete)}}@media(max-width:500px){}
+
+
+/* ── El portal público, al pie de la navegación ────────────────────────────
+   Separado del resto por un filete y en tono más apagado: no es una sección
+   de la consola, es salir de ella. */
+/* FIJO AL PIE DE LA BARRA. Quedaba 57 px por debajo del pliegue: existía, pero
+   había que descubrir que la barra se desplaza para encontrarlo. Anclado abajo
+   se ve siempre, y sigue viéndose cuando se añadan secciones —que es lo que va
+   a pasar—. El fondo es opaco para que la lista pase por debajo sin
+   transparentarse. */
+/* ESTATICO AL FINAL DE LA COLUMNA, no pegado sobre ella. Era `position: sticky; bottom: 0` con un
+   margen negativo que se comía el relleno de la barra: la lista le pasaba por debajo y el conjunto
+   se leía como si se moviera. Ahora es el último hijo de una columna de alto fijo, así que está
+   donde está y no depende de cuánto se haya desplazado la lista. */
+.sidebar-portal {
+  flex: 0 0 auto;
+  /* El relleno lateral que la barra ya no tiene: su sitio es el mismo que el de las secciones. */
+  margin-inline: .85rem;
+  display: grid;
+  grid-template-columns: 1.15rem minmax(0, 1fr);
+  align-items: center;
+  gap: .7rem;
+  min-height: var(--spacing-control);
+  margin-top: .35rem;
+  border-top: 1px solid #eef0f4;
+  border-radius: 0;
+  padding: 1rem .7rem 0;
+  color: #8b95a7;
+  font-size: var(--text-dato);
+  font-weight: 600;
+  text-decoration: none;
+}
+.sidebar-portal:hover { color: var(--color-morado); }
+.sidebar-portal:hover .sidebar-icono { color: var(--color-morado-claro); }
+
+/* ── La barra de desplazamiento de la navegación, invisible en reposo ──────
+   Una barra gris permanente pegada al borde del menú es ruido: está ahí para
+   decir «esto se puede desplazar», y eso solo hace falta saberlo cuando se va
+   a desplazar. Aparece al acercarse con el puntero o al entrar con el teclado.
+
+   EL HUECO SE RESERVA IGUAL (`scrollbar-gutter: stable`): si el ancho apareciera
+   y desapareciera, la lista entera se movería lateralmente al pasar el ratón,
+   que es peor que la barra. */
+.foundation-sidebar {
+  scrollbar-gutter: stable;
+  scrollbar-width: thin;
+  scrollbar-color: transparent transparent;
+  transition: scrollbar-color .15s;
+}
+.foundation-sidebar:hover,
+.foundation-sidebar:focus-within { scrollbar-color: #d6dbe3 transparent; }
+
+/* Y lo mismo para los navegadores que aún usan el pseudoelemento. */
+.foundation-sidebar::-webkit-scrollbar { width: 8px; }
+.foundation-sidebar::-webkit-scrollbar-track { background: transparent; }
+.foundation-sidebar::-webkit-scrollbar-thumb {
+  border: 2px solid transparent;
+  border-radius: 99px;
+  background: transparent;
+  background-clip: content-box;
+}
+.foundation-sidebar:hover::-webkit-scrollbar-thumb,
+.foundation-sidebar:focus-within::-webkit-scrollbar-thumb { background: #d6dbe3; background-clip: content-box; }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   LA NAVEGACION EN PANTALLA ESTRECHA — UN CAJON, NO UNA TIRA DE 3 429 PX
+
+   Por debajo de 800 px la barra se convertia en una fila horizontal con los
+   diecisiete destinos en linea. Dos problemas, medidos el 14 de septiembre de
+   2026 a 390 px:
+
+     · Los rotulos se pisaban. Cada boton media 63 px con su rotulo completo en
+       `white-space: nowrap` dentro, porque la regla estrecha devolvia
+       `width: auto` pero no deshacia el `display: grid` de tres columnas ni
+       ponia `flex-shrink: 0`: el boton se encogia por debajo de su contenido y
+       «Solicitudes y revisiones» se dibujaba encima de «Calidad y
+       coincidencias».
+     · Aun arreglado eso, la tira media 3 429 px de recorrido. Nada quedaba
+       oculto, pero llegar a «Usuarios y roles» eran casi nueve pantallas de
+       arrastre a ciegas.
+
+   Ahora un disparador despliega la MISMA lista agrupada que en escritorio, con
+   sus titulos de grupo y su orden. No contradice «la segmentacion se ve, no se
+   pliega»: en escritorio la lista sigue entera y ningun grupo se pliega; esto
+   solo existe donde no hay columna donde ponerla.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* En escritorio el disparador no existe: hay columna. */
+.sidebar-disparador { display: none; }
+
+@media (max-width: 800px) {
+  .sidebar-disparador {
+    display: grid;
+    grid-template-columns: 1.15rem auto minmax(0, 1fr);
+    align-items: center;
+    gap: .55rem;
+    width: 100%;
+    min-height: var(--spacing-control-comodo);
+    border: 0;
+    border-bottom: 1px solid #e0e4eb;
+    background: var(--color-hueso);
+    padding: .5rem 1rem;
+    color: #5f6b80;
+    text-align: left;
+    cursor: pointer;
+  }
+  .sidebar-disparador__rotulo {
+    color: #19213a;
+    font-size: var(--text-cuerpo);
+    font-weight: 800;
+  }
+  /* Que seccion se esta viendo, para no tener que abrir el cajon para saberlo. */
+  .sidebar-disparador__actual {
+    overflow: hidden;
+    border-left: 1px solid #dfe3ea;
+    padding-left: .55rem;
+    color: #808b9e;
+    font-size: var(--text-dato);
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .foundation-sidebar {
+    /* Fuera del flujo mientras esta cerrada: `display: none` y no altura cero,
+       para que su contenido no sea alcanzable con el tabulador. */
+    display: none;
+    position: static;
+    /* EN MOVIL LA BARRA NO ES UNA COLUMNA: es un cajon que se despliega sobre el
+       contenido y se desplaza con la pagina. Un alto fijo de ventana la dejaria
+       ocupando la pantalla entera con el contenido debajo, sin verse. */
+    height: auto;
+    max-height: none;
+    overflow: visible;
+    scrollbar-gutter: auto;
+    border-right: 0;
+    border-bottom: 1px solid #e0e4eb;
+    padding: 1.1rem 1rem 1.4rem;
+  }
+  /* Y sus hijos no lo repiten: en móvil el relleno vuelve a estar en la barra. */
+  .sidebar-secciones { padding-inline: 0; scrollbar-gutter: auto; }
+  .sidebar-portal { margin-inline: 0; }
+  .foundation-sidebar.esta-desplegada { display: block; }
+  /* Y su lista tampoco se desplaza aparte: se desplaza la pagina. */
+  .sidebar-secciones { overflow: visible; min-height: 0; }
+
+  /* Desplegada es la lista vertical de siempre: los grupos con su titulo, los
+     botones a ancho completo. No hace falta deshacer nada de escritorio. */
+  .sidebar-group:last-of-type { margin-bottom: 0; }
+
+  /* El enlace al portal cierra la lista en vez de anclarse: un pie fijo dentro
+     de un cajon que ya se desplaza con la pagina no se queda en ningun sitio. */
+  .sidebar-portal { position: static; }
+}
+
+/* ── El lienzo blanco de Solicitudes ───────────────────────────────────────
+   La consola va sobre gris (#f5f6f9) y cada bloque se levanta en blanco. En
+   Solicitudes eso dejaba una tarjeta blanca grande flotando sobre el gris, con
+   la lista fuera y el trámite dentro: dos superficies para una sola tarea.
+   Aquí el área de trabajo ES la sección, así que el blanco lo pone el lienzo y
+   ningún bloque necesita levantarse. */
+.foundation-main.es-lienzo-blanco { background: #fff; }

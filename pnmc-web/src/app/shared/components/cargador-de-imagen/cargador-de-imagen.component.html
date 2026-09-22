@@ -1,0 +1,47 @@
+<div class="space-y-3">
+  @if (rutaActual) {
+    <div class="flex flex-wrap items-start gap-4">
+      <img [src]="rutaActual" [alt]="etiqueta" width="120" height="150"
+        class="h-32 w-auto rounded-xl border border-slate-200 bg-white object-contain" />
+      <div class="min-w-0 flex-1">
+        <p class="break-all font-mono text-dato text-slate-500">{{ rutaActual }}</p>
+        <button type="button" (click)="quitar()"
+          class="mt-2 inline-flex min-h-11 items-center gap-2 rounded-xl px-3 text-dato font-bold text-rose-700 hover:bg-rose-50">
+          <svg lucideTrash2 size="14" aria-hidden="true"></svg>
+          <span>Quitar la imagen</span>
+        </button>
+      </div>
+    </div>
+  } @else {
+    <div class="flex items-center gap-3 rounded-xl border border-dashed border-slate-300 p-4">
+      <svg lucideImage size="22" class="shrink-0 text-slate-300" aria-hidden="true"></svg>
+      <p class="text-dato leading-relaxed text-slate-500">
+        Todavía no hay imagen. En un catálogo la portada <b>es</b> el dato: es lo que permite
+        reconocer la obra en el listado.
+      </p>
+    </div>
+  }
+
+  <label class="block">
+    <span class="text-dato font-black uppercase tracking-wider text-slate-500">Texto alternativo *</span>
+    <input type="text" [ngModel]="textoAlternativo()" (ngModelChange)="textoAlternativo.set($event)"
+      [name]="'alt-' + etiqueta"
+      placeholder="Portada de «Acento», con una banda de niños en primer plano"
+      class="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2 text-sm outline-none focus:border-morado" />
+    <small class="mt-1 block text-dato text-slate-400">Describe la imagen para quien no puede verla. Sin esto no se puede subir.</small>
+  </label>
+
+  <label class="block">
+    <span class="sr-only">Elegir la imagen de {{ etiqueta }}</span>
+    <input type="file" accept="image/png,image/jpeg,image/webp" (change)="elegir($event)" [disabled]="subiendo()"
+      class="block w-full text-xs text-slate-600 file:mr-3 file:rounded-xl file:border-0 file:bg-morado file:px-4 file:py-2 file:text-xs file:font-bold file:text-white" />
+    <small class="mt-1 block text-dato text-slate-400">PNG, JPEG o WebP, hasta 2 MB.</small>
+  </label>
+
+  @if (subiendo()) {
+    <p class="text-xs text-slate-500" role="status">Subiendo…</p>
+  }
+  @if (error()) {
+    <p role="alert" class="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-900">{{ error() }}</p>
+  }
+</div>

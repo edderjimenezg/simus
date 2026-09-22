@@ -1,0 +1,481 @@
+<div class="space-y-4 text-left font-nunito">
+  @if (dandoDeAlta()) {
+    <app-admin-alta-organizacion
+      (registrada)="registrada($event)"
+      (cancelado)="cerrarAlta()"></app-admin-alta-organizacion>
+  }
+
+  @if (avisoDeAlta()) {
+    <p class="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-xs text-emerald-900" role="status">{{ avisoDeAlta() }}</p>
+  }
+
+  <!-- Cabecera: buscador, recuento y aviso de cuánto del registro no tiene responsable declarado -->
+  <!--
+    SIN TARJETA, SIN «TABLA: ENTIDADES». La lista iba dentro de una tarjeta blanca con una línea que
+    nombraba la tabla de la base de datos —una nota de desarrollo en pantalla— y unas pestañas en
+    versalitas propias de este panel. Ahora usa las piezas comunes de la consola: `barra-de-lista`,
+    `app-selector-segmentado`, `tabla-administrativa`, `app-estado-de-lista` y `app-boton`.
+  -->
+  <app-barra-de-lista>
+    <app-buscador-de-lista identificador="buscar-organizacion" etiqueta="Buscar organizaciones"
+      marcador="Nombre, NIT o correo…" [valor]="busqueda()" (cambiar)="buscar($event)" />
+    <!-- Los 31 departamentos, en un panel acotado y con buscador. Ver `app-filtro-desplegable`. -->
+    <app-filtro-desplegable
+      identificador="territorio"
+      etiqueta="Filtrar organizaciones por territorio"
+      [opciones]="filtroDeTerritorio()"
+      [elegida]="departamentoActivo()"
+      (cambiar)="filtrarPorTerritorio($event)" />
+    <ng-container extremo>
+      <app-boton importancia="terciaria" etiqueta="Actualizar la lista" [deshabilitado]="cargando()" (accion)="cargar()"><svg lucideRefreshCw [size]="15" aria-hidden="true"></svg></app-boton>
+      <app-boton importancia="principal" (accion)="abrirAlta()">Nueva organización</app-boton>
+    </ng-container>
+  </app-barra-de-lista>
+
+  <app-selector-segmentado
+    [opciones]="pestanasDeEstado()"
+    [elegida]="estadoActivo()"
+    etiquetaDelGrupo="Filtrar organizaciones por estado"
+    atributoDeDatos="filtro-organizacion"
+    (elegir)="filtrarPor($event)"></app-selector-segmentado>
+
+  @if (error()) {
+    <p data-error-organizaciones role="alert" class="mt-4 text-cuerpo text-amber-800">{{ error() }}</p>
+  } @else if (cargando()) {
+    <app-estado-de-lista tipo="cargando" titulo="Leyendo el registro de organizaciones…" />
+  } @else {
+    <div class="mt-2 overflow-x-auto">
+      <table class="tabla-administrativa tabla-de-organizaciones">
+        <!--
+          ANCHOS DECLARADOS. Sin ellos el navegador los reparte por contenido y cambian en cuanto
+          cambia la página: al pulsar una cabecera para ordenar, las columnas saltaban. Lo pidió el
+          dirección de producto: fijos, y solo se cambian a mano.
+        -->
+        <colgroup>
+          <col class="tabla-de-organizaciones__nombre" />
+          <col class="tabla-de-organizaciones__responsable" />
+          <col class="tabla-de-organizaciones__procesos" />
+          <col class="tabla-de-organizaciones__territorio" />
+          <col class="tabla-de-organizaciones__creacion" />
+          <col class="tabla-de-organizaciones__estado" />
+          <col class="tabla-de-organizaciones__acciones" />
+        </colgroup>
+        <thead class="tabla-administrativa__cabecera">
+          <!--
+            LA MISMA PIEZA QUE LAS OTRAS NUEVE TABLAS. Este panel y el de Festivales tenían cada uno
+            su copia de `ordenarPor`, `flechaDe` y `ordenAriaDe`; las otras ocho tablas no ordenaban.
+            Aquí solo se declaran las columnas. El orden lo sigue aplicando el SERVIDOR, porque
+            ordenar la página que se tiene delante mentiría: el resto del resultado no está aquí.
+          -->
+          <tr><app-cabecera-de-tabla [columnas]="COLUMNAS" [orden]="orden" (ordenarPor)="ordenarPor($event)" /></tr>
+        </thead>
+        <tbody>
+          @for (organizacion of organizaciones(); track organizacion.id) {
+            <tr class="tabla-administrativa__fila" [attr.data-organizacion]="organizacion.id">
+              <td>
+                <button type="button" class="tabla-administrativa__principal" data-abrir-ficha-organizacion (click)="abrirFicha(organizacion)">{{ organizacion.nombre }}</button>
+                @if (organizacion.esInstitucional) {
+                  <span data-institucional class="tabla-administrativa__secundaria inline-flex items-center gap-1 font-semibold text-morado">
+                    <svg lucideShieldCheck [size]="12" aria-hidden="true"></svg> Entidad institucional
+                  </span>
+                }
+                <span class="tabla-administrativa__secundaria"><app-sello-de-procedencia [procedencia]="organizacion.procedencia"></app-sello-de-procedencia></span>
+                <span class="tabla-administrativa__secundaria">{{ organizacion.correoContacto || 'Sin correo de contacto' }}@if (organizacion.identificacion) { · NIT {{ organizacion.identificacion }}}</span>
+              </td>
+              <td>
+                @if (organizacion.responsable) {
+                  <p data-responsable class="font-semibold">{{ organizacion.responsable.nombre }}</p>
+                  <span class="tabla-administrativa__secundaria">{{ organizacion.responsable.correo || 'Sin correo' }}@if (organizacion.responsable.telefono) { · {{ organizacion.responsable.telefono }}}</span>
+                } @else {
+                  <p data-responsable class="text-rotulo">Nadie identificado</p>
+                }
+                <span [attr.data-origen]="organizacion.responsable?.origen || 'ninguno'" class="tabla-administrativa__secundaria" [class]="origenDe(organizacion).clase">{{ origenDe(organizacion).texto }}</span>
+                @if (organizacion.responsable?.tieneDocumento) {
+                  <span data-documento class="tabla-administrativa__secundaria">{{ organizacion.responsable?.tipoDocumento }} registrada</span>
+                }
+              </td>
+              <td>
+                <span class="tabla-administrativa__cifra" data-procesos-total>{{ totalDeProcesos(organizacion) }}</span>
+                @if (totalDeProcesos(organizacion) > 0) {
+                  <span class="tabla-administrativa__secundaria">
+                    @for (p of procesosDe(organizacion); track p.etiqueta) {<span>{{ p.etiqueta }} {{ p.total }}</span>@if (!$last) { · }}
+                  </span>
+                  @if (dependientesDe(organizacion) > 0) {
+                    <span class="tabla-administrativa__secundaria font-semibold text-amber-700" data-procesos-dependientes>
+                      {{ dependientesDe(organizacion) === 1 ? '1 depende de ella' : dependientesDe(organizacion) + ' dependen de ella' }}
+                    </span>
+                  }
+                } @else {
+                  <span class="tabla-administrativa__secundaria">Ninguno a su nombre</span>
+                }
+              </td>
+              <td class="text-prosa">{{ organizacion.territorio || '—' | nombrePropio }}</td>
+              <td class="whitespace-nowrap"><span data-fecha-creacion class="tabular-nums text-prosa">{{ organizacion.fechaCreacion | date: 'd MMM y, HH:mm':'':'es-CO' }}</span></td>
+              <td>
+                <app-indicador-de-estado
+                  [etiqueta]="organizacion.estadoEtiqueta"
+                  [tono]="tonoDelEstado(organizacion.estado)"
+                  [matiz]="matizDelEstado(organizacion.estado)"
+                  [conTexto]="true"></app-indicador-de-estado>
+              </td>
+              <td class="tabla-administrativa__acciones">
+                <app-menu-de-acciones
+                  [acciones]="accionesDe(organizacion)"
+                  [descripcion]="organizacion.nombre"
+                  (elegida)="ejecutarAccion(organizacion, $event)"></app-menu-de-acciones>
+              </td>
+            </tr>
+          } @empty {
+            <tr><td colspan="7" class="p-0"><app-lista-sin-filas entidad="organizaciones"
+              [hayFiltros]="hayFiltrosPuestos()" [ambito]="ambitoDeLaLista()"
+              comoLlegan="Una organización se registra desde el espacio externo, o la da de alta el Programa con «Nueva organización»."
+              (limpiar)="limpiarFiltros()">
+              <app-boton importancia="principal" tamano="menudo" (accion)="abrirAlta()">Nueva organización</app-boton>
+            </app-lista-sin-filas></td></tr>
+          }
+        </tbody>
+      </table>
+    </div>
+    <nav data-paginacion aria-label="Paginación de organizaciones" class="tabla-administrativa__pie">
+      <p data-rango class="m-0" aria-live="polite">
+        @if (total() === 0) {
+          Ninguna organización cumple el filtro
+        } @else {
+          {{ desde() }}–{{ hasta() }} de {{ total() }} organizaciones
+          @if (totalDePaginas() > 1) {
+            · página {{ paginaAplicada() }} de {{ totalDePaginas() }}
+          }
+        }
+      </p>
+      @if (totalDePaginas() > 1) {
+        <div class="flex items-center gap-2">
+          <app-boton importancia="secundaria" tamano="menudo" identificador="pagina-anterior" [deshabilitado]="!hayPaginaAnterior() || cargando()" (accion)="irAPagina(paginaAplicada() - 1)">← Anterior</app-boton>
+          <app-boton importancia="secundaria" tamano="menudo" identificador="pagina-siguiente" [deshabilitado]="!hayPaginaSiguiente() || cargando()" (accion)="irAPagina(paginaAplicada() + 1)">Siguiente →</app-boton>
+        </div>
+      }
+    </nav>
+    @if (organizaciones().length > 0 && sinResponsableDeclarado() > 0) {
+      <p data-aviso-respaldo class="tabla-administrativa__nota">
+        {{ sinResponsableDeclarado() }} de {{ organizaciones().length }} organizaciones de esta página no tienen una persona
+        declarada en el alta: el nombre que se ve —cuando lo hay— sale de la cuenta que las administra.
+      </p>
+    }
+  }
+  @if (fichaAbiertaId()) {
+    <!--
+      LA FICHA, EN EL LIENZO Y CON EL LENGUAJE COMUN. Iba en una tarjeta blanca con rótulos a 9,9 px
+      y los datos como parejas en negrita; ahora usa el título de apartado, las acciones como
+      `app-boton` junto al título —editar es una opción, no el asunto— y `app-dato-en-lectura` en
+      grupos con un filete cada uno, igual que la ficha de la organización en el espacio externo.
+    -->
+    <section data-ficha-organizacion class="mt-10 border-t border-filete pt-8" aria-label="Ficha de la organización">
+      <header class="flex flex-wrap items-start justify-between gap-x-8 gap-y-3">
+        <div class="min-w-0">
+          <p class="font-alternate text-dato font-bold uppercase tracking-[0.14em] text-seccion">Ficha de la organización</p>
+          <h2 class="mt-1 font-alternate text-titulo font-bold text-valor">{{ ficha()?.organizacion?.nombre ?? 'Organización' }}</h2>
+        </div>
+        <div class="flex flex-wrap items-center gap-2">
+          <app-boton importancia="secundaria" (accion)="escribirle()">Escribirle</app-boton>
+          <app-boton importancia="secundaria" (accion)="administrarEstado()">Estado y vigencia</app-boton>
+          @if (ficha()?.organizacion; as o) { @if (!o.correoConfirmado && o.correosDeCuenta.length > 0) {
+            <app-boton importancia="secundaria" identificador="confirmar-correo" (accion)="confirmarElCorreo()">Confirmar el correo</app-boton>
+          } }
+          <app-boton importancia="terciaria" etiqueta="Cerrar la ficha" (accion)="cerrarFicha()">Cerrar</app-boton>
+        </div>
+      </header>
+      @if (avisoDeAsistencia()) {
+        <p class="mt-4 text-cuerpo font-semibold text-verde-texto" role="status">{{ avisoDeAsistencia() }}</p>
+      }
+      @if (errorDeAsistencia()) {
+        <p class="mt-4 text-cuerpo font-semibold text-amber-800" role="alert">{{ errorDeAsistencia() }}</p>
+      }
+      @if (cargandoFicha()) {
+        <app-estado-de-lista tipo="cargando" titulo="Leyendo la ficha…" />
+      } @else if (errorFicha()) {
+        <p data-error-ficha class="mt-4 text-cuerpo text-amber-800">{{ errorFicha() }}</p>
+      } @else if (ficha(); as f) {
+        <div class="mt-6 max-w-7xl space-y-8">
+          @if (mensajes().length > 0) {
+            <section class="space-y-4">
+              <h3 class="border-t border-filete pt-4 font-alternate text-dato font-bold uppercase tracking-[0.18em] text-seccion">Mensajes enviados</h3>
+              <ul class="divide-y divide-filete">
+                @for (mensaje of mensajes(); track mensaje.id) {
+                  <li class="py-3">
+                    <div class="flex flex-wrap items-start justify-between gap-2">
+                      <p class="text-lectura font-semibold text-valor">{{ mensaje.asunto }}</p>
+                      <span class="text-dato font-semibold" [class.text-verde-texto]="mensaje.leidoEn" [class.text-amber-700]="!mensaje.leidoEn">{{ mensaje.leidoEn ? 'Leído' : 'Sin leer' }}</span>
+                    </div>
+                    <p class="mt-1 text-cuerpo leading-relaxed text-prosa">{{ mensaje.mensaje }}</p>
+                    <p class="mt-1 text-dato text-rotulo">
+                      {{ mensaje.remitenteNombre || 'Sin remitente registrado' }} · {{ mensaje.fechaEnvio | date: 'd MMM y, HH:mm':'':'es-CO' }}@if (mensaje.destinatarioCorreo) { · {{ mensaje.destinatarioCorreo }} }
+                    </p>
+                  </li>
+                }
+              </ul>
+            </section>
+          }
+          <section class="space-y-4">
+            <h3 class="border-t border-filete pt-4 font-alternate text-dato font-bold uppercase tracking-[0.18em] text-seccion">Identidad</h3>
+            <dl class="grid gap-x-10 gap-y-6 sm:grid-cols-2 lg:grid-cols-3">
+              <div class="flex flex-col"><app-dato-en-lectura rotulo="Estado" [valor]="f.organizacion.estadoEtiqueta"></app-dato-en-lectura></div>
+              <div class="flex flex-col"><app-dato-en-lectura rotulo="Territorio" [valor]="f.organizacion.territorio | nombrePropio"></app-dato-en-lectura></div>
+              <div class="flex flex-col"><app-dato-en-lectura rotulo="Correo" [valor]="f.organizacion.correoContacto"></app-dato-en-lectura></div>
+              <div class="flex flex-col"><app-dato-en-lectura rotulo="Teléfono" [valor]="f.organizacion.telefono"></app-dato-en-lectura></div>
+            </dl>
+          </section>
+          <section class="space-y-4">
+            <h3 class="border-t border-filete pt-4 font-alternate text-dato font-bold uppercase tracking-[0.18em] text-seccion">Persona responsable</h3>
+            @if (f.organizacion.responsable; as resp) {
+              <dl class="grid gap-x-10 gap-y-6 sm:grid-cols-2 lg:grid-cols-3">
+                <div class="flex flex-col"><app-dato-en-lectura rotulo="Nombre" [valor]="resp.nombre"></app-dato-en-lectura></div>
+                <div class="flex flex-col"><app-dato-en-lectura rotulo="Correo" [valor]="resp.correo"></app-dato-en-lectura></div>
+                <div class="flex flex-col"><app-dato-en-lectura rotulo="Origen del dato" [valor]="origenDe(f.organizacion).texto"></app-dato-en-lectura></div>
+              </dl>
+            } @else {
+              <p class="text-cuerpo text-prosa">Sin responsable declarado.</p>
+            }
+          </section>
+          <section class="space-y-4">
+            <h3 class="border-t border-filete pt-4 font-alternate text-dato font-bold uppercase tracking-[0.18em] text-seccion">Procesos administrados</h3>
+            @if (gruposDeProcesos(f).length === 0) {
+              <p class="text-cuerpo text-prosa">Esta organización todavía no administra ningún proceso.</p>
+            } @else {
+              <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                @for (grupo of gruposDeProcesos(f); track grupo.etiqueta) {
+                  <div>
+                    <p class="text-dato text-rotulo">{{ grupo.etiqueta }} · {{ grupo.items.length }}</p>
+                    <ul class="mt-2 space-y-1.5">
+                      @for (item of grupo.items; track item.id) {
+                        <li class="flex flex-wrap items-center gap-2 text-cuerpo" data-proceso-administrado>
+                          <button type="button" (click)="verFestival.emit(item.id)" data-abrir-proceso
+                            class="text-left font-semibold text-morado underline-offset-2 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-morado">{{ item.nombre }}</button>
+                          <app-indicador-de-estado
+                            [etiqueta]="estadoDelProceso(item.estado)"
+                            [tono]="tonoDelEstado(item.estado)"
+                            [matiz]="matizDelEstado(item.estado)"
+                            [conTexto]="true"></app-indicador-de-estado>
+                        </li>
+                      }
+                    </ul>
+                  </div>
+                }
+              </div>
+            }
+          </section>
+          <section class="space-y-4">
+            <h3 class="border-t border-filete pt-4 font-alternate text-dato font-bold uppercase tracking-[0.18em] text-seccion">Solicitudes y vinculaciones</h3>
+            @if (f.solicitudes.length === 0 && f.reclamaciones.length === 0) {
+              <p class="text-cuerpo text-prosa">No hay solicitudes ni reclamaciones asociadas.</p>
+            } @else {
+              <ul class="divide-y divide-filete">
+                @for (s of f.solicitudes; track s.id) {
+                  <li class="py-2.5">
+                    <p class="text-lectura font-semibold text-valor">{{ s.recordName || ('Registro #' + s.recordId) }}</p>
+                    <p class="mt-0.5 text-dato text-rotulo">Vinculación · {{ etiquetaDeEstado(s.status) }}</p>
+                  </li>
+                }
+                @for (r of f.reclamaciones; track r.id) {
+                  <li class="py-2.5">
+                    <p class="text-lectura font-semibold text-valor">{{ r.registroNombre || ('Registro #' + r.registroCanonicoId) }}</p>
+                    <p class="mt-0.5 text-dato text-rotulo">Reclamación de administración · {{ etiquetaDeEstado(r.estado) }}</p>
+                  </li>
+                }
+              </ul>
+            }
+          </section>
+          <section class="space-y-4">
+            <h3 class="border-t border-filete pt-4 font-alternate text-dato font-bold uppercase tracking-[0.18em] text-seccion">Historial</h3>
+            <app-boton importancia="secundaria" tamano="menudo" (accion)="historialAbierto.set(f.organizacion)">Ver historial y procedencia</app-boton>
+          </section>
+        </div>
+      }
+    </section>
+  }
+</div>
+
+@if (historialAbierto(); as elegida) {
+  <app-historial-de-registro
+    [titulo]="elegida.nombre"
+    [registro]="{ tabla: tablaDeAuditoria, id: elegida.id }"
+    [procedencia]="elegida.procedencia"
+    (cerrar)="historialAbierto.set(null)"></app-historial-de-registro>
+}
+
+@if (formularioDeMensaje(); as m) {
+  <!--
+    EL SERVIDOR RESUELVE A QUIEN LE LLEGA. Quien escribe no tiene por qué conocer los correos de la
+    organización, y pedírselos abriría la puerta a escribirle a cualquiera desde una pantalla que
+    dice «organización».
+  -->
+  <app-dialogo-de-formulario
+    titulo="Escribirle a la organización"
+    proposito="Le llegará a quienes administran la organización, en su propio panel. Si nadie ha reclamado todavía su administración, no habrá quién lo lea y se te dirá."
+    verbo="Enviar"
+    [guardando]="trabajando()"
+    [puedeGuardar]="!!m.asunto.trim() && !!m.mensaje.trim()"
+    [error]="errorDeAsistencia()"
+    identificador="enviar-mensaje"
+    (guardar)="enviarMensaje()"
+    (cerrar)="cerrarMensaje()">
+    <label class="mt-5 block campo__rotulo" for="mensaje-asunto">Asunto</label>
+    <input id="mensaje-asunto" name="asunto" [ngModel]="m.asunto" (ngModelChange)="campoDelMensaje('asunto', $event)"
+      placeholder="Falta tu personería jurídica"
+      class="mt-1.5 w-full rounded-xl border border-slate-200 px-3 py-2 text-xs text-slate-700 outline-none focus:border-morado" />
+
+    <label class="mt-4 block campo__rotulo" for="mensaje-cuerpo">Mensaje</label>
+    <textarea id="mensaje-cuerpo" name="mensaje" rows="5" [ngModel]="m.mensaje" (ngModelChange)="campoDelMensaje('mensaje', $event)"
+      placeholder="Dile qué falta y cómo corregirlo. No edites tú sus datos."
+      class="mt-1.5 w-full rounded-xl border border-slate-200 px-3 py-2 text-xs text-slate-700 outline-none focus:border-morado"></textarea>
+  </app-dialogo-de-formulario>
+}
+
+<!--
+  CONFIRMAR EL CORREO POR OTRA VIA. Mientras no haya proveedor, el enlace no sale del sistema y la
+  organización no puede abrirlo: sin esta acción se quedaría bloqueada por un mensaje que nadie
+  recibe. Lo que la separa de un bypass es que exige decir CÓMO se comprobó y queda en la bitácora
+  con quién y cuándo.
+-->
+<!--
+  CONFIRMAR EL CORREO POR OTRA VIA. Mientras no haya proveedor, el enlace no sale del sistema y la
+  organización no puede abrirlo: sin esta acción se quedaría bloqueada por un mensaje que nadie
+  recibe. Lo que la separa de un bypass es que exige decir CÓMO se comprobó y queda en la bitácora
+  con quién y cuándo.
+-->
+@if (formularioDeConfirmacion(); as c) {
+  <app-dialogo-de-formulario
+    titulo="Confirmar el correo de la organización"
+    proposito="Esto da por comprobado su canal de contacto y la deja operar. No valida a la organización ni aprueba sus datos: lo que publique sigue pasando por revisión."
+    verbo="Dar por comprobado"
+    [guardando]="trabajando()"
+    [puedeGuardar]="motivoDeConfirmacionSuficiente()"
+    [error]="errorDeAsistencia()"
+    identificador="guardar-confirmacion"
+    (guardar)="guardarConfirmacion()"
+    (cerrar)="cerrarConfirmacion()">
+    @if (correosParaConfirmar().length > 1) {
+      <!--
+        CON VARIAS CUENTAS HAY QUE DECIR CUAL. Dar por buena «la primera» confirmaría una
+        dirección que quien llamó no verificó, que es justo lo que esto viene a evitar.
+      -->
+      <label class="mt-5 block campo__rotulo" for="correo-comprobado">Qué dirección comprobaste</label>
+      <select id="correo-comprobado" name="correoComprobado" [ngModel]="c.correo" (ngModelChange)="campoDeConfirmacion('correo', $event)"
+        class="mt-1.5 w-full rounded-xl border border-slate-200 px-3 py-2 text-xs text-slate-700 outline-none focus:border-morado">
+        <option value="">Elige una dirección</option>
+        @for (correo of correosParaConfirmar(); track correo) {
+          <option [value]="correo">{{ correo }}</option>
+        }
+      </select>
+    } @else if (correosParaConfirmar().length === 1) {
+      <p class="mt-5 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-xs text-slate-700">
+        Se dará por comprobada <b class="break-all">{{ correosParaConfirmar()[0] }}</b>.
+      </p>
+    }
+
+    <label class="mt-4 block campo__rotulo" for="confirmacion-motivo">Cómo lo comprobaste</label>
+    <textarea id="confirmacion-motivo" name="motivoConfirmacion" rows="3" [ngModel]="c.motivo" (ngModelChange)="campoDeConfirmacion('motivo', $event)"
+      placeholder="Verificado por teléfono con la directora el 12 de septiembre."
+      class="mt-1.5 w-full rounded-xl border border-slate-200 px-3 py-2 text-xs text-slate-700 outline-none focus:border-morado"></textarea>
+    <small class="mt-1 block text-dato leading-relaxed text-slate-400">
+      Queda en la bitácora con tu nombre y la fecha. Es lo que distingue una comprobación real de
+      un clic para desbloquear.
+    </small>
+  </app-dialogo-de-formulario>
+}
+
+@if (formularioDeEstado(); as e) {
+  <!--
+    UN SOLO EJE Y UNA ACCION POR ESTADO. Aquí había un desplegable con ocho códigos del circuito
+    editorial —«Publicado», «Aprobado»— y, debajo, una casilla de «vigencia» aparte, con una tabla
+    explicando la diferencia entre las dos cosas. Esa tabla era la señal de que el modelo estaba mal:
+    si «inactiva» describe una situación de la organización, es un estado, no una segunda columna.
+    Ahora se elige el ACTO, y el acto dice qué pasa.
+  -->
+  <app-dialogo-de-formulario
+    titulo="Estado de la organización"
+    [proposito]="'Esto no cambia sus datos: cambia cómo el sistema la trata. Hoy está ' + e.estadoActual + '.'"
+    [verbo]="accionElegida()"
+    [guardando]="trabajando()"
+    [puedeGuardar]="!cierraLaOrganizacion() || !!e.motivo.trim()"
+    [error]="errorDeAsistencia()"
+    identificador="guardar-estado"
+    (guardar)="guardarEstado()"
+    (cerrar)="cerrarEstado()">
+    <label class="mt-5 block campo__rotulo" for="estado-organizacion">Qué quieres hacer</label>
+    <select id="estado-organizacion" name="estadoOrganizacion" [ngModel]="e.estado" (ngModelChange)="campoDelEstado('estado', $event)"
+      class="mt-1.5 w-full rounded-xl border border-slate-200 px-3 py-2 text-xs text-slate-700 outline-none focus:border-morado">
+      @for (opcion of accionesDisponibles(); track opcion.estado) {
+        <option [value]="opcion.estado">{{ opcion.accion }}</option>
+      }
+    </select>
+    @if (ayudaDelEstado()) {
+      <!-- QUE PASA SI SE HACE, en la misma pantalla en la que se decide. -->
+      <small class="mt-1.5 block text-dato leading-relaxed text-slate-500" data-ayuda-estado>{{ ayudaDelEstado() }}</small>
+    }
+
+    @if (cierraLaOrganizacion()) {
+      <!-- DESACTIVAR O ELIMINAR LA SACA DE LA OPERACION: el motivo es la mitad del acto. -->
+      <label class="mt-4 block campo__rotulo" for="estado-motivo">Por qué</label>
+      <textarea id="estado-motivo" name="motivoEstado" rows="3" [ngModel]="e.motivo" (ngModelChange)="campoDelEstado('motivo', $event)"
+        placeholder="La fundación se disolvió en agosto de 2026."
+        class="mt-1.5 w-full rounded-xl border border-slate-200 px-3 py-2 text-xs text-slate-700 outline-none focus:border-morado"></textarea>
+      <small class="mt-1 block text-dato text-slate-400">Dentro de seis meses nadie recordará el motivo si no queda escrito.</small>
+    }
+
+
+    @if (procesosQueBloquean().length > 0) {
+      <!--
+        LO QUE EL CIERRE DEJARIA SIN NADIE. Un Festival publicado cuya organización se queda sin
+        cuentas sigue en la página pública y ya no hay quien lo edite, reciba propuestas ni lo
+        reclame: solo se puede reclamar lo que está en custodia del Programa.
+      -->
+      <div class="mt-4 rounded-xl border border-amber-200 bg-amber-50 p-3" data-procesos-bloquean>
+        <p class="text-dato font-black uppercase tracking-wider text-amber-800">Falta decidir qué pasa con sus procesos</p>
+        <ul class="mt-2 space-y-1">
+          @for (proceso of procesosQueBloquean(); track proceso.id) {
+            <li class="flex flex-wrap items-center gap-2 text-xs text-amber-900">
+              <span class="font-medium">{{ proceso.nombre }}</span>
+              <app-indicador-de-estado
+                [etiqueta]="estadoDelProceso(proceso.estado)"
+                [tono]="tonoDelEstado(proceso.estado)"
+                [conTexto]="true"></app-indicador-de-estado>
+            </li>
+          }
+        </ul>
+        <!--
+          DOS SALIDAS, Y DICEN A DONDE LLEVAN. Solo existía «liberar», así que cerrar una
+          organización dejaba sus festivales publicados a nombre del Programa aunque ya no fueran
+          a celebrarse, y retirarlos obligaba a salir de aquí, ir a Festivales y eliminarlos uno a
+          uno. El criterio es este: «debe dar la opción de
+          también eliminar los procesos registrados o liberarlos».
+
+          NINGUNA BORRA NADA: archivar es el mismo acto que «Eliminar del ecosistema» sobre un
+          Festival —sale del portal y conserva ficha, historial y bitácora—, y las dos quedan
+          escritas con el motivo.
+        -->
+        <dl class="mt-3 space-y-2 text-dato leading-relaxed text-amber-800">
+          <div>
+            <dt class="inline font-bold">Liberarlos:</dt>
+            <dd class="inline"> siguen publicados y su custodia vuelve al Programa, donde otra organización puede reclamarlos.</dd>
+          </div>
+          <div>
+            <dt class="inline font-bold">Archivarlos:</dt>
+            <dd class="inline"> salen del sitio público y conservan su ficha, su historial y su bitácora.</dd>
+          </div>
+        </dl>
+        <!--
+          DOS SALIDAS, CON EL BOTON DEL PROYECTO. Eran los dos últimos botones de la consola escritos
+          a mano, con su propio ámbar y su propio peso; y cambiaban el texto a «Trabajando…», que es
+          justo lo que mueve el control bajo el puntero de quien acaba de apuntar ahí.
+        -->
+        <div class="mt-3 flex flex-wrap gap-2">
+          <app-boton importancia="confirmar" tamano="menudo" identificador="liberar-procesos"
+            [ocupado]="trabajando()" [deshabilitado]="!e.motivo.trim()"
+            (accion)="guardarEstado('liberar')">Liberar sus procesos</app-boton>
+          <app-boton importancia="secundaria" tamano="menudo" identificador="archivar-procesos"
+            [ocupado]="trabajando()" [deshabilitado]="!e.motivo.trim()"
+            (accion)="guardarEstado('archivar')">Archivar sus procesos</app-boton>
+        </div>
+      </div>
+    }
+  </app-dialogo-de-formulario>
+}

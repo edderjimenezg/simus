@@ -1,0 +1,208 @@
+@if (ficha(); as f) {
+  <section class="space-y-6" aria-labelledby="ficha-consola-titulo">
+
+    <!-- ═══════════ Cabecera: qué es y en qué estado está ═══════════ -->
+    <header class="flex flex-col gap-4 border-b border-slate-200 pb-5 lg:flex-row lg:items-start lg:justify-between">
+      <div class="min-w-0">
+        <p class="font-mono text-dato tracking-widest text-slate-400">{{ f.codigo }}</p>
+        <h3 id="ficha-consola-titulo" class="mt-1 font-alternate text-lg font-bold uppercase tracking-wide text-morado">{{ f.titulo }}</h3>
+        @if (f.subtitulo || f.designacionVolumen) {
+          <p class="mt-1 text-sm leading-relaxed text-slate-500">
+            {{ f.subtitulo }}@if (f.subtitulo && f.designacionVolumen) {<span> · </span>}{{ f.designacionVolumen }}
+          </p>
+        }
+        <!--
+          LOS DOS ESTADOS SE LEEN JUNTOS Y SEPARADOS, porque son dos decisiones distintas: una ficha
+          validada puede quedarse sin publicar, y una publicada puede estar pendiente de revisión.
+        -->
+        <div class="mt-3 flex flex-wrap items-center gap-4">
+          <span class="inline-flex items-center gap-2">
+            <span class="text-dato font-bold uppercase tracking-widest text-slate-400">Catalogación</span>
+            <app-indicador-de-estado
+              [etiqueta]="rotuloDeCatalogacion(f.estadoCatalogacion)"
+              [tono]="tonoDelEstado(f.estadoCatalogacion)"
+              [matiz]="matizDelEstado(f.estadoCatalogacion)"
+              [conTexto]="true"></app-indicador-de-estado>
+          </span>
+          <span class="inline-flex items-center gap-2">
+            <span class="text-dato font-bold uppercase tracking-widest text-slate-400">Publicación</span>
+            <app-indicador-de-estado
+              [etiqueta]="rotuloDePublicacion(f.estadoPublicacion)"
+              [tono]="tonoDelEstado(f.estadoPublicacion)"
+              [matiz]="matizDelEstado(f.estadoPublicacion)"
+              [conTexto]="true"></app-indicador-de-estado>
+          </span>
+        </div>
+      </div>
+      <button type="button" (click)="cerrar.emit()"
+              class="shrink-0 rounded-lg border border-slate-300 bg-white px-4 py-2 text-xs font-bold text-morado transition hover:border-morado">Volver al listado</button>
+    </header>
+
+    @if (error()) { <p role="alert" class="border-l-4 border-red-500 bg-red-50 p-3 text-sm text-red-800">{{ error() }}</p> }
+    <p role="status" [class.hidden]="!aviso()" class="border-l-4 border-emerald-500 bg-emerald-50 p-3 text-sm text-emerald-800">{{ aviso() }}</p>
+
+    <!--
+      QUE LE FALTA PARA VERSE, ANTES DE PULSAR. La puerta pública exige cuatro cosas a la vez y el
+      servidor las comprueba al publicar; enterarse ahí es enterarse tarde. Enumerarlas convierte
+      «no se puede publicar» en una lista de tareas.
+    -->
+    @if (sePuedeVerEnElPortal()) {
+      <p class="border-l-4 border-emerald-400 bg-emerald-50/60 px-4 py-3 text-sm leading-relaxed text-emerald-900">
+        Esta ficha se está viendo en el portal.
+      </p>
+    } @else if (loQueFalta().length > 0) {
+      <div class="border-l-4 border-amber-400 bg-amber-50 px-4 py-3">
+        <p class="text-sm font-bold text-amber-950">Todavía no se puede ver en el portal</p>
+        <ul class="mt-2 list-disc space-y-1 pl-5 text-sm leading-relaxed text-amber-900">
+          @for (falta of loQueFalta(); track falta) { <li>{{ falta }}</li> }
+        </ul>
+      </div>
+    } @else {
+      <p class="border-l-4 border-slate-300 bg-slate-50 px-4 py-3 text-sm leading-relaxed text-slate-600">
+        Cumple las condiciones para publicarse, pero todavía no está publicada.
+      </p>
+    }
+
+    <!-- ═══════════ Lo que el portal NO enseña ═══════════ -->
+    <div class="grid gap-4 md:grid-cols-2">
+      @if (administrativos().length > 0) {
+        <div class="rounded-2xl border border-slate-200 bg-slate-50/60 p-5">
+          <h4 class="font-alternate text-cuerpo font-bold uppercase tracking-wide text-morado">Trabajo de catalogación</h4>
+          <p class="mt-1 text-xs leading-relaxed text-slate-500">Esto no sale al portal: describe cómo está hecha la ficha, no la obra.</p>
+          <dl class="mt-4 space-y-3">
+            @for (dato of administrativos(); track dato.rotulo) {
+              <div>
+                <dt class="text-dato font-bold uppercase tracking-widest text-slate-400">{{ dato.rotulo }}</dt>
+                <dd class="mt-0.5 text-sm leading-relaxed text-slate-700">{{ dato.valor }}</dd>
+              </div>
+            }
+          </dl>
+        </div>
+      }
+
+      <div class="rounded-2xl border border-slate-200 bg-slate-50/60 p-5">
+        <h4 class="font-alternate text-cuerpo font-bold uppercase tracking-wide text-morado">Derechos y procedencia</h4>
+        <p class="mt-1 text-xs leading-relaxed text-slate-500">Al portal solo sale la licencia; quién la verificó se queda aquí.</p>
+        <dl class="mt-4 space-y-3">
+          @for (dato of derechos(); track dato.rotulo) {
+            <div>
+              <dt class="text-dato font-bold uppercase tracking-widest text-slate-400">{{ dato.rotulo }}</dt>
+              <dd class="mt-0.5 text-sm leading-relaxed text-slate-700">{{ dato.valor }}</dd>
+            </div>
+          }
+          @if (f.fuentes.length > 0) {
+            <div>
+              <dt class="text-dato font-bold uppercase tracking-widest text-slate-400">Fuentes que cita</dt>
+              <dd class="mt-0.5 space-y-1">
+                @for (fuente of f.fuentes; track fuente.id) {
+                  <p class="text-sm leading-relaxed text-slate-700">{{ fuente.nombre }}@if (fuente.verificadaPor) {<span class="text-slate-400"> · verificada por {{ fuente.verificadaPor }}</span>}</p>
+                }
+              </dd>
+            </div>
+          } @else {
+            <div>
+              <dt class="text-dato font-bold uppercase tracking-widest text-slate-400">Fuentes que cita</dt>
+              <dd class="mt-0.5 text-sm leading-relaxed text-amber-800">Ninguna. Sin fuente, la ficha no puede verse en el portal.</dd>
+            </div>
+          }
+          @if (f.procedencia; as p) {
+            <div>
+              <dt class="text-dato font-bold uppercase tracking-widest text-slate-400">Procedencia del registro</dt>
+              <dd class="mt-0.5 text-sm leading-relaxed text-slate-700">{{ p.contextoEtiqueta || p.contextoOrigen }}@if (p.usuarioCreadorNombre) {<span> · {{ p.usuarioCreadorNombre }}</span>}</dd>
+            </div>
+          }
+        </dl>
+      </div>
+    </div>
+
+    <!-- ═══════════ El hilo: decisiones y anotaciones, en un solo orden ═══════════ -->
+    <section class="rounded-2xl border border-slate-200 bg-white p-5" aria-labelledby="hilo-titulo">
+      <h4 id="hilo-titulo" class="font-alternate text-cuerpo font-bold uppercase tracking-wide text-morado">Revisiones y anotaciones</h4>
+      <p class="mt-1 text-xs leading-relaxed text-slate-500">
+        Lo que se decidió sobre esta ficha y lo que alguien anotó, en el mismo orden.
+      </p>
+
+      <div class="mt-4 space-y-2">
+        <label for="anotacion-nueva" class="block text-xs font-bold text-slate-600">
+          Dejar una anotación
+          <textarea id="anotacion-nueva" rows="2" [ngModel]="anotacion()" (ngModelChange)="anotacion.set($event)"
+                    placeholder="Qué hay que revisar, qué se comprobó, qué falta…"
+                    class="mt-1 w-full rounded-lg border border-slate-300 p-3 text-sm font-normal text-slate-900 focus:border-verde-medio focus:outline-none focus-visible:ring-2 focus-visible:ring-verde-medio"></textarea>
+        </label>
+        <div class="flex justify-end">
+          <!-- NO SE OFRECE GUARDAR UNA ANOTACION VACIA: una entrada en blanco no le dice nada a quien la lea después. -->
+          <button type="button" (click)="guardarAnotacion()"
+                  [disabled]="guardandoAnotacion() || !anotacion().trim()"
+                  class="rounded-lg bg-morado px-4 py-2 text-xs font-bold text-white transition hover:bg-morado/90 disabled:opacity-50">
+            {{ guardandoAnotacion() ? 'Guardando…' : 'Anotar' }}
+          </button>
+        </div>
+      </div>
+
+      @if (cargandoHistorial()) {
+        <p role="status" class="py-4 text-sm text-slate-500">Consultando el historial…</p>
+      } @else if (historial().length === 0) {
+        <p class="mt-4 rounded-xl border border-slate-200 bg-slate-50 p-4 text-sm leading-relaxed text-slate-600">
+          Todavía no hay nada en el historial de esta ficha. Aparecerá aquí en cuanto se valide, se
+          publique o alguien deje una anotación.
+        </p>
+      } @else {
+        <ol class="mt-5 space-y-0 border-l-2 border-slate-100 pl-5">
+          @for (entrada of historial(); track entrada.id) {
+            <li class="relative pb-5 last:pb-0">
+              <span aria-hidden="true"
+                    [class]="'absolute -left-[1.6rem] top-1.5 h-2.5 w-2.5 rounded-full ' + (esAnotacion(entrada) ? 'bg-slate-300' : 'bg-verde-medio')"></span>
+              <p class="text-xs font-bold text-slate-900">{{ tituloDeLaEntrada(entrada) }}</p>
+              <p class="mt-0.5 text-dato tabular-nums text-slate-400">
+                {{ entrada.fecha | date: formatoDeFecha:'':'es-CO' }}@if (entrada.usuarioNombre) {<span> · {{ entrada.usuarioNombre }}</span>}
+              </p>
+              @if (entrada.comentario) {
+                <p class="mt-2 rounded-lg bg-slate-50 px-3 py-2 text-sm leading-relaxed text-slate-700">{{ entrada.comentario }}</p>
+              }
+            </li>
+          }
+        </ol>
+      }
+    </section>
+
+    <!--
+      ═══════════ La normalización, que es trabajo de catalogación y no de lectura ═══════════
+
+      ESTOS DATOS ESTABAN EN LA FICHA PUBLICA Y NO LE SERVIAN A NADIE ALLI. «Tipo de recurso
+      (Dublin Core): MovingImage» es un término del DCMI Type Vocabulary —no se traduce porque es un
+      identificador de intercambio, y por eso aparecía en inglés en mitad de una ficha en español—,
+      y «RDA 336/337/338» es la norma que da el término, no el término. Nada de eso ayuda a quien
+      busca una obra; todo eso importa a quien la cataloga y a quien exporta el catálogo. Aquí sí.
+    -->
+    <section class="rounded-2xl border border-slate-200 bg-white p-5" aria-labelledby="normalizacion-titulo">
+      <h4 id="normalizacion-titulo" class="font-alternate text-cuerpo font-bold uppercase tracking-wide text-morado">Normalización y estándares</h4>
+      <p class="mt-1 text-xs leading-relaxed text-slate-500">
+        Los términos normalizados de la ficha. No se publican: hacen la ficha citable e intercambiable.
+      </p>
+      <dl class="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
+        @for (fila of normalizacionInterna(); track fila.rotulo) {
+          <div class="min-w-0">
+            <dt class="text-dato font-bold uppercase tracking-widest text-slate-400">{{ fila.rotulo }}</dt>
+            <dd class="mt-0.5 break-words font-nunito text-xs leading-relaxed text-slate-700">{{ fila.valor }}</dd>
+          </div>
+        }
+      </dl>
+      @if (normalizacionInterna().length === 0) {
+        <p class="mt-3 font-nunito text-xs text-slate-400">Esta ficha todavía no tiene tipología normalizada.</p>
+      }
+    </section>
+
+    <!-- ═══════════ Y la ficha, exactamente como la ve el portal ═══════════ -->
+    <section class="rounded-2xl border border-slate-200 bg-slate-50/60 p-5" aria-labelledby="como-se-ve-titulo">
+      <h4 id="como-se-ve-titulo" class="font-alternate text-cuerpo font-bold uppercase tracking-wide text-morado">Como se ve en el portal</h4>
+      <p class="mt-1 text-xs leading-relaxed text-slate-500">
+        Es el mismo componente que pinta el catálogo público: lo que se ve aquí es lo que verá quien consulte.
+      </p>
+      @if (comoLoVeElPortal(); as recurso) {
+        <div class="mt-5 rounded-xl bg-white p-5">
+          <app-ficha-editorial [item]="recurso" variante="fila"></app-ficha-editorial>
+        </div>
+      }
+    </section>
+  </section>
+}

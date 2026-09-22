@@ -1,0 +1,140 @@
+<!--
+  ALTO MINIMO Y NO ALTO FIJO en el modo compacto, desde.
+
+  Era `h-[24rem] lg:h-[40vh]`. Con `pt-28` (112px, que es lo que mide la barra fija) y `pb-8`
+  (32px), un encabezado de 256px —40vh en un viewport de 639px— deja 112px utiles. Medido ese
+  dia a 1280x639: el contenido de /ecosistema ocupa 198px, /pnmc y /ejes 172px. Los tres se
+  desbordaban, 86px el peor. Como el `header` es `flex items-center` y ademas `overflow-hidden`,
+  el bloque no empujaba: se centraba en los 256px y el titulo empezaba en y=69 en vez de y=112,
+  es decir 43px DENTRO de la franja reservada para la barra. Eso es lo que se ve pegado.
+
+  Con `min-h-` el relleno se respeta y el encabezado crece con su texto. El modo a pantalla
+  completa conserva su alto exacto: ahi el alto ES el diseno.
+-->
+<header
+  class="relative flex items-center overflow-hidden bg-[#291242] text-left w-full"
+  [class.h-[100svh]]="fullScreen"
+  [class.min-h-[20rem]]="!fullScreen && backOnly"
+  [class.lg:min-h-[35vh]]="!fullScreen && backOnly"
+  [class.min-h-[24rem]]="!fullScreen && !backOnly"
+  [class.lg:min-h-[40vh]]="!fullScreen && !backOnly"
+  [class.pt-28]="true"
+  [class.pb-6]="backOnly"
+  [class.lg:pb-8]="backOnly"
+  [class.pb-8]="!backOnly"
+  [class.lg:pb-8]="!backOnly"
+>
+  <div class="absolute inset-0 z-0">
+    <img
+      [src]="bgImage"
+      alt=""
+      class="w-full h-full object-cover grayscale opacity-28 transition-all duration-1000"
+      [class.object-center]="true"
+      [class.scale-[1.18]]="fullScreen"
+      [class.md:scale-[1.1]]="fullScreen"
+      [ngClass]="bgImageClassName"
+    />
+    <div class="absolute inset-0 bg-[#291242]/62 mix-blend-multiply z-10"></div>
+    <div class="absolute inset-0 bg-gradient-to-t from-[#291242] via-transparent to-transparent z-10"></div>
+  </div>
+
+  <div class="relative z-20 w-full max-w-7xl mx-auto px-6 lg:px-8">
+    <!-- Breadcrumb de retorno -->
+    @if (hasBackListener) {
+      <nav aria-label="Ruta de navegación" class="mb-6 lg:mb-8">
+        <ol class="flex items-center gap-2 font-alternate text-[0.66rem] font-bold uppercase tracking-widest">
+          <li>
+            <button
+              type="button"
+              (click)="regresoSolicitado.emit()"
+              class="cursor-pointer rounded-sm border-0 bg-transparent p-0 uppercase text-[#00DA5E]/75 transition-colors hover:text-[#8BF784] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00DA5E] focus-visible:ring-offset-2 focus-visible:ring-offset-[#291242]"
+            >{{ backLabel }}</button>
+          </li>
+          @if (breadcrumbCurrent) {
+            <li class="text-[#00DA5E]/35" aria-hidden="true">/</li>
+            <li class="max-w-[16rem] truncate text-[#00DA5E]" aria-current="page">{{ breadcrumbCurrent }}</li>
+          }
+        </ol>
+      </nav>
+    }
+
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-14 items-center w-full">
+      <div
+        [class.lg:col-span-7]="hasVisual"
+        [class.lg:col-span-12]="!hasVisual"
+        [class.space-y-6]="fullScreen"
+        [class.md:space-y-8]="fullScreen"
+        [class.space-y-4]="!fullScreen"
+      >
+        @if (!backOnly) {
+          @if (tag && fullScreen) {
+            <app-hero-eyebrow [text]="tag"></app-hero-eyebrow>
+          }
+          @if (titleTone === 'split-lines') {
+            <app-two-tone-line-title
+              [text]="getFullTitle()"
+              [className]="getTitleClassName()"
+            ></app-two-tone-line-title>
+          } @else {
+            <h1 [class]="getTitleClassName() + ' font-gregor leading-[1.1] uppercase tracking-tighter drop-shadow-xl'">
+              {{ title }}
+              @if (titleAccent) {
+                @if (fullScreen) {
+                  <br/>
+                }
+                <span [class]="(fullScreen ? 'text-[#00DA5E] italic' : 'text-white')">{{ fullScreen ? '' : ' ' }}{{ titleAccent }}</span>
+              }
+            </h1>
+          }
+          <!--
+            La descripción se pintaba SOLO en el modo a pantalla completa. Las
+            páginas que usan el encabezado compacto la pasaban igual y se perdía
+            en silencio: así estaba «Sobre el PNMC», con `about_description`
+            editable en el panel y ausente de la página. Un input que se acepta y
+            a veces se ignora es una trampa; ahora se pinta siempre que traiga
+            texto, con el tratamiento que corresponde a cada modo.
+          -->
+          @if (description) {
+            @if (fullScreen) {
+              <p class="font-nunito text-sm md:text-base lg:text-lg text-slate-300 font-light leading-relaxed max-w-xl border-l border-[#8BF784]/30 pl-5">
+                {{ description }}
+              </p>
+            } @else {
+              <p class="font-nunito text-sm md:text-base text-white/80 font-light leading-relaxed max-w-2xl">
+                {{ description }}
+              </p>
+            }
+          }
+        }
+
+        @if (!backOnly && childrenPosition !== 'bottom-right') {
+          <div class="flex flex-wrap gap-4">
+            <ng-content select="[buttons]"></ng-content>
+          </div>
+        }
+      </div>
+
+      @if (!backOnly && hasVisual) {
+        <div class="lg:col-span-5 relative hidden md:block">
+          <ng-content select="[visual]"></ng-content>
+        </div>
+      }
+    </div>
+  </div>
+
+  @if (childrenPosition === 'bottom-right') {
+    <div class="absolute bottom-10 right-6 lg:right-12 z-30">
+      <ng-content select="[buttons]"></ng-content>
+    </div>
+  }
+
+  @if (fullScreen) {
+    <button
+      type="button"
+      (click)="scrollDown()"
+      class="absolute bottom-10 left-1/2 -translate-x-1/2 z-30 animate-bounce hover:opacity-70 transition-opacity cursor-pointer border-0 bg-transparent"
+    >
+      <svg lucideChevronDown class="text-[#8BF784]" [size]="32"></svg>
+    </button>
+  }
+</header>

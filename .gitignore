@@ -1,0 +1,122 @@
+# OS / IDE
+.DS_Store
+**/.DS_Store
+.vscode/
+**/.vscode/
+.idea/
+**/.idea/
+.vs/
+**/.vs/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# JS/Frontend
+**/node_modules/
+**/dist/
+**/dist-ssr/
+**/.angular/
+**/.vite/
+**/coverage/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# .NET
+**/bin/
+**/obj/
+**/TestResults/
+**/*.nupkg
+**/*.snupkg
+
+# Environment / secrets
+.env
+**/.env
+**/.env.*
+!**/.env.example
+
+# Misc
+*.log
+tmp/
+backups/
+Trash/
+
+# Configuración local con credenciales reales. El repositorio versiona la
+# plantilla appsettings.Local.example.json; la copia con secretos, nunca.
+appsettings.Local.json
+appsettings.*.Local.json
+
+# Linea base del texto renderizado: se toma en el entorno del corte,
+# no se trae de una maquina de desarrollo.
+pnmc-web/tools/.snapshots/
+
+# Sondas temporales de Playwright (sesion de trabajo, no forman parte del proyecto)
+__probe_tmp*.cjs
+
+# ─────────────────────────────────────────────────────────────────────────────
+# TRAZABILIDAD INTERNA. Qué se pidió, cuándo, qué se decidió y con qué
+# instrucciones vigentes. Se conserva en la máquina como historial de trabajo y
+# NO forma parte del producto ni de la documentación pública del repositorio.
+#
+# La exclusión es técnica y no un acuerdo: se ignora la carpeta entera, no sus
+# ficheros uno a uno, para que nada nuevo se cuele por haberse creado después.
+# ─────────────────────────────────────────────────────────────────────────────
+# --- Documentación interna de trabajo -------------------------------------------------
+# EL REPOSITORIO ES LA ENTREGA. Cada push debe poder compartirse con un tercero sin revelar
+# cómo se construyó el sistema: planes, revisiones, auditorías, notas de proceso, borradores,
+# instrucciones a asistentes y cualquier archivo que solo tuviera sentido mientras se construía
+# viven fuera de Git, en `.interno/`.
+#
+# La prueba para cualquier fichero es una sola: ¿hace falta para COMPRENDER, INSTALAR, MANTENER,
+# DESPLEGAR o USAR el sistema terminado? Si no, no entra.
+.interno/
+docs/entregables/
+docs/historial/
+docs/integracion/
+docs/**/decisiones-abiertas.md
+docs/**/plan-*.md
+docs/**/revision-*.md
+docs/**/inventario-*.md
+
+# Salida generada por el arnés de auditoría de interfaz: se regenera ejecutándolo.
+pnmc-web/e2e-audit/.informe/
+
+# Trabajo con asistentes de IA: instrucciones, contexto y estado de sesión.
+.claude/
+.codex/
+.gemini/
+.copilot/
+CLAUDE.local.md
+AGENTS.local.md
+*.session.json
+
+# Guiones de comprobación escritos durante una sesión y no mantenidos. Las
+# herramientas que sí se mantienen viven en `pnmc-web/tools/` y se versionan.
+comprueba-*.mjs
+ver-*.mjs
+mide-*.mjs
+flujo*.mjs
+/pnmc-web/*.mjs
+
+# Volcados, respaldos y salidas generadas
+*.bak
+*.dump
+*.sql.gz
+dumps/
+salidas/
+output/
+
+# Configuración personal del entorno, no del proyecto
+.env.local
+*.local.json
+!appsettings.Local.example.json
+.tool-versions.local
+
+# LOS ARCHIVOS DE BLOQUEO DE WORD. Aparecen como `~$documento.docx` mientras alguien tiene el
+# archivo abierto y desaparecen al cerrarlo: versionarlos deja en el repositorio un fichero que solo
+# significa «esto estaba abierto en un portátil una tarde».
+~$*.docx
+~$*.xlsx
+~$*.pptx

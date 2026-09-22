@@ -1,0 +1,263 @@
+<!--
+  El directorio público de Mercados Musicales.
+
+  LA MISMA ARMAZON QUE EL DE FESTIVALES: encabezado, columna de filtros a la izquierda, franja de
+  cifras con el conmutador de vista, listado o cuadrícula, y paginación. Nació con una línea de
+  conteo y una tabla de tres columnas, y quedó definido igual que el de Festivales.
+
+  `section`, no `main`: el landmark principal lo declara el armazón en `app.component.html`, y un
+  `main` aquí quedaría anidado dentro de aquel.
+
+  EL DISEÑO MANDA Y EL DATO SE ADAPTA: los cuerpos de texto llevan altura explícita, así que un
+  mercado con descripción larga y otro sin ninguna ocupan lo mismo. Lo que no cabe se recorta.
+-->
+<section class="min-h-screen bg-hueso pb-24 font-nunito text-slate-700">
+  <app-compact-hero
+    backLabel="Ecosistema"
+    current="Mercados musicales"
+    title="Mercados musicales"
+    subtitle="Nodos de intercambio, visibilización y profesionalización"
+    (regresoSolicitado)="volver()"></app-compact-hero>
+
+  <div class="mx-auto max-w-[100rem]" role="region" aria-label="Explorador de Mercados musicales">
+    <div class="grid grid-cols-1 lg:grid-cols-[22rem_minmax(0,1fr)]">
+
+      <!-- ============================ FILTROS ============================ -->
+      <aside
+        aria-label="Filtros del directorio de Mercados musicales"
+        class="self-start border-b border-slate-100 bg-slate-50/50 p-7 lg:sticky lg:top-20 lg:flex lg:h-[calc(100vh-5rem)] lg:flex-col lg:self-start lg:overflow-y-auto lg:border-b-0 lg:border-r lg:p-10">
+        <form (ngSubmit)="irAResultados()">
+
+          <div class="space-y-3">
+            <label for="mercados-buscar" class="block font-alternate text-xs font-bold uppercase tracking-[0.24em] text-slate-500">
+              Buscar mercado, territorio o práctica
+            </label>
+            <span class="flex items-center gap-3 overflow-hidden rounded-2xl border border-slate-200 bg-white px-4 py-3 shadow-sm focus-within:border-verde focus-within:ring-2 focus-within:ring-verde/20">
+              <svg lucideSearch [size]="16" class="shrink-0 text-slate-400"></svg>
+              <input id="mercados-buscar" type="search" name="busqueda"
+                [ngModel]="busqueda()" (ngModelChange)="actualizarBusqueda($event)"
+                placeholder="Mercado, organización o lugar"
+                class="min-w-0 flex-1 border-0 bg-transparent text-sm text-morado outline-none placeholder:text-slate-400" />
+              <!--
+                LA «X» PARA LIMPIAR: el campo ya filtra mientras se escribe, y sin ella hay que
+                seleccionar el texto y borrarlo a mano para volver a ver todo el directorio. El botón
+                «Buscar» NO busca —eso ya ocurre solo—: lleva a los resultados, que en móvil están
+                debajo de esta columna y fuera de la pantalla.
+              -->
+              @if (busqueda()) {
+                <button type="button" (click)="actualizarBusqueda('')" aria-label="Borrar la búsqueda" title="Borrar la búsqueda"
+                  class="shrink-0 cursor-pointer rounded-full p-1 text-slate-400 transition hover:text-morado">
+                  <svg lucideX [size]="14"></svg>
+                </button>
+              }
+            </span>
+            <button type="submit"
+              class="w-full cursor-pointer rounded-xl border-0 bg-morado px-4 py-3 font-alternate text-[0.62rem] font-bold uppercase tracking-widest text-white transition hover:bg-morado-claro focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-verde focus-visible:ring-offset-2">Buscar</button>
+          </div>
+
+          <div class="mt-9 border-t border-slate-200 pt-8">
+            <div class="mb-4 flex items-center justify-between gap-3">
+              <p class="flex items-center gap-2 font-alternate text-xs font-bold uppercase tracking-[0.24em] text-slate-500">
+                <svg lucideSlidersHorizontal [size]="15" class="text-verde-medio"></svg> Territorio
+              </p>
+              <button type="button" (click)="limpiarFiltros()" [disabled]="!hayFiltros()" data-limpiar-filtros
+                class="cursor-pointer border-0 bg-transparent text-xs font-semibold text-verde-texto transition hover:underline disabled:cursor-not-allowed disabled:text-slate-300 disabled:no-underline">
+                Limpiar filtros @if (filtrosActivos()) { ({{ filtrosActivos() }}) }
+              </button>
+            </div>
+
+            <div class="space-y-4">
+              <!--
+                SOLO LOS TERRITORIOS QUE DE VERDAD TIENEN MERCADOS. Ofrecer los 33 departamentos
+                sobre un directorio con dos haría que casi cada elección devolviera una lista vacía.
+              -->
+              <label class="block"><span class="mb-2 block text-xs font-bold text-slate-600">Departamento</span>
+                <select id="mercados-departamento" name="departamento"
+                  [ngModel]="departamento()" (ngModelChange)="actualizarDepartamento($event)"
+                  class="w-full cursor-pointer rounded-xl border border-slate-200 bg-white px-3 py-3 text-sm text-slate-700 outline-none transition focus:border-verde-medio">
+                  <option value="">Todos los departamentos</option>
+                  @for (item of departamentos(); track item) { <option [value]="item">{{ item | nombrePropio }}</option> }
+                </select>
+              </label>
+
+              <label class="block"><span class="mb-2 block text-xs font-bold text-slate-600">Municipio</span>
+                <select id="mercados-municipio" name="municipio" [disabled]="!departamento()"
+                  [ngModel]="municipio()" (ngModelChange)="actualizarMunicipio($event)"
+                  class="w-full cursor-pointer rounded-xl border border-slate-200 bg-white px-3 py-3 text-sm text-slate-700 outline-none transition focus:border-verde-medio disabled:cursor-not-allowed disabled:bg-slate-50 disabled:text-slate-400">
+                  <option value="">{{ departamento() ? 'Todos los municipios' : 'Elige un departamento primero' }}</option>
+                  @for (item of municipios(); track item) { <option [value]="item">{{ item | nombrePropio }}</option> }
+                </select>
+              </label>
+
+              <label class="block"><span class="mb-2 block text-xs font-bold text-slate-600">Prácticas musicales</span>
+                <select id="mercados-practica" name="practica"
+                  [ngModel]="practica()" (ngModelChange)="actualizarPractica($event)"
+                  class="w-full cursor-pointer rounded-xl border border-slate-200 bg-white px-3 py-3 text-sm text-slate-700 outline-none transition focus:border-verde-medio">
+                  <option value="">Todas las prácticas</option>
+                  @for (item of practicas(); track item) { <option [value]="item">{{ item }}</option> }
+                </select>
+              </label>
+
+              <label class="block"><span class="mb-2 block text-xs font-bold text-slate-600">Territorios Sonoros</span>
+                <select id="mercados-territorio-sonoro" name="territorioSonoro"
+                  [ngModel]="territorioSonoro()" (ngModelChange)="actualizarTerritorioSonoro($event)"
+                  class="w-full cursor-pointer rounded-xl border border-slate-200 bg-white px-3 py-3 text-sm text-slate-700 outline-none transition focus:border-verde-medio">
+                  <option value="">Todos los territorios sonoros</option>
+                  @for (item of territoriosSonoros(); track item) { <option [value]="item">{{ item }}</option> }
+                </select>
+              </label>
+            </div>
+          </div>
+
+          <div class="mt-9 border-t border-slate-200 pt-8">
+            <label class="block">
+              <span class="mb-2 block font-alternate text-xs font-bold uppercase tracking-[0.24em] text-slate-500">Ordenar</span>
+              <select id="mercados-orden" name="orden"
+                [ngModel]="orden()" (ngModelChange)="actualizarOrden($event)"
+                class="w-full cursor-pointer rounded-xl border border-slate-200 bg-white px-3 py-3 text-sm text-slate-700 outline-none transition focus:border-verde-medio">
+                <option value="nombre">Nombre (A–Z)</option>
+                <option value="territorio">Territorio (A–Z)</option>
+                <option value="ediciones">Más ediciones registradas</option>
+              </select>
+            </label>
+            <p class="mt-3 text-xs leading-relaxed text-slate-400">
+              Los filtros muestran únicamente territorios y prácticas con mercados publicados.
+            </p>
+          </div>
+        </form>
+
+        <div class="mt-9 border-t border-slate-200 pt-8">
+          <app-acceso-mapa-ecosistema etiqueta="Ver mercados en el mapa" (activar)="abrirMapa()"></app-acceso-mapa-ecosistema>
+        </div>
+      </aside>
+
+      <!-- ============================ RESULTADOS ============================ -->
+      <section class="min-w-0 bg-white p-7 lg:p-12">
+        <!-- El encabezado real de la lista. No se ve: el `h1` de la página es el del encabezado. -->
+        <h2 class="sr-only">Mercados musicales publicados en el Ecosistema</h2>
+
+        <app-barra-exploracion-ecosistema
+          class="block"
+          [metricas]="metricas()"
+          [vista]="vista()"
+          (cambioVista)="cambiarVista($event)"></app-barra-exploracion-ecosistema>
+
+        <p id="resultados-de-mercados" aria-live="polite"
+           class="mt-6 scroll-mt-24 font-alternate text-[0.58rem] font-bold uppercase tracking-widest text-slate-500">
+          Mostrando {{ desdeMostrado() }}–{{ hastaMostrado() }} de {{ filtrados().length }}
+          @if (filtrosActivos()) {
+            <span class="ml-1.5 rounded-full bg-verde/10 px-2.5 py-0.5 text-verde-texto">
+              {{ filtrosActivos() }} {{ filtrosActivos() === 1 ? 'filtro' : 'filtros' }}
+            </span>
+          }
+        </p>
+
+        @if (cargando()) {
+          <div class="py-16 text-center text-sm text-slate-500">Consultando los mercados musicales…</div>
+        } @else if (error()) {
+          <div class="mt-8 rounded-2xl border border-amber-200 bg-amber-50 p-6 text-sm text-amber-800" role="alert">{{ error() }}</div>
+        } @else if (filtrados().length === 0) {
+          <!--
+            EL VACIO DICE QUE HACER. «No hay resultados» a secas deja a quien busca sin saber si el
+            directorio está vacío o si es su consulta la que no encuentra nada.
+          -->
+          <div class="mt-10 border-l-4 border-verde-medio bg-slate-50 px-6 py-8" data-sin-resultados>
+            @if (mercados().length === 0) {
+              <h3 class="font-alternate text-lg font-bold uppercase tracking-wide text-morado">Todavía no hay mercados publicados</h3>
+              <p class="mt-2 max-w-2xl text-sm leading-relaxed text-slate-600">
+                Cuando el Programa publique el primero, aparecerá aquí con su territorio y sus realizaciones.
+              </p>
+            } @else {
+              <h3 class="font-alternate text-lg font-bold uppercase tracking-wide text-morado">Ningún mercado coincide con esta consulta</h3>
+              <p class="mt-2 max-w-2xl text-sm leading-relaxed text-slate-600">
+                Hay {{ mercados().length }} {{ mercados().length === 1 ? 'mercado publicado' : 'mercados publicados' }} en el Ecosistema.
+                Prueba con menos filtros.
+              </p>
+              <button type="button" (click)="limpiarFiltros()"
+                class="mt-5 cursor-pointer rounded-xl border-0 bg-morado px-5 py-3 font-alternate text-[0.62rem] font-bold uppercase tracking-widest text-white transition hover:bg-morado-claro">Limpiar filtros</button>
+            }
+          </div>
+        } @else if (vista() === 'listado') {
+
+          <ul class="mt-6 divide-y divide-slate-100">
+            @for (mercado of visibles(); track mercado.id) {
+              <li class="grid gap-4 py-7 lg:grid-cols-[minmax(0,1fr)_14rem] lg:gap-10">
+                <div class="min-w-0">
+                  <a [routerLink]="['/ecosistema/mercados-musicales', mercado.id]"
+                     class="font-alternate text-xl font-bold uppercase leading-tight tracking-tight text-morado no-underline transition hover:text-verde-medio">{{ mercado.nombre }}</a>
+                  <p class="mt-1 text-[0.82rem] text-slate-500">{{ resumen(mercado) }}</p>
+                  <p class="mt-3 line-clamp-3 text-sm leading-relaxed text-slate-600">
+                    {{ mercado.descripcion || 'Sin descripción registrada.' }}
+                  </p>
+
+                  @if (mercado.seRealizaEnElMarcoDeUnFestival && mercado.festivalNombre) {
+                    <!-- LA RELACION ES UN ENLACE, no un texto: el festival existe en el Ecosistema. -->
+                    <p class="mt-3 text-[0.82rem] text-slate-500">
+                      En el marco de
+                      <a [routerLink]="['/ecosistema/festivales', mercado.festivalId]"
+                         class="font-semibold text-verde-texto underline-offset-2 hover:underline">{{ mercado.festivalNombre }}</a>
+                    </p>
+                  }
+
+                  @if (mercado.practicasMusicales.length > 0 || enlaces(mercado).length > 0) {
+                    <div class="mt-4 flex flex-wrap items-center gap-2">
+                      @for (practica of mercado.practicasMusicales; track practica.id) {
+                        <span class="rounded-full bg-verde/10 px-3 py-1 text-[0.7rem] text-verde-texto">{{ practica.nombre }}</span>
+                      }
+                      @for (enlace of enlaces(mercado); track enlace.clave) {
+                        <a [href]="enlace.href" target="_blank" rel="noopener noreferrer"
+                           class="text-slate-400 transition hover:text-verde-medio">
+                          <app-icono-de-enlace [tipo]="enlace.clave" [tamano]="14" />
+                          <span class="sr-only">{{ enlace.etiqueta }} de {{ mercado.nombre }}</span>
+                        </a>
+                      }
+                    </div>
+                  }
+                </div>
+
+                <div class="min-w-0 lg:text-right">
+                  <p class="font-alternate text-[0.56rem] font-bold uppercase tracking-widest text-slate-400">Territorio</p>
+                  <p class="mt-1 text-sm text-slate-700">{{ donde(mercado) | nombrePropio }}</p>
+                  <p class="mt-3 font-alternate text-[0.56rem] font-bold uppercase tracking-widest text-slate-400">Ediciones</p>
+                  <p class="mt-1 text-sm text-slate-700">{{ cuantasEdiciones(mercado) }}</p>
+                  <!-- UNA ACCION SE DIBUJA COMO UN CONTROL, no como un texto con una flecha. -->
+                  <a [routerLink]="['/ecosistema/mercados-musicales', mercado.id]" data-abrir-mercado
+                     class="mt-4 inline-block rounded-xl border border-slate-200 bg-white px-4 py-2.5 font-alternate text-[0.58rem] font-bold uppercase tracking-widest text-morado no-underline transition hover:border-verde-medio hover:text-verde-medio">Ver ficha</a>
+                </div>
+              </li>
+            }
+          </ul>
+
+        } @else {
+
+          <div class="mt-6 grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
+            @for (mercado of visibles(); track mercado.id) {
+              <article class="flex h-full flex-col border border-slate-200 p-6 transition hover:border-verde-medio">
+                <a [routerLink]="['/ecosistema/mercados-musicales', mercado.id]"
+                   class="font-alternate text-base font-bold uppercase leading-tight tracking-tight text-morado no-underline transition hover:text-verde-medio">{{ mercado.nombre }}</a>
+                <p class="mt-1 truncate text-[0.78rem] text-slate-500">{{ resumen(mercado) }}</p>
+                <p class="mt-3 line-clamp-3 min-h-16 text-[0.82rem] leading-relaxed text-slate-600">
+                  {{ mercado.descripcion || 'Sin descripción registrada.' }}
+                </p>
+                <p class="mt-auto pt-4 text-[0.78rem] text-slate-500">{{ donde(mercado) | nombrePropio }}</p>
+                <p class="text-[0.78rem] text-slate-400">{{ cuantasEdiciones(mercado) }}</p>
+              </article>
+            }
+          </div>
+        }
+
+        @if (totalPaginas() > 1) {
+          <nav class="mt-8 flex items-center justify-center gap-3 border-t border-slate-100 pt-8" aria-label="Paginación de Mercados musicales">
+            <button type="button" (click)="irAPagina(pagina() - 1)" [disabled]="pagina() === 1"
+              class="cursor-pointer rounded-xl border border-slate-200 bg-white px-4 py-2.5 font-alternate text-[0.58rem] font-bold uppercase tracking-widest text-morado transition hover:border-verde-medio disabled:cursor-not-allowed disabled:text-slate-300">Anterior</button>
+            <span class="font-alternate text-[0.58rem] font-bold uppercase tracking-widest text-slate-500">
+              Página {{ pagina() }} de {{ totalPaginas() }}
+            </span>
+            <button type="button" (click)="irAPagina(pagina() + 1)" [disabled]="pagina() === totalPaginas()"
+              class="cursor-pointer rounded-xl border border-slate-200 bg-white px-4 py-2.5 font-alternate text-[0.58rem] font-bold uppercase tracking-widest text-morado transition hover:border-verde-medio disabled:cursor-not-allowed disabled:text-slate-300">Siguiente</button>
+          </nav>
+        }
+      </section>
+    </div>
+  </div>
+</section>

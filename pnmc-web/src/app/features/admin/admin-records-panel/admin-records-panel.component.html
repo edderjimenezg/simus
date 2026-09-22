@@ -1,0 +1,325 @@
+<div class="space-y-5 text-left font-nunito">
+  <!--
+    SIN ENCABEZADO PROPIO NI TARJETA. Hasta este panel repetía debajo de
+    la cabecera de página un segundo encabezado —«Registros / Festivales», «Festivales registrados»,
+    una descripción y un aviso morado—: tres títulos para una lista. La cabecera de página ya dice
+    qué sección es; aquí empieza directamente la barra de la lista, con las piezas comunes de la
+    consola: `barra-de-lista`, `app-boton`, `tabla-administrativa` y `app-estado-de-lista`.
+  -->
+  <app-barra-de-lista>
+    <app-buscador-de-lista identificador="buscar-registro" etiqueta="Buscar registros"
+      marcador="Buscar por nombre…" [valor]="q()" (cambiar)="buscarRegistros($event)" />
+    <!--
+      EL PANEL LO DIBUJA LA CONSOLA, NO EL SISTEMA OPERATIVO. Con un `<select>`, el desplegable de
+      los 32 departamentos ocupaba media pantalla y no había forma de acotarlo, darle buscador ni
+      decidir dónde aparece. Ver `app-filtro-desplegable`.
+    -->
+    <app-filtro-desplegable
+      identificador="estado"
+      etiqueta="Filtrar registros por estado"
+      [opciones]="filtroDeEstado()"
+      [elegida]="estadoActivo()"
+      (cambiar)="filtrarPorEstado($event)" />
+    <app-filtro-desplegable
+      identificador="territorio"
+      etiqueta="Filtrar registros por territorio"
+      [opciones]="filtroDeTerritorio()"
+      [elegida]="departamentoActivo()"
+      (cambiar)="filtrarPorTerritorio($event)" />
+    <!--
+      AQUI ESTABA «PENDIENTES PRIMERO», un botón de la barra con el mismo aspecto que los filtros
+      que tiene al lado, aunque no filtra nada: ordena. Ahora ese orden vive donde vive el resto del
+      orden de la tabla —en las cabeceras—: es el estado de partida, y un tercer golpe en la columna
+      por la que se está ordenando devuelve a él. Ver `OrdenDeTabla.ordenPropio`.
+    -->
+    @if (isFestivalModule) {
+      <ng-container ngProjectAs="app-conmutador-de-ojo"><app-conmutador-de-ojo identificador="alternar-borradores" grupo="Borradores"
+        deQue="los festivales en borrador" [visible]="mostrarBorradores()"
+        (alternar)="alternarBorradores()" /></ng-container>
+    }
+    <ng-container extremo>
+      <app-boton importancia="terciaria" etiqueta="Actualizar la lista" [deshabilitado]="cargandoRegistros()" (accion)="loadRecords()"><svg lucideRefreshCw [size]="15" aria-hidden="true"></svg></app-boton>
+      <app-boton importancia="secundaria" [deshabilitado]="generandoPlantilla()" (accion)="handleDownloadTemplate()"><svg lucideDownload [size]="15" aria-hidden="true"></svg> Plantilla</app-boton>
+      <app-boton importancia="principal" (accion)="registroFestival.emit()"><svg lucidePlus [size]="15" aria-hidden="true"></svg> Registrar Festival</app-boton>
+    </ng-container>
+  </app-barra-de-lista>
+  @if (message()) {
+    <p class="barra-de-lista__resumen" role="status">{{ message() }}</p>
+  }
+
+  @if (cargandoRegistros() && records().length === 0) {
+    <app-estado-de-lista tipo="cargando" titulo="Consultando los registros…" />
+  } @else if (records().length === 0) {
+    <app-lista-sin-filas entidad="Festivales" [hayFiltros]="hayFiltrosPuestos()"
+      comoLlegan="Los registra una organización desde su espacio, o el Programa desde aquí con «Registrar Festival»."
+      (limpiar)="limpiarFiltros()">
+      <app-boton importancia="principal" tamano="menudo" (accion)="registroFestival.emit()">Registrar Festival</app-boton>
+    </app-lista-sin-filas>
+  } @else {
+    <div class="overflow-x-auto lg:overflow-visible">
+      <table class="tabla-administrativa tabla-de-festivales">
+        <!--
+          ANCHOS DECLARADOS. Sin ellos la tabla los repartía por contenido: el nombre se quedaba en
+          202 px y partía los títulos en tres líneas, «Acciones» se llevaba 222 y las fechas se
+          partían por la coma. Cada columna tiene ahora el ancho que su dato necesita.
+        -->
+        <colgroup>
+          <col class="tabla-de-festivales__nombre" />
+          <col class="tabla-de-festivales__estado" />
+          @if (isFestivalModule) { <col class="tabla-de-festivales__organizacion" /> }
+          <col class="tabla-de-festivales__territorio" />
+          <col class="tabla-de-festivales__fecha" />
+          <col class="tabla-de-festivales__acciones" />
+        </colgroup>
+        <thead class="tabla-administrativa__cabecera">
+          <tr><app-cabecera-de-tabla [columnas]="columnasVisibles()" [orden]="orden" (ordenarPor)="requestSort($event)" /></tr>
+        </thead>
+        <tbody>
+          @for (record of records(); track record.id) {
+            <tr class="tabla-administrativa__fila">
+              <td>
+                <button type="button" class="tabla-administrativa__principal" (click)="fichaFestival.emit(record.id)">{{ record.title || record.name || '#' + record.id }}</button>
+                <span class="tabla-administrativa__secundaria">
+                  ID {{ record.id }}
+                  @if (record.metadata?.['procedenciaEtiqueta']) { · {{ record.metadata?.['procedenciaEtiqueta'] }} }
+                  @if (record.metadata?.hasActiveRequest) { · <span class="font-semibold text-amber-700">{{ activeRequestLabel(record) }}</span> }
+                </span>
+              </td>
+              <td>
+                <app-indicador-de-estado
+                  [etiqueta]="statusText(record.status)"
+                  [tono]="tonoDelEstado(record.status)"
+                  [matiz]="matizDelEstado(record.status)"
+                  [conTexto]="true"></app-indicador-de-estado>
+              </td>
+              @if (isFestivalModule) {
+                <td class="hidden xl:table-cell">
+                  <span class="block max-w-[14rem] truncate font-semibold" [title]="organizationLabel(record)">{{ organizationLabel(record) }}</span>
+                  <span class="tabla-administrativa__secundaria max-w-[14rem] truncate" [title]="responsibleLabel(record)">{{ responsibleLabel(record) }}</span>
+                </td>
+              }
+              <td>
+                <!-- EL MUNICIPIO ARRIBA Y EL DEPARTAMENTO DEBAJO, en vez de «Bogotá, D.C. / Bogotá, D.C.» partido por la mitad. -->
+                @if (record.municipality) {
+                  <span class="block font-medium">{{ record.municipality | nombrePropio }}</span>
+                  @if (record.department) { <span class="tabla-administrativa__secundaria">{{ record.department | nombrePropio }}</span> }
+                } @else {
+                  <span class="text-prosa">{{ record.department ? (record.department | nombrePropio) : '—' }}</span>
+                }
+              </td>
+              <td class="hidden lg:table-cell whitespace-nowrap">
+                <span class="tabular-nums text-prosa">{{ record.updatedAt ? (record.updatedAt | date: 'd MMM y, HH:mm':'':'es-CO') : '—' }}</span>
+                @if (record.owner) { <span class="tabla-administrativa__secundaria max-w-[12rem] truncate" [title]="record.owner">Por {{ record.owner }}</span> }
+              </td>
+              <td class="tabla-administrativa__acciones">
+                @if (isFestivalModule) {
+                  <app-menu-de-acciones
+                    [acciones]="accionesDe(record)"
+                    [descripcion]="record.title || record.name || ('Festival #' + record.id)"
+                    (elegida)="ejecutarAccion(record, $event)"></app-menu-de-acciones>
+                }
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+
+  <!-- PREVIEW MODAL -->
+  @if (previewRecord(); as registroPrevisualizado) {
+    <div
+      class="fixed inset-0 z-[4500] flex items-center justify-center p-4"
+      style="background-color: rgba(15,23,42,0.7); backdrop-filter: blur(4px);"
+      (mousedown)="$event.target === $event.currentTarget && previewRecord.set(null)"
+    >
+      <div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[85vh] flex flex-col overflow-hidden border border-slate-100">
+        <!-- Header -->
+        <div class="flex items-start justify-between gap-4 px-6 py-5 border-b border-slate-100">
+          <div class="min-w-0">
+            <div class="flex items-center gap-2 flex-wrap">
+              <app-indicador-de-estado
+                [etiqueta]="statusText(registroPrevisualizado.status)"
+                [tono]="tonoDelEstado(registroPrevisualizado.status)"
+                [matiz]="matizDelEstado(registroPrevisualizado.status)"
+                [conTexto]="true"></app-indicador-de-estado>
+              <span class="text-dato font-bold uppercase tracking-widest text-slate-400">ID {{ registroPrevisualizado.id }}</span>
+            </div>
+            <h2 [class]="isFestivalModule ? 'mt-1.5 text-xl font-bold tracking-tight text-slate-900 leading-tight' : 'font-alternate text-base uppercase font-bold tracking-wide text-slate-900 mt-1.5 leading-tight'">{{ registroPrevisualizado.title || registroPrevisualizado.name || 'Registro' }}</h2>
+            <p class="text-xs text-slate-400 mt-0.5">{{ moduloOpcional?.label }} · {{ formatLocation(registroPrevisualizado.department, registroPrevisualizado.municipality) || 'Sin territorio' | nombrePropio }}</p>
+          </div>
+          <button type="button" (click)="previewRecord.set(null)" class="rounded-xl border border-slate-200 p-2 text-slate-400 hover:text-slate-700 hover:border-slate-300 transition shrink-0 cursor-pointer">
+            <svg lucideX size="15"></svg>
+          </button>
+        </div>
+
+
+        <!-- Body -->
+        <div class="flex-1 overflow-y-auto px-6 py-5">
+          <!--
+            AQUI HABIA UNA SEGUNDA FICHA DEL FESTIVAL, con sus pestañas. Repetía lo que
+            `app-admin-ficha-festival` ya enseña desde el Bloque 6 —descripción, organización
+            responsable, territorio, periodicidad, contacto, prácticas, territorios sonoros y
+            ediciones—, leyéndolo de OTRO endpoint y pintándolo de otra manera. Dos fichas del mismo
+            registro son dos sitios donde decidir qué se enseña de él, y ya habían empezado a
+            divergir. Lo que queda aquí es lo único que la ficha no tiene y que sí es de este
+            modal: las referencias históricas y las reclamaciones de administración.
+          -->
+          @if (isFestivalModule) {
+            <section aria-labelledby="procedencia-festival-titulo" class="space-y-5">
+              <div class="border-b border-slate-100 pb-4"><h3 id="procedencia-festival-titulo" class="text-sm font-bold text-slate-800">Procedencia y coincidencias</h3><p class="mt-1 text-xs leading-relaxed text-slate-500">Referencias históricas asociadas y reclamaciones de administración registradas para este Festival.</p></div>
+              @if (festivalDetailLoading()) {
+                <p class="py-6 text-xs text-slate-500">Consultando procedencia…</p>
+              } @else if (!(festivalDetail()?.procedencia?.referenciasHistoricas?.length) && !(festivalDetail()?.procedencia?.reclamacionesAdministracion?.length)) {
+                <app-estado-de-lista denso titulo="Sin referencias históricas ni reclamaciones"
+                  detalle="Aparecerán aquí si el Festival se vincula a un registro histórico o si alguna organización reclama su administración." />
+              } @else {
+                <section>
+                  <p class="text-dato font-bold uppercase tracking-wide text-slate-400">Referencias históricas</p>
+                  @if (festivalDetail()?.procedencia?.referenciasHistoricas?.length) {
+                    <ul class="mt-2 divide-y divide-slate-100 border-y border-slate-100">@for (referencia of festivalDetail()?.procedencia?.referenciasHistoricas ?? []; track referencia.id) { <li class="py-3"><p class="text-xs font-bold text-slate-700">{{ referencia.organizacionNombre }}</p><p class="mt-1 text-dato text-slate-400">Referencia registrada: {{ referencia.fechaRegistro ? (referencia.fechaRegistro | date: 'd MMM y':'':'es-CO') : 'Sin fecha' }}</p></li> }</ul>
+                  } @else { <app-estado-de-lista denso titulo="Sin referencias históricas asociadas" /> }
+                </section>
+                <section>
+                  <p class="text-dato font-bold uppercase tracking-wide text-slate-400">Reclamaciones de administración</p>
+                  @if (festivalDetail()?.procedencia?.reclamacionesAdministracion?.length) {
+                    <ul class="mt-2 divide-y divide-slate-100 border-y border-slate-100">@for (reclamacion of festivalDetail()?.procedencia?.reclamacionesAdministracion ?? []; track reclamacion.id) { <li class="py-3"><div class="flex items-start justify-between gap-3"><p class="text-xs font-bold text-slate-700">{{ reclamacion.organizacionSolicitanteNombre }}</p><app-indicador-de-estado [etiqueta]="reclamacion.estado" [tono]="tonoDelEstado(reclamacion.estado)" [conTexto]="true"></app-indicador-de-estado></div><p class="mt-1 text-xs leading-relaxed text-slate-600">{{ reclamacion.justificacion }}</p>@if (reclamacion.motivoDecision) { <p class="mt-2 border-l-2 border-[#4a2a6f] pl-2 text-xs leading-relaxed text-slate-600">Decisión institucional: {{ reclamacion.motivoDecision }}</p> }<p class="mt-2 text-dato text-slate-400">Radicada: {{ (reclamacion.fechaEnvio || reclamacion.fechaCreacion) ? ((reclamacion.fechaEnvio || reclamacion.fechaCreacion) | date: 'd MMM y':'':'es-CO') : 'Sin fecha' }}@if (reclamacion.fechaDecision) { · Decidida: {{ reclamacion.fechaDecision ? (reclamacion.fechaDecision | date: 'd MMM y':'':'es-CO') : 'Sin fecha' }} }</p></li> }</ul>
+                  } @else { <p class="mt-2 text-xs leading-relaxed text-slate-500">Hay referencias históricas asociadas, pero no existe una reclamación de administración. Esto no permite concluir que una organización haya descartado una coincidencia.</p> }
+                </section>
+              }
+            </section>
+          } @else {
+          <div class="grid grid-cols-2 gap-3">
+            @for (field of moduloOpcional?.fields; track field.name) {
+              @if (field.name !== 'id' && field.name !== 'coverageLevel' && field.name !== 'department' && field.name !== 'municipality') {
+                @let val = registroPrevisualizado[field.name] || registroPrevisualizado.metadata?.[field.name];
+                @let isEmpty = isValEmpty(val);
+                <div [class]="'rounded-xl bg-slate-50 border border-slate-100 px-4 py-3 ' + (field.type === 'textarea' || field.wide ? 'col-span-2' : '')">
+                  <p class="text-dato font-black uppercase tracking-widest text-slate-400 mb-1">{{ field.label }}</p>
+                  @if (isEmpty) {
+                    <p class="text-sm text-slate-300 font-normal italic">—</p>
+                  } @else if (field.type === 'checkbox') {
+                    <p class="text-sm font-semibold text-slate-800">{{ val === 'Sí' || val === true ? 'Sí' : 'No' }}</p>
+                  } @else if (field.type === 'textarea') {
+                    <p class="text-sm text-slate-700 leading-relaxed whitespace-pre-wrap">{{ val }}</p>
+                  } @else if (field.type === 'url') {
+                    <a [href]="val" target="_blank" rel="noopener noreferrer" class="text-sm text-blue-600 hover:underline break-all">{{ val }}</a>
+                  } @else {
+                    <p class="text-sm font-semibold text-slate-800">{{ val }}</p>
+                  }
+                </div>
+              }
+            }
+            <!-- Territory -->
+            @if (registroPrevisualizado.department || registroPrevisualizado.municipality) {
+              <div class="rounded-xl bg-slate-50 border border-slate-100 px-4 py-3">
+                <p class="text-dato font-black uppercase tracking-widest text-slate-400 mb-1">Ubicación</p>
+                <p class="text-sm font-semibold text-slate-800">{{ formatLocation(registroPrevisualizado.department, registroPrevisualizado.municipality) | nombrePropio }}</p>
+              </div>
+            }
+            @if (registroPrevisualizado.updatedAt) {
+              <div class="rounded-xl bg-slate-50 border border-slate-100 px-4 py-3">
+                <p class="text-dato font-black uppercase tracking-widest text-slate-400 mb-1">Última actualización</p>
+                <p class="text-sm font-semibold text-slate-800 tabular-nums">{{ registroPrevisualizado.updatedAt | date: 'd MMM y, HH:mm':'':'es-CO' }}</p>
+              </div>
+            }
+            @if (registroPrevisualizado.owner) {
+              <div class="rounded-xl bg-slate-50 border border-slate-100 px-4 py-3">
+                <p class="text-dato font-black uppercase tracking-widest text-slate-400 mb-1">Autor de la edición</p>
+                <p class="text-sm font-semibold text-slate-800">{{ registroPrevisualizado.owner }}</p>
+              </div>
+            }
+          </div>
+          }
+        </div>
+
+        <!-- Footer -->
+        <div class="flex items-center justify-end gap-2 px-6 py-4 border-t border-slate-100 bg-slate-50">
+          <button type="button" (click)="previewRecord.set(null)" class="rounded-xl border border-slate-200 px-4 py-2.5 text-xs font-bold text-slate-600 hover:border-slate-300 transition cursor-pointer">
+            Cerrar
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- EDIT / CREATE FORM MODAL -->
+  @if (institutionalDraftOpen()) {
+    <div class="fixed inset-0 z-[4600] flex items-center justify-center bg-slate-950/60 p-4" (mousedown)="$event.target === $event.currentTarget && institutionalDraftOpen.set(false)">
+      <div class="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-2xl bg-white shadow-2xl">
+        <div class="flex items-start justify-between border-b border-slate-100 px-6 py-5"><div><p class="text-dato font-bold text-slate-400">Propuesta de cambio · Gestión institucional</p><h2 class="mt-1 text-xl font-bold text-slate-900">{{ institutionalDraftTitle() }}</h2><p class="mt-1 text-xs text-slate-500">Los cambios no modifican la versión pública hasta que sean revisados y publicados.</p></div><button type="button" (click)="institutionalDraftOpen.set(false)" class="text-slate-400 hover:text-slate-700">✕</button></div>
+        <div class="space-y-4 px-6 py-5"><label class="block campo__rotulo">Nombre<input type="text" [ngModel]="institutionalDraftForm().nombre" (ngModelChange)="updateInstitutionalDraftField('nombre', $event)" class="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm" /></label><label class="block campo__rotulo">Descripción<textarea rows="5" [ngModel]="institutionalDraftForm().descripcion" (ngModelChange)="updateInstitutionalDraftField('descripcion', $event)" class="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"></textarea></label><div class="grid gap-4 sm:grid-cols-2"><label class="block campo__rotulo">Periodicidad<input type="text" [ngModel]="institutionalDraftForm().periodicidad" (ngModelChange)="updateInstitutionalDraftField('periodicidad', $event)" class="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm" /></label><label class="block campo__rotulo">Correo de contacto<input type="email" [ngModel]="institutionalDraftForm().correoContacto" (ngModelChange)="updateInstitutionalDraftField('correoContacto', $event)" class="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm" /></label><label class="block campo__rotulo">Nivel territorial<select [ngModel]="institutionalDraftForm().nivelCobertura" (ngModelChange)="updateInstitutionalDraftField('nivelCobertura', $event)" class="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"><option value="municipal">Municipal</option><option value="departamental">Departamental</option><option value="nacional">Nacional</option></select></label><label class="block campo__rotulo">Código departamento<input type="text" [ngModel]="institutionalDraftForm().codigoDepartamento" (ngModelChange)="updateInstitutionalDraftField('codigoDepartamento', $event)" class="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm" /></label><label class="block campo__rotulo">Código municipio<input type="text" [ngModel]="institutionalDraftForm().codigoMunicipio" (ngModelChange)="updateInstitutionalDraftField('codigoMunicipio', $event)" class="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm" /></label><label class="block campo__rotulo">Teléfono<input type="text" [ngModel]="institutionalDraftForm().telefonoCelular" (ngModelChange)="updateInstitutionalDraftField('telefonoCelular', $event)" class="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm" /></label></div><div class="grid gap-4 border-t border-slate-100 pt-4 sm:grid-cols-2"><label class="block campo__rotulo">Instagram<input type="url" [ngModel]="institutionalDraftForm().instagram" (ngModelChange)="updateInstitutionalDraftField('instagram', $event)" class="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm" /></label><label class="block campo__rotulo">Facebook<input type="url" [ngModel]="institutionalDraftForm().facebook" (ngModelChange)="updateInstitutionalDraftField('facebook', $event)" class="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm" /></label><label class="block campo__rotulo">Sitio web<input type="url" [ngModel]="institutionalDraftForm().paginaWeb" (ngModelChange)="updateInstitutionalDraftField('paginaWeb', $event)" class="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm" /></label><label class="block campo__rotulo">Otro enlace<input type="url" [ngModel]="institutionalDraftForm().otroEnlace" (ngModelChange)="updateInstitutionalDraftField('otroEnlace', $event)" class="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm" /></label></div><label class="block campo__rotulo">Observaciones de contacto<textarea rows="3" [ngModel]="institutionalDraftForm().observacionesContacto" (ngModelChange)="updateInstitutionalDraftField('observacionesContacto', $event)" class="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm"></textarea></label></div>
+        <div class="grid gap-5 border-t border-slate-100 px-6 py-5 sm:grid-cols-2"><div><p class="text-xs font-bold text-slate-700">Prácticas musicales</p><div class="mt-2 max-h-32 space-y-1 overflow-y-auto">@for (item of festivalCatalogs().practicasMusicales; track item.id) { <label class="flex gap-2 text-xs text-slate-600"><input type="checkbox" [checked]="institutionalDraftForm().practicasMusicalesIds.includes(item.id)" (change)="toggleInstitutionalCatalog('practicasMusicalesIds', item.id, $any($event.target).checked)" />{{ item.nombre }}</label> }</div></div><div><p class="text-xs font-bold text-slate-700">Territorios sonoros</p><div class="mt-2 max-h-32 space-y-1 overflow-y-auto">@for (item of festivalCatalogs().territoriosSonoros; track item.id) { <label class="flex gap-2 text-xs text-slate-600"><input type="checkbox" [checked]="institutionalDraftForm().territoriosSonorosIds.includes(item.id)" (change)="toggleInstitutionalCatalog('territoriosSonorosIds', item.id, $any($event.target).checked)" />{{ item.nombre }}</label> }</div></div></div>
+        <div class="flex justify-end gap-3 border-t border-slate-100 px-6 py-4"><button type="button" (click)="institutionalDraftOpen.set(false)" class="text-xs font-bold text-slate-600">Cancelar</button><button type="button" [disabled]="institutionalDraftSaving()" (click)="saveInstitutionalDraft(false)" class="rounded-lg border border-slate-300 px-4 py-2 text-xs font-bold text-slate-700 disabled:opacity-50">Guardar propuesta</button><button type="button" [disabled]="institutionalDraftSaving()" (click)="saveInstitutionalDraft(true)" class="rounded-lg bg-morado px-4 py-2 text-xs font-bold text-white disabled:opacity-50">Enviar a revisión</button></div>
+      </div>
+    </div>
+  }
+
+  <!--
+    AQUI VIVIA EL FORMULARIO CRUD HEREDADO: 240 lineas de modal con su cabecera, sus campos
+    generados a partir de `module.fields`, la preparacion de ficha desde texto y los dos botones
+    de guardado.
+
+    POR QUE SE VA ENTERO Y NO SE ARREGLA. Solo se abria por `startNewRecord` o `editFromRecord`, y
+    las dos puertas estaban cerradas para Festivales a proposito —el propio `startNewRecord` lo
+    dice: ese formulario omite la relacion organizacional y el flujo canonico de registro—. Las
+    unicas que lo abrian eran los ocho modulos sin circuito, retirados en este mismo corte. Y su
+    guardado apuntaba a `module.endpoint`, que responde 404: el boton existia y no podia funcionar.
+
+    LO QUE MERECE LA PENA RESCATAR, cuando el Catalogo Editorial necesite su formulario, es
+    `prepararCamposDesdeTexto`: proponia campos con reglas locales, sin modelo externo, y no
+    inventaba ninguno que no reconociera. Esta en el historial de git de este fichero.
+  -->
+
+
+  <!-- PREPARACIÓN LOCAL DE UNA FICHA -->
+      <!--
+        AQUI VIVIA EL DIALOGO «Preparar ficha desde texto»: pegaba o subia un texto y proponia
+        campos con reglas locales, sin modelo externo. Se abria SOLO desde el formulario CRUD
+        heredado, retirado en este mismo corte junto con los ocho modulos sin circuito.
+
+        MERECE VOLVER cuando el Catalogo Editorial tenga su formulario: no inventaba ningun campo
+        que no reconociera, y esa es la parte dificil. Esta en el historial de git de este fichero.
+      -->
+
+  <!-- ─────────── Las piezas compartidas con las otras cuatro pantallas ─────────── -->
+
+  @if (historialAbierto(); as elegido) {
+    <app-historial-de-registro
+      [titulo]="elegido.title || elegido.name || ('Festival #' + elegido.id)"
+      [registro]="{ tabla: tablaDeAuditoria, id: elegido.id }"
+      [versiones]="versionesDelHistorial()"
+      (cerrar)="historialAbierto.set(null)"></app-historial-de-registro>
+  }
+
+  @if (previsualizando(); as festival) {
+    <app-dialogo-de-previsualizacion
+      modulo="festivales"
+      [id]="festival.id"
+      [nombre]="festival.title || festival.name || ('Festival #' + festival.id)"
+      [estadoEtiqueta]="festival.status || ''"
+      [yaEsPublico]="false"
+      (cerrar)="previsualizando.set(null)" />
+  }
+
+  <!--
+    ELIMINAR DEL ECOSISTEMA, CON MOTIVO Y EN UN DIALOGO DE VERDAD. Antes eran `window.prompt` y
+    `window.confirm`: sin estilo, fuera del recorrido de teclado de la consola, imposibles de
+    comprobar en una prueba y bloqueados sin aviso en algunos contextos. Es la única acción de esta
+    pantalla que no se deshace, así que era justo donde peor estaba.
+  -->
+  @if (eliminacionPedida(); as record) {
+    <app-confirmacion
+      titulo="Eliminar del ecosistema"
+      [detalle]="'«' + (record.title || record.name) + '» dejará de verse en el sitio público. No se borra: conserva su historial y su auditoría, y no se puede revertir desde este panel.'"
+      accion="Eliminar del ecosistema"
+      pideMotivo
+      rotuloDelMotivo="Por qué se elimina"
+      ayudaDelMotivo="Queda en el historial del Festival, con tu nombre y la fecha."
+      [error]="errorDeLaEliminacion()"
+      identificador="eliminar-festival-del-ecosistema"
+      (confirmar)="eliminarFestivalDelEcosistema($event)"
+      (cancelar)="cancelarEliminacion()" />
+  }
+
+</div>

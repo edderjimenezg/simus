@@ -1,0 +1,438 @@
+<section aria-labelledby="noticias-consola-titulo">
+  <!--
+    SIN ENCABEZADO PROPIO. La cabecera de página ya dice qué sección es; aquí repetía el título, el
+    grupo y una descripción, que es el tercer rótulo para lo mismo. Lo único que este panel añadía
+    —qué exige publicar— se dice donde se decide: en el formulario.
+  -->
+  <h2 id="noticias-consola-titulo" class="sr-only">Noticias y prensa</h2>
+
+  <!--
+    LA MISMA BARRA QUE LA AGENDA, EN EL MISMO ORDEN: buscador, lo que acota la lista, y a la derecha
+    la acción de crear. Debajo, y ya fuera de la barra, las categorías como pestañas. Lo fijó el
+    dirección de producto: «la estructura de la barra de la tabla de agenda
+    debe ser la base también para noticias: categorías debajo en pestañas, buscador, botones, nuevo
+    registro a la derecha».
+
+    ANTES LAS PESTAÑAS ESTABAN DENTRO DE LA BARRA, en la misma fila que el buscador y el botón de
+    crear, así que la fila crecía hasta tres líneas y no se distinguía qué acotaba la lista de qué
+    la modificaba.
+  -->
+  <app-barra-de-lista>
+    <app-buscador-de-lista identificador="buscar-noticia-consola" etiqueta="Buscar noticias"
+      marcador="Buscar por título o resumen…" [valor]="busqueda()" (cambiar)="buscar($event)" />
+    <app-filtro-desplegable identificador="estado" etiqueta="Mostrar noticias por estado"
+      [opciones]="FILTRO_DE_ESTADO" [elegida]="filtroEstado()" (cambiar)="filtroEstado.set($event)" />
+    <ng-container extremo>
+      <app-boton importancia="principal" (accion)="nueva()">Nueva noticia</app-boton>
+    </ng-container>
+  </app-barra-de-lista>
+
+  <!--
+    LA CATEGORIA, COMO PESTAÑAS Y NO COMO LISTA. El mismo criterio que en Agenda: es el control con
+    el que la consola separa asuntos en Solicitudes, Organizaciones y el Banco de archivos. Y las
+    aplica el SERVIDOR: la lista pagina, así que separar la página que se tiene delante diría «no
+    hay ninguna de esa categoría» cuando lo que pasa es que están en otra.
+  -->
+  @if (categoriasEnUso().length > 0) {
+    <app-selector-segmentado
+      [opciones]="pestanasDeCategoria()"
+      [elegida]="filtroCategoria()"
+      etiquetaDelGrupo="Filtrar noticias por categoría"
+      (elegir)="filtroCategoria.set($event)" />
+  }
+
+  @if (error()) { <p class="mb-4 text-cuerpo font-semibold text-amber-800" role="alert">{{ error() }}</p> }
+  @if (aviso()) { <p class="mb-4 text-cuerpo font-semibold text-verde-texto" role="status">{{ aviso() }}</p> }
+
+  @if (cargando() && noticiasVisibles().length === 0) {
+    <app-estado-de-lista tipo="cargando" titulo="Consultando las noticias…" />
+  } @else if (noticiasVisibles().length === 0) {
+    <app-lista-sin-filas entidad="noticias" [hayFiltros]="hayFiltrosPuestos()" [ambito]="ambitoDeLaLista()"
+      comoLlegan="Las redacta el Programa desde aquí con «Nueva noticia»; ninguna entra desde fuera."
+      (limpiar)="limpiarFiltros()">
+      <app-boton importancia="principal" tamano="menudo" (accion)="nueva()">Nueva noticia</app-boton>
+    </app-lista-sin-filas>
+  } @else {
+  <div class="overflow-x-auto">
+    <table class="tabla-administrativa tabla-de-publicaciones">
+      <colgroup>
+        <col class="tabla-de-publicaciones__titulo" />
+        <col class="tabla-de-publicaciones__estado" />
+        <col class="tabla-de-publicaciones__fecha" />
+        <col class="tabla-de-publicaciones__acciones" />
+      </colgroup>
+      <thead class="tabla-administrativa__cabecera">
+        <!-- Ordena por columna EN EL SERVIDOR: la lista pagina. Ver la misma nota en la Agenda. -->
+        <tr><app-cabecera-de-tabla [columnas]="COLUMNAS" [orden]="orden" (ordenarPor)="ordenarPor($event)" /></tr>
+      </thead>
+      <tbody>
+        @for (noticia of noticiasVisibles(); track noticia.id) {
+          <tr class="tabla-administrativa__fila">
+            <td>
+              <span class="tabla-administrativa__principal">{{ noticia.titulo }}</span>
+              <span class="tabla-administrativa__secundaria">/noticias/{{ noticia.slug }}</span>
+              <span class="tabla-administrativa__secundaria"><app-sello-de-procedencia [procedencia]="noticia.procedencia"></app-sello-de-procedencia></span>
+            </td>
+            <td>
+              <!--
+                SE ENSEÑA EL ESTADO EFECTIVO Y NO EL GUARDADO. Una noticia publicada con fecha futura
+                no está en el portal: está programada, y decirle «Publicado» hace creer lo contrario.
+                Las acciones del menú siguen saliendo del estado guardado, que es con el que se
+                decide qué se puede hacer.
+              -->
+              <app-indicador-de-estado
+                [etiqueta]="rotuloDeEstado(noticia.estadoEfectivo)"
+                [tono]="tonoDelEstado(noticia.estadoEfectivo)"
+                [matiz]="matizDelEstado(noticia.estadoEfectivo)"
+                [conTexto]="true"></app-indicador-de-estado>
+              @if (esperandoSuFecha(noticia)) {
+                <!--
+                  PUBLICADA NO ES LO MISMO QUE VISIBLE. Una fechada el lunes está publicada hoy y
+                  no aparece hasta el lunes; sin este aviso, el «la publiqué y no sale» es seguro.
+                -->
+                <span class="tabla-administrativa__secundaria text-amber-700">Aparece el {{ noticia.fechaPublicacion | date: 'd MMM y':'':'es-CO' }}</span>
+              }
+            </td>
+            <td class="whitespace-nowrap"><span class="tabular-nums text-prosa">{{ noticia.fechaPublicacion ? (noticia.fechaPublicacion | date: 'd MMM y':'':'es-CO') : 'Sin fecha' }}</span></td>
+            <td class="tabla-administrativa__acciones">
+              <!--
+                UN SOLO CONTROL POR FILA, con el mismo ciclo, las mismas palabras y el mismo orden
+                que Agenda y Catálogo editorial. Las acciones salen del estado de la noticia.
+              -->
+              <app-menu-de-acciones
+                [acciones]="accionesDe(noticia)"
+                [descripcion]="noticia.titulo"
+                (elegida)="ejecutarAccion(noticia, $event)"></app-menu-de-acciones>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+
+    @if (totalDePaginas() > 1) {
+      <div class="tabla-administrativa__pie">
+        <p class="barra-de-lista__resumen">Página {{ pagina() }} de {{ totalDePaginas() }} · {{ total() }} noticias</p>
+        <div class="flex flex-wrap items-center gap-2">
+          <app-boton importancia="secundaria" tamano="menudo" [deshabilitado]="pagina() <= 1" (accion)="irALaPagina(pagina() - 1)">Anterior</app-boton>
+          <app-boton importancia="secundaria" tamano="menudo" [deshabilitado]="pagina() >= totalDePaginas()" (accion)="irALaPagina(pagina() + 1)">Siguiente</app-boton>
+        </div>
+      </div>
+    }
+  </div>
+  }
+
+  <!--
+    LEER UNA NOTICIA SIN ABRIR EL FORMULARIO. El mismo cajón que la Agenda y el Catálogo: enseña lo
+    que el registro guarda, de lectura, y deja salir sin tocar nada.
+  -->
+  @if (fichaEnLectura(); as noticia) {
+    <app-panel-lateral titulo="{{ noticia.titulo }}" contexto="Noticia" (cerrar)="cerrarLaFicha()">
+      <div class="space-y-5">
+        <div class="flex flex-wrap items-center gap-3">
+          <app-indicador-de-estado
+            [etiqueta]="rotuloDeEstado(noticia.estadoEfectivo)"
+            [tono]="tonoDelEstado(noticia.estadoEfectivo)"
+            [matiz]="matizDelEstado(noticia.estadoEfectivo)"
+            [conTexto]="true"></app-indicador-de-estado>
+          <app-sello-de-procedencia [procedencia]="noticia.procedencia"></app-sello-de-procedencia>
+        </div>
+
+        @if (noticia.imagenUrl || noticia.imagenRuta) {
+          <img [src]="noticia.imagenUrl || noticia.imagenRuta" [alt]="noticia.imagenAlt || noticia.imagenAlternativa || ''"
+            width="640" height="360" loading="lazy" decoding="async"
+            class="w-full rounded-xl border border-filete object-cover" style="aspect-ratio: 16 / 9;" />
+        }
+
+        <h3 class="titulo-de-apartado">Qué dice</h3>
+        <div class="grid gap-x-8 gap-y-4">
+          <app-dato-en-lectura rotulo="Resumen" [valor]="noticia.resumen" [prosa]="true" />
+          @if (noticia.cuerpo) {
+            <app-dato-en-lectura rotulo="Cuerpo" [valor]="noticia.cuerpo" [prosa]="true" />
+          }
+        </div>
+
+        <h3 class="titulo-de-apartado">Ficha</h3>
+        <div class="grid gap-x-8 gap-y-4 sm:grid-cols-2 xl:grid-cols-3">
+          <app-dato-en-lectura rotulo="Categoría" [valor]="noticia.categoria" />
+          <app-dato-en-lectura rotulo="Autoría" [valor]="noticia.autoriaNombre" />
+          <app-dato-en-lectura rotulo="Aparece" [valor]="noticia.fechaPublicacion ? (noticia.fechaPublicacion | date: 'd MMM y':'':'es-CO') : ''" />
+          <app-dato-en-lectura rotulo="Dirección en el portal" [valor]="'/noticias/' + noticia.slug" />
+        </div>
+
+        @if (noticia.etiquetas.length) {
+          <h3 class="titulo-de-apartado">Etiquetas</h3>
+          <p class="text-cuerpo text-prosa">{{ noticia.etiquetas.join(', ') }}</p>
+        }
+
+        <div class="flex flex-wrap items-center gap-3 border-t border-filete pt-4">
+          <app-boton importancia="secundaria" (accion)="editarDesdeLaFicha(noticia)">Editar</app-boton>
+          @if (noticia.estadoEfectivo === 'publicado') {
+            <a class="text-cuerpo font-bold text-morado underline-offset-4 hover:underline"
+              [href]="rutaPublica(noticia)" target="_blank" rel="noopener">Ver en el portal</a>
+          }
+        </div>
+      </div>
+    </app-panel-lateral>
+  }
+
+  <!--
+    COMO SE VERA EN SU LISTADO, antes de publicarlo. Se carga la pantalla pública real dentro de un
+    marco y el registro entra por el mismo servicio que la alimenta, así que la tarjeta que se ve es
+    la de verdad. Ver `PrevisualizacionEnListadoService`.
+  -->
+  @if (previsualizando(); as registro) {
+    <app-dialogo-de-previsualizacion
+      modulo="noticias"
+      [id]="registro.id"
+      [nombre]="nombreParaPrevisualizar(registro)"
+      [estadoEtiqueta]="estadoParaPrevisualizar(registro)"
+      [yaEsPublico]="false"
+      (cerrar)="cerrarPrevisualizacion()">
+      <!--
+        LA NOTICIA COMO SE LEE, compuesta con lo que el registro guarda. No se pide al portal: su
+        página de detalle busca por `slug` contra el API público, que responde 404 mientras no esté
+        publicada, y previsualizar es justamente lo que se hace ANTES de publicar.
+      -->
+      <app-previsualizacion-de-pieza
+        [titulo]="registro.titulo"
+        [antetitulo]="registro.categoria"
+        [firma]="firmaDeLaNoticia(registro)"
+        [entradilla]="registro.resumen"
+        [cuerpo]="registro.cuerpo"
+        [portada]="registro.imagenUrl || registro.imagenRuta"
+        [textoAlternativo]="registro.imagenAlt || registro.imagenAlternativa"
+        [datos]="datosDeLaNoticia(registro)" />
+    </app-dialogo-de-previsualizacion>
+  }
+
+  @if (historialAbierto(); as elegida) {
+    <app-historial-de-registro
+      [titulo]="elegida.titulo"
+      [registro]="{ tabla: tablaDeAuditoria, id: elegida.id }"
+      [procedencia]="elegida.procedencia"
+      (cerrar)="cerrarHistorial()"></app-historial-de-registro>
+  }
+
+  @if (formulario(); as f) {
+    <div class="dialogo-velo" role="dialog" aria-modal="true" aria-labelledby="formulario-noticia-titulo" appDialogo (cerrar)="cerrarFormulario()">
+      <div class="dialogo">
+        <div class="flex items-start justify-between gap-4">
+          <h3 id="formulario-noticia-titulo" class="font-alternate text-xl font-bold text-slate-800">
+            {{ f.id === null ? 'Nueva noticia' : 'Editar noticia' }}
+          </h3>
+          <app-boton importancia="terciaria" tamano="menudo" etiqueta="Cerrar sin guardar" (accion)="cerrarFormulario()">Cerrar</app-boton>
+        </div>
+
+        @if (f.id !== null) {
+          <p class="mt-3 rounded-xl bg-slate-50 px-3 py-2 font-mono text-dato text-slate-500">
+            /noticias/{{ f.slug }} · <span class="font-sans font-bold">la dirección no cambia al guardar</span>
+          </p>
+        }
+
+        @if (borradorRecuperable(); as pendiente) {
+          <!--
+            SE OFRECE, NO SE APLICA SOLO. Recuperar sin preguntar sorprendería a quien abrió el
+            formulario para escribir otra cosa y se encontraría con texto ajeno a su intención.
+          -->
+          <div class="mt-4 rounded-xl border border-morado bg-slate-50 px-4 py-3" role="status">
+            <p class="text-xs text-slate-700">
+              Quedó una noticia a medio escribir del
+              {{ pendiente.fecha | date: 'd MMM y, HH:mm':'':'es-CO' }}.
+            </p>
+            <div class="mt-2 flex flex-wrap gap-2">
+              <app-boton importancia="principal" tamano="menudo" (accion)="recuperarBorrador()">Recuperarla</app-boton>
+              <app-boton importancia="secundaria" tamano="menudo" (accion)="descartarBorrador()">Empezar de cero</app-boton>
+            </div>
+          </div>
+        }
+
+        <div class="mt-5">
+          <app-indicador-de-pasos [pasos]="pasos" [pasoActivo]="paso()" etiqueta="Pasos de la noticia"
+            (irAlPaso)="irAlPaso($event)"></app-indicador-de-pasos>
+        </div>
+
+        <div class="mt-5 grid gap-4">
+          @if (paso() === 1) {
+          <label class="block">
+            <span class="text-dato font-black uppercase tracking-wider text-slate-500">Título</span>
+            <input type="text" [ngModel]="f.titulo" (ngModelChange)="campo('titulo', $event)"
+              class="campo__control" />
+          </label>
+
+          <label class="block">
+            <span class="text-dato font-black uppercase tracking-wider text-slate-500">Resumen</span>
+            <textarea rows="2" [ngModel]="f.resumen" (ngModelChange)="campo('resumen', $event)"
+              class="campo__control"></textarea>
+            <small class="mt-1 block text-dato text-slate-400">Es lo que se lee en la lista del portal y en el Inicio.</small>
+          </label>
+
+          <label class="block">
+            <span class="text-dato font-black uppercase tracking-wider text-slate-500">Cuerpo</span>
+            <textarea rows="8" [ngModel]="f.cuerpo" (ngModelChange)="campo('cuerpo', $event)"
+              class="campo__control"></textarea>
+            <small class="mt-1 block text-dato text-slate-400">Deja una línea en blanco entre párrafos. Se publica como texto, no como marcado.</small>
+          </label>
+
+          <div class="grid gap-4 sm:grid-cols-2">
+            <label class="block">
+              <span class="text-dato font-black uppercase tracking-wider text-slate-500">Fecha de publicación</span>
+              <input type="date" [ngModel]="f.fechaPublicacion" (ngModelChange)="campo('fechaPublicacion', $event)"
+                class="campo__control" />
+              <small class="mt-1 block text-dato text-slate-400">Una fecha futura publica la noticia, pero el portal la enseña cuando llegue.</small>
+            </label>
+            <!-- El rótulo va con `for`: el desplegable lo pinta un componente hijo. -->
+            <div class="block">
+              <label for="noticia-categoria" class="text-dato font-black uppercase tracking-wider text-slate-500">Categoría</label>
+              <app-selector-de-categoria modulo="noticias" idCampo="noticia-categoria"
+                [categoriaId]="f.categoriaId" (categoriaIdChange)="campo('categoriaId', $event)"></app-selector-de-categoria>
+              <small class="mt-1 block text-dato text-slate-400">Organiza la barra de filtros del portal. Se administran en «Categorías temáticas».</small>
+            </div>
+            <label class="block">
+              <span class="text-dato font-black uppercase tracking-wider text-slate-500">Autoría</span>
+              <input type="text" [ngModel]="f.autoriaNombre" (ngModelChange)="campo('autoriaNombre', $event)"
+                placeholder="Comunicaciones PNMC"
+                class="campo__control" />
+            </label>
+          </div>
+
+          }
+
+          @if (paso() === 2) {
+          <!--
+            LA IMAGEN SE SUBE, NO SE TECLEA. Antes este bloque era un campo de texto donde alguien
+            escribía una ruta y confiaba en que el fichero estuviera puesto. Ahora va al banco de
+            archivos, que valida los bytes por su firma y exige la alternativa antes de aceptarlo.
+          -->
+          <fieldset class="rounded-xl border border-slate-200 p-4">
+            <legend class="px-1 text-dato font-black uppercase tracking-wider text-slate-500">Imagen de la noticia</legend>
+
+            <label class="block">
+              <span class="text-dato font-black uppercase tracking-wider text-slate-500">Texto alternativo</span>
+              <input type="text" [ngModel]="f.imagenAlt" (ngModelChange)="campo('imagenAlt', $event)"
+                placeholder="Encuentro de bandas en la plaza principal"
+                class="campo__control" />
+              <small class="mt-1 block text-dato text-slate-400">Se escribe antes de subir: describe la imagen para quien no puede verla.</small>
+            </label>
+
+            @if (f.imagenUrl) {
+              <div class="mt-4 flex items-center gap-4">
+                <img [src]="f.imagenUrl" [alt]="f.imagenAlt" width="120" height="80"
+                  class="h-20 w-32 rounded-lg border border-slate-200 object-cover" />
+                <app-boton importancia="secundaria" tamano="menudo" (accion)="quitarImagen()">Quitar imagen</app-boton>
+              </div>
+            } @else {
+              <label class="mt-4 block">
+                <span class="sr-only">Elegir imagen</span>
+                <input type="file" accept="image/png,image/jpeg,image/webp" (change)="elegirImagen($event)"
+                  [disabled]="subiendoImagen()"
+                  class="block w-full text-xs text-slate-600 file:mr-3 file:rounded-xl file:border-0 file:bg-morado file:px-4 file:py-2 file:text-xs file:font-bold file:text-white" />
+                <small class="mt-1 block text-dato text-slate-400">PNG, JPEG o WebP, hasta 2 MB.</small>
+              </label>
+            }
+
+            @if (subiendoImagen()) {
+              <p class="mt-3 text-xs text-slate-500" role="status">Subiendo…</p>
+            }
+            @if (errorDeImagen()) {
+              <p class="mt-3 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-900" role="alert">{{ errorDeImagen() }}</p>
+            }
+
+            @if (f.imagenRuta) {
+              <!--
+                SOLO APARECE SI LA NOTICIA YA TRAIA UNA RUTA ESCRITA A MANO. Las cargadas antes del
+                banco siguen enseñándola mientras nadie las edite; subir una imagen la sustituye.
+              -->
+              <p class="mt-3 rounded-lg bg-slate-50 px-3 py-2 font-mono text-dato text-slate-500">
+                Ruta heredada: {{ f.imagenRuta }}
+              </p>
+            }
+          </fieldset>
+          }
+
+          @if (paso() === 3) {
+          <label class="block">
+            <span class="text-dato font-black uppercase tracking-wider text-slate-500">Etiquetas</span>
+            <input type="text" [ngModel]="f.etiquetas" (ngModelChange)="campo('etiquetas', $event)"
+              placeholder="convivencia, territorio, bandas"
+              class="campo__control" />
+            <small class="mt-1 block text-dato text-slate-400">Separadas por comas. Se guardan una a una.</small>
+          </label>
+
+          <app-selector-de-clasificacion
+            [practicasElegidas]="f.practicasMusicalesIds"
+            [territoriosElegidos]="f.territoriosSonorosIds"
+            (practicasElegidasChange)="campo('practicasMusicalesIds', $event)"
+            (territoriosElegidosChange)="campo('territoriosSonorosIds', $event)"></app-selector-de-clasificacion>
+
+          <!--
+            LAS INICIATIVAS DEL PROGRAMA VAN APARTE DE LA CLASIFICACION porque son otra pregunta:
+            la clasificación dice de qué trata el contenido, esto dice a qué iniciativa pertenece.
+            Un evento puede ser de «Encuentros» y además de Celebra la Música.
+          -->
+          <app-selector-de-proyectos
+            [elegidos]="f.proyectosTransversalesIds"
+            (elegidosChange)="campo('proyectosTransversalesIds', $event)"></app-selector-de-proyectos>
+          }
+
+          @if (paso() === 4) {
+          <!--
+            EL ULTIMO PASO NO PIDE NADA: enseña lo escrito. Decidir con los campos delante evita el
+            «guardo y ya veré» que deja fichas a medias.
+          -->
+          <dl class="grid gap-3 rounded-xl border border-slate-200 p-4 text-xs">
+            <div class="flex flex-wrap gap-2">
+              <dt class="w-32 shrink-0 font-black uppercase tracking-wider text-slate-500">Título</dt>
+              <dd class="flex-1 text-slate-800">{{ f.titulo || '—' }}</dd>
+            </div>
+            <div class="flex flex-wrap gap-2">
+              <dt class="w-32 shrink-0 font-black uppercase tracking-wider text-slate-500">Resumen</dt>
+              <dd class="flex-1 text-slate-800">{{ f.resumen || '—' }}</dd>
+            </div>
+            <div class="flex flex-wrap gap-2">
+              <dt class="w-32 shrink-0 font-black uppercase tracking-wider text-slate-500">Fecha</dt>
+              <dd class="flex-1 text-slate-800">{{ f.fechaPublicacion || 'Sin fecha' }}</dd>
+            </div>
+            <div class="flex flex-wrap gap-2">
+              <dt class="w-32 shrink-0 font-black uppercase tracking-wider text-slate-500">Imagen</dt>
+              <dd class="flex-1 text-slate-800">{{ f.imagenArchivoId ? 'Subida' : (f.imagenRuta || 'Sin imagen') }}</dd>
+            </div>
+          </dl>
+          }
+        </div>
+
+        <div class="mt-6 flex flex-wrap items-center justify-between gap-3">
+          <!--
+            EL AUTOGUARDADO SE VE. Un mecanismo silencioso no tranquiliza a nadie, y cuando falla
+            hay que decirlo: es el momento en que conviene copiar el texto a otro sitio.
+          -->
+          <p class="text-dato text-slate-500" role="status" aria-live="polite">
+            @switch (autoguardado.estado()) {
+              @case ('guardando') { Guardando borrador… }
+              @case ('guardado') { Borrador guardado {{ autoguardado.ultimoGuardado() | date: 'HH:mm':'':'es-CO' }} }
+              @case ('fallido') { <span class="text-amber-700">No se pudo guardar el borrador. Copia el texto antes de cerrar.</span> }
+            }
+          </p>
+
+          <div class="flex flex-wrap items-center justify-end gap-3">
+            <app-boton importancia="secundaria" (accion)="cerrarFormulario()">Cancelar</app-boton>
+            @if (paso() > 1) {
+              <app-boton importancia="secundaria" (accion)="pasoAnterior()">Atrás</app-boton>
+            }
+            @if (paso() < pasos.length) {
+              <app-boton importancia="principal" (accion)="siguientePaso()">Siguiente</app-boton>
+            } @else {
+              <app-boton importancia="principal" [ocupado]="guardando()" (accion)="guardar()">{{ guardando() ? 'Guardando…' : (f.id === null ? 'Crear borrador' : 'Guardar cambios') }}</app-boton>
+            }
+          </div>
+        </div>
+
+        @if (f.id !== null) {
+          <p class="mt-4 text-dato leading-relaxed text-slate-400">
+            Se guarda citando la versión {{ f.version }}. Si alguien la cambió mientras la editabas,
+            el servidor lo rechaza en vez de pisar su trabajo.
+          </p>
+        }
+      </div>
+    </div>
+  }
+</section>

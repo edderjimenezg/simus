@@ -1,0 +1,128 @@
+<div class="space-y-6">
+  <!--
+    SIN ENCABEZADO PROPIO. «ESTADO DEL SISTEMA · Lectura directa de la API, la base de datos y los
+    datos territoriales» iba justo debajo de «Salud del sistema · Salud de la API, capacidades
+    informadas y telemetría técnica»: dos títulos y dos descripciones para la misma pantalla.
+  -->
+  <h2 id="sistema-consola-titulo" class="sr-only">Estado del sistema</h2>
+
+  <!--
+    CUANDO SE LEYO Y VOLVER A LEER. El armazón sondea cada diez segundos, pero quien mira esta
+    pantalla quiere una lectura AHORA y saber de cuándo es la que ve: es la misma pareja que
+    llevan Auditoría y Análisis.
+  -->
+  <div class="flex flex-wrap items-center justify-between gap-3">
+    <p class="barra-de-lista__resumen" data-ultima-lectura>
+      @if (monitor(); as lectura) {
+        Última lectura: {{ fecha(lectura.checkedAt) }} · API en {{ lectura.api.latencyMs }} ms
+      } @else {
+        Sin lectura del servidor todavía.
+      }
+    </p>
+    <app-boton importancia="terciaria" etiqueta="Volver a leer el estado del sistema" [ocupado]="ocupado()" (accion)="recargar.emit()">
+      <svg lucideRefreshCw [size]="15" aria-hidden="true"></svg>
+    </app-boton>
+  </div>
+
+  <!--
+    ESTADO GENERAL, EN LA FRANJA DE CIFRAS DE TODA LA CONSOLA. Aquí había tres celdas compuestas a
+    mano con divisores y utilidades sueltas —la tercera forma de dibujar la misma franja que el
+    Resumen operativo y Análisis—; desde es la pieza compartida.
+  -->
+  <app-franja-de-cifras [cifras]="cifrasDelSistema()" [conFilete]="false" />
+
+  <!--
+    Solo se muestran las capacidades que el monitor de la API informa como operativas.
+
+    NI TARJETA NI TITULO DENTRO DE ELLA: el lienzo ya es blanco, así que el recuadro con sombra no
+    separaba nada, y el título del apartado va como rótulo, no como un tercer encabezado con su
+    propia descripción debajo.
+  -->
+  <section aria-labelledby="capacidades-operativas">
+    <h3 id="capacidades-operativas" class="titulo-de-apartado">Capacidades operativas</h3>
+    <div class="overflow-x-auto">
+      <table class="tabla-administrativa tabla-de-capacidades">
+        <colgroup>
+          <col class="tabla-de-capacidades__modulo" />
+          <col class="tabla-de-capacidades__area" />
+          <col class="tabla-de-capacidades__registros" />
+        </colgroup>
+        <thead class="tabla-administrativa__cabecera">
+          <tr>
+            <th scope="col">Módulo</th>
+            <th scope="col">Área</th>
+            <th scope="col" class="text-right">Registros</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (modulo of modulosOperativos(); track modulo.id) {
+            <tr class="tabla-administrativa__fila">
+              <td><span class="tabla-administrativa__principal">{{ modulo.label }}</span></td>
+              <td class="text-prosa">{{ modulo.area }}</td>
+              <td class="text-right"><span class="tabla-administrativa__cifra">{{ modulo.total }}</span></td>
+            </tr>
+          }
+        </tbody>
+      </table>
+      @if (modulosOperativos().length === 0) {
+        <app-estado-de-lista
+          titulo="El monitor no informó módulos operativos"
+          detalle="Es la respuesta del servidor en esta lectura, no un fallo de esta pantalla." />
+      }
+    </div>
+  </section>
+
+  <section aria-labelledby="datos-divipola">
+    <h3 id="datos-divipola" class="titulo-de-apartado">Datos territoriales (DIVIPOLA)</h3>
+
+    <app-barra-de-lista>
+      <!-- `espera` EN CERO: el filtrado es en memoria, no hay petición que amortiguar. -->
+      <app-buscador-de-lista identificador="buscar-departamento" etiqueta="Buscar departamento"
+        marcador="Buscar departamento…" [espera]="0"
+        [valor]="busqueda()" (cambiar)="busqueda.set($event)" />
+      <p class="barra-de-lista__resumen">{{ departamentos().length }} departamentos · {{ totalDeMunicipios() }} municipios cargados</p>
+    </app-barra-de-lista>
+
+    <!--
+      LOS 33, Y ORDENABLES. La tabla cortaba en diez departamentos sin decirlo y el estado vacío
+      prometía «vacía la búsqueda para ver los 33»: se veían diez. Ordenar y filtrar actúan sobre
+      el total, que aquí cabe entero en memoria.
+    -->
+    <div class="overflow-x-auto">
+      <table class="tabla-administrativa tabla-de-divipola">
+        <colgroup>
+          <col class="tabla-de-divipola__departamento" />
+          <col class="tabla-de-divipola__cuantos" />
+          <col class="tabla-de-divipola__municipios" />
+        </colgroup>
+        <thead class="tabla-administrativa__cabecera">
+          <tr><app-cabecera-de-tabla [columnas]="COLUMNAS" [orden]="orden" (ordenarPor)="orden.alternar($event)" /></tr>
+        </thead>
+        <tbody>
+          @for (departamento of departamentosVisibles(); track departamento.nombre) {
+            <tr class="tabla-administrativa__fila">
+              <td><span class="tabla-administrativa__principal">{{ departamento.nombre | nombrePropio }}</span></td>
+              <td><span class="tabla-administrativa__cifra">{{ departamento.municipios.length }}</span></td>
+              <!--
+                LOS MUNICIPIOS ERAN CAPSULAS GRISES, cinco por fila y treinta y tres filas: más de
+                ciento cincuenta píldoras en una pantalla, y ninguna es un objeto ni una acción.
+                Son una muestra del contenido de la fila, así que se escriben como texto.
+              -->
+              <td class="text-prosa">
+                {{ muestraDeMunicipios(departamento.municipios) }}
+                @if (departamento.municipios.length > 5) {
+                  <span class="text-rotulo"> y {{ departamento.municipios.length - 5 }} más</span>
+                }
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+      @if (departamentosVisibles().length === 0) {
+        <app-estado-de-lista
+          titulo="Sin coincidencias en los datos territoriales"
+          detalle="Prueba con otro nombre de departamento, o vacía la búsqueda para ver los {{ departamentos().length }}." />
+      }
+    </div>
+  </section>
+</div>

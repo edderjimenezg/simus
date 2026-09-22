@@ -1,0 +1,978 @@
+<!--
+  LA FICHA DEL FESTIVAL: LA MISMA VISTA PARA LEER Y PARA EDITAR.
+
+  UNA SOLA MAQUETACIÓN. El criterio es este: «quiero que mantengamos la
+  misma vista para editar la edición del festival y para la ficha; si le doy editar, me habilita los
+  campos del festival, y así se puede tener una mejor experiencia de usuario… mantengamos este como
+  base para editar y ver ficha; cuando se crea un festival también mantengamos esta estructura, así
+  homogenizamos». Las pestañas, las secciones y su orden son los mismos en los tres casos —leer,
+  editar y crear—; lo único que cambia es que el valor deja de ser texto y pasa a ser un campo.
+
+  QUÉ SE FUE CON ESO. El formulario de doce pantallas con «Atrás» y «Siguiente»: la tira de números,
+  el contador «paso 2 de 10» y la regla de «guardar solo desde el paso 3». Sin pasos que recorrer,
+  «Guardar borrador» está disponible mientras se edita, y punto.
+
+  LAS DOS PESTAÑAS. «Datos básicos» escribe la CABECERA (`dbo.Festivales`, que es
+  `ART_MUS_FESTIVALES` del volcado); «Ediciones» escribe una EDICIÓN (`dbo.VersionesFestival`, que
+  es `ART_MUS_FESTIVALES_VERSION`). Son dos filas de dos tablas distintas y por eso van aparte:
+  «en todo el formulario debemos identificar la diferencia entre la información de la edición o
+  ediciones, y distinguir eso», del usuario.
+
+  SE DICE «EDICIÓN» Y NO «VERSIÓN». Es del mismo encargo: «recuerda es edición y no versión». La
+  base, el API y las rutas siguen diciendo VERSION —`dbo.VersionesFestival`,
+  `POST /externo/festivales/{id}/versiones`—; lo que cambia es lo que se lee.
+
+  EL RESTO DE LOS RÓTULOS SON LOS DEL VOLCADO, no traducciones libres. «Fuente de financiación» y
+  no «Fuente principal», «Página web» y no «Sitio web», «Director» y no «Dirección del Festival»,
+  «URL del archivo» y no «Dirección». El criterio es este: «a los nombres
+  de los campos no los cambies como vi que hiciste, en por ejemplo "fuente de financiamiento";
+  déjalo tal cual».
+
+  POR ENCIMA DE LA BARRA. `z-[4500]` y no `z-[100]`: la barra de navegación es `fixed w-full
+  z-[3000]` (navigation.component.html:3), así que con 100 el diálogo queda DEBAJO y sale cortado
+  por arriba.
+
+  ESCAPE Y EL FONDO NO CIERRAN MIENTRAS SE EDITA. Con cuarenta campos, cinco listas y tres tablas
+  rellenadas, un clic fuera perdería el trabajo entero. La X sí cierra siempre.
+-->
+
+<!--
+  `modoIncrustado`, SUMADO EL 1 DE SEPTIEMBRE DE 2026 para la ficha interna de Festival: la misma
+  ficha, sin el fondo oscuro ni la trampa de foco, para vivir DENTRO de una pestaña de
+  `/ecosistema/mi-panel/ecosistema/{id}` en vez de flotar como diálogo. `appDialogo` no puede
+  aplicarse condicionalmente sobre el mismo elemento -es una directiva estructural por presencia,
+  no por valor-, así que las dos ramas comparten el MISMO contenido (`#contenido`, más abajo) y solo
+  cambia el envoltorio: con fondo y trampa de foco para el diálogo modal de siempre, plano para la
+  ficha incrustada. Sin esto, la trampa de foco de un diálogo embebido en una página capturaría el
+  tabulador y no dejaría llegar a las demás pestañas de la ficha interna.
+-->
+@if (modoIncrustado) {
+  <div data-testid="ficha-festival-incrustada" class="w-full">
+    <ng-container [ngTemplateOutlet]="contenido"></ng-container>
+  </div>
+} @else {
+<div
+  data-testid="ficha-festival-fondo"
+  tabindex="-1"
+  class="fixed inset-0 z-[4500] flex items-center justify-center bg-black/40 p-4"
+  (mousedown)="alPulsarElFondo($event)"
+  (click)="alSoltarSobreElFondo($event)"
+  (keydown.enter)="cerrarSiNoSeEdita()"
+>
+  <div
+    appDialogo
+    (cerrar)="cerrarSiNoSeEdita()"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="ficha-festival-titulo"
+    data-testid="ficha-festival-modal"
+    [class]="enRevision()
+      ? 'flex max-h-[92vh] w-full max-w-6xl flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white text-left shadow-2xl'
+      : 'flex max-h-[92vh] w-full max-w-4xl flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white text-left shadow-2xl'"
+  >
+  <ng-container [ngTemplateOutlet]="contenido"></ng-container>
+  </div>
+</div>
+}
+
+<ng-template #contenido>
+    <!--
+      `ocultarEncabezado`: cuando la ficha vive DENTRO de un panel que ya muestra de qué registro se
+      trata —la bandeja de Solicitudes desde—, repetir aquí el título y
+      la descripción de contexto pinta dos encabezados seguidos y hace que la ficha se lea como
+      «otra cosa que se abrió» en vez de como la misma pantalla cambiando de contenido.
+    -->
+    @if ((!modoIncrustado || enRevision()) && !ocultarEncabezado) {
+    <header [class]="modoIncrustado ? 'flex shrink-0 items-start justify-between gap-4 pb-4' : 'flex shrink-0 items-start justify-between gap-4 border-b border-slate-200 px-5 py-4'">
+      <div class="min-w-0">
+        <div class="flex items-center gap-2">
+          <h2 id="ficha-festival-titulo" data-testid="ficha-titulo" class="font-alternate text-titulo font-bold uppercase tracking-wide text-morado">
+            {{ tituloPersonalizado || titulo() }}
+          </h2>
+          @if (enRevision()) {
+            <span data-testid="revision-autoguardado"
+                  [attr.aria-label]="estadoAutoguardado === 'guardando' ? 'Guardando el borrador de revisión automáticamente' : estadoAutoguardado === 'pendiente' ? 'Cambios pendientes de guardado automático' : 'Borrador de revisión guardado automáticamente'"
+                  [title]="estadoAutoguardado === 'guardando' ? 'Guardando borrador de revisión…' : estadoAutoguardado === 'pendiente' ? 'Cambios pendientes de guardado automático' : 'Borrador guardado automáticamente' + (horaAutoguardado ? ' a las ' + horaAutoguardado : '')"
+                  [class]="estadoAutoguardado === 'guardado' ? 'border-emerald-200 bg-emerald-50 text-emerald-700' : estadoAutoguardado === 'guardando' ? 'border-amber-200 bg-amber-50 text-amber-700' : 'border-slate-200 bg-slate-50 text-slate-500'"
+                  class="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-md border" role="status" aria-live="polite">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" [class]="estadoAutoguardado === 'guardando' ? 'h-4 w-4 animate-spin' : pulsoAutoguardado ? 'h-4 w-4 animate-pulse' : 'h-4 w-4'" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M5 3h11l3 3v15H5V3Z" />
+                <path stroke-linecap="round" stroke-linejoin="round" d="M8 3v6h7V3M8 21v-7h8v7" />
+                @if (estadoAutoguardado === 'guardado') { <path stroke-linecap="round" stroke-linejoin="round" d="m10 17 1.5 1.5L15 15" /> }
+              </svg>
+            </span>
+          }
+        </div>
+        @if (esAlta()) {
+          @if (nombreOrganizacion) {
+            <p class="mt-1 text-xs text-slate-500">
+              Se registra a nombre de <span class="font-bold text-slate-700">{{ nombreOrganizacion }}</span>.
+            </p>
+          }
+          <p class="mt-1 text-xs text-slate-500">
+            Primero los datos básicos: solo el nombre y el alcance territorial son obligatorios. Las
+            ediciones se añaden después, y un Festival puede tener todas las que haga falta.
+          </p>
+        } @else {
+          <p class="mt-1 truncate text-sm font-bold text-slate-700">{{ cabecera()?.nombre }}</p>
+          @if (descripcionContexto) {
+            <p class="mt-1 max-w-2xl text-xs leading-relaxed text-slate-500">{{ descripcionContexto }}</p>
+          }
+        }
+      </div>
+
+      <!--
+        LA X. El criterio es este: «recuerda ponerle una x para cerrar esa
+        ventana». Es un `<button>` y no un aspa dibujada: sale en el recorrido de tabulación, se
+        activa con Enter y con espacio, y lleva nombre accesible propio porque «×» no se lee.
+      -->
+      @if (!modoIncrustado) {
+      <button type="button"
+              data-testid="ficha-cerrar"
+              aria-label="Cerrar la ficha del Festival"
+              (click)="cerrarDialogo()"
+              class="shrink-0 rounded-lg border border-slate-200 px-2.5 py-1 text-lg leading-none text-slate-500 transition hover:bg-slate-100 hover:text-morado focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-morado">
+        <span aria-hidden="true">&times;</span>
+      </button>
+      }
+    </header>
+    }
+
+    <!-- EL CUERPO ES LO ÚNICO QUE DESPLAZA: la cabecera y los botones quedan siempre a la vista. -->
+    <div data-simus-form [class]="enRevision() ? 'relative flex-1 overflow-y-auto px-5 py-5' : modoIncrustado ? 'flex-1' : 'flex-1 overflow-y-auto px-5 py-4'">
+
+      <!--
+        LAS DOS REGIONES VIVAS ESTÁN SIEMPRE EN EL DOM y solo su texto es condicional. Un
+        `role="status"` que se inserta con el mensaje dentro no se anuncia: el lector tiene que
+        haber observado la región antes de que cambie.
+      -->
+      <!--
+        `tabindex="-1"` PARA PODER RECIBIR EL FOCO por programa y no por tabulación: tras un
+        guardado fallido el botón «Guardar» está deshabilitado y el navegador ya ha desenfocado, así
+        que el foco tiene que ir a algún sitio que diga qué pasó.
+      -->
+      <p role="alert" data-testid="ficha-error" tabindex="-1" [class.hidden]="!error()"
+         class="mb-3 rounded-xl border border-rose-200 bg-rose-50 p-3 text-sm text-rose-800">{{ error() }}</p>
+      <p role="status" data-testid="ficha-mensaje" [class.hidden]="!mensaje()"
+         class="mb-3 rounded-xl border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-800">{{ mensaje() }}</p>
+
+      <ng-content select="[contexto-envio]"></ng-content>
+
+      <!--
+        EL RECUENTO DE AJUSTES. El criterio es este: «me gustaría ver la
+        cantidad de ajustes, y cuando tenga los ajustes totalmente concluidos, podemos decir todos
+        los ajustes hechos, de naranja a verde, sugerir ya guardar cambios».
+
+        SIEMPRE EN EL DOM Y SOLO EL TEXTO CONDICIONAL, igual que los dos avisos de arriba y por el
+        mismo motivo: el paso de ámbar a verde es EL momento que hay que anunciar, y un
+        `role="status"` que se inserta con su contenido dentro no se anuncia. El lector tiene que
+        haber observado la región antes de que cambie.
+
+        EL COLOR NO VA SOLO. «De naranja a verde» es la señal rápida, pero un cambio de tono no lo
+        percibe quien no distingue esos dos tonos: el texto también cambia —«3 de 5» pasa a «Todos
+        los ajustes hechos»— y el número está escrito, no solo pintado.
+      -->
+      <p role="status"
+         data-testid="ficha-recuento-ajustes"
+         [class.hidden]="!atendiendoAjustes() || modoIncrustado"
+         [class]="claseDelRecuentoDeAjustes()"
+         class="mb-3 rounded-xl border p-3 text-sm leading-relaxed">
+        @if (todosLosAjustesHechos()) {
+          <strong data-testid="ficha-ajustes-completos">Todos los ajustes hechos: {{ cuantosAjustes() }} de {{ cuantosAjustes() }}.</strong>
+          @if (editando()) {
+            Guarda los cambios y, en tu panel, vuelve a enviar el Festival a revisión.
+          } @else {
+            Ya puedes volver a enviar el Festival a revisión desde tu panel.
+          }
+        } @else {
+          <strong>{{ ajustesHechos() }} de {{ cuantosAjustes() }} ajustes hechos.</strong>
+          Corrige cada campo señalado y guarda los cambios.
+          <!--
+            AQUI DECIA CUANTOS AJUSTES ESTABAN EN OTRA EDICION, y remataba con «ábrela desde la
+            pestaña Ediciones para verlo». Esa pestaña se retiró, así
+            que la frase mandaba a un sitio que ya no existe. Y no había forma de que apareciera:
+            el único sitio que podía pedir un ajuste sobre una edición era esa misma pestaña.
+
+            LO QUE QUEDA PENDIENTE, y queda dicho para que no se pierda: `RevisionDeCamposStore`
+            sigue sabiendo distinguir notas por edición —`versionAbierta`,
+            `pendientesEnOtraEdicion()`, `ambito: 'subregistro'`— y hoy nadie escribe esas
+            notas ni las lee. Si la revisión institucional llega a cubrir Ediciones, ese eje ya está
+            montado; si se decide que no, sobra entero. No se toca aquí porque es otro subsistema.
+          -->
+        }
+      </p>
+
+      <!--
+        EL FALLO DEL CIRCUITO DE NOTAS. Lo escribía `cargarCambiosPedidos()` y no lo pintaba nadie de
+        este lado: una ficha sin notas y un reenvío apagado se veían igual que «no te pidieron nada».
+      -->
+      <p role="alert" data-testid="ficha-error-revision" [class.hidden]="!errorDeLaRevision()"
+         class="mb-3 rounded-xl border border-rose-200 bg-rose-50 p-3 text-sm text-rose-800">{{ errorDeLaRevision() }}</p>
+
+      @if (cargando()) {
+        <p role="status" class="py-6 text-center text-sm text-slate-500">Consultando la ficha del Festival…</p>
+      } @else {
+
+        <!--
+          EL MISMO CONTENEDOR PARA LOS DOS MODOS, y por eso el `data-testid` es una expresión: es la
+          misma región de pantalla, y lo único que cambia es si sus valores se leen o se escriben.
+        -->
+        <div [attr.data-testid]="editando() ? 'ficha-formulario' : 'ficha-lectura'">
+
+          @if (enRevision() && mostrarResumenDeRevision) {
+            <ng-content select="[resumen-decision]"></ng-content>
+          } @else {
+
+          <!--
+            AQUI HABIA UN `tablist` DE DOS PESTAÑAS, «Datos básicos» y «Ediciones», y sobraba por
+            dos motivos a la vez. Los cuatro montajes del componente ya lo apagaban con
+            `[mostrarTablist]="false"` —la ficha de gestión y la consola institucional traen sus
+            propias pestañas, con su propia URL—; y desde ya no hay dos
+            partes entre las que elegir: la ficha muestra el Festival, y la Edición se registra en
+            su propia sección. Con una sola parte, el contenedor tampoco es ya un `tabpanel`: un
+            panel de pestaña sin pestañas le anuncia a un lector de pantalla algo que no existe.
+          -->
+
+          <div data-testid="panel-festival">
+
+            <!--
+              AQUI HABIA UNA SEGUNDA PESTAÑA, «EDICIONES», Y NADIE PODIA ABRIRLA.
+
+              Los cuatro montajes de este componente —los tres de la ficha de gestión y el de la
+              consola institucional— pasaban `pestanaForzada="festival"`, así que `pestana()` valía
+              siempre «festival» y las 1.322 líneas de la otra rama no se pintaban nunca. No era una
+              pantalla a medias: era un segundo formulario COMPLETO de la Edición, con sus ocho
+              secciones, duplicando el que sí se usa —`app-ediciones-temporales` con
+              `app-ficha-edicion-festival`, contra `/externo/ediciones`—.
+
+              Y pedía sus datos a `/externo/festivales/{id}/versiones`, que desde el 9 de septiembre
+              de 2026 no está registrada: medido el 13 de septiembre contra la API local, 404.
+              Retirada entera ese mismo día.
+            -->
+              <!-- Con `seccionVisible`, quien monta la ficha ya pinta sus propias pestañas: esta
+                   columna flotada sería una segunda navegación para lo mismo. -->
+              @if (enRevision() && !seccionVisible) {
+                <nav aria-label="Secciones de la revisión" class="mb-5 border-b border-slate-200 pb-3 lg:sticky lg:top-0 lg:float-left lg:mb-0 lg:w-48 lg:border-b-0 lg:border-r lg:bg-white lg:pb-0 lg:pr-4">
+                  <p class="mb-2 text-dato font-bold uppercase tracking-widest text-slate-400">Secciones</p>
+                  <div class="flex gap-1 overflow-x-auto lg:flex-col">
+                    @for (pasoId of ['generales', 'contacto-festival', 'musica-festival']; track pasoId) {
+                      <button type="button" (click)="irAPasoDeRevision(pasoId)" class="shrink-0 rounded-md px-2 py-1.5 text-left text-xs font-semibold text-slate-600 transition hover:bg-slate-100 hover:text-morado focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-morado">{{ paso(pasoId).titulo }}</button>
+                    }
+                  </div>
+                </nav>
+              }
+              <!-- CON UNA SOLA SECCION A LA VISTA NO HAY NADA QUE DIVIDIR. El filete de `divide-y`
+                   caía debajo de la única sección visible, a 48 px del que ya trae el pie: dos rayas
+                   seguidas separando lo mismo. -->
+              <ol [class]="seccionVisible ? 'space-y-0' : enRevision() ? 'space-y-0 divide-y divide-slate-200 lg:ml-56' : modoIncrustado ? 'divide-y divide-slate-200' : 'space-y-5'">
+                <li [attr.data-testid]="'paso-generales'" aria-labelledby="titular-paso-generales"
+                    [class.hidden]="seccionVisible && seccionVisible !== 'generales'"
+                    [class]="modoCampoContextual
+                      ? 'py-0'
+                      : enRevision() || modoIncrustado
+                      ? (seccionVisible ? 'scroll-mt-2 pb-6 pt-0' : 'scroll-mt-2 py-7 first:pt-0')
+                      : 'scroll-mt-2 rounded-2xl border border-slate-200 bg-white p-4'">
+                  <!--
+                    EL PATRÓN DE ACORDEÓN DE ARIA: el encabezado ENVUELVE al mando, y no al revés. Un `<h3>`
+                    dentro de un `<button>` no es HTML válido —el botón solo admite contenido en línea— y
+                    prescindir del encabezado deja los nueve pasos fuera de la navegación por encabezados de un
+                    lector de pantalla, que es como se recorre una ficha larga.
+
+                    ES UN BOTÓN AL LEER Y AL EDITAR, desde que «el estado natural son todos cerrados» (usuario, 29
+                    de agosto de 2026): también al leer hay algo que desplegar, así que también hay algo que
+                    pulsar. `aria-expanded` dice si está abierto y `aria-controls` qué región abre.
+                  -->
+                  <h3 id="titular-paso-generales" [attr.data-testid]="'titular-paso-generales'" tabindex="-1"
+                      [class.hidden]="modoCampoContextual" class="focus:outline-none">
+                    <button type="button"
+                            [attr.data-testid]="'abrir-paso-generales'"
+                            [disabled]="modoIncrustado || enRevision()"
+                            [attr.aria-expanded]="(modoIncrustado || enRevision()) ? null : estaAbierto('generales')"
+                            [attr.aria-controls]="(modoIncrustado || enRevision()) ? null : 'cuerpo-paso-generales'"
+                            (click)="alternarPaso('generales')"
+                            [class]="enRevision() || modoIncrustado
+                              ? 'flex w-full cursor-default items-baseline gap-3 text-left disabled:opacity-100'
+                              : 'flex w-full items-baseline gap-3 rounded-lg text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-morado'">
+                      <!--
+                        EL NÚMERO APARECE UNA SOLA VEZ EN EL TEXTO. Hasta iba dos: la
+                        insignia con el dígito, oculta al lector de pantalla, y un `sr-only` que repetía «Paso N
+                        de M». El criterio es este: «este 3 no es necesario… y está duplicado»—. Ahora la
+                        insignia no se oculta y se lleva el contexto dentro: se ve «3» y se oye «Paso 3 de 6».
+                      -->
+                      @if (!seccionVisible) {
+                        <span [class]="estaAbierto('generales')
+                                ? 'flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-morado font-alternate text-sm font-bold text-white'
+                                : 'flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-morado/10 font-alternate text-sm font-bold text-morado'">
+                          <span class="sr-only">Paso </span>{{ numeroDelPaso('generales') }}<span class="sr-only"> de {{ cuantosPasos() }}:</span>
+                        </span>
+                      }
+                      <span class="min-w-0 flex-1">
+                        <!-- Con `seccionVisible` el nombre de la sección ya está en la pestaña de
+                             arriba; repetirlo aquí es el mismo rótulo dos veces seguidas. -->
+                        <span class="block font-alternate text-sm font-bold uppercase tracking-wide text-morado"
+                              [class.hidden]="!!seccionVisible">
+                          {{ paso('generales').titulo }}
+                        </span>
+                        <span class="ayuda-de-seccion">{{ paso('generales').ayuda }}</span>
+                      </span>
+                      <!--
+                        EL DISTINTIVO CON EL NUMERO DE CAMBIOS PEDIDOS. «El estado natural son todos cerrados»
+                        (usuario, 29 de agosto de 2026): con los nueve pasos plegados, sin este numero no hay
+                        forma de saber cual hay que abrir, y quien corrige tendria que desplegarlos uno a uno.
+                        Se cuenta lo PENDIENTE: lo ya atendido deja de reclamar atencion.
+                      -->
+                      @if (!seccionVisible && cambiosPendientesEnElPaso('generales') > 0) {
+                        <span [attr.data-testid]="'insignia-cambios-generales'"
+                              class="shrink-0 rounded-full bg-amber-100 px-2.5 py-1 text-dato font-bold text-amber-800">
+                          {{ cambiosPendientesEnElPaso('generales') }}
+                          {{ cambiosPendientesEnElPaso('generales') === 1 ? 'ajuste sin atender' : 'ajustes sin atender' }}
+                        </span>
+                      }
+                      @if (!modoIncrustado && !enRevision()) {
+                        <span aria-hidden="true" class="shrink-0 text-slate-400">{{ estaAbierto('generales') ? '▾' : '▸' }}</span>
+                      }
+                    </button>
+                  </h3>
+
+                  @if (estaAbierto('generales')) {
+                  <div [id]="'cuerpo-paso-generales'" [attr.data-testid]="'cuerpo-paso-generales'"
+                       [class.mt-0]="modoCampoContextual" [class.mt-4]="!modoCampoContextual" class="space-y-5">
+                    <!--
+                      LOS CAMBIOS PEDIDOS, AL PRINCIPIO DEL PASO Y SOLO AL EDITAR. Al leer, la nota va pegada
+                      debajo de su campo —que es donde se entiende—; pero al editar el campo es un `<input>` y
+                      ahi no cabe. «Que sea por secciones, con la nota que diga que debe cambiar en cada campo»,
+                      del usuario: la lista dice el rotulo y luego la nota.
+                    -->
+                    @if (editando() && !modoCampoContextual && cambiosDelPaso('generales').length > 0) {
+                      <div [attr.data-testid]="'cambios-paso-generales'"
+                           class="rounded-xl border border-amber-300 bg-amber-50 p-3">
+                        <p class="font-alternate text-xs font-bold uppercase tracking-wide text-amber-800">
+                          Sugerencias de ajuste del equipo del PNMC
+                        </p>
+                        <ul class="mt-2 space-y-2 text-sm">
+                          @for (cambio of cambiosDelPaso('generales'); track cambio.campoId) {
+                            <li [attr.data-testid]="'cambio-' + cambio.campoId">
+                              <p [class]="cambio.estado === 'atendida' ? 'text-slate-500' : 'text-slate-700'">
+                                <strong>{{ cambio.campoEtiqueta }}:</strong> {{ cambio.nota }}
+                              </p>
+                              @if (puedeAtenderCambios()) {
+                                <label class="mt-1 flex items-start gap-2 text-xs text-slate-600">
+                                  <input type="checkbox" [attr.data-testid]="'atender-en-paso-' + cambio.campoId"
+                                         [checked]="cambio.estado === 'atendida'"
+                                         (change)="atenderCambio(cambio.id, $any($event.target))"
+                                         class="mt-0.5 h-4 w-4 rounded border-slate-300 text-verde-texto focus:ring-verde-texto" />
+                                  <!-- El rotulo del campo va DENTRO del nombre accesible: con tres
+                                       cambios en un paso, las tres casillas se anunciaban «Ya lo
+                                       corregi» y nada mas, y marcar la equivocada escribe en el
+                                       servidor que se corrigio un campo que nadie toco. -->
+                                  <span>Ya lo corregí<span class="sr-only">: {{ cambio.campoEtiqueta }}</span></span>
+                                </label>
+                              }
+                            </li>
+                          }
+                        </ul>
+                      </div>
+                    }
+                    <section [attr.data-testid]="'seccion-generales'" aria-labelledby="titular-paso-generales">
+                      @if (editando()) {
+                        <div data-testid="bloque-generales" [class]="modoCampoContextual ? 'grid gap-3' : 'grid gap-3 sm:grid-cols-2'">
+                          <div [class.hidden]="campoVisible && !mostrarCampoContextual('festival.nombre')" class="sm:col-span-2">
+                            <label for="ficha-nombre-festival" class="block campo__rotulo">
+                              Nombre del festival <span class="text-rose-600" aria-hidden="true">*</span>
+                            </label>
+                            <input id="ficha-nombre-festival" name="nombre" type="text" required
+                                   [(ngModel)]="formularioGeneral.nombre"
+                                   [attr.aria-invalid]="errores()['nombre'] ? 'true' : null"
+                                   [attr.aria-describedby]="errores()['nombre'] ? 'error-nombre' : null"
+                                   class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-morado focus:outline-none" />
+                            @if (errores()['nombre']) {
+                              <!-- EL MENSAJE VA ATADO AL CAMPO con `aria-describedby`. Sin eso, un lector de
+                                   pantalla lee «Nombre del festival, no válido» y no dice qué falta. -->
+                              <p id="error-nombre" class="mt-1 text-xs text-rose-700">{{ errores()['nombre'] }}</p>
+                            }
+                          </div>
+                          <div [class.hidden]="campoVisible && !mostrarCampoContextual('festival.descripcion')" class="sm:col-span-2">
+                            <label for="ficha-descripcion-festival" class="block campo__rotulo">Descripción del festival</label>
+                            <textarea id="ficha-descripcion-festival" name="descripcionFestival" rows="3"
+                                      [(ngModel)]="formularioGeneral.descripcion"
+                                      class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-morado focus:outline-none"></textarea>
+                          </div>
+
+                          <!--
+                            LOS TRES DE ABAJO SON NUESTROS, no del volcado de SIMUS. Los exige
+                            `CK_Festivales_NivelCobertura`, que comprueba la coherencia entre el alcance y el
+                            territorio: nacional sin departamento ni municipio, departamental con departamento,
+                            municipal con los dos. Sin ellos el guardado muere en la base.
+                          -->
+                          <div [class.hidden]="campoVisible && !mostrarCampoContextual('festival.periodicidad')">
+                            <label for="ficha-periodicidad" class="block campo__rotulo">Periodicidad</label>
+                            <select id="ficha-periodicidad" name="periodicidad"
+                                   [(ngModel)]="formularioGeneral.periodicidad"
+                                   class="mt-1 w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm focus:border-morado focus:outline-none">
+                              <option value="">Selecciona una opción</option>
+                              <option value="anual">Anual</option>
+                              <option value="semestral">Semestral</option>
+                              <option value="trimestral">Trimestral</option>
+                              <option value="bianual">Bianual (dos veces al año)</option>
+                              <option value="bienal">Bienal (cada dos años)</option>
+                              <option value="trienal">Trienal (cada tres años)</option>
+                              <option value="otra_regular">Otra periodicidad regular</option>
+                              <option value="intermitente">Intermitente o sin periodicidad fija</option>
+                            </select>
+                          </div>
+                          @if ((formularioGeneral.periodicidad === 'otra_regular' || formularioGeneral.periodicidad === 'intermitente') && (!campoVisible || mostrarCampoContextual('festival.periodicidad') || mostrarCampoContextual('festival.periodicidadDetalle'))) {
+                            <div class="sm:col-span-2">
+                              <label for="ficha-periodicidad-detalle" class="block campo__rotulo">Explicación de la periodicidad</label>
+                              <textarea id="ficha-periodicidad-detalle" name="periodicidadDetalle" rows="2" maxlength="600"
+                                        [(ngModel)]="formularioGeneral.periodicidadDetalle"
+                                        class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-morado focus:outline-none"></textarea>
+                            </div>
+                          }
+                          <div [class.hidden]="campoVisible && !mostrarCampoContextual('festival.nivelCobertura')">
+                            <label for="ficha-nivel-cobertura" class="block campo__rotulo">
+                              Alcance territorial <span class="text-rose-600" aria-hidden="true">*</span>
+                            </label>
+                            <select id="ficha-nivel-cobertura" name="nivelCobertura"
+                                    [(ngModel)]="formularioGeneral.nivelCobertura"
+                                    (ngModelChange)="alCambiarNivelDeCobertura()"
+                                    class="mt-1 w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm focus:border-morado focus:outline-none">
+                              @for (nivel of nivelesDeCobertura; track nivel.codigo) {
+                                <option [value]="nivel.codigo">{{ nivel.etiqueta }}</option>
+                              }
+                            </select>
+                          </div>
+                          @if (exigeDepartamento()) {
+                            <div [class.hidden]="campoVisible && !mostrarCampoContextual('festival.codigoDepartamento')">
+                              <label for="ficha-departamento" class="block campo__rotulo">Departamento</label>
+                              <select id="ficha-departamento" name="codigoDepartamento"
+                                      [(ngModel)]="formularioGeneral.codigoDepartamento"
+                                      (ngModelChange)="alCambiarDepartamentoGeneral()"
+                                      [attr.aria-invalid]="errores()['codigoDepartamento'] ? 'true' : null"
+                                      [attr.aria-describedby]="errores()['codigoDepartamento'] ? 'error-departamento' : null"
+                                      class="mt-1 w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm focus:border-morado focus:outline-none">
+                                <option value="">Sin elegir</option>
+                                @for (departamento of departamentos(); track departamento.codigo) {
+                                  <option [value]="departamento.codigo">{{ departamento.nombre | nombrePropio }}</option>
+                                }
+                              </select>
+                              @if (errores()['codigoDepartamento']) {
+                                <p id="error-departamento" class="mt-1 text-xs text-rose-700">{{ errores()['codigoDepartamento'] }}</p>
+                              }
+                            </div>
+                          }
+                          @if (exigeMunicipio()) {
+                            <div [class.hidden]="campoVisible && !mostrarCampoContextual('festival.codigoMunicipio')">
+                              <label for="ficha-municipio" class="block campo__rotulo">Municipio</label>
+                              <select id="ficha-municipio" name="codigoMunicipio"
+                                      [(ngModel)]="formularioGeneral.codigoMunicipio"
+                                      [attr.aria-invalid]="errores()['codigoMunicipio'] ? 'true' : null"
+                                      [attr.aria-describedby]="errores()['codigoMunicipio'] ? 'error-municipio' : null"
+                                      class="mt-1 w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm focus:border-morado focus:outline-none">
+                                <option value="">Sin elegir</option>
+                                @for (municipio of municipiosGenerales(); track municipio.municipalityCode) {
+                                  <option [value]="municipio.municipalityCode">{{ municipio.municipalityName | nombrePropio }}</option>
+                                }
+                              </select>
+                              @if (errores()['codigoMunicipio']) {
+                                <p id="error-municipio" class="mt-1 text-xs text-rose-700">{{ errores()['codigoMunicipio'] }}</p>
+                              }
+                            </div>
+                          }
+                        </div>
+                      } @else {
+                        @if (cabecera(); as c) {
+                          <dl data-testid="ficha-lectura-generales" class="mt-2 grid gap-3 sm:grid-cols-2">
+                            <div app-dato-de-la-ficha campo="festival.nombre" seccion="generales"
+                                 etiqueta="Nombre del festival" [valor]="texto(c.nombre)"></div>
+                            <div app-dato-de-la-ficha campo="festival.periodicidad" seccion="generales"
+                                 etiqueta="Periodicidad" [valor]="texto(c.periodicidad)"></div>
+                            <div app-dato-de-la-ficha campo="festival.descripcion" seccion="generales"
+                                 etiqueta="Descripción del festival" [valor]="texto(c.descripcion)"></div>
+                            <div app-dato-de-la-ficha campo="festival.nivelCobertura" seccion="generales"
+                                 etiqueta="Alcance territorial" [valor]="etiquetaCobertura(c.nivelCobertura)"></div>
+                            <!--
+                              EL TERRITORIO SE ESCRIBIA Y NO SE LEIA. Hasta el formulario
+                              pedia departamento y municipio —los exige `CK_Festivales_NivelCobertura`— y la ficha
+                              de lectura no los mostraba: quien abria un Festival municipal no veia en que
+                              municipio es. Lo destapo la revision adversarial del 29 de agosto.
+
+                              SOLO CUANDO EL ALCANCE LOS PIDE: un Festival nacional los tiene en NULL por
+                              restriccion de la base, y «Sin registrar» ahi se leeria como un dato que falta.
+                            -->
+                            @if (nivelPideDepartamento(c.nivelCobertura)) {
+                              <div app-dato-de-la-ficha campo="festival.codigoDepartamento" seccion="generales"
+                                   etiqueta="Departamento" [valor]="nombreDelDepartamento(c.codigoDepartamento)"></div>
+                            }
+                            @if (nivelPideMunicipio(c.nivelCobertura)) {
+                              <div app-dato-de-la-ficha campo="festival.codigoMunicipio" seccion="generales"
+                                   etiqueta="Municipio" [valor]="nombreDelMunicipio(c.codigoDepartamento, c.codigoMunicipio)"></div>
+                            }
+                          </dl>
+                        }
+                      }
+                    </section>
+                  </div>
+                  }
+                </li>
+
+                <li [attr.data-testid]="'paso-contacto-festival'" aria-labelledby="titular-paso-contacto-festival"
+                    [class.hidden]="seccionVisible && seccionVisible !== 'contacto-festival'"
+                    [class]="modoCampoContextual
+                      ? 'py-0'
+                      : enRevision() || modoIncrustado
+                      ? (seccionVisible ? 'scroll-mt-2 pb-6 pt-0' : 'scroll-mt-2 py-7')
+                      : 'scroll-mt-2 rounded-2xl border border-slate-200 bg-white p-4'">
+                  <!--
+                    EL PATRÓN DE ACORDEÓN DE ARIA: el encabezado ENVUELVE al mando, y no al revés. Un `<h3>`
+                    dentro de un `<button>` no es HTML válido —el botón solo admite contenido en línea— y
+                    prescindir del encabezado deja los nueve pasos fuera de la navegación por encabezados de un
+                    lector de pantalla, que es como se recorre una ficha larga.
+
+                    ES UN BOTÓN AL LEER Y AL EDITAR, desde que «el estado natural son todos cerrados» (usuario, 29
+                    de agosto de 2026): también al leer hay algo que desplegar, así que también hay algo que
+                    pulsar. `aria-expanded` dice si está abierto y `aria-controls` qué región abre.
+                  -->
+                  <h3 id="titular-paso-contacto-festival" [attr.data-testid]="'titular-paso-contacto-festival'" tabindex="-1"
+                      [class.hidden]="modoCampoContextual" class="focus:outline-none">
+                    <button type="button"
+                            [attr.data-testid]="'abrir-paso-contacto-festival'"
+                            [disabled]="modoIncrustado || enRevision()"
+                            [attr.aria-expanded]="(modoIncrustado || enRevision()) ? null : estaAbierto('contacto-festival')"
+                            [attr.aria-controls]="(modoIncrustado || enRevision()) ? null : 'cuerpo-paso-contacto-festival'"
+                            (click)="alternarPaso('contacto-festival')"
+                            [class]="enRevision() || modoIncrustado
+                              ? 'flex w-full cursor-default items-baseline gap-3 text-left disabled:opacity-100'
+                              : 'flex w-full items-baseline gap-3 rounded-lg text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-morado'">
+                      <!--
+                        EL NÚMERO APARECE UNA SOLA VEZ EN EL TEXTO. Hasta iba dos: la
+                        insignia con el dígito, oculta al lector de pantalla, y un `sr-only` que repetía «Paso N
+                        de M». El criterio es este: «este 3 no es necesario… y está duplicado»—. Ahora la
+                        insignia no se oculta y se lleva el contexto dentro: se ve «3» y se oye «Paso 3 de 6».
+                      -->
+                      @if (!seccionVisible) {
+                        <span [class]="estaAbierto('contacto-festival')
+                                ? 'flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-morado font-alternate text-sm font-bold text-white'
+                                : 'flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-morado/10 font-alternate text-sm font-bold text-morado'">
+                          <span class="sr-only">Paso </span>{{ numeroDelPaso('contacto-festival') }}<span class="sr-only"> de {{ cuantosPasos() }}:</span>
+                        </span>
+                      }
+                      <span class="min-w-0 flex-1">
+                        <!-- Con `seccionVisible` el nombre de la sección ya está en la pestaña de
+                             arriba; repetirlo aquí es el mismo rótulo dos veces seguidas. -->
+                        <span class="block font-alternate text-sm font-bold uppercase tracking-wide text-morado"
+                              [class.hidden]="!!seccionVisible">
+                          {{ paso('contacto-festival').titulo }}
+                        </span>
+                        <span class="ayuda-de-seccion">{{ paso('contacto-festival').ayuda }}</span>
+                      </span>
+                      <!--
+                        EL DISTINTIVO CON EL NUMERO DE CAMBIOS PEDIDOS. «El estado natural son todos cerrados»
+                        (usuario, 29 de agosto de 2026): con los nueve pasos plegados, sin este numero no hay
+                        forma de saber cual hay que abrir, y quien corrige tendria que desplegarlos uno a uno.
+                        Se cuenta lo PENDIENTE: lo ya atendido deja de reclamar atencion.
+                      -->
+                      @if (!seccionVisible && cambiosPendientesEnElPaso('contacto-festival') > 0) {
+                        <span [attr.data-testid]="'insignia-cambios-contacto-festival'"
+                              class="shrink-0 rounded-full bg-amber-100 px-2.5 py-1 text-dato font-bold text-amber-800">
+                          {{ cambiosPendientesEnElPaso('contacto-festival') }}
+                          {{ cambiosPendientesEnElPaso('contacto-festival') === 1 ? 'ajuste sin atender' : 'ajustes sin atender' }}
+                        </span>
+                      }
+                      @if (!modoIncrustado && !enRevision()) {
+                        <span aria-hidden="true" class="shrink-0 text-slate-400">{{ estaAbierto('contacto-festival') ? '▾' : '▸' }}</span>
+                      }
+                    </button>
+                  </h3>
+
+                  @if (estaAbierto('contacto-festival')) {
+                  <div [id]="'cuerpo-paso-contacto-festival'" [attr.data-testid]="'cuerpo-paso-contacto-festival'"
+                       [class.mt-0]="modoCampoContextual" [class.mt-4]="!modoCampoContextual" class="space-y-5">
+                    <!--
+                      LOS CAMBIOS PEDIDOS, AL PRINCIPIO DEL PASO Y SOLO AL EDITAR. Al leer, la nota va pegada
+                      debajo de su campo —que es donde se entiende—; pero al editar el campo es un `<input>` y
+                      ahi no cabe. «Que sea por secciones, con la nota que diga que debe cambiar en cada campo»,
+                      del usuario: la lista dice el rotulo y luego la nota.
+                    -->
+                    @if (editando() && !modoCampoContextual && cambiosDelPaso('contacto-festival').length > 0) {
+                      <div [attr.data-testid]="'cambios-paso-contacto-festival'"
+                           class="rounded-xl border border-amber-300 bg-amber-50 p-3">
+                        <p class="font-alternate text-xs font-bold uppercase tracking-wide text-amber-800">
+                          Sugerencias de ajuste del equipo del PNMC
+                        </p>
+                        <ul class="mt-2 space-y-2 text-sm">
+                          @for (cambio of cambiosDelPaso('contacto-festival'); track cambio.campoId) {
+                            <li [attr.data-testid]="'cambio-' + cambio.campoId">
+                              <p [class]="cambio.estado === 'atendida' ? 'text-slate-500' : 'text-slate-700'">
+                                <strong>{{ cambio.campoEtiqueta }}:</strong> {{ cambio.nota }}
+                              </p>
+                              @if (puedeAtenderCambios()) {
+                                <label class="mt-1 flex items-start gap-2 text-xs text-slate-600">
+                                  <input type="checkbox" [attr.data-testid]="'atender-en-paso-' + cambio.campoId"
+                                         [checked]="cambio.estado === 'atendida'"
+                                         (change)="atenderCambio(cambio.id, $any($event.target))"
+                                         class="mt-0.5 h-4 w-4 rounded border-slate-300 text-verde-texto focus:ring-verde-texto" />
+                                  <!-- El rotulo del campo va DENTRO del nombre accesible: con tres
+                                       cambios en un paso, las tres casillas se anunciaban «Ya lo
+                                       corregi» y nada mas, y marcar la equivocada escribe en el
+                                       servidor que se corrigio un campo que nadie toco. -->
+                                  <span>Ya lo corregí<span class="sr-only">: {{ cambio.campoEtiqueta }}</span></span>
+                                </label>
+                              }
+                            </li>
+                          }
+                        </ul>
+                      </div>
+                    }
+                    <section [attr.data-testid]="'seccion-contacto-festival'" aria-labelledby="titular-paso-contacto-festival">
+                      @if (editando()) {
+                        <div data-testid="bloque-contacto-festival" [class]="modoCampoContextual ? 'grid gap-3' : 'grid gap-3 sm:grid-cols-2'">
+                          <!--
+                            SON LAS SIETE COLUMNAS DE CONTACTO DE `ART_MUS_FESTIVALES`: CORREO_CONTACTO,
+                            CELULAR, INSTAGRAM, FACEBOOK, PAGINA_WEB, OTRO_ENLACE y OBSERVACIONES_CONTACTO.
+                            Las de la EDICIÓN se llaman casi igual y viven en otra tabla; por eso esta
+                            sección tiene su propio nombre y vive bajo su propia pestaña.
+                          -->
+                          <div [class.hidden]="campoVisible && !mostrarCampoContextual('festival.correoContacto')">
+                            <label for="ficha-correo-festival" class="block campo__rotulo">Correo de contacto</label>
+                            <input id="ficha-correo-festival" name="correoContactoFestival" type="email"
+                                   [(ngModel)]="formularioGeneral.correoContacto"
+                                   class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-morado focus:outline-none" />
+                          </div>
+                          <div [class.hidden]="campoVisible && !mostrarCampoContextual('festival.telefonoCelular')">
+                            <label for="ficha-celular" class="block campo__rotulo">Celular</label>
+                            <input id="ficha-celular" name="telefonoCelular" type="tel"
+                                   [(ngModel)]="formularioGeneral.telefonoCelular"
+                                   class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-morado focus:outline-none" />
+                          </div>
+                          <div [class.hidden]="campoVisible && !mostrarCampoContextual('festival.instagram')">
+                            <label for="ficha-instagram-festival" class="block campo__rotulo">Instagram</label>
+                            <input id="ficha-instagram-festival" name="instagramFestival" type="text"
+                                   [(ngModel)]="formularioGeneral.instagram"
+                                   class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-morado focus:outline-none" />
+                          </div>
+                          <div [class.hidden]="campoVisible && !mostrarCampoContextual('festival.facebook')">
+                            <label for="ficha-facebook-festival" class="block campo__rotulo">Facebook</label>
+                            <input id="ficha-facebook-festival" name="facebookFestival" type="text"
+                                   [(ngModel)]="formularioGeneral.facebook"
+                                   class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-morado focus:outline-none" />
+                          </div>
+                          <div [class.hidden]="campoVisible && !mostrarCampoContextual('festival.paginaWeb')">
+                            <label for="ficha-pagina-web" class="block campo__rotulo">Página web</label>
+                            <input id="ficha-pagina-web" name="paginaWeb" type="url"
+                                   [(ngModel)]="formularioGeneral.paginaWeb"
+                                   class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-morado focus:outline-none" />
+                          </div>
+                          <div [class.hidden]="campoVisible && !mostrarCampoContextual('festival.otroEnlace')">
+                            <label for="ficha-otro-enlace-festival" class="block campo__rotulo">Otro enlace</label>
+                            <input id="ficha-otro-enlace-festival" name="otroEnlaceFestival" type="url"
+                                   [(ngModel)]="formularioGeneral.otroEnlace"
+                                   class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-morado focus:outline-none" />
+                          </div>
+                          <div [class.hidden]="campoVisible && !mostrarCampoContextual('festival.observacionesContacto')" class="sm:col-span-2">
+                            <label for="ficha-observaciones-festival" class="block campo__rotulo">Observaciones de contacto</label>
+                            <textarea id="ficha-observaciones-festival" name="observacionesContactoFestival" rows="2"
+                                      [(ngModel)]="formularioGeneral.observacionesContacto"
+                                      class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-morado focus:outline-none"></textarea>
+                          </div>
+                        </div>
+                      } @else {
+                        @if (cabecera(); as c) {
+                          <dl data-testid="ficha-lectura-contacto-festival" class="mt-2 grid gap-3 sm:grid-cols-2">
+                            <div app-dato-de-la-ficha campo="festival.correoContacto" seccion="contacto-festival"
+                                 etiqueta="Correo de contacto" [valor]="texto(c.correoContacto)"></div>
+                            <div app-dato-de-la-ficha campo="festival.telefonoCelular" seccion="contacto-festival"
+                                 etiqueta="Celular" [valor]="texto(c.telefonoCelular)"></div>
+                            <div app-dato-de-la-ficha campo="festival.instagram" seccion="contacto-festival"
+                                 etiqueta="Instagram" [valor]="texto(c.instagram)"></div>
+                            <div app-dato-de-la-ficha campo="festival.facebook" seccion="contacto-festival"
+                                 etiqueta="Facebook" [valor]="texto(c.facebook)"></div>
+                            <div app-dato-de-la-ficha campo="festival.paginaWeb" seccion="contacto-festival"
+                                 etiqueta="Página web" [valor]="texto(c.paginaWeb)"></div>
+                            <div app-dato-de-la-ficha campo="festival.otroEnlace" seccion="contacto-festival"
+                                 etiqueta="Otro enlace" [valor]="texto(c.otroEnlace)"></div>
+                            <div app-dato-de-la-ficha campo="festival.observacionesContacto" seccion="contacto-festival"
+                                 etiqueta="Observaciones de contacto" [valor]="texto(c.observacionesContacto)" [ancho]="2"></div>
+                          </dl>
+                        }
+                      }
+                    </section>
+                  </div>
+                  }
+                </li>
+
+                <li [attr.data-testid]="'paso-musica-festival'" aria-labelledby="titular-paso-musica-festival"
+                    [class.hidden]="seccionVisible && seccionVisible !== 'musica-festival'"
+                    [class]="modoCampoContextual
+                      ? 'py-0'
+                      : enRevision() || modoIncrustado
+                      ? (seccionVisible ? 'scroll-mt-2 pb-6 pt-0' : 'scroll-mt-2 py-7')
+                      : 'scroll-mt-2 rounded-2xl border border-slate-200 bg-white p-4'">
+                  <!--
+                    EL PATRÓN DE ACORDEÓN DE ARIA: el encabezado ENVUELVE al mando, y no al revés. Un `<h3>`
+                    dentro de un `<button>` no es HTML válido —el botón solo admite contenido en línea— y
+                    prescindir del encabezado deja los nueve pasos fuera de la navegación por encabezados de un
+                    lector de pantalla, que es como se recorre una ficha larga.
+
+                    ES UN BOTÓN AL LEER Y AL EDITAR, desde que «el estado natural son todos cerrados» (usuario, 29
+                    de agosto de 2026): también al leer hay algo que desplegar, así que también hay algo que
+                    pulsar. `aria-expanded` dice si está abierto y `aria-controls` qué región abre.
+                  -->
+                  <h3 id="titular-paso-musica-festival" [attr.data-testid]="'titular-paso-musica-festival'" tabindex="-1"
+                      [class.hidden]="modoCampoContextual" class="focus:outline-none">
+                    <button type="button"
+                            [attr.data-testid]="'abrir-paso-musica-festival'"
+                            [disabled]="modoIncrustado || enRevision()"
+                            [attr.aria-expanded]="(modoIncrustado || enRevision()) ? null : estaAbierto('musica-festival')"
+                            [attr.aria-controls]="(modoIncrustado || enRevision()) ? null : 'cuerpo-paso-musica-festival'"
+                            (click)="alternarPaso('musica-festival')"
+                            [class]="enRevision() || modoIncrustado
+                              ? 'flex w-full cursor-default items-baseline gap-3 text-left disabled:opacity-100'
+                              : 'flex w-full items-baseline gap-3 rounded-lg text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-morado'">
+                      <!--
+                        EL NÚMERO APARECE UNA SOLA VEZ EN EL TEXTO. Hasta iba dos: la
+                        insignia con el dígito, oculta al lector de pantalla, y un `sr-only` que repetía «Paso N
+                        de M». El criterio es este: «este 3 no es necesario… y está duplicado»—. Ahora la
+                        insignia no se oculta y se lleva el contexto dentro: se ve «3» y se oye «Paso 3 de 6».
+                      -->
+                      @if (!seccionVisible) {
+                        <span [class]="estaAbierto('musica-festival')
+                                ? 'flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-morado font-alternate text-sm font-bold text-white'
+                                : 'flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-morado/10 font-alternate text-sm font-bold text-morado'">
+                          <span class="sr-only">Paso </span>{{ numeroDelPaso('musica-festival') }}<span class="sr-only"> de {{ cuantosPasos() }}:</span>
+                        </span>
+                      }
+                      <span class="min-w-0 flex-1">
+                        <!-- Con `seccionVisible` el nombre de la sección ya está en la pestaña de
+                             arriba; repetirlo aquí es el mismo rótulo dos veces seguidas. -->
+                        <span class="block font-alternate text-sm font-bold uppercase tracking-wide text-morado"
+                              [class.hidden]="!!seccionVisible">
+                          {{ paso('musica-festival').titulo }}
+                        </span>
+                        <span class="ayuda-de-seccion">{{ paso('musica-festival').ayuda }}</span>
+                      </span>
+                      <!--
+                        EL DISTINTIVO CON EL NUMERO DE CAMBIOS PEDIDOS. «El estado natural son todos cerrados»
+                        (usuario, 29 de agosto de 2026): con los nueve pasos plegados, sin este numero no hay
+                        forma de saber cual hay que abrir, y quien corrige tendria que desplegarlos uno a uno.
+                        Se cuenta lo PENDIENTE: lo ya atendido deja de reclamar atencion.
+                      -->
+                      @if (!seccionVisible && cambiosPendientesEnElPaso('musica-festival') > 0) {
+                        <span [attr.data-testid]="'insignia-cambios-musica-festival'"
+                              class="shrink-0 rounded-full bg-amber-100 px-2.5 py-1 text-dato font-bold text-amber-800">
+                          {{ cambiosPendientesEnElPaso('musica-festival') }}
+                          {{ cambiosPendientesEnElPaso('musica-festival') === 1 ? 'ajuste sin atender' : 'ajustes sin atender' }}
+                        </span>
+                      }
+                      @if (!modoIncrustado && !enRevision()) {
+                        <span aria-hidden="true" class="shrink-0 text-slate-400">{{ estaAbierto('musica-festival') ? '▾' : '▸' }}</span>
+                      }
+                    </button>
+                  </h3>
+
+                  @if (estaAbierto('musica-festival')) {
+                  <div [id]="'cuerpo-paso-musica-festival'" [attr.data-testid]="'cuerpo-paso-musica-festival'"
+                       [class.mt-0]="modoCampoContextual" [class.mt-4]="!modoCampoContextual" class="space-y-5">
+                    <!--
+                      LOS CAMBIOS PEDIDOS, AL PRINCIPIO DEL PASO Y SOLO AL EDITAR. Al leer, la nota va pegada
+                      debajo de su campo —que es donde se entiende—; pero al editar el campo es un `<input>` y
+                      ahi no cabe. «Que sea por secciones, con la nota que diga que debe cambiar en cada campo»,
+                      del usuario: la lista dice el rotulo y luego la nota.
+                    -->
+                    @if (editando() && !modoCampoContextual && cambiosDelPaso('musica-festival').length > 0) {
+                      <div [attr.data-testid]="'cambios-paso-musica-festival'"
+                           class="rounded-xl border border-amber-300 bg-amber-50 p-3">
+                        <p class="font-alternate text-xs font-bold uppercase tracking-wide text-amber-800">
+                          Sugerencias de ajuste del equipo del PNMC
+                        </p>
+                        <ul class="mt-2 space-y-2 text-sm">
+                          @for (cambio of cambiosDelPaso('musica-festival'); track cambio.campoId) {
+                            <li [attr.data-testid]="'cambio-' + cambio.campoId">
+                              <p [class]="cambio.estado === 'atendida' ? 'text-slate-500' : 'text-slate-700'">
+                                <strong>{{ cambio.campoEtiqueta }}:</strong> {{ cambio.nota }}
+                              </p>
+                              @if (puedeAtenderCambios()) {
+                                <label class="mt-1 flex items-start gap-2 text-xs text-slate-600">
+                                  <input type="checkbox" [attr.data-testid]="'atender-en-paso-' + cambio.campoId"
+                                         [checked]="cambio.estado === 'atendida'"
+                                         (change)="atenderCambio(cambio.id, $any($event.target))"
+                                         class="mt-0.5 h-4 w-4 rounded border-slate-300 text-verde-texto focus:ring-verde-texto" />
+                                  <!-- El rotulo del campo va DENTRO del nombre accesible: con tres
+                                       cambios en un paso, las tres casillas se anunciaban «Ya lo
+                                       corregi» y nada mas, y marcar la equivocada escribe en el
+                                       servidor que se corrigio un campo que nadie toco. -->
+                                  <span>Ya lo corregí<span class="sr-only">: {{ cambio.campoEtiqueta }}</span></span>
+                                </label>
+                              }
+                            </li>
+                          }
+                        </ul>
+                      </div>
+                    }
+                    <section [attr.data-testid]="'seccion-musica-festival'" aria-labelledby="titular-paso-musica-festival">
+                      @if (editando()) {
+                        <div data-testid="bloque-musica-festival" class="space-y-4">
+                          <!--
+                            ESCRIBEN EN LA CABECERA, no en la edición. Hasta estas dos
+                            listas no existían en este bloque: el formulario mandaba a la cabecera las de la
+                            EDICIÓN abierta, así que guardar una edición sin prácticas borraba las del
+                            Festival. Se ven iguales que las de «Prácticas y expresiones» y son otras.
+                          -->
+                          <fieldset [class.hidden]="campoVisible && !mostrarCampoContextual('festival.practicasMusicales')">
+                            <legend class="text-xs font-bold uppercase tracking-wide text-slate-600">Prácticas musicales</legend>
+                            <div data-testid="casillas-festival-practicasMusicalesIds" class="mt-2 grid gap-1 sm:grid-cols-2">
+                              @for (opcion of catalogos().practicasMusicales; track opcion.id) {
+                                <div class="flex items-center gap-2 text-sm text-slate-700"><label class="flex items-center gap-2">
+                                  <input type="checkbox" [checked]="estaSeleccionadoEnElFestival('practicasMusicalesIds', opcion.id)"
+                                         (change)="alternarEnElFestival('practicasMusicalesIds', opcion.id)"
+                                         class="h-4 w-4 rounded border-slate-300 text-morado focus:ring-morado" />
+                                  {{ opcion.nombre }}
+                                </label><app-ayuda-conceptual-catalogo class="self-start pt-0.5" tipo="practica" [nombre]="opcion.nombre" /></div>
+                              }
+                            </div>
+                          </fieldset>
+
+                          <fieldset [class.hidden]="campoVisible && !mostrarCampoContextual('festival.territoriosSonoros')">
+                            <legend class="text-xs font-bold uppercase tracking-wide text-slate-600">Territorios sonoros</legend>
+                            <div data-testid="casillas-festival-territoriosSonorosIds" class="mt-2 grid gap-1 sm:grid-cols-2">
+                              @for (opcion of catalogos().territoriosSonoros; track opcion.id) {
+                                <div class="flex items-center gap-2 text-sm text-slate-700"><label class="flex items-center gap-2">
+                                  <input type="checkbox" [checked]="estaSeleccionadoEnElFestival('territoriosSonorosIds', opcion.id)"
+                                         (change)="alternarEnElFestival('territoriosSonorosIds', opcion.id)"
+                                         class="h-4 w-4 rounded border-slate-300 text-morado focus:ring-morado" />
+                                  {{ opcion.nombre }}
+                                </label><app-ayuda-conceptual-catalogo class="self-start pt-0.5" tipo="territorio" [nombre]="opcion.nombre" /></div>
+                              }
+                            </div>
+                          </fieldset>
+
+                        </div>
+                      } @else {
+                        @if (cabecera(); as c) {
+                          <dl data-testid="ficha-lectura-musica-festival" class="mt-2 grid gap-3 sm:grid-cols-2">
+                            <div app-dato-de-la-ficha campo="festival.practicasMusicales" seccion="musica-festival"
+                                 etiqueta="Prácticas musicales" [valor]="lista(c.practicasMusicales)"></div>
+                            <div app-dato-de-la-ficha campo="festival.territoriosSonoros" seccion="musica-festival"
+                                 etiqueta="Territorios sonoros" [valor]="lista(c.territoriosSonoros)"></div>
+                          </dl>
+                        }
+                      }
+                    </section>
+                  </div>
+                  }
+                </li>
+              </ol>
+
+              <!--
+                DÓNDE ACABA EL FESTIVAL Y EMPIEZA LA EDICIÓN. Sin esta línea, quien termina de
+                rellenar los datos básicos no sabe si le falta algo: las nueve secciones de la
+                edición están en la otra pestaña y no se ven desde aquí.
+              -->
+              @if (editando() && !modoCampoContextual) {
+                <div data-testid="aviso-fin-del-festival"
+                     class="mt-6 rounded-xl border border-morado/30 bg-morado/5 p-3 text-xs text-slate-700">
+                  <p class="font-bold uppercase tracking-wide text-morado">Hasta aquí llega el Festival</p>
+                  <p class="mt-1">
+                    Ya puedes <span class="font-bold">guardar el borrador</span>: el Festival existe
+                    con esto y no hace falta nada más.
+                  </p>
+                  <p class="mt-1">
+                    Registrar Ediciones <span class="font-bold">no es obligatorio</span> para guardar
+                    ni para enviar el Festival a revisión. Puedes gestionarlas por separado en
+                    <span class="font-bold">Ediciones</span>.
+                  </p>
+                </div>
+              }
+          </div>
+          }
+        </div>
+      }
+    </div>
+
+    @if (!ocultarAcciones) {
+    <footer [class]="modoCampoContextual
+      ? 'mt-5 flex shrink-0 flex-wrap items-center justify-end gap-2 border-t border-slate-200 pt-4'
+      : modoIncrustado
+      ? 'mt-7 flex shrink-0 flex-col gap-4 border-t border-slate-200 pb-2 pt-5'
+      : 'flex shrink-0 flex-wrap items-center justify-end gap-2 border-t border-slate-200 px-5 py-3'">
+      <!--
+        EL PIE DE LA REVISION LO PONE QUIEN MONTA LA FICHA. En la consola institucional no hay nada
+        que editar ni que guardar de la ficha —el funcionario no corrige el Festival de una
+        organizacion, pide que lo corrijan—, y lo que va aqui es «Guardar borrador de la revision» y
+        «Enviar la solicitud de cambios». Proyectarlo evita meter la consola dentro de este
+        componente, que es de la organizacion.
+      -->
+      <ng-content select="[pie-de-revision]"></ng-content>
+
+      @if (enRevision()) {
+        <!-- Los botones de la organizacion no salen: aqui no se edita, se anota. -->
+      } @else if (editando()) {
+        <button type="button" data-testid="ficha-cancelar" [disabled]="guardando()" (click)="cancelar()"
+                class="mr-auto rounded-lg border border-slate-300 px-4 py-2 font-alternate text-xs font-bold uppercase tracking-widest text-slate-600 transition hover:bg-slate-100 disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-morado">
+          Cancelar
+        </button>
+
+        <!--
+          «GUARDAR BORRADOR» ESTÁ SIEMPRE MIENTRAS SE EDITA. Hasta salía
+          solo desde el último paso del Festival en adelante —«después del paso 3 podemos dar en
+          guardar borrador, no antes», del usuario—, y esa regla existía porque el formulario iba
+          por pasos: había que recorrerlos. Sin pasos, todo está a la vista desde el primer momento
+          y la regla no tiene nada que ordenar.
+        -->
+        <button type="button" data-testid="ficha-guardar" [disabled]="guardando()" (click)="guardar()"
+                class="rounded-lg bg-verde-texto px-4 py-2 font-alternate text-xs font-bold uppercase tracking-widest text-white transition hover:bg-morado disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-morado">
+          {{ guardando() ? 'Guardando…' : etiquetaGuardar }}
+        </button>
+      } @else {
+        @if (puedeEditar()) {
+          <!--
+            EDITAR NO CAMBIA DE PANTALLA: habilita los campos de la que ya se está viendo. «Si le
+            doy editar, me habilita los campos del festival», del usuario.
+          -->
+          <button type="button" data-testid="ficha-editar" (click)="editar()"
+                  class="rounded-lg bg-verde-texto px-4 py-2 font-alternate text-xs font-bold uppercase tracking-widest text-white transition hover:bg-morado focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-morado">
+            Editar el Festival
+          </button>
+        } @else if (cabecera()) {
+          <!--
+            NO ES UN BOTÓN APAGADO. Un «Editar» deshabilitado no dice por qué; esta línea sí, y es
+            la misma regla que aplica el servidor: fuera de borrador y de ajustes solicitados el PUT
+            contesta 409.
+          -->
+          <!--
+            DOS SITUACIONES, DOS MENSAJES. Antes las dos se contaban con la misma frase —«ya está en
+            revisión o publicada, así que no admite cambios desde aquí»— y ninguna decía qué hacer:
+            una está esperando al Ministerio y la otra tiene un camino abierto.
+          -->
+          @if (estaEnRevision()) {
+            <p data-testid="ficha-no-editable" class="mr-auto text-xs text-slate-500">
+              El equipo del PNMC está revisando este Festival. Podrás cambiarlo cuando te lo
+              devuelvan con sus observaciones.
+            </p>
+          } @else if (sePuedeProponerCambios()) {
+            <div class="mr-auto flex flex-wrap items-center gap-3">
+              <p data-testid="ficha-no-editable" class="text-xs text-slate-500">
+                Está publicado, así que no se edita directamente: los cambios se plantean como una
+                propuesta y el PNMC la revisa.
+              </p>
+              <button type="button" data-testid="ficha-proponer-cambios"
+                      (click)="proponerCambios()"
+                      class="rounded-lg bg-morado px-4 py-2 font-alternate text-xs font-bold uppercase tracking-widest text-white transition hover:bg-morado/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-morado">
+                Proponer cambios
+              </button>
+            </div>
+          } @else {
+            <p data-testid="ficha-no-editable" class="mr-auto text-xs text-slate-500">
+              Esta edición no admite cambios desde aquí.
+            </p>
+          }
+        }
+        @if (!modoIncrustado) {
+          <button type="button" data-testid="ficha-cerrar-pie" (click)="cerrarDialogo()"
+                  class="rounded-lg border border-slate-300 px-4 py-2 font-alternate text-xs font-bold uppercase tracking-widest text-slate-600 transition hover:bg-slate-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-morado">
+            Cerrar
+          </button>
+        }
+      }
+    </footer>
+    }
+</ng-template>

@@ -1,0 +1,645 @@
+<section aria-labelledby="agenda-consola-titulo">
+  <!--
+    SIN ENCABEZADO PROPIO: la cabecera de página ya dice qué sección es. Lo que este panel añadía
+    —que la modalidad decide qué datos hacen falta— se dice donde se decide: en el formulario, que
+    lo comprueba campo a campo.
+  -->
+  <h2 id="agenda-consola-titulo" class="sr-only">Agenda y eventos</h2>
+
+  <app-barra-de-lista>
+    <app-buscador-de-lista identificador="buscar-evento-consola" etiqueta="Buscar eventos"
+      marcador="Buscar por actividad o lugar…" [valor]="busqueda()" (cambiar)="buscar($event)" />
+    <!--
+      FILTRAR POR CATEGORIA. Faltaba: la Agenda y las Noticias comparten el vocabulario de
+      Categorías y proyectos, se les pide al crear cada registro, y no había forma de listar por él.
+      Solo se ofrecen las categorías QUE ALGUN EVENTO USA, con cuántos: un desplegable con las
+      veinte del catálogo llevaría a listas vacías.
+    -->
+    <app-filtro-desplegable identificador="estado" etiqueta="Mostrar eventos por estado"
+      [opciones]="FILTRO_DE_ESTADO" [elegida]="filtroEstado()" (cambiar)="filtroEstado.set($event)" />
+    <!--
+      DE QUIEN SON LOS EVENTOS, EN BOTONES Y NO EN PESTAÑAS. Con las categorías ya en pestañas, una
+      segunda tira de pestañas encima dejaba dos filas del mismo control diciendo cosas distintas y
+      no se sabía cuál mandaba. El criterio es este: «no
+      funciona tener dobles pestañas, mejor que el cambio entre todos, institucionales y externos
+      como botones». Van en la barra, que es donde está lo que acota la lista.
+    -->
+    <span class="flex flex-wrap items-center gap-1" role="group" aria-label="Ver eventos por procedencia">
+      @for (opcion of PROCEDENCIAS; track opcion.id) {
+        <app-boton importancia="terciaria" tamano="menudo"
+          [pulsado]="filtroProcedencia() === opcion.id"
+          (accion)="cambiarProcedencia(opcion.id)">{{ opcion.etiqueta }}</app-boton>
+      }
+    </span>
+    <!--
+      LOS ARCHIVADOS, FUERA POR OMISION. Un archivo cerrado no es trabajo pendiente y con 471
+      eventos ocupa sitio sin decir nada. El conmutador los trae de vuelta cuando hacen falta; lo
+      resuelve el servidor, no un filtro sobre la página.
+
+      <b>ES UN OJO Y NO UN BOTON CON TEXTO, y eso es lo que dice qué clase de control es.</b> Los
+      tres de al lado —Todos, Institucionales, Externos— son posiciones EXCLUYENTES de una misma
+      pregunta: solo una puede estar puesta. Este es otro tipo de cosa: un interruptor que se
+      combina con cualquiera de los tres. Con la misma forma que ellos se leía como una cuarta
+      opción del grupo. El criterio es este: «con un icono
+      de vista u ojo que cambie al cliquear, que se sienta diferente».
+
+      EL ICONO CAMBIA Y EL ROTULO TAMBIEN: el ojo abierto cuando los archivados se ven, tachado
+      cuando no. Un icono que no cambia obliga a adivinar si dice el estado actual o lo que pasará
+      al pulsarlo.
+
+      DICE DE QUE HABLA, EN PANTALLA. El ojo solo llevaba su nombre en `aria-label` y en `title`:
+      quien mira no sabía si escondía archivados, borradores o eventos pasados sin posar el ratón
+      encima, y en táctil no hay dónde posarlo. Quedó definido
+      de 2026: «si es necesario que se sepa que el ojo oculta o muestra». La palabra es el sujeto;
+      el estado lo sigue diciendo el icono y el relleno de pulsado.
+    -->
+    <app-conmutador-de-ojo identificador="agenda-archivados" grupo="Archivados"
+      deQue="los eventos archivados" [visible]="mostrarArchivados()"
+      (alternar)="mostrarArchivados.set($event)" />
+    <ng-container extremo>
+      <!--
+        EL AFICHE YA SABE CUANDO Y DONDE. Transcribirlo a mano teniéndolo delante es copiar; leerlo
+        es la misma herramienta que usa el Catálogo Editorial, con otro reconocimiento detrás.
+      -->
+      <app-boton importancia="secundaria" (accion)="abrirLectura()">Desde un afiche</app-boton>
+      <app-boton importancia="principal" (accion)="nuevo()">Nuevo evento</app-boton>
+    </ng-container>
+  </app-barra-de-lista>
+
+  @if (leyendoDocumento()) {
+    <div class="mb-6 rounded-xl bg-morado/5 p-4">
+      <app-importar-desde-documento
+        ruta="/api/v1/institucional/agenda/desde-documento"
+        queSeCrea="evento"
+        (propuesta)="usarLaPropuesta($event)"></app-importar-desde-documento>
+      <div class="mt-3"><app-boton importancia="terciaria" tamano="menudo" (accion)="cerrarLectura()">Cancelar</app-boton></div>
+    </div>
+  }
+
+  <!-- Las categorías, debajo del buscador: el mismo orden que Organizaciones y Solicitudes. -->
+  @if (categoriasEnUso().length > 0) {
+    <app-selector-segmentado
+      [opciones]="pestanasDeCategoria()"
+      [elegida]="filtroCategoria()"
+      etiquetaDelGrupo="Filtrar eventos por categoría"
+      (elegir)="filtroCategoria.set($event)" />
+  }
+
+  @if (error()) { <p class="mb-4 text-cuerpo font-semibold text-amber-800" role="alert">{{ error() }}</p> }
+  @if (aviso()) { <p class="mb-4 text-cuerpo font-semibold text-verde-texto" role="status">{{ aviso() }}</p> }
+
+  @if (cargando() && eventosVisibles().length === 0) {
+    <app-estado-de-lista tipo="cargando" titulo="Consultando la agenda…" />
+  } @else if (eventosVisibles().length === 0) {
+    <app-lista-sin-filas entidad="eventos" [hayFiltros]="hayFiltrosPuestos()" [ambito]="ambitoDeLaLista()"
+      comoLlegan="Los programa el Programa desde aquí con «Nuevo evento», y los anuncian las organizaciones desde su espacio."
+      (limpiar)="limpiarFiltros()">
+      <app-boton importancia="principal" tamano="menudo" (accion)="nuevo()">Nuevo evento</app-boton>
+    </app-lista-sin-filas>
+  } @else {
+  <div class="overflow-x-auto">
+    <table class="tabla-administrativa tabla-de-publicaciones">
+      <colgroup>
+        <col class="tabla-de-publicaciones__titulo" />
+        <col class="tabla-de-publicaciones__cuando" />
+        <col class="tabla-de-publicaciones__donde" />
+        <col class="tabla-de-publicaciones__estado" />
+        <col class="tabla-de-publicaciones__acciones" />
+      </colgroup>
+      <thead class="tabla-administrativa__cabecera">
+        <!--
+          LA TABLA ORDENA POR COLUMNA, Y ORDENA EN EL SERVIDOR. Sus cuatro cabeceras fueron primero
+          texto muerto y después un orden sobre la página cargada, que es otra manera de mentir:
+          con doce filas de cuarenta páginas, ordenar por estado no traía ningún publicado a la
+          primera página porque los publicados estaban en la treinta. Ahora la columna viaja en la
+          petición y vuelve la primera página del orden pedido.
+        -->
+        <tr><app-cabecera-de-tabla [columnas]="COLUMNAS" [orden]="orden" (ordenarPor)="ordenarPor($event)" /></tr>
+      </thead>
+      <tbody>
+        @for (evento of eventosVisibles(); track evento.id) {
+          <tr class="tabla-administrativa__fila">
+            <td>
+              <span class="tabla-administrativa__principal">{{ evento.titulo }}</span>
+              <span class="tabla-administrativa__secundaria">/agenda · {{ evento.slug }}</span>
+              <!--
+                DE DONDE VINO, junto al título y no en una columna propia: es un dato del registro
+                que casi nadie consulta mientras trabaja, y una columna más estrecharía las que sí.
+              -->
+              <span class="tabla-administrativa__secundaria"><app-sello-de-procedencia [procedencia]="evento.procedencia"></app-sello-de-procedencia></span>
+            </td>
+            <td class="whitespace-nowrap">
+              <span class="tabular-nums">{{ evento.fechaInicio | date: 'd MMM y':'':'es-CO' }}</span>
+              @if (evento.fechaFin && evento.fechaFin !== evento.fechaInicio) {
+                <span class="tabla-administrativa__secundaria tabular-nums">hasta {{ evento.fechaFin | date: 'd MMM y':'':'es-CO' }}</span>
+              }
+              <span class="tabla-administrativa__secundaria">{{ etiquetasDeSituacion[evento.situacion] || evento.situacion }}</span>
+            </td>
+            <td>
+              <span>{{ rotuloDeModalidad(evento.modalidad) }}</span>
+              @if (evento.lugar) { <span class="tabla-administrativa__secundaria">{{ evento.lugar }}</span> }
+              @if (evento.nombreDepartamento) { <span class="tabla-administrativa__secundaria">{{ evento.nombreDepartamento | nombrePropio }}</span> }
+            </td>
+            <td>
+              <app-indicador-de-estado
+                [etiqueta]="rotuloDeEstado(evento.estado)"
+                [tono]="tonoDelEstado(evento.estado)"
+                [matiz]="matizDelEstado(evento.estado)"
+                [conTexto]="true"></app-indicador-de-estado>
+            </td>
+            <td class="tabla-administrativa__acciones">
+              <!--
+                UN SOLO CONTROL POR FILA. Siete botoncitos iguales desbordaban la celda y obligaban
+                a leerlos todos para encontrar el que se necesita; ahora todo vive en el menú, con
+                la acción esperada primera, y las que no aplican al estado no se pintan.
+              -->
+              <app-menu-de-acciones
+                [acciones]="accionesDe(evento)"
+                [descripcion]="evento.titulo"
+                (elegida)="ejecutarAccion(evento, $event)"></app-menu-de-acciones>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+
+    @if (totalDePaginas() > 1) {
+      <div class="tabla-administrativa__pie">
+        <p class="barra-de-lista__resumen">Página {{ pagina() }} de {{ totalDePaginas() }} · {{ total() }} eventos</p>
+        <div class="flex flex-wrap items-center gap-2">
+          <app-boton importancia="secundaria" tamano="menudo" [deshabilitado]="pagina() <= 1" (accion)="irALaPagina(pagina() - 1)">Anterior</app-boton>
+          <app-boton importancia="secundaria" tamano="menudo" [deshabilitado]="pagina() >= totalDePaginas()" (accion)="irALaPagina(pagina() + 1)">Siguiente</app-boton>
+        </div>
+      </div>
+    }
+  </div>
+  }
+
+  <!--
+    LEER UN EVENTO SIN ABRIR EL FORMULARIO.
+
+    Hasta hoy, para ver qué dice un evento había que abrir la pantalla de EDICION —que es para
+    escribir, y que además tapa la lista— o previsualizarlo, que enseña la tarjeta del listado
+    público y no lo que el registro guarda. Este cajón enseña la ficha entera, de lectura, y deja
+    salir sin guardar nada.
+  -->
+  @if (fichaEnLectura(); as evento) {
+    <app-panel-lateral titulo="{{ evento.titulo }}" contexto="Evento de la agenda" (cerrar)="cerrarLaFicha()">
+      <div class="space-y-5">
+        <div class="flex flex-wrap items-center gap-3">
+          <app-indicador-de-estado
+            [etiqueta]="rotuloDeEstado(evento.estado)"
+            [tono]="tonoDelEstado(evento.estado)"
+            [matiz]="matizDelEstado(evento.estado)"
+            [conTexto]="true"></app-indicador-de-estado>
+          <app-sello-de-procedencia [procedencia]="evento.procedencia"></app-sello-de-procedencia>
+        </div>
+
+        <h3 class="titulo-de-apartado">Cuándo y dónde</h3>
+        <div class="grid gap-x-8 gap-y-4 sm:grid-cols-2 xl:grid-cols-3">
+          <app-dato-en-lectura rotulo="Empieza" [valor]="evento.fechaInicio | date: 'd MMM y':'':'es-CO'" />
+          <app-dato-en-lectura rotulo="Termina" [valor]="evento.fechaFin ? (evento.fechaFin | date: 'd MMM y':'':'es-CO') : ''" />
+          <!-- SIN SEGUNDOS: el servidor manda «18:00:00» y nadie programa un evento al segundo. -->
+          <app-dato-en-lectura rotulo="Hora" [valor]="soloLaHora(evento.horaInicio)" [sufijo]="evento.horaFin ? 'a ' + soloLaHora(evento.horaFin) : ''" />
+          <app-dato-en-lectura rotulo="Modalidad" [valor]="rotuloDeModalidad(evento.modalidad)" />
+          <app-dato-en-lectura rotulo="Lugar" [valor]="evento.lugar" />
+          <!-- Los nombres territoriales nunca en mayúsculas sostenidas: DIVIPOLA los manda así. -->
+          <app-dato-en-lectura rotulo="Territorio" [valor]="(evento.nombreMunicipio || evento.nombreDepartamento) | nombrePropio" />
+        </div>
+
+        <h3 class="titulo-de-apartado">De qué trata</h3>
+        <div class="grid gap-x-8 gap-y-4">
+          <app-dato-en-lectura rotulo="Resumen" [valor]="evento.descripcion" [prosa]="true" />
+          @if (evento.descripcionLarga) {
+            <app-dato-en-lectura rotulo="Descripción" [valor]="evento.descripcionLarga" [prosa]="true" />
+          }
+        </div>
+
+        <h3 class="titulo-de-apartado">Ficha</h3>
+        <div class="grid gap-x-8 gap-y-4 sm:grid-cols-2 xl:grid-cols-3">
+          <app-dato-en-lectura rotulo="Categoría" [valor]="evento.categoria" />
+          <app-dato-en-lectura rotulo="Organiza" [valor]="evento.organizador" />
+          <app-dato-en-lectura rotulo="Cobertura" [valor]="evento.nivelCobertura" />
+          <app-dato-en-lectura rotulo="Dirección en el portal" [valor]="'/agenda · ' + evento.slug" />
+        </div>
+
+        <div class="flex flex-wrap items-center gap-2 border-t border-filete pt-4">
+          <app-boton importancia="secundaria" (accion)="editarDesdeLaFicha(evento)">Editar</app-boton>
+          @if (evento.estado === 'publicado') {
+            <!-- `app-boton` no navega: un destino es un enlace, y así se abre en otra pestaña. -->
+            <a class="text-cuerpo font-bold text-morado underline-offset-4 hover:underline"
+              [href]="rutaPublica()" target="_blank" rel="noopener">Ver en el portal</a>
+          }
+        </div>
+      </div>
+    </app-panel-lateral>
+  }
+
+  <!--
+    COMO SE VERA EN SU LISTADO, antes de publicarlo. Se carga la pantalla pública real dentro de un
+    marco y el registro entra por el mismo servicio que la alimenta, así que la tarjeta que se ve es
+    la de verdad. Ver `PrevisualizacionEnListadoService`.
+  -->
+  @if (previsualizando(); as registro) {
+    <app-dialogo-de-previsualizacion
+      modulo="agenda"
+      [id]="registro.id"
+      [nombre]="nombreParaPrevisualizar(registro)"
+      [estadoEtiqueta]="estadoParaPrevisualizar(registro)"
+      (cerrar)="cerrarPrevisualizacion()">
+      <!--
+        EL EVENTO COMO SE LEE. Aquí importa más que en Noticias: la Agenda NO tiene página de
+        detalle en el portal —solo la tarjeta del listado—, así que hasta hoy no había ningún sitio
+        donde ver un evento entero. Se compone con lo que el registro guarda.
+      -->
+      <app-previsualizacion-de-pieza
+        [titulo]="registro.titulo"
+        [antetitulo]="registro.categoria"
+        [firma]="cuandoYDonde(registro)"
+        [entradilla]="registro.descripcion"
+        [cuerpo]="registro.descripcionLarga"
+        [portada]="registro.imagenRuta"
+        [textoAlternativo]="registro.imagenAlternativa"
+        [datos]="datosDelEvento(registro)" />
+    </app-dialogo-de-previsualizacion>
+  }
+
+  @if (historialAbierto(); as elegido) {
+    <app-historial-de-registro
+      [titulo]="elegido.titulo"
+      [registro]="{ tabla: tablaDeAuditoria, id: elegido.id }"
+      [procedencia]="elegido.procedencia"
+      (cerrar)="cerrarHistorial()"></app-historial-de-registro>
+  }
+
+  @if (formulario(); as f) {
+    <div class="dialogo-velo" role="dialog" aria-modal="true" aria-labelledby="formulario-evento-titulo" appDialogo (cerrar)="cerrarFormulario()">
+      <div class="dialogo">
+        <div class="flex items-start justify-between gap-4">
+          <h3 id="formulario-evento-titulo" class="font-alternate text-xl font-bold text-slate-800">{{ f.id === null ? 'Nuevo evento' : 'Editar evento' }}</h3>
+          <app-boton importancia="terciaria" tamano="menudo" etiqueta="Cerrar sin guardar" (accion)="cerrarFormulario()">Cerrar</app-boton>
+        </div>
+
+        @if (f.id !== null) {
+          <p class="mt-3 rounded-xl bg-slate-50 px-3 py-2 font-mono text-dato text-slate-500">
+            {{ f.slug }} · <span class="font-sans font-bold">la dirección no cambia al guardar</span>
+          </p>
+        }
+
+        @if (borradorRecuperable(); as pendiente) {
+          <!--
+            SE OFRECE, NO SE APLICA SOLO. Recuperar sin preguntar sorprendería a quien abrió el
+            formulario para escribir otra cosa y se encontraría con texto ajeno a su intención.
+          -->
+          <div class="mt-4 rounded-xl border border-morado bg-slate-50 px-4 py-3" role="status">
+            <p class="text-xs text-slate-700">
+              Quedó un evento a medio escribir del
+              {{ pendiente.fecha | date: 'd MMM y, HH:mm':'':'es-CO' }}.
+            </p>
+            <div class="mt-2 flex flex-wrap gap-2">
+              <app-boton importancia="principal" tamano="menudo" (accion)="recuperarBorrador()">Recuperarlo</app-boton>
+              <app-boton importancia="secundaria" tamano="menudo" (accion)="descartarBorrador()">Empezar de cero</app-boton>
+            </div>
+          </div>
+        }
+
+        <!--
+          POR PASOS Y NO EN UN MURO. El formulario pide veinte campos; agrupados por pregunta cada
+          pantalla cabe de una ojeada. Se puede saltar a cualquiera: casi todo es opcional hasta
+          publicar, y bloquear obligaría a inventar un dato para llegar al que se quería corregir.
+        -->
+        <div class="mt-5">
+          <app-indicador-de-pasos [pasos]="pasos" [pasoActivo]="paso()" etiqueta="Pasos del evento"
+            (irAlPaso)="irAlPaso($event)"></app-indicador-de-pasos>
+        </div>
+
+        <div class="mt-5 grid gap-4">
+          @if (paso() === 1) {
+          <label class="block">
+            <span class="text-dato font-black uppercase tracking-wider text-slate-500">Título</span>
+            <input type="text" [ngModel]="f.titulo" (ngModelChange)="campo('titulo', $event)"
+              class="campo__control" />
+          </label>
+
+          <label class="block">
+            <span class="text-dato font-black uppercase tracking-wider text-slate-500">Descripción</span>
+            <textarea rows="3" [ngModel]="f.descripcion" (ngModelChange)="campo('descripcion', $event)"
+              class="campo__control"></textarea>
+          </label>
+
+          <label class="block">
+            <span class="text-dato font-black uppercase tracking-wider text-slate-500">Texto extenso</span>
+            <textarea rows="5" [ngModel]="f.descripcionLarga" (ngModelChange)="campo('descripcionLarga', $event)"
+              class="campo__control"></textarea>
+            <small class="mt-1 block text-dato text-slate-400">Opcional. La descripción de arriba es la que va en las tarjetas.</small>
+          </label>
+
+          <div class="grid gap-4 sm:grid-cols-2">
+            <label class="block">
+              <span class="text-dato font-black uppercase tracking-wider text-slate-500">Organiza</span>
+              <input type="text" [ngModel]="f.organizador" (ngModelChange)="campo('organizador', $event)"
+                placeholder="Escuela de Música de Paipa"
+                class="campo__control" />
+            </label>
+            <label class="block">
+              <span class="text-dato font-black uppercase tracking-wider text-slate-500">Orden en la lista</span>
+              <input type="number" min="1" [ngModel]="f.ordenVisualizacion" (ngModelChange)="campo('ordenVisualizacion', $event)"
+                class="campo__control" />
+              <small class="mt-1 block text-dato text-slate-400">Déjalo vacío para el orden por fecha. Empieza en 1.</small>
+            </label>
+          </div>
+          }
+
+          @if (paso() === 2) {
+          @if (problemasDeFecha().length > 0) {
+            <!-- SE DICE AL LADO DE LOS CAMPOS y no al pulsar guardar: enterarse abajo obliga a
+                 volver arriba a buscar cuál de las dos fechas estaba mal. -->
+            <ul class="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-xs text-amber-900" role="alert">
+              @for (problema of problemasDeFecha(); track problema) {
+                <li>{{ problema }}</li>
+              }
+            </ul>
+          }
+
+          <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            <label class="block">
+              <span class="text-dato font-black uppercase tracking-wider text-slate-500">Empieza</span>
+              <input type="date" [ngModel]="f.fechaInicio" (ngModelChange)="campo('fechaInicio', $event)"
+                class="campo__control" />
+            </label>
+            <label class="block">
+              <span class="text-dato font-black uppercase tracking-wider text-slate-500">Termina</span>
+              <input type="date" [ngModel]="f.fechaFin" (ngModelChange)="campo('fechaFin', $event)"
+                class="campo__control" />
+              <small class="mt-1 block text-dato text-slate-400">Déjalo vacío si acaba el mismo día.</small>
+            </label>
+            <!--
+              LA HORA APARECE SOLO SI ALGUIEN LA PIDE. Muchos eventos no tienen hora —una exposición
+              que dura una semana, una convocatoria— y un campo siempre visible invita a rellenarlo
+              «por si acaso» con una hora inventada. La casilla hace explícita esa decisión.
+            -->
+            <div>
+              <!--
+                «AGREGAR HORA DE INICIO», NO «¿TIENE HORA DE INICIO?». Una pregunta invita a
+                contestarla —y a marcar la casilla «por si acaso» con una hora inventada—; una
+                acción describe lo que va a pasar y solo se pulsa cuando se quiere que pase.
+              -->
+              <label class="flex items-center gap-2">
+                <input type="checkbox" [ngModel]="f.conHoraInicio" (ngModelChange)="cambiarHoraDeInicio($event)" />
+                <span class="text-dato font-black uppercase tracking-wider text-slate-500">Agregar hora de inicio</span>
+              </label>
+              @if (f.conHoraInicio) {
+                <label class="mt-2 block">
+                  <span class="sr-only">Hora de inicio</span>
+                  <input type="time" [ngModel]="f.horaInicio" (ngModelChange)="campo('horaInicio', $event)"
+                    class="campo__control" />
+                </label>
+              }
+            </div>
+            <div>
+              <!--
+                LA HORA DE FIN NO SE OFRECE ANTES QUE LA DE INICIO. Una hora de fin sin hora de
+                inicio no significa nada, así que en vez de aceptarla y rechazarla después con un
+                error, el control no está hasta que existe su requisito. Desmarcar la de inicio
+                retira también esta, porque deja de tener sentido.
+              -->
+              @if (f.conHoraInicio) {
+                <label class="flex items-center gap-2">
+                  <input type="checkbox" [ngModel]="f.conHoraFin" (ngModelChange)="campo('conHoraFin', $event)" />
+                  <span class="text-dato font-black uppercase tracking-wider text-slate-500">Agregar hora de fin</span>
+                </label>
+                @if (f.conHoraFin) {
+                  <label class="mt-2 block">
+                    <span class="sr-only">Hora de fin</span>
+                    <input type="time" [ngModel]="f.horaFin" (ngModelChange)="campo('horaFin', $event)"
+                      class="campo__control" />
+                  </label>
+                }
+              } @else {
+                <p class="text-dato leading-relaxed text-slate-400">
+                  La hora de fin se puede agregar en cuanto haya hora de inicio.
+                </p>
+              }
+            </div>
+          </div>
+
+          }
+
+          @if (paso() === 3) {
+          <label class="block">
+            <span class="text-dato font-black uppercase tracking-wider text-slate-500">Modalidad</span>
+            <select [ngModel]="f.modalidad" (ngModelChange)="campo('modalidad', $event)"
+              class="campo__control">
+              <option value="presencial">Presencial</option>
+              <option value="virtual">Virtual</option>
+              <option value="mixta">Mixta</option>
+            </select>
+          </label>
+
+          <!--
+            LOS CAMPOS APARECEN SEGUN LA MODALIDAD, y no todos siempre. Enseñar «enlace» en un
+            evento presencial invita a rellenarlo y luego a preguntarse por qué no se ve.
+          -->
+          @if (f.modalidad === 'presencial' || f.modalidad === 'mixta') {
+            <div class="grid gap-4 sm:grid-cols-2">
+              <label class="block">
+                <span class="text-dato font-black uppercase tracking-wider text-slate-500">Lugar</span>
+                <input type="text" [ngModel]="f.lugar" (ngModelChange)="campo('lugar', $event)"
+                  placeholder="Teatro Municipal de Paipa"
+                  class="campo__control" />
+              </label>
+              <!--
+                SE ELIGE, NO SE TECLEA. Antes se escribían los códigos a mano y un dígito de más
+                daba un territorio inválido que la foránea rechazaba con un error poco claro.
+              -->
+              <div class="grid grid-cols-2 gap-3">
+                <label class="block">
+                  <span class="text-dato font-black uppercase tracking-wider text-slate-500">Departamento</span>
+                  <select [ngModel]="f.codigoDepartamento" (ngModelChange)="cambiarDepartamento($event)"
+                    class="campo__control">
+                    <option value="">Sin especificar</option>
+                    @for (territorio of territorios(); track territorio.codigo) {
+                      <option [value]="territorio.codigo">{{ territorio.nombre | nombrePropio }}</option>
+                    }
+                  </select>
+                </label>
+                <label class="block">
+                  <span class="text-dato font-black uppercase tracking-wider text-slate-500">Municipio</span>
+                  <select [ngModel]="f.codigoMunicipio" (ngModelChange)="campo('codigoMunicipio', $event)"
+                    [disabled]="municipiosDelDepartamento().length === 0"
+                    class="campo__control">
+                    <option value="">Todo el departamento</option>
+                    @for (m of municipiosDelDepartamento(); track m.codigo) {
+                      <option [value]="m.codigo">{{ m.nombre }}</option>
+                    }
+                  </select>
+                </label>
+              </div>
+            </div>
+          }
+
+          @if (f.modalidad === 'virtual' || f.modalidad === 'mixta') {
+            <label class="block">
+              <span class="text-dato font-black uppercase tracking-wider text-slate-500">Enlace</span>
+              <input type="url" [ngModel]="f.url" (ngModelChange)="campo('url', $event)"
+                placeholder="https://www.mincultura.gov.co/…"
+                class="campo__control" />
+            </label>
+          }
+
+          }
+
+          @if (paso() === 4) {
+          <!--
+            LA IMAGEN SE SUBE, NO SE TECLEA. Antes este bloque era un campo de texto donde alguien
+            escribía una ruta y confiaba en que el fichero estuviera puesto. Ahora va al banco de
+            archivos, que valida los bytes por su firma y exige la alternativa antes de aceptarlo.
+          -->
+          <fieldset class="rounded-xl border border-slate-200 p-4">
+            <legend class="px-1 text-dato font-black uppercase tracking-wider text-slate-500">Imagen del evento</legend>
+
+            <label class="block">
+              <span class="text-dato font-black uppercase tracking-wider text-slate-500">Texto alternativo</span>
+              <input type="text" [ngModel]="f.imagenAlt" (ngModelChange)="campo('imagenAlt', $event)"
+                placeholder="Banda juvenil tocando en la plaza principal"
+                class="campo__control" />
+              <small class="mt-1 block text-dato text-slate-400">Se escribe antes de subir: describe la imagen para quien no puede verla.</small>
+            </label>
+
+            @if (f.imagenUrl) {
+              <div class="mt-4 flex items-center gap-4">
+                <img [src]="f.imagenUrl" [alt]="f.imagenAlt" width="120" height="80"
+                  class="h-20 w-32 rounded-lg border border-slate-200 object-cover" />
+                <app-boton importancia="secundaria" tamano="menudo" (accion)="quitarImagen()">Quitar imagen</app-boton>
+              </div>
+            } @else {
+              <label class="mt-4 block">
+                <span class="sr-only">Elegir imagen</span>
+                <input type="file" accept="image/png,image/jpeg,image/webp" (change)="elegirImagen($event)"
+                  [disabled]="subiendoImagen()"
+                  class="block w-full text-xs text-slate-600 file:mr-3 file:rounded-xl file:border-0 file:bg-morado file:px-4 file:py-2 file:text-xs file:font-bold file:text-white" />
+                <small class="mt-1 block text-dato text-slate-400">PNG, JPEG o WebP, hasta 2 MB.</small>
+              </label>
+            }
+
+            @if (subiendoImagen()) {
+              <p class="mt-3 text-xs text-slate-500" role="status">Subiendo…</p>
+            }
+            @if (errorDeImagen()) {
+              <p class="mt-3 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-900" role="alert">{{ errorDeImagen() }}</p>
+            }
+          </fieldset>
+
+          <!--
+            EL RÓTULO VA CON `for` Y NO ENVOLVIENDO: el desplegable lo pinta un componente hijo, y
+            un `<label>` que envuelve algo que no es un control nativo no lo asocia con nada —quien
+            usa lector de pantalla oiría el campo sin nombre—.
+          -->
+          <div class="block">
+            <label for="evento-categoria" class="text-dato font-black uppercase tracking-wider text-slate-500">Categoría</label>
+            <app-selector-de-categoria modulo="agenda" idCampo="evento-categoria"
+              [categoriaId]="f.categoriaId" (categoriaIdChange)="campo('categoriaId', $event)"></app-selector-de-categoria>
+            <small class="mt-1 block text-dato text-slate-400">Organiza el filtro del portal. Se administran en «Categorías temáticas».</small>
+          </div>
+
+          <label class="block">
+            <span class="text-dato font-black uppercase tracking-wider text-slate-500">Etiquetas</span>
+            <input type="text" [ngModel]="f.etiquetas" (ngModelChange)="campo('etiquetas', $event)"
+              placeholder="bandas, formación, territorio"
+              class="campo__control" />
+            <small class="mt-1 block text-dato text-slate-400">Separadas por comas. Se guardan una a una.</small>
+          </label>
+
+          <app-selector-de-clasificacion
+            [practicasElegidas]="f.practicasMusicalesIds"
+            [territoriosElegidos]="f.territoriosSonorosIds"
+            (practicasElegidasChange)="campo('practicasMusicalesIds', $event)"
+            (territoriosElegidosChange)="campo('territoriosSonorosIds', $event)"></app-selector-de-clasificacion>
+
+          <!--
+            LAS INICIATIVAS DEL PROGRAMA VAN APARTE DE LA CLASIFICACION porque son otra pregunta:
+            la clasificación dice de qué trata el contenido, esto dice a qué iniciativa pertenece.
+            Un evento puede ser de «Encuentros» y además de Celebra la Música.
+          -->
+          <app-selector-de-proyectos
+            [elegidos]="f.proyectosTransversalesIds"
+            (elegidosChange)="campo('proyectosTransversalesIds', $event)"></app-selector-de-proyectos>
+          }
+
+          @if (paso() === 5) {
+          <!--
+            EL ULTIMO PASO NO PIDE NADA: enseña lo escrito y lo que falta. Es donde se decide, y
+            decidir con los campos delante evita el «guardo y ya veré» que deja fichas a medias.
+          -->
+          <dl class="grid gap-3 rounded-xl border border-slate-200 p-4 text-xs">
+            <div class="flex flex-wrap gap-2">
+              <dt class="w-32 shrink-0 font-black uppercase tracking-wider text-slate-500">Título</dt>
+              <dd class="flex-1 text-slate-800">{{ f.titulo || '—' }}</dd>
+            </div>
+            <div class="flex flex-wrap gap-2">
+              <dt class="w-32 shrink-0 font-black uppercase tracking-wider text-slate-500">Cuándo</dt>
+              <dd class="flex-1 text-slate-800">
+                {{ f.fechaInicio || '—' }}{{ f.fechaFin ? ' — ' + f.fechaFin : '' }}
+                {{ f.conHoraInicio && f.horaInicio ? ' · ' + f.horaInicio : '' }}
+              </dd>
+            </div>
+            <div class="flex flex-wrap gap-2">
+              <dt class="w-32 shrink-0 font-black uppercase tracking-wider text-slate-500">Dónde</dt>
+              <dd class="flex-1 text-slate-800">
+                {{ rotuloDeModalidad(f.modalidad) }}{{ f.lugar ? ' · ' + f.lugar : '' }}
+              </dd>
+            </div>
+            <div class="flex flex-wrap gap-2">
+              <dt class="w-32 shrink-0 font-black uppercase tracking-wider text-slate-500">Imagen</dt>
+              <dd class="flex-1 text-slate-800">{{ f.imagenArchivoId ? 'Subida' : 'Sin imagen' }}</dd>
+            </div>
+          </dl>
+          }
+        </div>
+
+        @if (loQueFalta().length > 0) {
+          <!--
+            SE DICE MIENTRAS SE ESCRIBE, no al pulsar «publicar». El servidor sigue siendo quien
+            decide —y la base lo respalda con una CHECK—; esto solo evita enterarse al final.
+          -->
+          <p class="mt-5 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-xs text-amber-900">
+            Para poder publicarlo falta {{ loQueFalta().join(', ') }}. Se puede guardar como borrador.
+          </p>
+        }
+
+        <div class="mt-6 flex flex-wrap items-center justify-between gap-3">
+          <!--
+            EL AUTOGUARDADO SE VE. Un mecanismo silencioso no tranquiliza a nadie, y cuando falla
+            hay que decirlo: es justo el momento en que conviene copiar el texto a otro sitio.
+          -->
+          <p class="text-dato text-slate-500" role="status" aria-live="polite">
+            @switch (autoguardado.estado()) {
+              @case ('guardando') { Guardando borrador… }
+              @case ('guardado') { Borrador guardado {{ autoguardado.ultimoGuardado() | date: 'HH:mm':'':'es-CO' }} }
+              @case ('fallido') { <span class="text-amber-700">No se pudo guardar el borrador. Copia el texto antes de cerrar.</span> }
+            }
+          </p>
+
+          <div class="flex flex-wrap items-center justify-end gap-3">
+            <app-boton importancia="secundaria" (accion)="cerrarFormulario()">Cancelar</app-boton>
+            @if (paso() > 1) {
+              <app-boton importancia="secundaria" (accion)="pasoAnterior()">Atrás</app-boton>
+            }
+            @if (paso() < pasos.length) {
+              <app-boton importancia="principal" (accion)="siguientePaso()">Siguiente</app-boton>
+            } @else {
+              <app-boton importancia="principal" [ocupado]="guardando()" [deshabilitado]="problemasDeFecha().length > 0" (accion)="guardar()">{{ guardando() ? 'Guardando…' : (f.id === null ? 'Crear borrador' : 'Guardar cambios') }}</app-boton>
+            }
+          </div>
+        </div>
+
+        @if (f.id !== null) {
+          <p class="mt-4 text-dato leading-relaxed text-slate-400">
+            Se guarda citando la versión {{ f.version }}. Si alguien lo cambió mientras lo editabas,
+            el servidor lo rechaza en vez de pisar su trabajo.
+          </p>
+        }
+      </div>
+    </div>
+  }
+</section>

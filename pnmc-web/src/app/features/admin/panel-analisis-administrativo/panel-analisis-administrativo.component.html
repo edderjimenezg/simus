@@ -1,0 +1,100 @@
+<div class="grid gap-6 xl:grid-cols-[minmax(0,1.05fr)_minmax(22rem,.95fr)]">
+  <section class="min-w-0" aria-labelledby="titulo-tablero-analisis">
+    <!--
+      SIN UN SEGUNDO ENCABEZADO. Aquí había antetítulo «Datos verificables», título «Panorama
+      administrativo» y descripción, justo debajo de los que ya pone la consola. Se queda el ROTULO
+      DE APARTADO, que es lo único que el armazón no sabe: que esta mitad son los indicadores y la
+      otra el asistente. Y a su derecha, cuándo se leyeron y el botón de volver a leerlos, que es la
+      misma pareja que llevan Auditoría y Salud del sistema.
+    -->
+    <div class="flex flex-wrap items-center justify-between gap-3">
+      <h2 id="titulo-tablero-analisis" class="titulo-de-apartado">Indicadores</h2>
+      <div class="flex items-center gap-3">
+        @if (tablero(); as datos) {
+          <p class="barra-de-lista__resumen">Actualizado: {{ fecha(datos.generadoEn) }}</p>
+        }
+        <app-boton importancia="terciaria" etiqueta="Actualizar los indicadores" [ocupado]="cargandoTablero()" (accion)="cargarTablero()">
+          <svg lucideRefreshCw [size]="15" aria-hidden="true"></svg>
+        </app-boton>
+      </div>
+    </div>
+
+    @if (cargandoTablero() && !tablero()) {
+      <app-estado-de-lista tipo="cargando" titulo="Consultando los indicadores…" />
+    } @else if (errorTablero()) {
+      <app-estado-de-lista tipo="error" titulo="No fue posible consultar los indicadores" [detalle]="errorTablero()">
+        <app-boton importancia="secundaria" tamano="menudo" (accion)="cargarTablero()">Reintentar</app-boton>
+      </app-estado-de-lista>
+    } @else if (tablero(); as datos) {
+      <!--
+        LA MISMA FRANJA QUE EL RESUMEN OPERATIVO Y SALUD DEL SISTEMA. Cada indicador iba en su
+        tarjeta con borde y sombra: ocho cajas en una pantalla cuyo lienzo ya es blanco. La cifra es
+        la protagonista y el resto se ordena con espacio.
+      -->
+      <app-franja-de-cifras class="mt-4" [cifras]="cifras()" [conFilete]="false" />
+
+      <!--
+        LOS REPARTOS SIN TARJETA. Eran dos cajas más, cada una con su título dentro; ahora son
+        apartados con el rótulo de toda la consola y una tabla densa de dos columnas, con sus
+        anchos declarados como cualquier tabla de la consola.
+
+        MERCADOS AL LADO DE FESTIVALES: un módulo del Ecosistema se conecta en las visualizaciones
+        de datos de principio a fin, como Festivales. Lo fijó la dirección de producto el 15 de
+        septiembre de 2026.
+      -->
+      <div class="mt-8 grid gap-8 lg:grid-cols-2">
+        <section aria-labelledby="reparto-festivales">
+          <h3 id="reparto-festivales" class="titulo-de-apartado">Festivales por estado</h3>
+          <ng-container *ngTemplateOutlet="reparto; context: { filas: datos.estadosFestival, vacio: 'No hay Festivales registrados.' }" />
+        </section>
+        <section aria-labelledby="reparto-mercados" data-reparto-de-mercados>
+          <h3 id="reparto-mercados" class="titulo-de-apartado">Mercados por estado</h3>
+          <ng-container *ngTemplateOutlet="reparto; context: { filas: datos.estadosMercado, vacio: 'No hay Mercados registrados.' }" />
+        </section>
+        <section aria-labelledby="reparto-departamentos" class="lg:col-span-2">
+          <!-- El rótulo dice lo que el servidor cuenta: Festivales publicados. -->
+          <h3 id="reparto-departamentos" class="titulo-de-apartado">Departamentos con más Festivales publicados</h3>
+          <ng-container *ngTemplateOutlet="reparto; context: { filas: datos.departamentosPrincipales, vacio: 'No hay Festivales publicados con departamento registrado.', propios: true }" />
+        </section>
+      </div>
+    }
+  </section>
+
+  <!--
+    EL ASISTENTE YA NO VIVE AQUI. Desde es una capacidad transversal:
+    el mismo componente responde en la consola del Programa y en el espacio de una organización, y
+    lo único que cambia es la ruta base -que decide el ámbito- y el contexto. Ver
+    `shared/components/consulta-guiada`.
+  -->
+  <section class="min-w-0" aria-labelledby="titulo-asistente-administrativo">
+    <h2 id="titulo-asistente-administrativo" class="titulo-de-apartado">Asistente de consulta</h2>
+    <div class="mt-4 flex min-h-[38rem] min-w-0 flex-col overflow-hidden rounded-xl border border-filete bg-white">
+    <app-consulta-guiada
+      base="/api/v1/admin/analisis"
+      [contexto]="{ seccion: 'Análisis y consultas' }"
+      saludo="Puedo consultar cifras agregadas de Festivales, de Mercados musicales y del trabajo administrativo. Cada respuesta de datos muestra la fuente y el alcance que usó." />
+    </div>
+  </section>
+</div>
+
+<!-- Una lista de reparto: el nombre y su cifra. Las tres del tablero se pintan con esta. -->
+<ng-template #reparto let-filas="filas" let-vacio="vacio" let-propios="propios">
+  @if (filas.length) {
+    <table class="tabla-administrativa tabla-administrativa--densa tabla-de-reparto">
+      <colgroup>
+        <col class="tabla-de-reparto__nombre" />
+        <col class="tabla-de-reparto__cifra" />
+      </colgroup>
+      <tbody>
+        @for (fila of filas; track fila[0]) {
+          <tr class="tabla-administrativa__fila">
+            <td><span class="tabla-administrativa__principal">{{ propios ? (fila[0] | nombrePropio) : fila[0] }}</span></td>
+            <td class="text-right"><span class="tabla-administrativa__cifra">{{ fila[1] }}</span></td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  } @else {
+    <app-estado-de-lista [titulo]="vacio" />
+  }
+</ng-template>

@@ -1,0 +1,114 @@
+<div class="min-h-screen bg-white pb-20 text-left font-nunito">
+  <!--
+    Los cuatro textos salen del panel desde. Estaban escritos aqui
+    mientras la foto de al lado ya era administrable: se podia cambiar la portada y no el titulo.
+  -->
+  <app-page-hero
+    [tag]="texto('ejes_hero_tag')"
+    [title]="texto('ejes_hero_title')"
+    [titleAccent]="texto('ejes_hero_accent')"
+    [description]="texto('ejes_hero_desc')"
+    [bgImage]="imagen('hero_ejes')"
+    (regresoSolicitado)="goHome()"
+  />
+
+  @for (eje of ejes(); track eje.id; let ejeIndex = $index) {
+    <section
+      [id]="ejeIndex === 0 ? 'musica-para-la-vida' : ejeIndex === 1 ? 'oficios-y-practicas' : 'gobernanza'"
+      class="scroll-mt-24 border-b border-slate-100 py-12 last:border-0 md:py-24"
+    >
+      <div class="mx-auto max-w-7xl px-6 lg:px-8">
+        <div class="mb-12 grid grid-cols-1 items-center gap-12 lg:grid-cols-12 lg:gap-20">
+          <div class="space-y-6 lg:col-span-5">
+            <!-- Sobre fondo claro el verde de marca no alcanza el contraste WCAG AA (#8BF784 y #00A849 sobre blanco quedan en 1,33:1 y 3,14:1); se usa el verde oscuro #087B3E (5,4:1). El verde claro se mantiene donde el fondo es oscuro (#291242) o es fondo/borde, no texto. -->
+            <div class="flex items-center gap-4">
+              <span class="font-gregor text-6xl font-bold leading-none text-verde-texto">{{ eje.id }}</span>
+              <div class="h-px flex-1 bg-slate-100"></div>
+            </div>
+            <h2 class="font-alternate text-4xl font-bold uppercase leading-[1.1] tracking-tight text-[#291242] text-balance lg:text-5xl">
+              {{ eje.title }}
+            </h2>
+            <div class="space-y-6">
+              @for (paragraph of eje.axisExplain; track paragraph) {
+                <p class="max-w-2xl font-nunito text-[1.05rem] font-light leading-loose text-slate-700">{{ paragraph }}</p>
+              }
+            </div>
+          </div>
+
+          <div class="lg:col-span-7">
+            <div class="group flex flex-col overflow-hidden rounded-[2.5rem] border-8 border-slate-50 bg-slate-100 shadow-2xl">
+              <div class="relative aspect-video w-full overflow-hidden">
+                <img [src]="eje.videoImg" alt="" class="h-full w-full object-cover brightness-95 opacity-80 grayscale-[40%] transition-all duration-1000 group-hover:brightness-100 group-hover:opacity-100 group-hover:grayscale-0" />
+                <div class="pointer-events-none absolute inset-0 bg-[#291242]/20 transition-opacity duration-1000 group-hover:opacity-0"></div>
+                <div class="absolute inset-0 flex items-center justify-center">
+                  <span class="flex h-20 w-20 items-center justify-center rounded-full bg-[#8BF784] text-[#291242] shadow-2xl transition-all group-hover:scale-110">
+                    <svg lucidePlay [size]="32" fill="currentColor"></svg>
+                  </span>
+                </div>
+              </div>
+              <div class="relative overflow-hidden border-t border-white/5 bg-[#291242] p-8">
+                <div class="relative z-10">
+                  <div class="mb-3 flex items-center gap-3 text-[#00DA5E]">
+                    <svg lucideTarget [size]="20"></svg>
+                    <span class="font-alternate text-xs font-bold uppercase tracking-widest">Propósito del Eje</span>
+                  </div>
+                  <p class="font-nunito text-lg font-light italic leading-relaxed text-white/80">{{ eje.purpose }}</p>
+                </div>
+                <div class="absolute -bottom-10 -right-10 h-40 w-40 rounded-full bg-white/5 blur-2xl transition-transform duration-1000 group-hover:scale-125"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="rounded-[2.5rem] border border-slate-100 bg-slate-50/70 p-4 md:p-8">
+          <div class="mb-6 px-4">
+            <span class="block font-alternate text-[0.55rem] font-bold uppercase tracking-[0.3em] text-slate-400">Estructura interna</span>
+            <h3 class="font-alternate text-lg font-bold uppercase tracking-widest text-[#291242]">Componentes del Eje {{ eje.id }}</h3>
+          </div>
+          <div class="flex flex-col gap-3">
+            @for (component of eje.components; track component.id; let componentIndex = $index) {
+              <article
+                [class]="'relative overflow-hidden rounded-[1.75rem] border transition-all duration-500 ease-[cubic-bezier(0.4,0,0.2,1)] ' + (isExpanded(eje, componentIndex) ? 'border-[#8BF784] bg-white shadow-lg' : 'border-transparent bg-slate-200/50 hover:bg-slate-200')"
+              >
+                <button
+                  type="button"
+                  (click)="toggleComponent(eje, componentIndex)"
+                  [attr.aria-expanded]="isExpanded(eje, componentIndex)"
+                  [attr.aria-controls]="'component-content-' + component.id"
+                  [class]="'flex w-full cursor-pointer items-center gap-5 border-0 bg-transparent px-6 py-5 text-left transition-all duration-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[#00DA5E] md:px-8 md:py-6 ' + (isExpanded(eje, componentIndex) ? 'border-b border-slate-100' : '')"
+                >
+                  <span [class]="'font-gregor text-2xl font-bold leading-none transition-all duration-500 ' + (isExpanded(eje, componentIndex) ? 'text-verde-texto' : 'text-slate-300')">0{{ componentIndex + 1 }}</span>
+                  <span [class]="'flex-1 font-alternate text-[0.72rem] font-bold uppercase tracking-[0.22em] transition-colors duration-500 md:text-[0.8rem] ' + (isExpanded(eje, componentIndex) ? 'text-[#291242]' : 'text-slate-500')">{{ component.name }}</span>
+                  <svg
+                    lucideChevronDown
+                    [size]="19"
+                    [class]="'shrink-0 text-slate-400 transition-transform duration-500 ' + (isExpanded(eje, componentIndex) ? 'rotate-180 text-verde-texto' : '')"
+                  ></svg>
+                </button>
+                <div
+                  [id]="'component-content-' + component.id"
+                  [class]="'grid transition-[grid-template-rows,opacity] duration-500 ease-in-out ' + (isExpanded(eje, componentIndex) ? 'grid-rows-[1fr] opacity-100' : 'pointer-events-none grid-rows-[0fr] opacity-0')"
+                >
+                  <div class="min-h-0 overflow-hidden">
+                    <div class="space-y-5 px-6 py-7 md:px-8 md:py-8 lg:max-w-5xl">
+                      @for (paragraph of component.fullText; track paragraph) {
+                        <p class="font-nunito text-base font-light leading-8 text-slate-600 md:text-[1.05rem]">{{ paragraph }}</p>
+                      }
+                      <a
+                        [routerLink]="['/ejes', component.slug]"
+                        class="group/link inline-flex w-fit items-center gap-2 pt-1 font-alternate text-[0.65rem] font-bold uppercase tracking-[0.16em] text-[#291242] underline decoration-[#00DA5E]/50 underline-offset-4 transition-colors hover:text-[#00A849] focus-visible:rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00DA5E] focus-visible:ring-offset-4"
+                      >
+                        Ver página completa
+                        <svg lucideArrowUpRight [size]="14" class="transition-transform duration-300 group-hover/link:-translate-y-0.5 group-hover/link:translate-x-0.5"></svg>
+                      </a>
+                    </div>
+                  </div>
+                </div>
+              </article>
+            }
+          </div>
+        </div>
+      </div>
+    </section>
+  }
+</div>

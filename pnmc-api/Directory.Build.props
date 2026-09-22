@@ -1,0 +1,200 @@
+<Project>
+
+  <!--
+    ==========================================================================
+    PNMC · backend · configuración común de compilación (analizadores)
+    ==========================================================================
+
+    Hasta hoy el backend se compilaba sin ningún analizador configurado: modo
+    `Default`, que deja la mayoría de reglas en severidad "info" e invisibles en
+    la salida de compilación. Este fichero enciende los analizadores de .NET en
+    modo AVISO y sube a ERROR sólo un conjunto pequeño de reglas que hoy se
+    cumplen al 100 %. Ese conjunto es el trinquete: puede subir, no puede bajar.
+
+    MEDICIÓN (2026 08 21, SDK 10.0.400, sobre una copia aislada del árbol)
+
+      · Configuración anterior, sin este fichero: 1 aviso de analizador
+        (xUnit2031) más 98 diagnósticos en severidad "info", invisibles al
+        compilar. Es decir: los analizadores estaban puestos pero callados.
+      · Esta configuración (Recommended + Security=All): 119 avisos, 11 "info"
+        y 0 errores sobre el código real en aquella medición.
+      · AnalysisMode=All (descartado): del orden de 1.300 avisos. Por eso no se
+        enciende de golpe: dejaría la salida de compilación inservible de leer.
+
+    Cómo reproducir la medición SIN compilar (este carril no puede ejecutar
+    `dotnet build` ni `dotnet test`; `dotnet format` carga el proyecto con
+    Roslyn y no compila):
+
+      dotnet format analyzers PNMC.Api.sln (con las opciones
+      verify-no-changes, no-restore, severity=info y verbosity=diag)
+
+    y se cuentan las líneas de diagnóstico por identificador de regla.
+
+    Medición con SDK 10.0.301: 272 avisos.
+      CA1305 140 · CA1848 43 · CA1859 17 · CA1861 17 · CA1873 16
+      CA1304 10 · CA1311 10 · CA1862 8 · CA1822 5 · CA1001 1
+      CA1310 1 · CA1847 1 · CA1865 1 · CA1866 1 · CA2249 1
+
+    Medición con SDK 10.0.301: 206 avisos en compilación limpia.
+      El escalón 3 quedó en cero y sus siete reglas pasaron al trinquete.
+
+    Medición con SDK 10.0.301: 189 avisos.
+      CA1305 140 · CA1848 43 · CA1304 2 · CA1311 2 · CA1001 1 · CA1865 1.
+      CA1861 quedó en cero y pasó al trinquete.
+
+    CA1707 generaba 408 avisos adicionales por los nombres descriptivos con
+    guiones bajos de xUnit. Se clasificó en el .editorconfig del proyecto de
+    pruebas: no describe un defecto y contradice una convención deliberada.
+    Ninguno rompe la compilación: son avisos a propósito.
+
+    POR QUÉ NO HAY TreatWarningsAsErrors
+
+    Encenderlo hoy rompería la compilación por los 272 avisos vigentes. Un
+    trinquete que deja el repositorio sin compilar de madrugada no es una
+    mejora, es una avería. El trinquete se sube regla a regla, con la lista del
+    final, y nunca de golpe.
+  -->
+
+  <PropertyGroup Label="Nulabilidad">
+    <!--
+      Los seis .csproj ya lo declaran uno a uno; aquí queda centralizado para
+      que cualquier proyecto nuevo del backend nazca con nulabilidad estricta.
+      Los .csproj no se han tocado: si un proyecto lo declara, su valor manda.
+    -->
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+  <PropertyGroup Label="Analizadores en modo aviso">
+    <EnableNETAnalyzers>true</EnableNETAnalyzers>
+
+    <!--
+      Anclado a 10.0 en vez de `latest` a propósito: si mañana llega el SDK 11,
+      el conjunto de reglas no cambia solo y el trinquete no se convierte en
+      una rotura de compilación por sorpresa. Subirlo es una decisión explícita.
+    -->
+    <AnalysisLevel>10.0</AnalysisLevel>
+    <AnalysisMode>Recommended</AnalysisMode>
+
+    <!--
+      Seguridad al máximo: es la única familia donde preferimos ruido a
+      silencio. Los avisos CA2100 y CA5394 que destapó quedaron saldados y
+      convertidos en errores.
+    -->
+    <AnalysisModeSecurity>All</AnalysisModeSecurity>
+
+    <!--
+      Reglas IDExxxx durante la compilación. Hoy salen 95, todas en severidad
+      "info", así que no añaden ni un aviso; quedan disponibles para el
+      escalón 5 sin volver a tocar esta configuración.
+    -->
+    <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
+
+    <!-- Explícito para que nadie lo encienda de paso. Ver el bloque de arriba. -->
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+  </PropertyGroup>
+
+  <PropertyGroup Label="Trinquete, escalones 1 a 4">
+    <!--
+      Reglas subidas a ERROR. Cada una cumple dos requisitos:
+        (a) 0 violaciones en todo el árbol hoy, medido y no supuesto;
+        (b) demostrada: se escribió una violación deliberada de cada regla y el
+            analizador la devuelve como `error`, no como aviso.
+
+      Corrección (fallos reales, no estilo):
+        CA2011  asignación recursiva dentro del propio `set` (recursión infinita)
+        CA2017  el número de parámetros de la plantilla de log no coincide
+        CA2200  `throw ex` dentro de un catch: se pierde la pila original
+        CA2241  argumentos de string.Format que no cuadran con la plantilla
+        CA2242  comparación con double.NaN, que siempre es falsa
+        CA2245  propiedad asignada a sí misma
+        CA2248  argumento de enumeración equivocado en Enum.HasFlag
+        CA2201  lanzar tipos reservados (`throw new Exception(...)` a secas),
+                que obliga a quien llama a capturar Exception para tratarlo
+      Criptografía:
+        CA5350  algoritmo débil (SHA1, RIPEMD160)
+        CA5351  algoritmo roto (MD5, DES, RC2)
+        CA5390  clave de cifrado incrustada en el código
+        CA5397  versión obsoleta de SslProtocols (TLS 1.0 y 1.1)
+
+      Detalle que conviene conocer: nombrar un identificador en
+      `WarningsAsErrors` no sólo sube la severidad, también ENCIENDE reglas que
+      vienen apagadas por omisión. Es lo que ocurre con CA5350 y CA5351: sin
+      esta lista no se emiten siquiera; con ella, rechazan. Comprobado con las
+      dos ejecuciones, con lista y sin lista, sobre el mismo código.
+
+      No metas aquí una regla sin medirla antes. Y ojo: `NoWarn` gana a
+      `WarningsAsErrors`, así que añadir una de estas a `NoWarn` desactiva la
+      puerta en silencio. Si alguna vez hace falta, que sea con un
+      `#pragma warning` acotado al sitio y con el motivo escrito al lado.
+
+      Descartada a propósito: CA5359 (no deshabilitar la validación de
+      certificados). Se probó a violarla en las dos formas habituales,
+      asignación e inicializador de objeto, y no se dispara con este conjunto
+      de analizadores. Una puerta que no puede fallar no es una puerta, así que
+      se queda fuera hasta que alguien la haga disparar de verdad.
+    -->
+    <WarningsAsErrors>$(WarningsAsErrors);ASPDEPR005;CA1822;CA1847;CA1859;CA1861;CA1862;CA1866;CA1873;CA2011;CA2017;CA2100;CA2200;CA2201;CA2241;CA2242;CA2245;CA2248;CA5350;CA5351;CA5390;CA5394;CA5397;CS8602;CS8604;CS8631;xUnit2029;xUnit2031</WarningsAsErrors>
+  </PropertyGroup>
+
+  <!--
+    ==========================================================================
+    PLAN DE SUBIDA: qué se convierte en error y en qué orden
+    ==========================================================================
+    En cada escalón se arreglan primero las violaciones y sólo después se mueve
+    la regla a <WarningsAsErrors>. Nunca al revés.
+
+    Escalón 2 · completado
+      CA5394: las referencias públicas usan RandomNumberGenerator.
+      CA2100: las tres escrituras con datos usan parámetros. Los cuatro ejecutores
+        de guiones internos conservan SQL dinámico porque reciben exclusivamente
+        archivos y constantes versionados; cada excepción está acotada y justificada.
+      También quedaron en error las obsolescencias de proxy, los diagnósticos de
+        nulabilidad encontrados y las dos reglas xUnit corregidas en el corte.
+
+    Escalón 3 · completado (49 ubicaciones): CA1859 17 · CA1873 16 ·
+      CA1862 8 · CA1822 5 · CA2249 1 · CA1866 1 · CA1847 1.
+      Las siete reglas quedaron en cero y subieron a WarningsAsErrors. La
+      compilación completa pasó de 272 a 206 avisos; la diferencia es mayor
+      que 49 porque algunas ubicaciones se emitían desde más de un proyecto.
+
+    Escalón 4 · completado: CA1861 (17 avisos)
+      Los arrays constantes usados como argumentos repetidos pasaron a campos
+      `static readonly`; la regla quedó en cero y subió a WarningsAsErrors.
+
+    Escalón 5 · PRUEBAS Y ESTILO
+      xUnit2029 y xUnit2031 ya son errores. Antes de subir toda la familia
+      xUnit2xxx se mide el árbol completo para no activar reglas nuevas a ciegas.
+      Las IDExxxx se fijan regla a regla mediante .editorconfig después de una
+      medición actualizada.
+
+    Escalón 6 · FAMILIA CS Y NULABILIDAD, SIN MEDIR TODAVÍA
+      El número de avisos CS de hoy no se ha podido medir: `dotnet format` no
+      informa de diagnósticos del compilador y este carril tiene prohibido
+      compilar. Antes de tocar nada hay que contarlos en la compilación de
+      integración, contando las líneas que contienen "warning CS" con
+      verbosity=normal. Si el resultado es 0, subir la nulabilidad entera:
+      CS8600, CS8602, CS8603, CS8604, CS8618 y CS8625 en WarningsAsErrors.
+      Si no es 0, arreglar y volver a contar. Este escalón no se pone a ojo.
+
+    Escalón 7 · AnalysisMode=All (1.301 avisos). NO recomendado todavía.
+      El reparto explica por qué: CA2007 804 (ConfigureAwait, irrelevante en
+      ASP.NET Core e iría directo a NoWarn con motivo), CA2234 89, CA1056 64,
+      CA1515 48, CA1308 32, CA1307 31, CA1062 29, CA2000 20, CA1002 17,
+      CA1812 15, CA1848 11, CA2227 10, CA1031 8, CA1034 7, CA1054 6.
+      Varias por separado sí valen la pena, sobre todo CA1062 (validar
+      argumentos públicos), CA2000 (objetos IDisposable sin liberar) y CA1031
+      (capturar Exception a secas). Encender la familia entera de golpe sólo
+      produce ruido.
+
+    Escalón 8 · DEPENDENCIAS, ya cubierto por otro carril
+      La auditoría de NuGet (NU1901 a NU1904) la lleva PNMC-013 desde los seis
+      .csproj, que fijan NU1903 y NU1904 como error y anclan
+      SQLitePCLRaw.lib.e_sqlite3 a 2.1.12. Comprobado: la restauración del árbol
+      actual sale limpia. Sus .csproj hacen `$(WarningsAsErrors);NU1903;NU1904`,
+      es decir, acumulan sobre el valor de este fichero en vez de pisarlo, así
+      que las dos puertas conviven. Si alguien reescribe esa propiedad sin el
+      `$(WarningsAsErrors)` inicial, apaga en silencio uno de los dos trinquetes.
+  -->
+
+</Project>

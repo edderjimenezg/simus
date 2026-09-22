@@ -1,0 +1,7 @@
+.admin-foundation{font-family:'Nunito Sans',sans-serif}.foundation-brand b,.workspace-title h1,.summary-worklist h2,.empty-copy h2{font-family:'Oswald',sans-serif;font-weight:700;letter-spacing:0}.foundation-brand b{font-size:.78rem;text-transform:none}.foundation-brand small{font-size:.67rem}/* ESTAS DOS REGLAS PISABAN LAS DE LA HOJA DE MAQUETA, y por eso los cambios de tamaño que se
+   hacían allí no se veían: esta hoja carga después. Los rótulos de grupo y los antetítulos medían
+   9,9 px, por debajo del suelo de la escala. Es el mismo defecto de «dos copias que divergen» que
+   ya apareció con .worklist-count y con .notification-tray, esta vez entre dos ficheros. */
+.sidebar-group>p,.workspace-kicker{font-size:var(--text-dato);letter-spacing:.08em}/* El peso se decide en la hoja de maqueta; aquí solo el tamaño y el interlineado.
+   Antes esta regla imponía 700 y ganaba por cargar después. */
+.sidebar-group button{font-size:var(--text-cuerpo);line-height:1.3}.workspace-title h1{line-height:1.05}.workspace-title p:not(.workspace-kicker){font-size:.94rem;line-height:1.65}.summary-grid strong{font-family:'Oswald',sans-serif;font-weight:700;letter-spacing:0}.summary-grid span,.summary-worklist__rows button{font-size:.78rem;line-height:1.45}.summary-worklist__rows small{font-size:.7rem;font-weight:700}

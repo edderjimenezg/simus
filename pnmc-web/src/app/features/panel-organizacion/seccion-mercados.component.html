@@ -1,0 +1,53 @@
+<div class="space-y-8 pb-8">
+  <section aria-labelledby="mercados-gestion-titulo" class="flex flex-col justify-between gap-4 border-b border-slate-200 pb-6 sm:flex-row sm:items-end">
+    <div>
+      <p class="font-alternate text-xs font-bold uppercase tracking-[0.18em] text-verde-texto">Procesos · Ecosistema</p>
+      <h2 id="mercados-gestion-titulo" class="mt-2 font-alternate text-2xl font-bold uppercase tracking-wide text-morado">Mercados musicales</h2>
+      <p class="mt-2 max-w-2xl text-cuerpo leading-relaxed text-prosa">Consulta y gestiona los mercados registrados por tu organización.</p>
+    </div>
+    <a data-testid="abrir-crear-mercado" routerLink="nuevo" class="inline-flex shrink-0 items-center justify-center gap-2 rounded-xl bg-verde-texto px-5 py-3 text-sm font-bold text-white no-underline shadow-sm transition hover:bg-verde-hondo focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-morado"><span class="text-lg leading-none">+</span> Registrar Mercado</a>
+  </section>
+
+  <p class="text-sm text-slate-500">¿Necesitas registrar otro tipo de proceso? <a routerLink="/gestion/procesos" class="font-bold text-verde-texto hover:underline">Consulta los procesos disponibles.</a></p>
+
+  <section aria-label="Indicadores de mercados musicales" class="grid divide-y divide-slate-200 border-y border-slate-200 sm:grid-cols-3 sm:divide-x sm:divide-y-0">
+    <div class="py-4 pr-5 sm:px-5 sm:first:pl-0"><p class="font-alternate text-3xl font-bold text-morado">{{ mercados().length }}</p><p class="mt-1 text-xs font-bold uppercase tracking-widest text-slate-500">Registros</p><p class="mt-1 text-xs text-slate-400">Mercados administrados.</p></div>
+    <div class="py-4 sm:px-5"><p class="font-alternate text-3xl font-bold text-morado">{{ pendientes() }}</p><p class="mt-1 text-xs font-bold uppercase tracking-widest text-slate-500">Pendientes</p><p class="mt-1 text-xs text-slate-400">En revisión o con ajustes.</p></div>
+    <div class="py-4 pl-0 sm:pl-5"><p class="font-alternate text-3xl font-bold text-morado">{{ borradores() }}</p><p class="mt-1 text-xs font-bold uppercase tracking-widest text-slate-500">Borradores</p><p class="mt-1 text-xs text-slate-400">Aún sin enviar a revisión.</p></div>
+  </section>
+
+  <section aria-label="Listado de mercados musicales">
+    @if (error()) { <p role="alert" class="border-l-4 border-red-500 bg-red-50 p-3 text-sm text-red-800">{{ error() }}</p> }
+    @if (cargando()) {
+      <p role="status" class="py-5 text-sm text-slate-500">Consultando los mercados de la organización…</p>
+    } @else if (!mercados().length) {
+      <div class="bg-slate-50 px-5 py-6">
+        <h3 class="text-lectura font-semibold text-valor">Todavía no has registrado ningún mercado.</h3>
+        <p class="mt-2 text-cuerpo leading-relaxed text-prosa">Un mercado musical puede ser independiente o realizarse en el marco de uno de tus festivales.</p>
+      </div>
+    } @else {
+      <!--
+        LA MISMA FILA QUE LA LISTA DE PROCESOS, para que un mercado se reconozca igual se entre por
+        donde se entre: nombre y ediciones, descripción, territorio y estado con su fecha.
+      -->
+      <div class="divide-y divide-slate-200 border-y border-slate-200">
+        @for (mercado of mercados(); track mercado.id) {
+          <a [routerLink]="[mercado.id]" data-testid="fila-de-mercado"
+             class="grid gap-3 px-3 py-4 no-underline transition hover:bg-white focus-visible:relative focus-visible:z-10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-morado md:grid-cols-[minmax(12rem,.8fr)_minmax(16rem,1.35fr)_10rem_9rem] md:items-center md:gap-5 sm:px-4">
+            <div class="min-w-0">
+              <span class="text-xs text-slate-400">{{ mercado.numeroDeEdiciones }} {{ mercado.numeroDeEdiciones === 1 ? 'edición' : 'ediciones' }}</span>
+              <p class="mt-1 truncate text-base font-bold text-slate-900">{{ mercado.nombre }}</p>
+              @if (mercado.seRealizaEnElMarcoDeUnFestival && mercado.festivalNombre) { <p class="mt-1 truncate text-xs text-slate-500">En el marco de {{ mercado.festivalNombre }}</p> }
+            </div>
+            <p class="min-w-0 line-clamp-2 text-sm leading-relaxed text-slate-600">{{ mercado.descripcion || 'Sin descripción registrada.' }}</p>
+            <p class="min-w-0 truncate text-sm text-slate-600">{{ territorio(mercado) | nombrePropio }}</p>
+            <div class="min-w-0">
+              <p class="text-sm font-bold text-slate-800">{{ etiquetaEstado(mercado.estadoRegistro) }}</p>
+              @if (mercado.fechaActualizacion) { <p class="mt-1 text-xs text-slate-500">Actualizado {{ mercado.fechaActualizacion | date: 'd MMM y' }}</p> }
+            </div>
+          </a>
+        }
+      </div>
+    }
+  </section>
+</div>

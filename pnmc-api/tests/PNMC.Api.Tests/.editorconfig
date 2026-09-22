@@ -1,0 +1,4 @@
+[*.cs]
+# Los nombres descriptivos de xUnit usan guiones bajos deliberadamente; CA1707
+# contradice esa convención y generaba más de la mitad del ruido del backend.
+dotnet_diagnostic.CA1707.severity = none

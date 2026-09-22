@@ -1,0 +1,529 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   SOLICITUDES Y REVISIONES — EL PANEL DE REVISION (`app-admin-solicitudes-panel`)
+
+   Rehecho desde cero. Lo anterior era una tabla de
+   seis columnas redimensionables donde cada fila se desplegaba hacia abajo, y
+   quedó descartado dos veces seguidas: «los tamaños de texto,
+   botones, todo, es terrible. Rediseña desde 0 este apartado, la idea es tener
+   un panel donde se vean listadas todas las solicitudes y se pueda tener una
+   pequeña previsualización de la misma de manera ágil».
+
+   La forma que responde a eso es maestro-detalle: el índice a la izquierda con
+   su propio desplazamiento, la previsualización fija al lado. Pasar de una
+   solicitud a la siguiente deja de mover la lista.
+
+   UNA SOLA SUPERFICIE LEVANTADA, la de la previsualización. El índice se
+   resuelve con filetes y espacio, no con una tarjeta por fila.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ── La barra de la bandeja ───────────────────────────────────────────────── */
+/* UN SOLO FILETE. La barra dibuja el suyo a todo lo ancho y las pestañas se apoyan en él: el
+   selector segmentado va sin filete propio (`[conFilete]="false"`) y sus botones, con `-mb-px`,
+   cruzan esta línea con su subrayado. Antes había dos —una corta bajo las pestañas y esta, siete
+   píxeles más abajo— y el bloque de pestañas se leía como una pieza pegada aparte. Medido el 14 de
+   septiembre de 2026. */
+.revision-barra {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: .75rem;
+  margin-bottom: 1.5rem;
+  border-bottom: 1px solid var(--color-filete);
+  padding-bottom: 0;
+}
+
+/* El orden va en su propia fila, arriba a la derecha y sobre las pestañas. En la misma línea que
+   ellas se leía como una pestaña más; aquí es lo que es: un control de la lista entera. */
+.revision-barra__orden {
+  display: flex;
+  justify-content: flex-end;
+}
+
+
+/* ── El armazón de dos columnas ───────────────────────────────────────────── */
+.revision {
+  display: grid;
+  grid-template-columns: minmax(15rem, 18rem) minmax(0, 1fr);
+  align-items: start;
+  gap: 1.75rem;
+}
+
+/* LA ESTRUCTURA NO SE MUEVE AL ABRIR LA FICHA. Antes el índice se encogía de
+   18 a 13,5 rem y escondía el tipo y la organización de cada fila: al pulsar
+   «ver ficha completa» la pantalla entera se recomponía y había que volver a
+   buscar dónde se estaba. Ahora solo cambia el contenido de la columna
+   derecha, que es lo que se pidió: «se mueve la estructura, y solamente el
+   medio se adapta». */
+
+/* El selector que cambia lo que se mira del trámite: resumen o ficha entera.
+   Va pegado al encabezado, por encima de la línea que separa la cabecera del
+   contenido, para que se lea como parte del mismo panel y no como una barra
+   suelta. */
+.revision-vistas { margin: .1rem 0 1.1rem; }
+
+/* LA TRANSICION ENTRE EL RESUMEN Y LA FICHA. Corta y sin desplazamiento
+   lateral: solo hace falta que se lea que lo que cambió es el contenido de esta
+   columna y no la pantalla entera. */
+.revision-vista { animation: revision-entra .18s ease-out both; }
+@keyframes revision-entra {
+  from { opacity: 0; transform: translateY(.4rem); }
+  to { opacity: 1; transform: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .revision-vista { animation: none; }
+}
+
+/* El botón que lleva a la ficha entera. Es la acción de la pantalla cuando el
+   trámite no se decide aquí, así que lleva el peso de una principal. */
+.revision-ir-a-ficha { font-size: var(--text-cuerpo); }
+
+/* EL PIE FIJO DE LA FICHA LE DEJA SITIO AL LANZADOR FLOTANTE. Medido el 14 de
+   septiembre de 2026 a 1440 px: el botón redondo de la consulta guiada, fijo en
+   (1360, 820), caía encima de «Rechazar registro» y de «Enviar sugerencias de
+   ajuste». El hueco está declarado una sola vez en `styles.css`.
+
+   SOLO A LA FILA DE BOTONES, que es la que se alinea a la derecha. Puesto en el
+   pie entero encogía también el área de texto de la observación general, que no
+   estorba a nadie por estar pegada al borde.
+
+   EL PIE YA NO ES FIJO dentro del panel: con las secciones repartidas en
+   pestañas, cada pantalla es corta y una barra fija de 300 px se comía un
+   tercio de la ventana tapando justamente los campos que hay que leer.
+
+   `::ng-deep` porque el pie pertenece a `app-ficha-festival` y esta hoja está
+   encapsulada; va precedido del selector local para que no escape de aquí. */
+.revision-detalle ::ng-deep footer > :last-child { padding-right: var(--spacing-lanzador-flotante); }
+
+/* ── El índice ────────────────────────────────────────────────────────────── */
+.revision-lista {
+  display: flex;
+  flex-direction: column;
+  /* Separa el índice del trámite ahora que ninguno de los dos lleva marco. */
+  border-right: 1px solid var(--color-filete);
+  padding-right: 1.1rem;
+  /* EL INDICE ES LO QUE SE QUEDA QUIETO. Antes lo fijo era el panel del trámite
+     y la lista se iba con la página; con la ficha entera dentro, eso dejaba la
+     cola fuera de la vista justo cuando se quiere pasar a la siguiente. */
+  position: sticky;
+  top: 1rem;
+  max-height: calc(100dvh - 9rem);
+  min-height: 12rem;
+  overflow-y: auto;
+  border-top: 1px solid var(--color-filete);
+  /* La barra de desplazamiento, discreta: el mismo criterio que se aplicó a la
+     barra de navegación de la izquierda. */
+  scrollbar-width: thin;
+  scrollbar-color: #d6dae2 transparent;
+}
+
+.revision-item {
+  display: grid;
+  gap: .1rem;
+  border: 0;
+  border-bottom: 1px solid #eef0f4;
+  /* El filete de selección ocupa sitio SIEMPRE, transparente cuando no toca:
+     si apareciera solo al elegir, la fila se desplazaría 3 px al pulsarla. */
+  border-left: 3px solid transparent;
+  background: none;
+  padding: .55rem .85rem .6rem .75rem;
+  width: 100%;
+  text-align: left;
+  cursor: pointer;
+  transition: background .12s, border-color .12s;
+}
+.revision-item:hover { background: var(--color-hueso); }
+.revision-item:focus-visible { outline: 2px solid var(--color-morado-claro); outline-offset: -2px; }
+
+.revision-item.esta-elegida {
+  border-left-color: var(--color-morado);
+  background: #f6f2fa;
+}
+
+/* EL PESO DE LA BARRA IZQUIERDA, QUE ES LA REFERENCIA. Allí un destino en
+   reposo va a 14/500 y el activo a 14/700; aquí estaban todos a 700, así que
+   nueve filas competían entre sí y la elegida no destacaba por el peso sino
+   solo por el fondo. */
+.revision-item__registro {
+  color: var(--color-valor);
+  font-size: var(--text-cuerpo);
+  font-weight: 600;
+  line-height: 1.3;
+}
+.revision-item.esta-elegida .revision-item__registro { color: var(--color-morado); font-weight: 700; }
+
+.revision-item__tipo {
+  color: var(--color-prosa);
+  font-size: var(--text-dato);
+}
+
+.revision-item__pie {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: .75rem;
+  margin-top: .1rem;
+}
+
+.revision-item__organizacion {
+  overflow: hidden;
+  color: var(--color-rotulo);
+  font-size: var(--text-dato);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Cuánto lleva esperando, no cuándo llegó: es lo que ordena el trabajo. */
+.revision-item__espera {
+  flex: none;
+  color: var(--color-rotulo);
+  font-size: var(--text-dato);
+  font-variant-numeric: tabular-nums;
+}
+/* Una semana esperando ya no es «reciente» y deja de leerse como tal. */
+.revision-item__espera.es-vieja { color: var(--color-aviso); font-weight: 700; }
+
+.revision-vacio {
+  margin: 0;
+  padding: 2rem .8rem;
+  color: var(--color-rotulo);
+  font-size: var(--text-cuerpo);
+}
+
+/* ── La previsualización ──────────────────────────────────────────────────── */
+.revision-detalle {
+  align-self: start;
+  /* SIN TOPE DE ALTURA Y SIN DESPLAZAMIENTO PROPIO. Con la ficha entera dentro,
+     un panel de 628 px con su propia barra dejaba a la vista el contexto del
+     envío y el pie de decisiones, y prácticamente ningún campo en medio. Ahora
+     se desplaza la página: el índice se queda fijo a la izquierda y el pie de
+     decisiones, que es `sticky`, se queda abajo. */
+  /* NI BORDE NI SOMBRA NI RADIO. La sección entera es blanca, así que levantar
+     aquí una superficie no crea jerarquía: crea una tarjeta dentro de un lienzo
+     del mismo color. Lo que separa el índice del trámite es el filete de la
+     izquierda y el aire. */
+  padding: .3rem 0 1.6rem 1.9rem;
+  scrollbar-width: thin;
+  scrollbar-color: #d6dae2 transparent;
+}
+
+/* Sin nada elegido se dice qué hacer y no se deja un hueco: el panel conserva
+   su sitio para que elegir no reorganice la pantalla. */
+.revision-detalle.esta-vacia {
+  display: grid;
+  place-items: center;
+  min-height: 16rem;
+  color: #8b95a7;
+  font-size: var(--text-cuerpo);
+}
+.revision-detalle.esta-vacia p { margin: 0; }
+
+.revision-detalle__cabecera {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+/* El tipo de trámite, sobre el título: el rótulo pequeño en versalitas de toda la consola.
+   Antes era `.workspace-kicker`, que vive en la hoja del armazón y no llega a este panel. */
+.revision-detalle__tipo {
+  margin: 0;
+  color: var(--color-seccion);
+  font-size: var(--text-dato);
+  font-weight: 900;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+}
+
+.revision-detalle__titulo {
+  margin: .25rem 0 0;
+  color: var(--color-valor);
+  font-family: var(--font-alternate);
+  /* Mismo tamaño que el título de «Atención prioritaria» en Resumen operativo:
+     es el equivalente en esta pantalla y tiene que pesar lo mismo. */
+  font-size: 1.4rem;
+  font-weight: 800;
+  letter-spacing: -.01em;
+  line-height: 1.15;
+}
+
+/* Un control de icono, con el mismo radio que los de la ficha. */
+.revision-cerrar {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  border-radius: .4rem;
+  background: none;
+  width: var(--spacing-control);
+  height: var(--spacing-control);
+  color: var(--color-rotulo);
+  cursor: pointer;
+}
+.revision-cerrar:hover { background: #f2f4f7; color: var(--color-valor); }
+
+/* Solo existe cuando la lista y el panel no caben a la vez; ver el bloque de
+   1080 px al final de la hoja. La flecha es un icono dibujado y no el glifo
+   «←», que se pinta con la tipografía del texto. */
+.revision-volver {
+  display: none;
+  align-items: center;
+  gap: .4rem;
+  min-height: var(--spacing-control);
+  margin-bottom: .5rem;
+  border: 0;
+  background: none;
+  padding: 0;
+  color: var(--color-morado);
+  font-size: var(--text-cuerpo);
+  font-weight: 700;
+  cursor: pointer;
+}
+/* «Volver al resumen del trámite» no depende del ancho: sale de la ficha
+   completa, que sustituye al panel en cualquier pantalla. */
+.revision-volver.es-siempre { display: inline-flex; margin-bottom: .9rem; }
+.revision-volver:hover { text-decoration: underline; }
+
+/* Las acciones, arriba y junto al registro: antes vivían al final del panel y
+   al decidir ya no se veía sobre qué. */
+/* EL UNICO FILETE DEL PANEL. Separa quién es el trámite y qué se puede hacer
+   con él, de lo que dice. Todo lo demás se ordena con espacio. */
+.revision-acciones {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: .5rem;
+  border-bottom: 1px solid var(--color-filete);
+  padding-bottom: 1.25rem;
+  margin-bottom: .1rem;
+}
+
+.revision-error {
+  margin: .5rem 0 0;
+  color: #9c4630;
+  font-size: var(--text-cuerpo);
+}
+
+/* Qué cambia una propuesta: lo vigente tachado y lo propuesto al lado, en vez
+   de dos columnas que obligan a cruzar la mirada. */
+.revision-cambios {
+  display: grid;
+  gap: .6rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.revision-cambios li {
+  display: grid;
+  gap: .1rem;
+  border-left: 2px solid #e4d9f0;
+  padding-left: .7rem;
+}
+.revision-cambios b { color: var(--color-prosa); font-size: var(--text-dato); font-weight: 700; }
+.revision-cambios__antes {
+  color: var(--color-rotulo);
+  font-size: var(--text-cuerpo);
+  text-decoration: line-through;
+}
+.revision-cambios__despues { color: var(--color-valor); font-size: var(--text-cuerpo); font-weight: 700; }
+
+/* ── Una sola columna cuando no caben dos ─────────────────────────────────── */
+/* Por debajo de 1080 px la columna del detalle baja de 34 rem y la comparación
+   de campos deja de leerse; se apila y cada bloque recupera el ancho entero. */
+@media (max-width: 1080px) {
+  /* LAS DOS CLASES, NO SOLO `.revision`. `.revision.esta-revisando` pesa dos
+     clases y las consultas de medios no añaden especificidad: sin repetirla
+     aquí, la rejilla de dos columnas sobrevivía a 390 px y dejaba la ficha
+     completa en 216 px de ancho. Medido. */
+  .revision,
+  .revision.esta-revisando { grid-template-columns: minmax(0, 1fr); gap: 1.25rem; }
+  .revision.esta-revisando .revision-item__tipo,
+  .revision.esta-revisando .revision-item__pie { display: revert; }
+  .revision-lista { position: static; max-height: none; border-right: 0; padding-right: 0; }
+  .revision-detalle { padding: .3rem 0 1.6rem; }
+
+  /* UNA A LA VEZ, NO LAS DOS APILADAS. Con la lista encima, elegir un trámite
+     dejaba la previsualización media pantalla más abajo: había que pulsar y
+     luego buscar. Aquí el panel ocupa el sitio de la lista y se vuelve con el
+     control de arriba. */
+  .revision.hay-eleccion .revision-lista,
+  .revision.esta-revisando .revision-lista { display: none; }
+  .revision-volver { display: inline-flex; }
+  .revision-cerrar { display: none; }
+}
+
+@media (max-width: 640px) {
+  .revision-detalle { padding: .3rem 0 1.25rem; }
+  .revision-acciones app-boton { flex: 1 1 8rem; }
+}
+
+/* ── Los botones de decisión y el contenido de la ficha ────────────────────
+   Se conservan del diseño anterior: el lenguaje de botón y el ritmo de las
+   secciones ya estaban resueltos, lo que no funcionaba era el armazón. */
+
+/* LOS BOTONES DE DECISION SON LOS DEL PROYECTO, NO LOS DE ESTA PANTALLA.
+   Aquí vivía un lenguaje propio —`.tramite-boton` con sus cuatro variantes— y
+   el resultado, medido en una sola pantalla, eran
+   cinco radios distintos (0, 4, 6, 9,6 y 12 px) y alturas de 20, 24, 28, 36, 37
+   y 39. Las acciones del panel pasan a `app-boton`, que es donde el proyecto
+   decide altura mínima, radio, peso y área de toque de una vez. */
+
+.tramite-nota { color: var(--color-rotulo); font-size: var(--text-cuerpo); }
+
+/* ── El contenido de la ficha, en secciones ────────────────────────────────
+   Los datos del TRAMITE —quién lo envía, de qué tipo, cuándo llegó— y los del
+   REGISTRO que se revisa son dos cosas distintas y se leían como una sola
+   lista continua de ocho pares, con la descripción suelta en medio. */
+/* EL MISMO ROTULO DE SECCION QUE EL RESTO DE LA CONSOLA. Estos títulos iban a
+   800 en gris claro con poco espaciado, y no se leían como los de Resumen
+   operativo —«ATENCION PRIORITARIA»—, que es el patrón que el dueño del
+   proyecto dio por bueno. Ahora comparten peso, color y espaciado con
+   `.revision-detalle__tipo`, y una línea fina los separa de su contenido. */
+.tramite-seccion {
+  /* SIN FILETE BAJO CADA ROTULO. Un panel corto con tres secciones acababa con
+     tres rayas horizontales además de la del encabezado: «no me gusta en esa
+     vista los excesivos separadores». Lo que separa una sección de la anterior
+     es el aire de arriba, que por eso es mayor que el de abajo. */
+  margin: 1.75rem 0 .6rem;
+  color: var(--color-seccion);
+  font-size: var(--text-dato);
+  font-weight: 900;
+  /* .08em y no .12: es el espaciado medido en «ATENCIÓN PRIORITARIA» del
+     Resumen operativo y en los títulos de grupo de la barra izquierda, que son
+     las dos referencias que la dirección de producto dio por buenas. */
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
+.tramite-datos {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr));
+  gap: .85rem 2rem;
+  margin: 0;
+}
+/* Dos listas de datos seguidas -la ficha y sus catálogos- se leían como una
+   sola rejilla desalineada, porque cada una calcula sus columnas por su cuenta.
+   El aire entre ellas es lo que las separa. */
+.tramite-datos + .tramite-datos { margin-top: 1rem; }
+.tramite-datos dt { color: var(--color-rotulo); font-size: var(--text-dato); }
+.tramite-datos dd { margin: .2rem 0 0; color: var(--color-valor); font-size: var(--text-lectura); font-weight: 600; line-height: 1.35; }
+
+.tramite-descripcion {
+  margin: 0 0 .5rem;
+  max-width: 58ch;
+  color: var(--color-prosa);
+  font-size: var(--text-lectura);
+  line-height: 1.6;
+}
+
+/* ── La comparación completa de una propuesta ──────────────────────────────
+   Era una tabla de tres columnas dentro de un diálogo superpuesto, con la fila
+   cambiada teñida de ámbar. Aquí es una lista de definiciones: el rótulo
+   arriba, lo vigente y lo propuesto debajo en dos columnas. Sin tabla, porque
+   en una columna de 800 px una tabla de tres columnas con textos largos obliga
+   a desplazarse en horizontal para leer un cambio. */
+.revision-comparacion {
+  display: grid;
+  gap: 0;
+  margin: 0;
+  border-top: 1px solid #eef0f4;
+}
+.revision-comparacion > div {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: .1rem 1.5rem;
+  border-bottom: 1px solid #eef0f4;
+  /* El filete de la izquierda ocupa sitio siempre: si apareciera solo en las
+     filas que cambian, cada una se desplazaría 2 px respecto de las demás. */
+  border-left: 2px solid transparent;
+  padding: .6rem .8rem;
+}
+/* Lo que cambia se señala con el filete y el color del valor, no con un fondo
+   teñido en toda la fila: el tinte se llevaba la lectura del texto. */
+.revision-comparacion > div.cambia { border-left-color: var(--color-morado-claro); background: var(--color-hueso); }
+
+.revision-comparacion dt {
+  grid-column: 1 / -1;
+  color: var(--color-rotulo);
+  font-size: var(--text-dato);
+}
+.revision-comparacion dd { margin: .1rem 0 0; font-size: var(--text-cuerpo); line-height: 1.45; }
+.revision-comparacion__vigente { color: var(--color-rotulo); }
+.revision-comparacion__propuesto { color: var(--color-valor); }
+.revision-comparacion > div.cambia .revision-comparacion__propuesto { color: var(--color-morado); font-weight: 700; }
+
+/* ── El historial de la propuesta ───────────────────────────────────────── */
+.revision-historial {
+  display: grid;
+  gap: .7rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+/* Sin filete al costado: con varias entradas seguidas eran varias líneas
+   verticales que no dicen nada. Las separa el espacio. */
+.revision-historial li { padding-left: 0; }
+.revision-historial b { color: var(--color-valor); font-size: var(--text-cuerpo); font-weight: 700; }
+.revision-historial span { margin-left: .5rem; color: var(--color-rotulo); font-size: var(--text-dato); }
+.revision-historial p { margin: .2rem 0 0; color: var(--color-prosa); font-size: var(--text-cuerpo); line-height: 1.5; }
+
+@media (max-width: 700px) {
+  .revision-comparacion > div { grid-template-columns: minmax(0, 1fr); gap: .15rem; }
+}
+
+/* Lo que contiene la posición elegida de la bandeja: una línea, en escala y con token. */
+.revision-barra__que { margin: .35rem 0 0; color: var(--color-prosa); font-size: var(--text-dato); line-height: 1.4; }
+
+/*
+  LA CONFIRMACION DE UNA DECISION, EN EL PANEL.
+
+  Sustituye a las tres ventanas del navegador —un `prompt` y dos `confirm`— que esta pantalla usaba
+  hasta. El filete de la izquierda es el mismo recurso con el que el
+  resto del proyecto marca «esto pide tu atención», y el fondo de hueso separa el bloque de la
+  ficha sin meterlo en una tarjeta dentro de otra.
+*/
+.confirmacion-de-decision {
+  margin-bottom: 1rem;
+  border-left: 4px solid var(--color-morado);
+  background: var(--color-hueso);
+  padding: 1rem 1.25rem;
+}
+.confirmacion-de-decision__titulo {
+  margin: 0;
+  color: var(--color-valor);
+  font-size: var(--text-lectura);
+  font-weight: 700;
+}
+.confirmacion-de-decision__aviso {
+  margin: .4rem 0 0;
+  color: var(--color-prosa);
+  font-size: var(--text-cuerpo);
+  line-height: 1.5;
+}
+/* Solo el aire: la tipografía la pone `.campo__rotulo`, que es la del proyecto. Tenía peso 700 y
+   .06em de espaciado donde el resto de la consola lleva 900 y .05em. */
+.confirmacion-de-decision__rotulo { margin-top: .9rem; }
+.confirmacion-de-decision__texto {
+  margin-top: .4rem;
+  width: 100%;
+  border: 1px solid var(--color-filete);
+  border-radius: .6rem;
+  background: #fff;
+  padding: .6rem .75rem;
+  color: var(--color-valor);
+  font-size: var(--text-cuerpo);
+  line-height: 1.5;
+  resize: vertical;
+}
+.confirmacion-de-decision__texto:focus {
+  outline: none;
+  border-color: var(--color-morado);
+}
+.confirmacion-de-decision__acciones {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .5rem;
+  margin-top: .9rem;
+}

@@ -1,0 +1,191 @@
+<!--
+  LA FICHA DEL FESTIVAL, EN EL CAJON LATERAL COMUN.
+
+  Hasta este cajón traía su propio velo y su propia columna, tres
+  tarjetas anidadas con rótulos a 9,9 px, el código crudo del estado —«en_revision»— como si fuera
+  su etiqueta, y botones de 10,88 px. Ahora es `app-panel-lateral`, los datos se leen con
+  `app-dato-en-lectura` en grupos con un filete cada uno —el mismo lenguaje que la ficha de la
+  organización en el espacio externo— y las acciones son `app-boton`.
+-->
+<app-panel-lateral contexto="Ecosistema musical · Festival" [titulo]="ficha()?.nombre ?? 'Festival'" idDelTitulo="ficha-festival-titulo" (cerrar)="cerrar.emit()">
+  <ng-container bajo-titulo>
+    @if (ficha(); as f) {
+      <app-indicador-de-estado
+        [etiqueta]="etiquetaDeEstado(f.estado)"
+        [tono]="tonoDelEstado(f.estado)"
+        [matiz]="matizDelEstado(f.estado)"
+        [conTexto]="true"></app-indicador-de-estado>
+      <span class="text-cuerpo text-prosa">Cobertura {{ f.nivelCobertura }}</span>
+    }
+  </ng-container>
+
+  @if (cargando()) {
+    <app-estado-de-lista tipo="cargando" titulo="Abriendo la ficha…" />
+  } @else if (error() && !ficha()) {
+    <app-estado-de-lista tipo="error" titulo="No fue posible abrir la ficha" [detalle]="error()" />
+  } @else if (ficha(); as f) {
+    @if (avisoDePublicacion()) {
+      <p class="mb-4 text-cuerpo font-semibold text-verde-texto" role="status">{{ avisoDePublicacion() }}</p>
+    }
+    @if (error()) {
+      <p class="mb-4 text-cuerpo font-semibold text-amber-800" role="alert">{{ error() }}</p>
+    }
+
+    @if (puedePublicar) {
+      <div class="mb-6 flex flex-wrap gap-2">
+        @if (f.estado !== 'publicado') {
+          <app-boton importancia="confirmar" [ocupado]="publicando()" (accion)="cambiarPublicacion('publicado')">Publicar</app-boton>
+        } @else {
+          <app-boton importancia="secundaria" [ocupado]="publicando()" (accion)="cambiarPublicacion('borrador')">Despublicar</app-boton>
+          <app-boton importancia="secundaria" [ocupado]="publicando()" (accion)="cambiarPublicacion('archivado')">Archivar</app-boton>
+        }
+        @if (f.estado !== 'publicado') {
+          <app-boton importancia="secundaria" identificador="previsualizar-festival" (accion)="previsualizando.set(true)">Previsualizar</app-boton>
+        } @else {
+          <a [href]="'/ecosistema/festivales/' + f.id" target="_blank" rel="noopener"
+             class="inline-flex min-h-control items-center gap-2 rounded-xl border border-slate-200 px-4 py-2.5 text-dato font-bold text-slate-600 transition hover:border-morado hover:text-morado">Ver en el portal</a>
+        }
+      </div>
+      @if (previsualizando()) {
+        <app-dialogo-de-previsualizacion
+          modulo="festivales"
+          [id]="f.id"
+          [nombre]="f.nombre"
+          [estadoEtiqueta]="etiquetaDeEstado(f.estado)"
+          (cerrar)="previsualizando.set(false)" />
+      }
+    }
+
+    <section class="space-y-4">
+      <h3 class="border-t border-filete pt-4 font-alternate text-dato font-bold uppercase tracking-[0.18em] text-seccion">Quién responde y de dónde vino</h3>
+      <dl class="grid gap-x-8 gap-y-5 sm:grid-cols-2">
+        <div class="flex flex-col">
+          @if (f.organizacionResponsableId !== null) {
+            <dt class="order-2 mt-1 text-dato text-rotulo">Organización responsable</dt>
+            <dd class="order-1 text-lectura font-semibold text-valor">
+              <button type="button" class="text-left text-morado underline-offset-2 hover:underline" (click)="verOrganizacion.emit(f.organizacionResponsableId!)">{{ f.organizacionResponsableNombre }}</button>
+            </dd>
+            @if (puedePublicar) {
+              <!--
+                CUANDO NADIE DE LA ORGANIZACION PUEDE ENTRAR, su Festival se queda congelado: nadie
+                lo edita y ninguna otra puede tomarlo, porque el circuito de reclamación solo ofrece
+                los que ya están en custodia del Programa. Esto no recupera el acceso de nadie:
+                desbloquea el proceso.
+              -->
+              <dd class="order-3 mt-2"><app-boton importancia="terciaria" tamano="menudo" (accion)="pedirLiberacion()">Devolver al Programa</app-boton></dd>
+            }
+          } @else {
+            <app-dato-en-lectura rotulo="Organización responsable" valor=""></app-dato-en-lectura>
+            <dd class="order-3 mt-1 text-dato text-rotulo">Todavía no hay ninguna que responda por él.</dd>
+          }
+        </div>
+        <div class="flex flex-col">
+          <dt class="order-2 mt-1 text-dato text-rotulo">Procedencia</dt>
+          <dd class="order-1"><app-sello-de-procedencia [procedencia]="f.procedencia" [detallado]="true"></app-sello-de-procedencia></dd>
+        </div>
+      </dl>
+      <!--
+        EL HISTORIAL VA AQUI Y NO EN LA BARRA DE ACCIONES. Es la continuación de la misma pregunta:
+        el sello dice de dónde vino y el historial dice qué le ha pasado desde entonces. Y es una
+        lectura, así que no depende de `puedePublicar`: quien puede abrir la ficha puede saber
+        quién la tocó.
+      -->
+      <app-boton importancia="secundaria" tamano="menudo" identificador="abrir-historial" (accion)="historialAbierto.set(true)">Ver historial</app-boton>
+      @if (historialAbierto()) {
+        <app-historial-de-registro
+          [titulo]="f.nombre"
+          [registro]="{ tabla: tablaDeAuditoria, id: f.id }"
+          [procedencia]="f.procedencia"
+          (cerrar)="historialAbierto.set(false)"></app-historial-de-registro>
+      }
+    </section>
+
+    <section class="mt-8 space-y-4">
+      <h3 class="border-t border-filete pt-4 font-alternate text-dato font-bold uppercase tracking-[0.18em] text-seccion">Datos permanentes</h3>
+      <dl class="grid gap-x-8 gap-y-5 sm:grid-cols-2">
+        <!-- EL MUNICIPIO SOLO NO UBICA: hay municipios con el mismo nombre en departamentos distintos. -->
+        <div class="flex flex-col">
+          <app-dato-en-lectura rotulo="Territorio"
+            [valor]="f.municipio && f.departamento ? ((f.municipio | nombrePropio) + ' (' + (f.departamento | nombrePropio) + ')') : ((f.municipio || f.departamento || 'Cobertura nacional') | nombrePropio)"></app-dato-en-lectura>
+        </div>
+        <div class="flex flex-col"><app-dato-en-lectura rotulo="Periodicidad" [valor]="etiquetaDePeriodicidad(f.periodicidad)"></app-dato-en-lectura></div>
+        <div class="flex flex-col"><app-dato-en-lectura rotulo="Correo de contacto" [valor]="f.correoContacto"></app-dato-en-lectura></div>
+        <div class="flex flex-col sm:col-span-2"><app-dato-en-lectura rotulo="Descripción" [valor]="f.descripcion" [prosa]="true"></app-dato-en-lectura></div>
+      </dl>
+      @if (f.practicasMusicales.length > 0 || f.territoriosSonoros.length > 0) {
+        <dl class="grid gap-x-8 gap-y-5 sm:grid-cols-2">
+          @if (f.practicasMusicales.length > 0) {
+            <div class="flex flex-col"><app-dato-en-lectura rotulo="Prácticas musicales" [valor]="nombresDe(f.practicasMusicales)"></app-dato-en-lectura></div>
+          }
+          @if (f.territoriosSonoros.length > 0) {
+            <div class="flex flex-col"><app-dato-en-lectura rotulo="Territorios sonoros" [valor]="nombresDe(f.territoriosSonoros)"></app-dato-en-lectura></div>
+          }
+        </dl>
+      }
+    </section>
+
+    <!--
+      LAS EDICIONES VAN DENTRO DEL FESTIVAL, no en una sección propia. Son su historial de
+      realizaciones, no un módulo equivalente.
+    -->
+    <section class="mt-8 space-y-4">
+      <h3 class="border-t border-filete pt-4 font-alternate text-dato font-bold uppercase tracking-[0.18em] text-seccion">Ediciones · {{ f.ediciones.length }}</h3>
+      @if (f.ediciones.length === 0) {
+        <p class="text-cuerpo leading-relaxed text-prosa">
+          Este Festival todavía no tiene ediciones registradas. Las registra la organización
+          responsable desde su espacio, y la consola las supervisa cuando se publican.
+        </p>
+      } @else {
+        <ul class="divide-y divide-filete">
+          @for (edicion of f.ediciones; track edicion.id) {
+            <li class="flex flex-wrap items-start justify-between gap-3 py-3">
+              <div class="min-w-0">
+                <p class="text-lectura font-semibold text-valor">{{ edicion.nombre || (edicion.anio ? 'Edición ' + edicion.anio : 'Edición sin nombre') }}</p>
+                <p class="mt-0.5 text-dato text-rotulo">
+                  @if (edicion.numeroEdicion) { N.º {{ edicion.numeroEdicion }} · }
+                  {{ edicion.anio || 'Sin año' }}
+                  @if (edicion.fechaInicio) { · {{ edicion.fechaInicio | date: 'd MMM y':'':'es-CO' }} }
+                </p>
+                <span class="mt-1 block"><app-sello-de-procedencia [procedencia]="edicion.procedencia"></app-sello-de-procedencia></span>
+              </div>
+              <span class="shrink-0">
+                <app-indicador-de-estado
+                  [etiqueta]="rotuloDeEdicion(edicion.estadoVisibilidad)"
+                  [tono]="tonoDelEstado(edicion.estadoVisibilidad)"
+                  [matiz]="matizDelEstado(edicion.estadoVisibilidad)"
+                  [conTexto]="true"></app-indicador-de-estado>
+              </span>
+            </li>
+          }
+        </ul>
+      }
+    </section>
+  }
+</app-panel-lateral>
+
+@if (liberando(); as l) {
+  <app-dialogo-de-formulario
+    encima
+    titulo="Devolver el Festival al Programa"
+    proposito="La organización que hoy lo administra dejará de hacerlo y el Festival quedará en custodia del Plan Nacional de Música para la Convivencia. Desde ahí, otra organización podrá reclamarlo por el circuito de siempre, con su justificación y su conciliación de datos."
+    verbo="Devolver al Programa"
+    [guardando]="publicando()"
+    [puedeGuardar]="!!l.motivo.trim()"
+    identificador="devolver-al-programa"
+    (guardar)="liberar()"
+    (cerrar)="cancelarLiberacion()">
+    <p class="text-cuerpo leading-relaxed text-prosa">
+      <b>No se toca ninguna contraseña</b> y <b>no cambia de dónde vino el registro</b>: cambia
+      quién responde por él ahora.
+    </p>
+    <label class="campo" for="motivo-liberacion">
+      <span class="campo__rotulo">Por qué se devuelve</span>
+      <textarea id="motivo-liberacion" name="motivoLiberacion" rows="3" [ngModel]="l.motivo" (ngModelChange)="motivoDeLiberacion($event)"
+        placeholder="La fundación se disolvió y nadie puede entrar a su cuenta."
+        class="campo__control"></textarea>
+      <small class="campo__ayuda">
+        Es la decisión más fuerte de esta pantalla: dentro de un año nadie recordará por qué se tomó.
+      </small>
+    </label>
+  </app-dialogo-de-formulario>
+}

@@ -1,0 +1,492 @@
+<!-- `section`, no `main`: el landmark principal unico lo declara el shell en
+     app.component.html. Un `main` aqui quedaria ANIDADO dentro de aquel, que es
+     una violacion de ARIA y desorienta a quien navega por regiones.
+
+     Accesibilidad WCAG 2.2 AA: sobre este fondo claro el verde #00A849 solo
+     alcanza 3,05:1 (minimo 4,5:1), asi que el TEXTO pasa al verde oscuro
+     #087B3E (5,4:1). Fondos, iconos y estados hover no se modifican.
+
+     EL ENCABEZADO SE QUEDA EN SU ANCHO DE SIEMPRE -max-w-7xl, el que trae `app-compact-hero` por
+     defecto-, igual que en el resto del sitio y que en el propio repositorio de referencia: alli
+     tambien el encabezado va a 7xl mientras el explorador va a max-w-[100rem]. No es un defecto
+     que igualar: es como se ve la referencia, y la dirección de producto
+     pidio expresamente no tocar el encabezado.
+
+     EL DISENO MANDA Y EL DATO SE ADAPTA. Cada fila y cada tarjeta tienen alto
+     fijo: los cuerpos de texto llevan `leading-` y una altura explicita, de modo
+     que un Festival con descripcion larga y otro sin ninguna ocupan lo mismo. Lo
+     que no cabe se recorta —`truncate` en una linea, `line-clamp` en varias—, y
+     la descripcion es la que se lleva mas lineas. -->
+<section class="min-h-screen bg-[#fbfcfb] pb-24 font-nunito text-slate-700">
+  <app-compact-hero
+    backLabel="Ecosistema"
+    current="Festivales"
+    [title]="texto('ecosistema_festivals_title')"
+    [subtitle]="texto('ecosistema_festivals_subtitle')"
+    (regresoSolicitado)="volverAlEcosistema()"
+  ></app-compact-hero>
+
+  <!--
+    LAS CUATRO CLAVES DEL CMS SIGUEN LEÍDAS, que es lo que exige `npm run cms:huerfanas`: el
+    título y su bajada están en el encabezado; `_tag` nombra la región del explorador para quien
+    navega por regiones; y `_heading` encabeza la lista de resultados sin verse, porque la página
+    ya tiene su `h1` arriba y dos `h1` en una página es un defecto, no una decisión de diseño.
+  -->
+  <div
+    class="mx-auto max-w-[100rem]"
+    role="region"
+    [attr.aria-label]="texto('ecosistema_festivals_tag')"
+  >
+    <div class="grid grid-cols-1 lg:grid-cols-[22rem_minmax(0,1fr)]">
+
+      <!-- ============================ FILTROS ============================ -->
+      <aside
+        aria-label="Filtros del directorio de Festivales"
+        class="self-start border-b border-slate-100 bg-slate-50/50 p-7 lg:sticky lg:top-20 lg:flex lg:h-[calc(100vh-5rem)] lg:flex-col lg:self-start lg:overflow-y-auto lg:border-b-0 lg:border-r lg:p-10"
+      >
+        <form (ngSubmit)="irAResultados()">
+
+          <!-- Buscador libre -->
+          <div class="space-y-3">
+            <label
+              for="festivales-buscar"
+              class="block font-alternate text-xs font-bold uppercase tracking-[0.24em] text-slate-500"
+            >{{ texto('ecosistema_festivals_search_label') }}</label>
+            <span class="flex items-center gap-3 overflow-hidden rounded-2xl border border-slate-200 bg-white px-4 py-3 shadow-sm focus-within:border-[#00DA5E] focus-within:ring-2 focus-within:ring-[#00DA5E]/20">
+              <svg lucideSearch [size]="16" class="shrink-0 text-slate-400"></svg>
+              <input
+                id="festivales-buscar"
+                type="search"
+                [ngModel]="busqueda()"
+                (ngModelChange)="actualizarBusqueda($event)"
+                name="busqueda"
+                placeholder="Festival, organización o lugar"
+                class="min-w-0 flex-1 border-0 bg-transparent text-sm text-[#291242] outline-none placeholder:text-slate-400"
+              />
+              <!--
+                LA «X» PARA LIMPIAR, que es lo único que le faltaba: el campo ya filtra mientras se
+                escribe. Sin ella hay que seleccionar el texto y borrarlo a mano para volver a ver
+                todo el directorio. El botón «Buscar» de al lado NO se retira: no busca —eso ya
+                ocurre solo—, lleva a los resultados, que en móvil están debajo de la columna de
+                filtros y fuera de la pantalla.
+              -->
+              @if (busqueda()) {
+                <button type="button" (click)="actualizarBusqueda('')" aria-label="Borrar la búsqueda"
+                  title="Borrar la búsqueda"
+                  class="shrink-0 cursor-pointer rounded-full p-1 text-slate-400 transition hover:text-morado">
+                  <svg lucideX [size]="14"></svg>
+                </button>
+              }
+            </span>
+            <button
+              type="submit"
+              class="w-full cursor-pointer rounded-xl border-0 bg-[#291242] px-4 py-3 font-alternate text-[0.62rem] font-bold uppercase tracking-widest text-white transition hover:bg-[#3a1b5b] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00DA5E] focus-visible:ring-offset-2"
+            >Buscar</button>
+          </div>
+
+          <!--
+            UNA SOLA SECCIÓN DE FILTROS, «Territorio», con los cuatro desplegables juntos —igual
+            que en el repositorio de referencia—. Antes iban en dos secciones separadas
+            («Territorio» y «Clasificación musical»): el usuario señaló
+            que esa división no existe en la referencia y que sobra.
+          -->
+          <div class="mt-9 border-t border-slate-200 pt-8">
+            <div class="mb-4 flex items-center justify-between gap-3">
+              <p class="flex items-center gap-2 font-alternate text-xs font-bold uppercase tracking-[0.24em] text-slate-500"><svg lucideSlidersHorizontal [size]="15" class="text-[#00A849]"></svg> Territorio</p>
+              <button
+                type="button"
+                (click)="limpiarFiltros()"
+                [disabled]="!hayFiltros()"
+                class="cursor-pointer border-0 bg-transparent text-xs font-semibold text-[#087b3e] transition hover:underline disabled:cursor-not-allowed disabled:text-slate-300 disabled:no-underline"
+              >Limpiar filtros @if (hayFiltros()) { ({{ filtrosActivos() }}) }</button>
+            </div>
+
+            <div class="space-y-4">
+              <label class="block"><span class="mb-2 block text-xs font-bold text-slate-600">Departamento</span>
+                <select
+                  id="festivales-departamento"
+                  name="departamento"
+                  [ngModel]="departamento()"
+                  (ngModelChange)="actualizarDepartamento($event)"
+                  class="w-full cursor-pointer rounded-xl border border-slate-200 bg-white px-3 py-3 text-sm text-slate-700 outline-none transition focus:border-[#00A849]"
+                >
+                  <option value="">Todos los departamentos</option>
+                  @for (item of departamentos(); track item) { <option [value]="item">{{ item | nombrePropio }}</option> }
+                </select>
+              </label>
+
+              <label class="block"><span class="mb-2 block text-xs font-bold text-slate-600">Municipio</span>
+                <select
+                  id="festivales-municipio"
+                  name="municipio"
+                  [ngModel]="municipio()"
+                  (ngModelChange)="actualizarMunicipio($event)"
+                  class="w-full cursor-pointer rounded-xl border border-slate-200 bg-white px-3 py-3 text-sm text-slate-700 outline-none transition focus:border-[#00A849]"
+                >
+                  <option value="">Todos los municipios</option>
+                  @for (item of municipios(); track item) { <option [value]="item">{{ item | nombrePropio }}</option> }
+                </select>
+              </label>
+
+              <label class="block"><span class="mb-2 block text-xs font-bold text-slate-600">Prácticas musicales</span>
+                <select
+                  id="festivales-practica"
+                  name="practica"
+                  [ngModel]="practica()"
+                  (ngModelChange)="actualizarPractica($event)"
+                  class="w-full cursor-pointer rounded-xl border border-slate-200 bg-white px-3 py-3 text-sm text-slate-700 outline-none transition focus:border-[#00A849]"
+                >
+                  <option value="">Todas las prácticas</option>
+                  @for (item of practicas(); track item) { <option [value]="item">{{ item | nombrePropio }}</option> }
+                </select>
+              </label>
+
+              <label class="block"><span class="mb-2 block text-xs font-bold text-slate-600">Territorios Sonoros</span>
+                <select
+                  id="festivales-territorio-sonoro"
+                  name="territorioSonoro"
+                  [ngModel]="territorioSonoro()"
+                  (ngModelChange)="actualizarTerritorioSonoro($event)"
+                  class="w-full cursor-pointer rounded-xl border border-slate-200 bg-white px-3 py-3 text-sm text-slate-700 outline-none transition focus:border-[#00A849]"
+                >
+                  <option value="">Todos los territorios sonoros</option>
+                  @for (item of territoriosSonoros(); track item) { <option [value]="item">{{ item | nombrePropio }}</option> }
+                </select>
+              </label>
+            </div>
+          </div>
+
+          <!--
+            ORDENAR, EN LA COLUMNA DE FILTROS. La referencia no trae este apartado; el dueño del
+            proyecto pidió sumarlo aquí -no en la barra de herramientas de
+            arriba, donde vivía antes- para que la exploración y el orden de lectura queden juntos
+            en el mismo panel. La lógica ya existía (`orden`/`actualizarOrden`): solo cambia dónde
+            se pinta el control.
+          -->
+          <div class="mt-8 border-t border-slate-200 pt-8">
+            <label for="festivales-orden" class="mb-2 block font-alternate text-xs font-bold uppercase tracking-[0.24em] text-slate-500">Ordenar</label>
+            <select
+              id="festivales-orden"
+              name="orden"
+              [ngModel]="orden()"
+              (ngModelChange)="actualizarOrden($event)"
+              class="w-full cursor-pointer rounded-xl border border-slate-200 bg-white px-3 py-3 text-sm text-slate-700 outline-none transition focus:border-[#00A849]"
+            >
+              <option value="nombre-asc">Nombre (A–Z)</option>
+              <option value="nombre-desc">Nombre (Z–A)</option>
+              <option value="territorio">Territorio</option>
+              <option value="organizacion">Organización</option>
+            </select>
+          </div>
+
+          <p class="mt-5 text-xs leading-relaxed text-slate-500">Los filtros muestran únicamente territorios con Festivales públicos disponibles en esta consulta.</p>
+        </form>
+
+        <app-acceso-mapa-ecosistema etiqueta="Ver Festivales en el mapa" (activar)="abrirMapa()"></app-acceso-mapa-ecosistema>
+      </aside>
+
+      <!-- ============================ CONSULTA ============================ -->
+      <section class="min-w-0 bg-white p-7 lg:p-12">
+
+        <!-- El encabezado real de la lista. No se ve: el `h1` de la página es el del encabezado. -->
+        <h2 class="sr-only">{{ texto('ecosistema_festivals_heading') }}</h2>
+
+        <app-barra-exploracion-ecosistema
+          class="block"
+          [metricas]="metricas()"
+          [vista]="vista()"
+          (cambioVista)="cambiarVista($event)"
+        ></app-barra-exploracion-ecosistema>
+
+        <!--
+          El aviso que faltaba en el directorio de escuelas: si la consulta trae
+          menos registros de los que el servidor dice tener, la pagina lo DICE.
+        -->
+        @if (consultaTruncada()) {
+          <p class="mt-5 rounded-xl border border-amber-200 bg-amber-50 px-4 py-2.5 text-[0.8rem] text-amber-800">
+            Esta consulta trae {{ festivales().length }} de los {{ totalPublicado() }} Festivales
+            publicados. Afina la búsqueda para ver los que faltan.
+          </p>
+        }
+
+        <p id="festivales-resultados" aria-live="polite" class="mt-6 scroll-mt-24 font-alternate text-[0.58rem] font-bold uppercase tracking-widest text-slate-500">
+          @if (totalResultados()) {
+            Mostrando {{ rangoMostrado().desde }}–{{ rangoMostrado().hasta }} de {{ totalResultados() }}
+          } @else {
+            Mostrando 0 de 0
+          }
+          @if (hayFiltros()) {
+            <span class="ml-1.5 rounded-full bg-[#00DA5E]/10 px-2.5 py-0.5 text-[#087B3E]">
+              {{ filtrosActivos() }} {{ filtrosActivos() === 1 ? 'filtro' : 'filtros' }}
+            </span>
+          }
+        </p>
+
+        <!-- ============================ RESULTADOS ============================ -->
+        @if (cargando()) {
+          <div class="py-16 text-center text-sm text-slate-500">Cargando Festivales públicos…</div>
+        } @else if (error()) {
+          <div class="mt-8 rounded-2xl border border-amber-200 bg-amber-50 p-6 text-sm text-amber-800">{{ error() }}</div>
+        } @else if (!totalResultados()) {
+          <div class="mt-8 rounded-2xl border border-dashed border-slate-200 p-12 text-center">
+            <p class="font-alternate text-lg font-bold uppercase text-[#291242]">{{ texto('ecosistema_festivals_empty_title') }}</p>
+            <p class="mt-2 text-sm text-slate-500">{{ texto('ecosistema_festivals_empty_desc') }}</p>
+            @if (hayFiltros()) {
+              <button
+                type="button"
+                (click)="limpiarFiltros()"
+                class="mt-4 cursor-pointer rounded-xl border border-slate-200 bg-white px-4 py-2.5 font-alternate text-[0.58rem] font-bold uppercase tracking-widest text-[#087B3E] transition hover:border-[#00DA5E]"
+              >Limpiar filtros</button>
+            }
+          </div>
+        } @else if (vista() === 'listado') {
+
+          <!--
+            Listado: filas separadas por una division, no tarjetas. Cuatro
+            renglones de alto fijo por fila —titulo, organizacion, descripcion,
+            clasificacion—, asi que todas las filas miden lo mismo tenga el
+            Festival descripcion larga, corta o ninguna.
+
+            LA ORGANIZACIÓN VA JUSTO DEBAJO DEL NOMBRE, no al final de la ficha como en la
+            referencia: lo pidió la dirección de producto. Es el primer dato
+            que identifica al Festival despues de su nombre, asi que va donde se lee primero.
+          -->
+          <div class="divide-y divide-slate-100">
+            @for (festival of mostrados(); track festival.id) {
+              <article
+                data-festival-fila
+                class="group grid gap-5 py-7 transition md:grid-cols-[minmax(0,1fr)_12rem] md:items-start"
+              >
+                <div class="min-w-0">
+                  <a
+                    [routerLink]="['/ecosistema/festivales', festival.id]"
+                    class="line-clamp-2 break-words font-alternate text-xl font-bold uppercase leading-snug text-[#291242] no-underline transition hover:text-[#087b3e] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00DA5E]"
+                  >{{ festival.nombre }}</a>
+
+                  <p class="mt-1.5 truncate text-xs text-slate-500">
+                    {{ festival.organizacionResponsable || 'Organización por confirmar' }}@if (festival.periodicidad) { <span class="capitalize"> · {{ festival.periodicidad }}</span> }@if (festival.territorioPrincipal.nivelCobertura) { <span class="capitalize"> · {{ festival.territorioPrincipal.nivelCobertura }}</span> }
+                  </p>
+
+                  <p class="mt-3 line-clamp-3 max-w-2xl text-sm leading-relaxed text-slate-500 whitespace-pre-line">{{ festival.descripcion }}</p>
+
+                  <div class="mt-3 flex items-center gap-3">
+                    <!--
+                      ETIQUETAS QUE FILTRAN, NO TEXTO UNIDO. Antes esto era una sola cadena
+                      —«Bambuco · Andina · Llanera»— y no hacía nada, aunque el filtro que las usa
+                      está en el mismo bloque de arriba. Son BOTONES y no enlaces porque no llevan a
+                      otra pantalla: acotan esta. `aria-pressed` dice si el filtro ya está puesto,
+                      que es lo que convierte el mismo control en «quítamelo».
+                    -->
+                    @if (festival.practicasMusicales.length || festival.territoriosSonoros.length) {
+                      <p class="flex min-w-0 flex-1 flex-wrap items-center gap-1.5">
+                        @for (practica of festival.practicasMusicales; track practica.id) {
+                          <button type="button" data-etiqueta-filtro
+                            (click)="alternarFiltroDeEtiqueta('practica', practica.nombre)"
+                            [attr.aria-pressed]="filtroActivo('practica', practica.nombre)"
+                            [attr.aria-label]="rotuloDeEtiqueta('practica', practica.nombre)"
+                            [class]="filtroActivo('practica', practica.nombre)
+                              ? 'rounded-full bg-verde/25 px-2 py-0.5 text-[0.65rem] font-bold text-verde-texto ring-1 ring-verde-medio transition'
+                              : 'rounded-full bg-verde/10 px-2 py-0.5 text-[0.65rem] font-semibold text-verde-texto transition hover:bg-verde/25'"
+                          >{{ practica.nombre }}</button>
+                        }
+                        @for (territorio of festival.territoriosSonoros; track territorio.id) {
+                          <button type="button" data-etiqueta-filtro
+                            (click)="alternarFiltroDeEtiqueta('territorio', territorio.nombre)"
+                            [attr.aria-pressed]="filtroActivo('territorio', territorio.nombre)"
+                            [attr.aria-label]="rotuloDeEtiqueta('territorio', territorio.nombre)"
+                            [class]="filtroActivo('territorio', territorio.nombre)
+                              ? 'rounded-full bg-violet-200 px-2 py-0.5 text-[0.65rem] font-bold text-violet-800 ring-1 ring-violet-500 transition'
+                              : 'rounded-full bg-violet-50 px-2 py-0.5 text-[0.65rem] font-semibold text-violet-700 transition hover:bg-violet-100'"
+                          >{{ territorio.nombre | nombrePropio }}</button>
+                        }
+                      </p>
+                    }
+                    <!-- SOLO ENLACES. El correo y el telefono salieron de la lectura publica el
+                         30 de agosto de 2026: no es que no se pinten, es que ya no llegan. -->
+                    @if (enlaces(festival).length) {
+                      <span class="ml-auto flex shrink-0 items-center gap-2 text-slate-400">
+                        @for (enlace of enlaces(festival); track enlace.clave) {
+                          <a
+                            [href]="enlace.href"
+                            [title]="enlace.etiqueta"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            class="rounded-sm text-slate-400 no-underline transition hover:text-[#087B3E] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00DA5E]"
+                          >
+                            <!--
+                              CADA ICONO ES EL DE SU DESTINO. Aqui habia un globo para el sitio web y
+                              el MISMO icono de «enlace externo» para los otros tres: Instagram,
+                              Facebook y el enlace libre se veian identicos, de modo que los cuatro
+                              iconos decian «hay cuatro enlaces» y ninguno decia a donde. Lo pidio el
+                              usuario: «seria importante plantear desde un
+                              inicio los iconos respectivos para saber a donde me llevan los enlaces».
+                            -->
+                            <app-icono-de-enlace [tipo]="enlace.clave" [tamano]="14" />
+                            <span class="sr-only">{{ enlace.etiqueta }} de {{ festival.nombre }}</span>
+                          </a>
+                        }
+                      </span>
+                    }
+                  </div>
+                </div>
+
+                <!--
+                  Columna derecha: territorio y salida a la ficha.
+
+                  `min-w-0` NO ES DECORATIVO. Sin el, el minimo automatico de un elemento de grid
+                  -`min-width: auto`- deja que un departamento largo (el ejemplo real es
+                  «Archipielago de San Andres, Providencia y Santa Catalina») empuje la columna
+                  mas alla de sus `12rem` fijos: el `truncate` de los `span` de abajo no basta,
+                  porque actua sobre su propio ancho y ese ancho ya se salio de la pista. Con
+                  `min-w-0` la pista manda y el truncado si recorta.
+                -->
+                <div class="grid min-w-0 gap-3 text-sm md:mt-1">
+                  <p class="min-w-0">
+                    <span class="block text-[0.6rem] font-bold uppercase tracking-widest text-slate-400">Departamento</span>
+                    @if (festival.territorioPrincipal.departamento; as dep) {
+                      <button type="button" data-etiqueta-filtro [title]="dep"
+                        (click)="alternarFiltroDeEtiqueta('departamento', dep)"
+                        [attr.aria-pressed]="filtroActivo('departamento', dep)"
+                        [attr.aria-label]="rotuloDeEtiqueta('departamento', dep)"
+                        [class]="filtroActivo('departamento', dep)
+                          ? 'mt-1 block w-full truncate rounded-sm text-left font-bold text-verde-texto underline decoration-verde decoration-2 underline-offset-2'
+                          : 'mt-1 block w-full truncate rounded-sm text-left text-slate-700 underline decoration-dotted decoration-slate-300 decoration-1 underline-offset-4 transition hover:text-verde-texto hover:decoration-verde hover:decoration-solid'"
+                      >{{ dep | nombrePropio }}</button>
+                    } @else {
+                      <span class="mt-1 block truncate text-slate-400">Sin información</span>
+                    }
+                  </p>
+                  <p class="min-w-0">
+                    <span class="block text-[0.6rem] font-bold uppercase tracking-widest text-slate-400">Municipio</span>
+                    @if (festival.territorioPrincipal.municipio; as mun) {
+                      <button type="button" data-etiqueta-filtro [title]="mun"
+                        (click)="alternarFiltroDeEtiqueta('municipio', mun)"
+                        [attr.aria-pressed]="filtroActivo('municipio', mun)"
+                        [attr.aria-label]="rotuloDeEtiqueta('municipio', mun)"
+                        [class]="filtroActivo('municipio', mun)
+                          ? 'mt-1 block w-full truncate rounded-sm text-left font-bold text-verde-texto underline decoration-verde decoration-2 underline-offset-2'
+                          : 'mt-1 block w-full truncate rounded-sm text-left text-slate-700 underline decoration-dotted decoration-slate-300 decoration-1 underline-offset-4 transition hover:text-verde-texto hover:decoration-verde hover:decoration-solid'"
+                      >{{ mun | nombrePropio }}</button>
+                    } @else {
+                      <span class="mt-1 block truncate text-slate-400">Sin información</span>
+                    }
+                  </p>
+                  <a
+                    [routerLink]="['/ecosistema/festivales', festival.id]"
+                    class="mt-1 inline-flex items-center gap-1.5 rounded-sm font-alternate text-[0.6rem] font-bold uppercase tracking-widest text-[#087b3e] no-underline transition hover:text-[#291242] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00DA5E]"
+                  >Ver ficha <svg lucideArrowRight [size]="14"></svg><span class="sr-only"> de {{ festival.nombre }}</span></a>
+                </div>
+              </article>
+            }
+          </div>
+
+        } @else {
+
+          <!--
+            Cuadricula: la organizacion va justo debajo del nombre, igual que en el listado; la
+            referencia no la muestra en esta vista. La descripcion, las etiquetas y los enlaces se
+            conservan del diseno anterior: la referencia no los tiene y se conservan.
+          -->
+          <div class="grid gap-5 py-8 sm:grid-cols-2 xl:grid-cols-3">
+            @for (festival of mostrados(); track festival.id) {
+              <article
+                data-festival-tarjeta
+                class="group flex min-h-72 flex-col rounded-2xl border border-slate-100 bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:border-[#00DA5E]/40 hover:shadow-lg"
+              >
+                <span class="flex h-11 w-11 items-center justify-center rounded-2xl bg-[#00DA5E]/10 text-[#00A849]"><svg lucideMusic2 [size]="21"></svg></span>
+
+                <h3 class="mt-6 line-clamp-2 font-alternate text-lg font-bold uppercase leading-snug text-[#291242]">
+                  <a
+                    [routerLink]="['/ecosistema/festivales', festival.id]"
+                    class="rounded-sm no-underline transition hover:text-[#00A849] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00DA5E]"
+                  >{{ festival.nombre }}</a>
+                </h3>
+
+                <p class="mt-1.5 truncate text-xs text-slate-500">{{ festival.organizacionResponsable || 'Organización por confirmar' }}</p>
+
+                <p class="mt-3 line-clamp-3 text-sm leading-relaxed text-slate-500 whitespace-pre-line">{{ festival.descripcion }}</p>
+
+                <p [title]="territorio(festival)" class="mt-4 flex items-center gap-2 text-xs text-slate-500"><svg lucideBuilding2 [size]="14" class="shrink-0 text-[#00A849]"></svg><span class="min-w-0 truncate">{{ territorio(festival) | nombrePropio }}</span></p>
+
+                <!--
+                  LA MISMA ETIQUETA, EL MISMO GESTO QUE EN LA VISTA DE LISTADO. Aquí eran enlaces a
+                  `/ecosistema/festivales?practica=…`: navegaban a esta misma página y, al hacerlo,
+                  BORRABAN los demás filtros puestos. Quien venía filtrando por Huila y pulsaba
+                  «Bambuco» perdía el Huila sin que nada se lo dijera. Y la misma etiqueta hacía una
+                  cosa en cuadrícula y otra en listado, en la misma pantalla.
+                -->
+                @if (festival.practicasMusicales.length || festival.territoriosSonoros.length) {
+                  <div class="mt-3 flex flex-wrap gap-1.5">
+                    @for (practica of festival.practicasMusicales; track practica.id) {
+                      <button type="button" data-etiqueta-filtro
+                        (click)="alternarFiltroDeEtiqueta('practica', practica.nombre)"
+                        [attr.aria-pressed]="filtroActivo('practica', practica.nombre)"
+                        [attr.aria-label]="rotuloDeEtiqueta('practica', practica.nombre)"
+                        [class]="filtroActivo('practica', practica.nombre)
+                          ? 'max-w-full truncate rounded-full bg-verde/25 px-2 py-1 text-[0.58rem] font-bold text-verde-texto ring-1 ring-verde-medio transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-verde'
+                          : 'max-w-full truncate rounded-full bg-verde/10 px-2 py-1 text-[0.58rem] font-semibold text-verde-texto transition hover:bg-verde/25 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-verde'"
+                      >{{ practica.nombre }}</button>
+                    }
+                    @for (territorioSonoro of festival.territoriosSonoros; track territorioSonoro.id) {
+                      <button type="button" data-etiqueta-filtro
+                        (click)="alternarFiltroDeEtiqueta('territorio', territorioSonoro.nombre)"
+                        [attr.aria-pressed]="filtroActivo('territorio', territorioSonoro.nombre)"
+                        [attr.aria-label]="rotuloDeEtiqueta('territorio', territorioSonoro.nombre)"
+                        [class]="filtroActivo('territorio', territorioSonoro.nombre)
+                          ? 'max-w-full truncate rounded-full bg-violet-200 px-2 py-1 text-[0.58rem] font-bold text-violet-800 ring-1 ring-violet-500 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500'
+                          : 'max-w-full truncate rounded-full bg-violet-50 px-2 py-1 text-[0.58rem] font-semibold text-violet-700 transition hover:bg-violet-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500'"
+                      >{{ territorioSonoro.nombre | nombrePropio }}</button>
+                    }
+                  </div>
+                }
+
+                @if (enlaces(festival).length) {
+                  <span class="mt-3 flex items-center gap-2 text-slate-400">
+                    @for (enlace of enlaces(festival); track enlace.clave) {
+                      <a [href]="enlace.href" [title]="enlace.etiqueta" target="_blank" rel="noopener noreferrer" class="rounded-sm text-slate-400 no-underline transition hover:text-[#087B3E] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00DA5E]">
+                        <app-icono-de-enlace [tipo]="enlace.clave" [tamano]="14" />
+                        <span class="sr-only">{{ enlace.etiqueta }} de {{ festival.nombre }}</span>
+                      </a>
+                    }
+                  </span>
+                }
+
+                <a
+                  [routerLink]="['/ecosistema/festivales', festival.id]"
+                  class="mt-auto inline-flex items-center gap-2 pt-6 font-alternate text-[0.58rem] font-bold uppercase tracking-widest text-[#291242] no-underline transition group-hover:gap-3 group-hover:text-[#00A849] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00DA5E]"
+                >Ver ficha <svg lucideArrowRight [size]="14"></svg><span class="sr-only"> de {{ festival.nombre }}</span></a>
+              </article>
+            }
+          </div>
+        }
+
+        <!--
+          PAGINACIÓN CONVENCIONAL, no «Ver más»: recorrer 51 Festivales dando clic repetido a un
+          botón que solo agranda la misma lista no decía cuántos faltaban ni permitía volver a un
+          punto concreto. Solo se pinta con
+          más de una página: una sola no necesita mando.
+        -->
+        @if (totalPaginas() > 1) {
+          <nav class="mt-8 flex items-center justify-center gap-3 border-t border-slate-100 pt-8" aria-label="Paginación de Festivales">
+            <button
+              type="button"
+              (click)="paginaAnterior()"
+              [disabled]="!hayPaginaAnterior()"
+              class="inline-flex cursor-pointer items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-3 font-alternate text-[0.58rem] font-bold uppercase tracking-widest text-slate-600 transition hover:border-[#00DA5E] hover:text-[#00A849] disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:border-slate-200 disabled:hover:text-slate-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00DA5E]"
+            ><svg lucideArrowLeft [size]="15"></svg> Anterior</button>
+
+            <p class="font-alternate text-[0.58rem] font-bold uppercase tracking-widest text-slate-500">Página {{ paginaActual() }} de {{ totalPaginas() }}</p>
+
+            <button
+              type="button"
+              (click)="paginaSiguiente()"
+              [disabled]="!hayPaginaSiguiente()"
+              class="inline-flex cursor-pointer items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-3 font-alternate text-[0.58rem] font-bold uppercase tracking-widest text-slate-600 transition hover:border-[#00DA5E] hover:text-[#00A849] disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:border-slate-200 disabled:hover:text-slate-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00DA5E]"
+            >Siguiente <svg lucideArrowRight [size]="15"></svg></button>
+          </nav>
+        }
+
+      </section>
+    </div>
+  </div>
+</section>

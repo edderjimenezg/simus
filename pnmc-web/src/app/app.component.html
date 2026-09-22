@@ -1,0 +1,50 @@
+<!--
+  ENLACE DE SALTO AL CONTENIDO.
+
+  No existía ninguno en toda la aplicación (verificado: cero coincidencias de
+  `skip`, `saltar`, `#main` o `#content` en `src/`). Con 17 botones en la
+  cabecera —y hasta ~25 con el desplegable de Ejes abierto— quien navega con
+  teclado tenía que recorrerlos TODOS en cada carga de página antes de llegar
+  al contenido.
+
+  Va oculto hasta recibir el foco: es el patrón estándar, invisible para quien
+  usa el ratón y lo primero que encuentra quien usa el tabulador.
+-->
+<a
+  href="#contenido-principal"
+  class="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[10000] focus:rounded-xl focus:bg-[#00DA5E] focus:px-5 focus:py-3 focus:font-alternate focus:text-[0.72rem] focus:font-bold focus:uppercase focus:tracking-widest focus:text-[#291242] focus:outline-none focus:ring-2 focus:ring-white"
+>
+  Saltar al contenido principal
+</a>
+
+@if (showNavigation()) {
+  <app-navigation
+    [scrolled]="scrolled()"
+    [forceSolid]="isSolidNavigation()"
+  ></app-navigation>
+}
+
+<!--
+  ANUNCIO DEL CAMBIO DE RUTA.
+
+  En una aplicación de página única el navegador no anuncia nada al cambiar de
+  vista: el documento no se recarga. Sin esta región, quien usa lector de
+  pantalla pulsaba un enlace del menú y no recibía ninguna señal de haber
+  llegado a otro sitio. La medición dio **cero** `aria-live` en todo el
+  frontend público.
+
+  `polite` y no `assertive`: no interrumpe lo que el lector esté leyendo.
+-->
+<p class="sr-only" aria-live="polite" aria-atomic="true">{{ anuncioDeRuta() }}</p>
+
+<main id="contenido-principal" tabindex="-1" class="min-h-screen animate-page-entrance">
+  <router-outlet></router-outlet>
+</main>
+
+@if (showFloatingButton()) {
+  <app-floating-button></app-floating-button>
+}
+
+@if (showGlobalFooter()) {
+  <app-footer></app-footer>
+}

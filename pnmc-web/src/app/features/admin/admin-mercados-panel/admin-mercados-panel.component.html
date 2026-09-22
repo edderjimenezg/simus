@@ -1,0 +1,786 @@
+<section aria-labelledby="mercados-consola-titulo">
+  <!-- SIN ENCABEZADO PROPIO: la cabecera de página ya dice qué sección es. -->
+  <h2 id="mercados-consola-titulo" class="sr-only">Mercados musicales</h2>
+
+  <!--
+    LA MISMA BARRA QUE AGENDA, NOTICIAS, ORGANIZACIONES Y FESTIVALES: buscador primero, filtros
+    después, y el alta en el extremo derecho. Es el orden que el proyecto estandarizó, y una sexta
+    pantalla con los elementos en otro sitio obligaría a volver a aprender dónde está cada cosa.
+  -->
+  <app-barra-de-lista>
+    <app-buscador-de-lista identificador="buscar-mercado-consola" etiqueta="Buscar mercados"
+      marcador="Buscar por nombre o descripción…" [valor]="busqueda()" (cambiar)="buscar($event)" />
+    <app-filtro-desplegable identificador="estado-mercado" etiqueta="Mostrar mercados por estado"
+      [opciones]="FILTRO_DE_ESTADO" [elegida]="filtroEstado()" (cambiar)="filtroEstado.set($event)" />
+    <!-- EL OJO DE BORRADORES, como en Festivales: lo resuelve el servidor, sobre el total. -->
+    <app-conmutador-de-ojo identificador="mercados-borradores" grupo="Borradores"
+      deQue="los mercados en borrador" [visible]="mostrarBorradores()"
+      (alternar)="mostrarBorradores.set($event)" />
+    <ng-container extremo>
+      <app-boton importancia="terciaria" etiqueta="Actualizar la lista" [deshabilitado]="cargando()" (accion)="recargar()"><svg lucideRefreshCw [size]="15" aria-hidden="true"></svg></app-boton>
+      <app-boton importancia="secundaria" [deshabilitado]="generandoPlantilla()" (accion)="descargarPlantilla()" data-plantilla-de-mercados><svg lucideDownload [size]="15" aria-hidden="true"></svg> Plantilla</app-boton>
+      <app-boton importancia="principal" (accion)="nuevo()"><svg lucidePlus [size]="15" aria-hidden="true"></svg> Nuevo mercado</app-boton>
+    </ng-container>
+  </app-barra-de-lista>
+
+  @if (error()) { <p class="mb-4 text-cuerpo font-semibold text-amber-800" role="alert">{{ error() }}</p> }
+  @if (aviso()) { <p class="mb-4 text-cuerpo font-semibold text-verde-texto" role="status">{{ aviso() }}</p> }
+
+  @if (cargando() && lista().length === 0) {
+    <app-estado-de-lista tipo="cargando" titulo="Consultando los mercados…" />
+  } @else if (lista().length === 0) {
+    <app-lista-sin-filas entidad="mercados musicales" [hayFiltros]="hayFiltrosPuestos()"
+      comoLlegan="Los registra una organización desde su espacio, o el Programa desde aquí con «Nuevo mercado»."
+      (limpiar)="limpiarFiltros()">
+      <app-boton importancia="principal" tamano="menudo" (accion)="nuevo()">Nuevo mercado</app-boton>
+    </app-lista-sin-filas>
+  } @else {
+    <div class="overflow-x-auto">
+      <table class="tabla-administrativa tabla-de-publicaciones">
+        <colgroup>
+          <col class="tabla-de-publicaciones__titulo" />
+          <col class="tabla-de-publicaciones__donde" />
+          <col class="tabla-de-publicaciones__cuando" />
+          <col class="tabla-de-publicaciones__estado" />
+          <col class="tabla-de-publicaciones__acciones" />
+        </colgroup>
+        <thead class="tabla-administrativa__cabecera">
+          <!--
+            ORDENA EN EL SERVIDOR, no sobre la página cargada. Con veinte filas por página, ordenar
+            el array traído reordena esas veinte y deja el resto donde estaba: en la primera página
+            nunca aparecería un publicado que vive en la quinta.
+          -->
+          <tr><app-cabecera-de-tabla [columnas]="COLUMNAS" [orden]="orden" (ordenarPor)="ordenarPor($event)" /></tr>
+        </thead>
+        <tbody>
+          @for (mercado of lista(); track mercado.id) {
+            <tr class="tabla-administrativa__fila">
+              <td>
+                <span class="tabla-administrativa__principal">{{ mercado.nombre }}</span>
+                @if (mercado.organizacionNombre) {
+                  <span class="tabla-administrativa__secundaria">{{ mercado.organizacionNombre }}</span>
+                }
+                <!--
+                  EL NUMERO DE EDICIONES SE CUENTA, no se guarda. La tabla heredada lo tenía en una
+                  columna que alguien debía mantener a mano mientras la lista decía otra cosa.
+                -->
+                <span class="tabla-administrativa__secundaria">
+                  {{ mercado.numeroDeEdiciones === 1 ? '1 edición registrada' : mercado.numeroDeEdiciones + ' ediciones registradas' }}
+                </span>
+              </td>
+              <td>
+                <span>{{ donde(mercado) | nombrePropio }}</span>
+                @if (mercado.lugarEspecifico) {
+                  <span class="tabla-administrativa__secundaria">{{ mercado.lugarEspecifico }}</span>
+                }
+              </td>
+              <td>
+                <!--
+                  EL FESTIVAL SE ENSEÑA POR SU NOMBRE REAL, leído de la relación. No hay un texto
+                  paralelo que pueda decir otra cosa.
+                -->
+                @if (mercado.seRealizaEnElMarcoDeUnFestival && mercado.festivalNombre) {
+                  <span>{{ mercado.festivalNombre }}</span>
+                } @else {
+                  <span class="tabla-administrativa__secundaria">Proceso independiente</span>
+                }
+              </td>
+              <td>
+                <app-indicador-de-estado
+                  [etiqueta]="rotuloDeEstado(mercado.estadoRegistro)"
+                  [tono]="tonoDelEstado(mercado.estadoRegistro)"
+                  [matiz]="matizDelEstado(mercado.estadoRegistro)"
+                  [conTexto]="true"></app-indicador-de-estado>
+              </td>
+              <td class="tabla-administrativa__acciones">
+                <!--
+                  UN SOLO CONTROL POR FILA, COMO EN FESTIVALES. Mercados nació con dos botones
+                  sueltos y quedó definido el mismo día. La acción esperada sale
+                  primera; lo que no aplica al estado no se pinta.
+                -->
+                <app-menu-de-acciones
+                  [acciones]="accionesDe(mercado)"
+                  [descripcion]="mercado.nombre"
+                  (elegida)="ejecutarAccion(mercado, $event)"></app-menu-de-acciones>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+
+      @if (totalDePaginas() > 1) {
+        <div class="tabla-administrativa__pie">
+          <p class="barra-de-lista__resumen">Página {{ pagina() }} de {{ totalDePaginas() }} · {{ total() }} mercados</p>
+          <div class="flex flex-wrap items-center gap-2">
+            <app-boton importancia="secundaria" tamano="menudo" [deshabilitado]="pagina() <= 1" (accion)="irALaPagina(pagina() - 1)">Anterior</app-boton>
+            <app-boton importancia="secundaria" tamano="menudo" [deshabilitado]="pagina() >= totalDePaginas()" (accion)="irALaPagina(pagina() + 1)">Siguiente</app-boton>
+          </div>
+        </div>
+      }
+    </div>
+  }
+
+  @if (formulario(); as f) {
+    <!--
+      EL ALTA PREGUNTA POR PASOS, COMO LA DE UN FESTIVAL; LA EDICION, NO.
+
+      Hasta registrar un mercado era un solo desplazamiento con trece
+      campos mientras registrar un Festival era un asistente de cinco pasos: dos formas de dar de
+      alta dos procesos que el proyecto trata igual. Quedó definido dos veces —«la
+      navegación, edición, publicación, etc. de un mercado debe ser igual en cuanto sea posible a la
+      de un festival»—.
+
+      EDITAR NO ES REGISTRAR, y por eso no hereda el asistente: quien corrige un dato ya sabe cuál
+      es, y hacerle recorrer cinco pasos para cambiar un teléfono sería peor que el formulario
+      largo. Los campos son los mismos —viven una sola vez, en las plantillas de abajo— y lo único
+      que cambia es cómo se presentan.
+    -->
+    @if (f.id === null) {
+      <app-asistente-de-alta
+        antetitulo="Ecosistema musical"
+        titulo="Registrar mercado musical"
+        proposito="Lo incorpora el Programa, pero la organización responsable sigue siendo quien lo gestiona. Son dos cosas distintas y quedan guardadas por separado."
+        [pasos]="pasosDelAlta"
+        [(paso)]="pasoDelAlta"
+        [error]="errorDelFormulario()"
+        [loQueFalta]="loQueFaltaParaRegistrar()"
+        [guardando]="guardando()"
+        verbo="Crear en borrador"
+        identificador="registrar-mercado"
+        (registrar)="guardar()"
+        (cancelar)="cerrarElFormulario()">
+
+        @if (pasoDelAlta() === 1) { <ng-container [ngTemplateOutlet]="campoOrganizacion" /> }
+        @if (pasoDelAlta() === 2) {
+          <ng-container [ngTemplateOutlet]="campoNombre" />
+          <ng-container [ngTemplateOutlet]="campoDescripcion" />
+          <ng-container [ngTemplateOutlet]="camposClasificacion" />
+        }
+        @if (pasoDelAlta() === 3) {
+          <ng-container [ngTemplateOutlet]="camposPeriodicidad" />
+          <ng-container [ngTemplateOutlet]="camposTerritorio" />
+        }
+        @if (pasoDelAlta() === 4) {
+          <ng-container [ngTemplateOutlet]="camposContacto" />
+          <ng-container [ngTemplateOutlet]="camposCatalogos" />
+          <ng-container [ngTemplateOutlet]="campoFestival" />
+        }
+        @if (pasoDelAlta() === 5) {
+          <!--
+            LA REVISION NO PREGUNTA NADA: enseña lo que se va a crear y con qué procedencia. Es lo
+            mismo que enseña el alta de un Festival, con los mismos rótulos.
+          -->
+          <dl class="grid gap-3 rounded-xl border border-slate-200 p-4 text-xs">
+            <div class="flex flex-wrap gap-2">
+              <dt class="w-40 shrink-0 campo__rotulo">Mercado</dt>
+              <dd class="flex-1 text-slate-800">{{ f.nombre || '—' }}</dd>
+            </div>
+            <div class="flex flex-wrap gap-2">
+              <dt class="w-40 shrink-0 campo__rotulo">Registrado por</dt>
+              <dd class="flex-1 text-slate-800">Plan Nacional de Música para la Convivencia</dd>
+            </div>
+            <div class="flex flex-wrap gap-2">
+              <dt class="w-40 shrink-0 campo__rotulo">Organización responsable</dt>
+              <dd class="flex-1 text-slate-800">{{ nombreDeLaOrganizacionElegida() || 'Sin elegir' }}</dd>
+            </div>
+            <div class="flex flex-wrap gap-2">
+              <dt class="w-40 shrink-0 campo__rotulo">Cobertura</dt>
+              <dd class="flex-1 text-slate-800">{{ etiquetaDeCobertura(f.nivelCobertura) }}</dd>
+            </div>
+          </dl>
+
+          <p class="text-dato leading-relaxed text-slate-500">
+            Se creará como borrador. Publicarlo es una decisión aparte, desde el circuito de revisión.
+          </p>
+        }
+      </app-asistente-de-alta>
+    } @else {
+      <div class="dialogo-velo" role="dialog" aria-modal="true" aria-labelledby="formulario-mercado-titulo" appDialogo (cerrar)="cerrarElFormulario()">
+        <div class="dialogo">
+          <div class="dialogo__cabecera">
+            <h3 id="formulario-mercado-titulo" class="dialogo__titulo">Editar mercado musical</h3>
+            <app-boton importancia="terciaria" tamano="menudo" (accion)="cerrarElFormulario()">Cerrar</app-boton>
+          </div>
+
+          <div class="dialogo__cuerpo">
+            @if (errorDelFormulario()) {
+              <p class="mb-4 text-cuerpo font-semibold text-amber-800" role="alert">{{ errorDelFormulario() }}</p>
+            }
+
+            <div class="grid gap-4">
+              <ng-container [ngTemplateOutlet]="campoNombre" />
+              <ng-container [ngTemplateOutlet]="campoDescripcion" />
+              <ng-container [ngTemplateOutlet]="campoOrganizacion" />
+              <ng-container [ngTemplateOutlet]="camposClasificacion" />
+              <ng-container [ngTemplateOutlet]="camposPeriodicidad" />
+              <ng-container [ngTemplateOutlet]="camposTerritorio" />
+              <ng-container [ngTemplateOutlet]="camposContacto" />
+              <ng-container [ngTemplateOutlet]="camposCatalogos" />
+              <ng-container [ngTemplateOutlet]="campoFestival" />
+            </div>
+          </div>
+
+          <div class="dialogo__pie">
+            <app-boton importancia="secundaria" (accion)="cerrarElFormulario()">Cancelar</app-boton>
+            <app-boton importancia="principal" [ocupado]="guardando()" (accion)="guardar()">Guardar cambios</app-boton>
+          </div>
+        </div>
+      </div>
+    }
+
+    <!--
+      LOS CAMPOS, UNA SOLA VEZ. Se declaran aquí y los pintan los dos recorridos: el asistente del
+      alta, paso a paso, y el formulario de la edición, todos seguidos. Escribirlos dos veces es
+      como empiezan a divergir dos pantallas que preguntan lo mismo.
+    -->
+    <ng-template #campoNombre>
+      <label class="block">
+        <span class="campo__rotulo">Nombre del mercado</span>
+        <input type="text" name="nombre" [ngModel]="f.nombre" (ngModelChange)="campo('nombre', $event)"
+          maxlength="240" required class="campo__control" />
+      </label>
+
+      <!--
+        AVISA, NO BLOQUEA. Hay mercados que de verdad se llaman parecido en departamentos
+        distintos, y quien registra es quien sabe si es el mismo. Por eso se enseña con qué
+        comparar —quién responde por él y en qué estado está— en vez de impedir el registro.
+      -->
+      @if (coincidencias().length > 0) {
+        <div class="rounded-xl border border-amber-200 bg-amber-50 p-4" role="status" data-coincidencias-de-mercado>
+          <p class="text-xs font-bold text-amber-900">Ya hay mercados con un nombre parecido</p>
+          <ul class="mt-2 space-y-1">
+            @for (parecido of coincidencias(); track parecido.id) {
+              <li class="text-dato text-amber-900">
+                {{ parecido.nombre }}
+                <!--
+                  EL ESPACIO VA DENTRO DE LA INTERPOLACION: Angular recorta el que queda
+                  entre dos bloques `@if`, y sin esto se lee «Fundación de Prueba· Publicado».
+                -->
+                @if (parecido.organizacionResponsable) { <span class="text-amber-700">{{ ' · ' + parecido.organizacionResponsable }}</span> }
+                @if (parecido.estado) { <span class="text-amber-700">{{ ' · ' + rotuloDeEstado(parecido.estado) }}</span> }
+              </li>
+            }
+          </ul>
+          <p class="mt-2 text-dato leading-relaxed text-amber-800">
+            Comprueba que no sea el mismo antes de crear otro registro.
+          </p>
+        </div>
+      }
+    </ng-template>
+
+    <ng-template #campoDescripcion>
+      <label class="block">
+        <span class="campo__rotulo">Descripción</span>
+        <textarea name="descripcion" rows="3" [ngModel]="f.descripcion"
+          (ngModelChange)="campo('descripcion', $event)" class="campo__control"></textarea>
+      </label>
+    </ng-template>
+
+    <ng-template #campoOrganizacion>
+      <!--
+        LA ORGANIZACION RESPONSABLE ES LO PRIMERO QUE HAY QUE DECIDIR, y por eso está antes
+        que el festival: acota qué festivales se pueden elegir después.
+      -->
+      <label class="block">
+        <span class="campo__rotulo">Organización responsable</span>
+        <select name="organizacionId" data-organizacion-del-mercado
+          [ngModel]="f.organizacionId" (ngModelChange)="campo('organizacionId', +$event)" class="campo__control">
+          <option [ngValue]="0">Elige una organización…</option>
+          @for (organizacion of organizaciones(); track organizacion.id) {
+            <option [ngValue]="+organizacion.id">{{ organizacion.nombre }}</option>
+          }
+        </select>
+      </label>
+    </ng-template>
+
+    <ng-template #camposClasificacion>
+      <div class="grid gap-4 sm:grid-cols-2">
+        <label class="block">
+          <span class="campo__rotulo">Alcance</span>
+          <select name="alcanceId" [ngModel]="f.alcanceId" (ngModelChange)="campo('alcanceId', $event)" class="campo__control">
+            <option [ngValue]="null">Sin especificar</option>
+            @for (opcion of catalogos().alcances; track opcion.id) {
+              <option [ngValue]="opcion.id">{{ opcion.nombre }}</option>
+            }
+          </select>
+        </label>
+        <label class="block">
+          <span class="campo__rotulo">Modalidad</span>
+          <select name="modalidadId" [ngModel]="f.modalidadId" (ngModelChange)="campo('modalidadId', $event)" class="campo__control">
+            <option [ngValue]="null">Sin especificar</option>
+            @for (opcion of catalogos().modalidades; track opcion.id) {
+              <option [ngValue]="opcion.id">{{ opcion.nombre }}</option>
+            }
+          </select>
+        </label>
+      </div>
+
+      <!--
+        EL TERRITORIO, CON EL MISMO CRITERIO QUE UN FESTIVAL: el nivel de cobertura decide qué
+        campos hacen falta, y la fuente es DIVIPOLA. No hay una segunda lógica territorial.
+      -->
+    </ng-template>
+
+    <ng-template #camposTerritorio>
+      <div class="grid gap-4 sm:grid-cols-3">
+        <label class="block">
+          <span class="campo__rotulo">Nivel de cobertura</span>
+          <select name="nivelCobertura" [ngModel]="f.nivelCobertura" (ngModelChange)="cambiarCobertura($event)" class="campo__control">
+            @for (nivel of NIVELES_DE_COBERTURA; track nivel.id) {
+              <option [ngValue]="nivel.id">{{ nivel.etiqueta }}</option>
+            }
+          </select>
+        </label>
+        @if (f.nivelCobertura !== 'nacional') {
+          <label class="block">
+            <span class="campo__rotulo">Departamento</span>
+            <select name="codigoDepartamento" [ngModel]="f.codigoDepartamento"
+              (ngModelChange)="cambiarDepartamento($event)" class="campo__control">
+              <option [ngValue]="null">Elige…</option>
+              @for (territorio of territorios(); track territorio.codigo) {
+                <option [ngValue]="territorio.codigo">{{ territorio.nombre | nombrePropio }}</option>
+              }
+            </select>
+          </label>
+        }
+        @if (f.nivelCobertura === 'municipal') {
+          <label class="block">
+            <span class="campo__rotulo">Municipio</span>
+            <select name="codigoMunicipio" [ngModel]="f.codigoMunicipio"
+              (ngModelChange)="campo('codigoMunicipio', $event)" class="campo__control">
+              <option [ngValue]="null">Elige…</option>
+              @for (municipio of municipiosDelDepartamento(); track municipio.codigo) {
+                <option [ngValue]="municipio.codigo">{{ municipio.nombre | nombrePropio }}</option>
+              }
+            </select>
+          </label>
+        }
+      </div>
+
+      <label class="block">
+        <span class="campo__rotulo">Lugar específico</span>
+        <input type="text" name="lugarEspecifico" [ngModel]="f.lugarEspecifico"
+          (ngModelChange)="campo('lugarEspecifico', $event)" maxlength="300"
+          placeholder="Recinto, plaza o sede donde ocurre" class="campo__control" />
+      </label>
+    </ng-template>
+
+    <ng-template #camposCatalogos>
+      <!--
+        QUE SUENA Y DESDE DONDE. Son los catálogos del Ecosistema —los mismos que llena un
+        Festival—, no un vocabulario propio de mercados: si se repitieran, el mismo territorio
+        sonoro tendría dos nombres según dónde se mirara. Las tablas existían desde el primer
+        corte del módulo y ningún formulario las llenaba.
+      -->
+      <div class="grid gap-4 sm:grid-cols-2">
+        <app-selector-multiple
+          etiqueta="Prácticas musicales" identificador="mercado-practicas"
+          [opciones]="catalogos().practicasMusicales" [seleccionados]="f.practicasMusicalesIds"
+          textoVacio="Sin prácticas registradas"
+          (alternar)="alternarDeCatalogo('practicasMusicalesIds', $event)" />
+        <app-selector-multiple
+          etiqueta="Territorios sonoros" identificador="mercado-territorios"
+          [opciones]="catalogos().territoriosSonoros" [seleccionados]="f.territoriosSonorosIds"
+          textoVacio="Sin territorios registrados"
+          (alternar)="alternarDeCatalogo('territoriosSonorosIds', $event)" />
+      </div>
+    </ng-template>
+
+    <ng-template #campoFestival>
+      <!--
+        ¿ESTE MERCADO SE REALIZA EN EL MARCO DE UN FESTIVAL?
+
+        ES LA PREGUNTA PROPIA DE ESTE MODULO, y la razón de que exista la relación. Un mercado
+        puede desarrollarse por su cuenta o dentro de un festival, a diferencia de los demás
+        procesos del Ecosistema.
+
+        EL SELECTOR NO APARECE HASTA QUE LA RESPUESTA ES QUE SI: un campo que depende de otro
+        no se muestra hasta que el primero exista.
+
+        Y NO ES TEXTO LIBRE. Escribir el nombre a mano simula la relación pero no la
+        establece: después no se puede consultar, ni navegar, ni mantener. Es exactamente el
+        defecto de la tabla heredada, que guardaba el festival dos veces —una con clave ajena
+        y otra como texto— sin nada que obligara a que coincidieran.
+      -->
+      <fieldset class="rounded-xl border border-slate-200 p-4">
+        <legend class="px-1 text-dato font-bold uppercase tracking-wider text-slate-500">En el marco de un festival</legend>
+        <label class="flex items-center gap-2 text-cuerpo">
+          <input type="checkbox" name="enMarcoDeFestival" data-en-marco-de-festival
+            [ngModel]="f.seRealizaEnElMarcoDeUnFestival"
+            (ngModelChange)="cambiarSiEstaEnUnFestival($event)" class="h-4 w-4 accent-morado" />
+          <span>Este mercado se realiza en el marco de un festival</span>
+        </label>
+
+        @if (f.seRealizaEnElMarcoDeUnFestival) {
+          @if (!f.organizacionId) {
+            <p class="mt-3 text-cuerpo text-prosa">
+              Elige primero la organización responsable: los festivales que se pueden asociar son los suyos.
+            </p>
+          } @else if (consultaDeFestivales() === 'preguntando' || consultaDeFestivales() === 'sin_preguntar') {
+            <p class="mt-3 text-cuerpo text-prosa">Consultando sus festivales…</p>
+          } @else if (consultaDeFestivales() === 'fallida') {
+            <!-- UN FALLO SE DICE. Decir «no tiene ninguno» sin haber podido preguntar es afirmar
+                 algo falso sobre los datos de esa organización. -->
+            <p class="mt-3 text-cuerpo font-semibold text-amber-800" data-fallo-al-consultar-festivales>
+              No pudimos consultar sus festivales. No significa que no tenga ninguno.
+              <app-boton importancia="terciaria" tamano="menudo" (accion)="reintentarLosFestivales()">Volver a intentarlo</app-boton>
+            </p>
+          } @else if (festivales().length === 0) {
+            <!--
+              NI SE CREA AL VUELO NI SE ESCRIBE A MANO. Registrar un festival tiene su propio
+              recorrido y su propia revisión; ofrecerlo aquí de paso crearía festivales a
+              medias solo para poder guardar un mercado.
+            -->
+            <p class="mt-3 text-cuerpo text-prosa" data-sin-festivales>
+              Esta organización todavía no tiene ningún festival registrado en SIMUS.
+              Regístralo primero en <b>Festivales y ediciones</b> y vuelve para asociarlo.
+            </p>
+          } @else {
+            <label class="mt-3 block">
+              <span class="campo__rotulo">¿Cuál?</span>
+              <select name="festivalId" data-festival-del-mercado
+                [ngModel]="f.festivalId" (ngModelChange)="campo('festivalId', $event)" class="campo__control">
+                <option [ngValue]="null">Elige un festival…</option>
+                @for (festival of festivales(); track festival.id) {
+                  <!--
+                    EL ESTADO SE ENSEÑA Y NO EXCLUYE: un festival en borrador se puede elegir,
+                    porque la condición es existir y pertenecer a la misma organización.
+                  -->
+                  <option [ngValue]="festival.id">
+                    {{ festival.nombre }}@if (festival.estadoRegistro !== 'publicado') { · {{ rotuloDeEstado(festival.estadoRegistro) }} }
+                  </option>
+                }
+              </select>
+            </label>
+          }
+        }
+      </fieldset>
+    </ng-template>
+
+    <ng-template #camposPeriodicidad>
+      <!--
+        LA PERIODICIDAD SE ELIGE, NO SE ESCRIBE. Era un campo de texto con el ejemplo en el
+        marcador —«Anual, bienal, permanente…»—, así que el mismo dato entraba escrito de
+        cuatro maneras según quién lo teclease, y «permanente» ni siquiera está entre los
+        valores que el circuito reconoce. El vocabulario es el de `core/vocabularios`.
+      -->
+      <div class="grid gap-4 sm:grid-cols-2">
+        <label class="block">
+          <span class="campo__rotulo">Periodicidad</span>
+          <select name="periodicidad" [ngModel]="f.periodicidad"
+            (ngModelChange)="campo('periodicidad', $event)" class="campo__control">
+            <option value="">Sin especificar</option>
+            @for (opcion of PERIODICIDADES; track opcion.codigo) {
+              <option [value]="opcion.codigo">{{ opcion.etiqueta }}</option>
+            }
+          </select>
+        </label>
+        <!-- EL DETALLE SOLO CUANDO LA RESPUESTA ANTERIOR LO NECESITA. Se pedía en el alta y
+             no se podía corregir desde ninguna ficha: un dato que entraba y no salía. -->
+        @if (pideDetalle(f.periodicidad)) {
+          <label class="block">
+            <span class="campo__rotulo">¿Cada cuánto, entonces?</span>
+            <input type="text" name="periodicidadDetalle" [ngModel]="f.periodicidadDetalle"
+              (ngModelChange)="campo('periodicidadDetalle', $event)" maxlength="240" class="campo__control" />
+          </label>
+        }
+      </div>
+    </ng-template>
+
+    <ng-template #camposContacto>
+      <div class="grid gap-4 sm:grid-cols-2">
+        <label class="block">
+          <span class="campo__rotulo">Correo del mercado</span>
+          <input type="email" name="correoMercado" [ngModel]="f.correoMercado"
+            (ngModelChange)="campo('correoMercado', $event)" maxlength="180" class="campo__control" />
+        </label>
+        <label class="block">
+          <span class="campo__rotulo">Teléfono</span>
+          <input type="tel" name="telefonoMercado" [ngModel]="f.telefonoMercado"
+            (ngModelChange)="campo('telefonoMercado', $event)" maxlength="80" class="campo__control" />
+        </label>
+        <label class="block">
+          <span class="campo__rotulo">Sitio web</span>
+          <input type="url" name="sitioWebMercado" [ngModel]="f.sitioWebMercado"
+            (ngModelChange)="campo('sitioWebMercado', $event)" maxlength="500" class="campo__control" />
+        </label>
+      </div>
+    </ng-template>
+  }
+
+  <!--
+    LA DEVOLUCION, CAMPO POR CAMPO, Y EN UN CAJON LATERAL.
+
+    ERA UN DIALOGO CON UN PARRAFO. Todo lo que hubiera que decir sobre treinta campos cabía en «qué
+    hay que corregir», y a la organización le llegaba un aviso suelto: no se sabía a qué campo se
+    refería cada frase, ni se podía marcar un punto como resuelto, ni contar cuántos quedaban.
+
+    Y VA EN EL CAJON PORQUE ES TRABAJO DE FONDO: recorrer la ficha señalando campos es leer y
+    escribir a la vez, y un diálogo superpuesto tapa la lista sobre la que se está decidiendo.
+  -->
+  @if (decidiendo(); as m) {
+    <app-panel-lateral
+      contexto="Ecosistema musical · Revisión de un mercado"
+      [titulo]="m.nombre"
+      idDelTitulo="decision-mercado-titulo"
+      (cerrar)="cerrarLaDecision()">
+      <ng-container bajo-titulo>
+        <span class="text-cuerpo text-prosa">{{ m.organizacionNombre }} lo envió a revisión</span>
+      </ng-container>
+
+      @if (cargandoRevision()) {
+        <app-estado-de-lista tipo="cargando" titulo="Abriendo la ficha…" />
+      } @else {
+        <p class="text-cuerpo leading-relaxed text-prosa">
+          Publicarlo lo deja visible en el ecosistema. Si algo falta,
+          <b>señala en qué campos</b> y devuélvelo: su organización verá cada nota al lado del campo
+          que la motivó y podrá ir marcándolas.
+        </p>
+
+        @if (errorDeLaDecision()) {
+          <p class="mt-3 text-cuerpo font-semibold text-amber-800" role="alert">{{ errorDeLaDecision() }}</p>
+        }
+
+        <label class="mt-5 block">
+          <span class="campo__rotulo">Lo que no cabe en ningún campo <span class="font-normal normal-case tracking-normal text-slate-400">(opcional)</span></span>
+          <!-- LA AYUDA NO VA EN EL `placeholder`: desaparece al empezar a escribir, que es justo cuando hace falta. Va debajo del campo y ligada con `aria-describedby`. -->
+          <textarea rows="2" class="campo__control" data-motivo-de-los-ajustes aria-describedby="ayuda-motivo-de-los-ajustes"
+            [ngModel]="motivoDeLosAjustes()" (ngModelChange)="motivoDeLosAjustes.set($event)"></textarea>
+          <small id="ayuda-motivo-de-los-ajustes" class="campo__ayuda">Una orientación general sobre el registro, además de las notas por campo.</small>
+        </label>
+
+        @for (seccion of SECCIONES_DE_LA_FICHA; track seccion.id) {
+          <section class="mt-8 space-y-4">
+            <h3 class="border-t border-filete pt-4 font-alternate text-dato font-bold uppercase tracking-[0.18em] text-seccion">{{ seccion.titulo }}</h3>
+            @for (campo of seccion.campos; track campo.id) {
+              <div class="flex flex-col">
+                <p class="text-lectura font-semibold text-valor">{{ valorDelCampo(campo) || 'Sin registrar' }}</p>
+                <p class="mt-0.5 text-dato text-rotulo">{{ campo.etiqueta }}</p>
+                <!--
+                  EL VALOR SE LEE ARRIBA Y LA NOTA SE ESCRIBE DEBAJO, en el mismo sitio: pedir un
+                  cambio sin ver lo que dice el campo obliga a recordarlo de otra pantalla.
+                -->
+                <textarea rows="2" class="campo__control mt-2" [attr.data-nota-de]="campo.id"
+                  [ngModel]="notaDelCampo(campo.id)" (ngModelChange)="escribirNota(campo.id, $event)"
+                  [attr.aria-label]="'Qué hay que corregir en ' + campo.etiqueta"
+                  placeholder="Déjalo vacío si este campo está bien."></textarea>
+              </div>
+            }
+          </section>
+        }
+
+        <div class="dialogo__acciones dialogo__acciones--repartidas mt-8">
+          <app-boton importancia="secundaria" (accion)="cerrarLaDecision()">Cancelar</app-boton>
+          <span class="flex flex-wrap items-center gap-2">
+            <!--
+              GUARDAR EL BORRADOR ES PARTE DEL TRABAJO: revisar treinta campos no se hace de una
+              sentada, y solo lo ve quien lo escribe hasta que lo envía.
+            -->
+            <app-boton importancia="terciaria" [ocupado]="guardando()" (accion)="guardarElBorradorDeLaRevision()" data-guardar-borrador-revision>Guardar borrador</app-boton>
+            <app-boton importancia="secundaria" [ocupado]="guardando()" [deshabilitado]="camposSenalados() === 0" (accion)="enviarLaRevision()" data-pedir-ajustes>
+              {{ camposSenalados() === 0 ? 'Devolver con cambios' : 'Devolver con ' + camposSenalados() + (camposSenalados() === 1 ? ' cambio' : ' cambios') }}
+            </app-boton>
+            <app-boton importancia="principal" [ocupado]="guardando()" (accion)="decidir('publicar')" data-publicar-mercado>Publicar</app-boton>
+          </span>
+        </div>
+      }
+    </app-panel-lateral>
+  }
+
+  @if (viendoEdiciones(); as m) {
+    <!--
+      EL CAJON LATERAL Y NO UN DIALOGO: el trabajo de fondo ocurre en el panel donde está la lista.
+      Ver una edición tras otra es pasar de una a otra, y un diálogo obliga a cerrar para recordar
+      sobre qué mercado se estaba.
+    -->
+    <app-panel-lateral titulo="{{ m.nombre }}" contexto="Ediciones del mercado" (cerrar)="cerrarLasEdiciones()">
+      @if (errorDeLaEdicion()) {
+        <p class="text-cuerpo font-semibold text-amber-800" role="alert">{{ errorDeLaEdicion() }}</p>
+      }
+
+      @if (cargandoEdiciones()) {
+        <app-estado-de-lista tipo="cargando" titulo="Consultando sus ediciones…" />
+      } @else if (!formularioDeEdicion()) {
+        @if (ediciones().length === 0) {
+          <!--
+            EL MISMO VACIO QUE EL RESTO DEL PROYECTO. Era un párrafo suelto con el botón encima, la
+            única sublista de la consola que se había quedado fuera del barrido de la v161: el alta
+            va DENTRO del vacío, que es donde la persona está mirando cuando no hay nada.
+          -->
+          <app-estado-de-lista titulo="Todavía no hay ediciones de este mercado"
+            detalle="Cada edición es una de sus realizaciones, con su año. Las registra el Programa desde aquí, o su organización desde el espacio externo.">
+            <app-boton importancia="principal" tamano="menudo" (accion)="nuevaEdicion()" data-nueva-edicion>Nueva edición</app-boton>
+          </app-estado-de-lista>
+        } @else {
+          <div class="mb-4">
+            <app-boton importancia="principal" (accion)="nuevaEdicion()" data-nueva-edicion>Nueva edición</app-boton>
+          </div>
+          <ul class="divide-y divide-slate-200 border-y border-slate-200">
+            @for (edicion of ediciones(); track edicion.id) {
+              <li class="flex flex-wrap items-start justify-between gap-3 py-3">
+                <div class="min-w-0">
+                  <p class="text-cuerpo font-bold text-slate-900">
+                    {{ edicion.anio }}@if (edicion.nombre) { · {{ edicion.nombre }} }
+                  </p>
+                  <!--
+                    LOS DOS ESTADOS, JUNTOS Y DISTINGUIDOS. Uno dice qué pasó con el acontecimiento
+                    y el otro si se enseña: un mercado cancelado que sigue publicado es información
+                    legítima, y con un solo rótulo habría que elegir cuál de las dos se dice.
+                  -->
+                  <p class="text-dato text-prosa">
+                    {{ rotuloDeEstadoDeEdicion(edicion.estado) }} · {{ rotuloDeVisibilidad(edicion.estadoVisibilidad) }}
+                  </p>
+                  @if (edicion.fechaInicio) {
+                    <p class="text-dato text-prosa tabular-nums">
+                      {{ edicion.fechaInicio | date: 'd MMM y':'':'es-CO' }}@if (edicion.fechaFin && edicion.fechaFin !== edicion.fechaInicio) { — {{ edicion.fechaFin | date: 'd MMM y':'':'es-CO' }} }
+                    </p>
+                  }
+                </div>
+                <!--
+                  UN SOLO MENU POR FILA, como en la lista de mercados. Aquí había un botón suelto
+                  «Editar» y nada más, así que una edición se creaba y se quedaba en borrador para
+                  siempre: no había forma de publicarla, retirarla ni archivarla.
+                -->
+                <app-menu-de-acciones
+                  [acciones]="accionesDeLaEdicion(edicion)"
+                  [descripcion]="edicion.anio + (edicion.nombre ? ' · ' + edicion.nombre : '')"
+                  (elegida)="ejecutarAccionDeEdicion(edicion, $event)"></app-menu-de-acciones>
+              </li>
+            }
+          </ul>
+        }
+      } @else if (formularioDeEdicion(); as e) {
+        <div class="grid gap-4">
+          <div class="grid gap-4 sm:grid-cols-2">
+            <label class="block">
+              <span class="campo__rotulo">Año</span>
+              <input type="number" class="campo__control" data-anio-de-la-edicion
+                [ngModel]="e.anio" (ngModelChange)="campoDeLaEdicion('anio', +$event)" />
+            </label>
+            <label class="block">
+              <span class="campo__rotulo">Número de edición</span>
+              <input type="number" class="campo__control"
+                [ngModel]="e.numeroEdicion" (ngModelChange)="campoDeLaEdicion('numeroEdicion', $event)" />
+            </label>
+          </div>
+
+          <label class="block">
+            <span class="campo__rotulo">Nombre de la edición</span>
+            <input type="text" maxlength="240" class="campo__control"
+              [ngModel]="e.nombre" (ngModelChange)="campoDeLaEdicion('nombre', $event)" />
+          </label>
+
+          <label class="block">
+            <span class="campo__rotulo">Descripción</span>
+            <textarea rows="3" class="campo__control"
+              [ngModel]="e.descripcion" (ngModelChange)="campoDeLaEdicion('descripcion', $event)"></textarea>
+          </label>
+
+          <div class="grid gap-4 sm:grid-cols-2">
+            <label class="block">
+              <span class="campo__rotulo">Empieza</span>
+              <input type="date" class="campo__control"
+                [ngModel]="e.fechaInicio" (ngModelChange)="campoDeLaEdicion('fechaInicio', $event)" />
+            </label>
+            <label class="block">
+              <span class="campo__rotulo">Termina</span>
+              <input type="date" class="campo__control"
+                [ngModel]="e.fechaFin" (ngModelChange)="campoDeLaEdicion('fechaFin', $event)" />
+            </label>
+          </div>
+
+          <label class="block">
+            <span class="campo__rotulo">Lugar específico</span>
+            <input type="text" maxlength="300" class="campo__control"
+              [ngModel]="e.lugarEspecifico" (ngModelChange)="campoDeLaEdicion('lugarEspecifico', $event)" />
+          </label>
+
+          <div class="grid gap-4 sm:grid-cols-2">
+            <label class="block">
+              <span class="campo__rotulo">Qué pasó con ella</span>
+              <select class="campo__control" data-estado-de-la-edicion
+                [ngModel]="e.estado" (ngModelChange)="campoDeLaEdicion('estado', $event)">
+                <option value="en_preparacion">En preparación</option>
+                <option value="programada">Programada</option>
+                <option value="realizada">Realizada</option>
+                <option value="cancelada">Cancelada</option>
+              </select>
+            </label>
+            <label class="block">
+              <span class="campo__rotulo">Si se enseña</span>
+              <select class="campo__control" data-visibilidad-de-la-edicion
+                [ngModel]="e.estadoVisibilidad" (ngModelChange)="campoDeLaEdicion('estadoVisibilidad', $event)">
+                <option value="borrador">Borrador</option>
+                <option value="publicado">Publicada</option>
+                <option value="archivado">Archivada</option>
+              </select>
+            </label>
+          </div>
+
+          <div class="flex flex-wrap items-center justify-end gap-2">
+            <app-boton importancia="secundaria" (accion)="formularioDeEdicion.set(null)">Cancelar</app-boton>
+            <app-boton importancia="principal" [deshabilitado]="guardandoEdicion()" (accion)="guardarLaEdicion()" data-guardar-edicion>
+              {{ guardandoEdicion() ? 'Guardando…' : (e.id === null ? 'Crear edición' : 'Guardar cambios') }}
+            </app-boton>
+          </div>
+        </div>
+      }
+    </app-panel-lateral>
+  }
+
+  @if (historialAbierto(); as elegido) {
+    <app-historial-de-registro
+      [titulo]="elegido.nombre"
+      [registro]="{ tabla: tablaDeAuditoria, id: elegido.id }"
+      (cerrar)="historialAbierto.set(null)"></app-historial-de-registro>
+  }
+
+  <!--
+    RETIRAR DEL ECOSISTEMA, CON MOTIVO Y EN UN DIALOGO DE VERDAD. Es la única acción de esta
+    pantalla que la organización no puede deshacer por su cuenta, así que el motivo es obligatorio
+    y queda en la bitácora y en el aviso que ella recibe. No borra: archiva.
+  -->
+  @if (retiroPedido(); as mercado) {
+    <app-confirmacion
+      titulo="Eliminar del ecosistema"
+      [detalle]="'«' + mercado.nombre + '» dejará de verse en el sitio público. No se borra: conserva su historial y su auditoría, y su organización recibirá el aviso con este motivo.'"
+      accion="Eliminar del ecosistema"
+      pideMotivo
+      rotuloDelMotivo="Por qué se elimina"
+      ayudaDelMotivo="Queda en el historial del mercado, con tu nombre y la fecha."
+      [error]="errorDelRetiro() || ''"
+      [ocupado]="retirando()"
+      identificador="retirar-mercado"
+      (confirmar)="retirarDelEcosistema($event)"
+      (cancelar)="cancelarElRetiro()" />
+  }
+
+  <!--
+    CONFIRMAR EL BORRADO DE UNA EDICION. Es la única acción del cajón que no se deshace, y solo se
+    ofrece sobre lo que nunca llegó al portal: lo publicado se archiva.
+  -->
+  @if (edicionPorEliminar(); as edicion) {
+    <app-confirmacion
+      encima
+      titulo="Eliminar la edición"
+      [detalle]="'«' + edicion.anio + (edicion.nombre ? ' · ' + edicion.nombre : '') + '» se borra y no se puede recuperar. Solo se ofrece porque nunca estuvo en el portal: lo que se publicó alguna vez se archiva.'"
+      accion="Eliminar la edición"
+      [error]="errorDeLaEdicion() || ''"
+      [ocupado]="guardandoEdicion()"
+      identificador="eliminar-edicion"
+      (confirmar)="eliminarLaEdicion()"
+      (cancelar)="cancelarLaEliminacionDeLaEdicion()" />
+  }
+
+  @if (previsualizando(); as mercado) {
+    <!-- COMO SE VERA EN EL DIRECTORIO, antes de publicarlo: el listado público real, con esta
+         tarjeta insertada en su sitio. Ver `PrevisualizacionEnListadoService`. -->
+    <app-dialogo-de-previsualizacion
+      modulo="mercados"
+      [id]="mercado.id"
+      [nombre]="mercado.nombre"
+      [estadoEtiqueta]="rotuloDeEstado(mercado.estadoRegistro)"
+      [yaEsPublico]="mercado.estadoRegistro === 'publicado'"
+      (cerrar)="previsualizando.set(null)" />
+  }
+</section>

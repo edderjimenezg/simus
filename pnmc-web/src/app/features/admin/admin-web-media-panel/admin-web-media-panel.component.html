@@ -1,0 +1,217 @@
+@if (!enabled()) {
+  <div class="rounded-2xl border border-slate-200 bg-white p-8 text-center text-sm text-slate-500">
+    Su rol no permite administrar las imágenes del sitio.
+  </div>
+} @else {
+  <div class="space-y-4">
+
+    <!-- Encabezado -->
+    <div class="flex flex-wrap items-end justify-between gap-3">
+      <div>
+        <h2 class="text-sm font-black uppercase tracking-wider text-slate-800">Imágenes del sitio</h2>
+        <p class="mt-1 max-w-2xl text-dato leading-relaxed text-slate-500">
+          Cada tarjeta es un sitio del sitio donde va una imagen. Subir la deja guardada;
+          <b>desplegar</b> es lo que la saca al sitio público. Retirar no borra nada: el sitio
+          vuelve a la imagen original y su archivo se queda aquí.
+        </p>
+      </div>
+      @if (topes(); as limites) {
+        <p data-testid="topes" class="text-dato text-slate-400">
+          Máximo {{ peso(limites.maxBytes) }} · {{ limites.allowedTypes.join(' · ') }}
+        </p>
+      }
+    </div>
+
+    <!-- Aviso -->
+    @if (aviso(); as a) {
+      <div
+        data-testid="aviso"
+        class="flex items-start gap-2 rounded-xl border px-3 py-2.5"
+        [ngClass]="a.tipo === 'ok' ? 'border-emerald-200 bg-emerald-50 text-emerald-800'
+                 : a.tipo === 'info' ? 'border-blue-200 bg-blue-50 text-blue-800'
+                 : 'border-rose-200 bg-rose-50 text-rose-800'"
+      >
+        @if (a.tipo === 'ok') {
+          <svg lucideCheckCircle2 class="mt-0.5 h-4 w-4 shrink-0"></svg>
+        } @else {
+          <svg lucideAlertCircle class="mt-0.5 h-4 w-4 shrink-0"></svg>
+        }
+        <p class="text-xs font-bold leading-relaxed">{{ a.texto }}</p>
+      </div>
+    }
+
+    <!-- Grupos -->
+    <!-- ERAN PILDORAS. Los grupos son posiciones de un mismo selector, como en toda la consola. -->
+    <div data-testid="grupos-de-imagen">
+      <app-selector-segmentado
+        [opciones]="gruposComoOpciones"
+        [elegida]="grupoElegido()"
+        etiquetaDelGrupo="Grupo de imágenes del sitio"
+        (elegir)="elegirGrupo($event)" />
+    </div>
+
+    @if (cargando()) {
+      <p class="py-10 text-center text-xs text-slate-400">Cargando…</p>
+    } @else {
+      <div data-testid="cuadricula" class="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
+        @for (imagen of imagenes(); track imagen.key) {
+          <article
+            class="flex flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm"
+            [attr.data-testid]="'tarjeta-' + imagen.key"
+          >
+            <!--
+              LAS DOS MITADES, UNA AL LADO DE LA OTRA cuando difieren. La
+              comparación ES la decisión: ponerlas en pantallas distintas obliga
+              a recordar cómo era la otra.
+            -->
+            <div class="grid" [ngClass]="hayBorradorSinPublicar(imagen) ? 'grid-cols-2' : 'grid-cols-1'">
+              <div class="relative aspect-video bg-slate-100">
+                @if (imagen.published) {
+                  <img
+                    [src]="urlDeVista(imagen, 'publicado')"
+                    [alt]="imagen.alt"
+                    class="h-full w-full"
+                    [ngClass]="imagen.use === 'logotipo' ? 'object-contain p-3' : 'object-cover'"
+                  />
+                } @else {
+                  <div class="flex h-full w-full items-center justify-center px-3 text-center">
+                    <p class="text-dato font-bold uppercase tracking-wider text-slate-400">
+                      El sitio muestra<br />su imagen original
+                    </p>
+                  </div>
+                }
+                <!-- El estado se dice con el indicador de la consola, no con una cápsula. -->
+                <span class="absolute left-2 top-2 rounded-md bg-white/90 px-1.5 py-0.5">
+                  <app-indicador-de-estado etiqueta="En el sitio" tono="logrado" [conTexto]="true" />
+                </span>
+              </div>
+
+              @if (hayBorradorSinPublicar(imagen)) {
+                <div class="relative aspect-video border-l border-slate-200 bg-slate-50">
+                  <img
+                    [src]="urlDeVista(imagen, 'borrador')"
+                    [alt]="'Borrador de ' + imagen.label"
+                    class="h-full w-full"
+                    [ngClass]="imagen.use === 'logotipo' ? 'object-contain p-3' : 'object-cover'"
+                  />
+                  <span class="absolute left-2 top-2 rounded-md bg-white/90 px-1.5 py-0.5">
+                    <app-indicador-de-estado etiqueta="Sin publicar" tono="requiere_accion" [conTexto]="true" />
+                  </span>
+                </div>
+              }
+            </div>
+
+            <div class="flex flex-1 flex-col gap-3 p-3.5">
+              <div>
+                <div class="flex items-start justify-between gap-2">
+                  <h3 class="text-xs font-black leading-snug text-slate-800">{{ imagen.label }}</h3>
+                  <span class="shrink-0" [attr.data-testid]="'estado-' + imagen.key">
+                    <app-indicador-de-estado
+                      [etiqueta]="estado(imagen.state)"
+                      [tono]="tonoDelEstado(imagen.state)"
+                      [matiz]="matizDelEstado(imagen.state)"
+                      [conTexto]="true"></app-indicador-de-estado>
+                  </span>
+                </div>
+                <p class="mt-1 text-dato text-slate-400">
+                  @if (imagen.published) {
+                    {{ imagen.published.width }}×{{ imagen.published.height }} ·
+                    {{ peso(imagen.published.bytes) }} ·
+                    {{ imagen.published.mime.replace('image/', '') }}
+                  } @else if (imagen.suggestedWidth) {
+                    Recomendado {{ imagen.suggestedWidth }}×{{ imagen.suggestedHeight }}
+                  }
+                </p>
+              </div>
+
+              @if (!imagen.editable) {
+                <!--
+                  MARCA INSTITUCIONAL AJENA. No se ofrece subir, y no es solo que
+                  este botón no se pinte: la base tiene un CHECK que impide
+                  guardar bytes en esta fila, así que tampoco entra por otra vía.
+                -->
+                <p
+                  [attr.data-testid]="'no-editable-' + imagen.key"
+                  class="mt-auto rounded-lg bg-slate-50 px-2.5 py-2 text-dato leading-relaxed text-slate-500"
+                >
+                  Marca institucional de otra entidad. No se reemplaza desde aquí.
+                </p>
+              } @else {
+                <div class="mt-auto flex flex-wrap gap-1.5">
+                  <label
+                    class="inline-flex cursor-pointer items-center gap-1.5 rounded-lg bg-morado px-2.5 py-1.5 text-dato font-bold text-white transition-colors hover:bg-[#3d1c66]"
+                    [class.pointer-events-none]="claveOcupada() === imagen.key"
+                    [class.opacity-50]="claveOcupada() === imagen.key"
+                  >
+                    <svg lucideUpload [size]="13"></svg>
+                    {{ imagen.draft ? 'Cambiar' : 'Subir imagen' }}
+                    <input
+                      type="file"
+                      class="hidden"
+                      [accept]="tiposAceptados()"
+                      [attr.data-testid]="'subir-' + imagen.key"
+                      (change)="subir(imagen, $event)"
+                    />
+                  </label>
+
+                  @if (imagen.published) {
+                    <a
+                      [href]="urlDeVista(imagen, 'publicado', false)"
+                      target="_blank"
+                      rel="noopener"
+                      class="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 px-2.5 py-1.5 text-dato font-bold text-slate-600 transition-colors hover:bg-slate-50"
+                      [attr.data-testid]="'ver-' + imagen.key"
+                    >
+                      <svg lucideExternalLink [size]="13"></svg>
+                      Ver
+                    </a>
+                  }
+
+                  <!-- LOS BOTONES DE LA CONSOLA, con el peso de cada acción: desplegar confirma, retirar destruye lo visible. -->
+                  @if (puedePublicar() && (hayBorradorSinPublicar(imagen) || imagen.state === 'retirado')) {
+                    <app-boton importancia="confirmar" tamano="menudo" [identificador]="'desplegar-' + imagen.key"
+                      [deshabilitado]="claveOcupada() === imagen.key" (accion)="desplegar(imagen)">Desplegar el borrador</app-boton>
+                  }
+
+                  @if (puedePublicar() && imagen.state === 'publicado') {
+                    <app-boton importancia="destructiva" tamano="menudo" [identificador]="'retirar-' + imagen.key"
+                      [deshabilitado]="claveOcupada() === imagen.key" (accion)="retirar(imagen)">Retirar del sitio</app-boton>
+                  }
+
+                  @if (imagen.draft) {
+                    <app-boton importancia="secundaria" tamano="menudo" [identificador]="'historial-' + imagen.key"
+                      (accion)="verHistorial(imagen)">Historial</app-boton>
+                  }
+                </div>
+              }
+
+              @if (historialDe() === imagen.key) {
+                <div data-testid="lista-historial" class="space-y-1 rounded-xl border border-slate-200 bg-slate-50/60 p-2.5">
+                  @for (entrada of historial(); track entrada.id) {
+                    <div class="flex items-center justify-between gap-2 text-dato">
+                      <span class="text-slate-500">
+                        {{ entrada.action }} · {{ entrada.at | date:'d MMM y, HH:mm' }} ·
+                        {{ peso(entrada.bytes) }}
+                      </span>
+                    </div>
+                  } @empty {
+                    <app-estado-de-lista denso titulo="Todavía no hay cambios registrados"
+                      detalle="Cada vez que se reemplace esta imagen quedará aquí la versión anterior, con su fecha y su peso." />
+                  }
+                  <p class="pt-1 text-dato leading-relaxed text-slate-400">
+                    Es el registro de lo que pasó. Los archivos anteriores no se guardan: al
+                    reemplazar una imagen, la anterior desaparece.
+                  </p>
+                </div>
+              }
+            </div>
+          </article>
+        } @empty {
+          <p class="col-span-full py-10 text-center text-xs text-slate-400">
+            Este grupo no tiene ranuras de imagen.
+          </p>
+        }
+      </div>
+    }
+  </div>
+}

@@ -1,0 +1,111 @@
+<!--
+  DOS ENVOLTORIOS, EL MISMO CONTENIDO. Dentro de la bandeja vive en la columna del trámite —igual
+  que la ficha de Festival en revisión— y fuera sigue siendo el diálogo de siempre. Lo único que
+  cambia es el marco: ver `comoPanel` en el componente.
+-->
+@if (comoPanel) {
+  <div class="w-full">
+    <ng-container [ngTemplateOutlet]="contenido"></ng-container>
+  </div>
+} @else {
+  <!-- EL VELO Y LA HOJA SON LOS DEL PROYECTO, no dos clases propias: tenía su gris y su radio. -->
+  <div class="dialogo-velo dialogo-velo--con-desplazamiento">
+    <section role="dialog" aria-modal="true" aria-label="Revisión de la Edición" appDialogo (cerrar)="cerrar.emit()"
+             class="dialogo dialogo--hoja dialogo--ancho">
+      <header class="mb-5 flex items-start justify-between gap-4 border-b border-slate-200 pb-4">
+        <div>
+          <p class="text-dato font-bold uppercase tracking-widest text-morado">Edición temporal</p>
+          <h2 class="mt-1 font-alternate text-titulo font-bold text-slate-800">{{ nombre }}</h2>
+        </div>
+        <button type="button" (click)="cerrar.emit()" aria-label="Cerrar"
+                class="flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 hover:bg-slate-100 hover:text-slate-700">
+          <svg lucideX [size]="16" aria-hidden="true"></svg>
+        </button>
+      </header>
+      <ng-container [ngTemplateOutlet]="contenido"></ng-container>
+    </section>
+  </div>
+}
+
+<ng-template #contenido>
+  @if (error()) {
+    <p role="alert" class="mb-4 border-l-2 border-red-600 pl-3 text-cuerpo text-red-700">{{ error() }}</p>
+  }
+
+  <p class="seccion-revision">Lo que se le devuelve a la organización</p>
+  <p class="text-cuerpo leading-relaxed text-slate-600">
+    Señala qué hay que corregir de esta Edición. La organización recibe cada instrucción junto al
+    campo al que se refiere.
+  </p>
+
+  <!-- ── Las observaciones por campo ─────────────────────────────────────── -->
+  <div class="mt-5">
+    <div class="flex flex-wrap items-baseline justify-between gap-3">
+      <p class="text-cuerpo font-bold text-slate-700">
+        @if (cuantasEscritas() === 0) { Ningún campo señalado todavía }
+        @else if (cuantasEscritas() === 1) { 1 campo señalado }
+        @else { {{ cuantasEscritas() }} campos señalados }
+      </p>
+      <app-boton importancia="terciaria" tamano="menudo" (accion)="agregar()">Señalar un campo</app-boton>
+    </div>
+
+    <ul class="mt-3 space-y-4">
+      @for (nota of notas; track $index) {
+        <!-- Filete al costado y no recuadro: dentro del panel un recuadro sería una tarjeta más. -->
+        <li class="border-l-2 border-slate-200 pl-4">
+          <div class="flex flex-wrap items-end justify-between gap-3">
+            <label class="min-w-0 flex-1">
+              <span class="mb-1 block text-dato font-bold text-slate-600">Campo de la Edición</span>
+              <!--
+                LISTA Y NO TEXTO LIBRE. Antes eran dos campos abiertos —identificador y rótulo— que
+                había que recordar y escribir; ahora el rótulo y la sección salen de lo elegido.
+              -->
+              <select [ngModel]="nota.campoId" (ngModelChange)="elegirCampo(nota, $event)"
+                      [attr.aria-label]="'Campo de la Edición para la observación ' + ($index + 1)"
+                      class="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-cuerpo text-slate-800 focus:border-morado focus:outline-none">
+                <option value="">Elige el campo…</option>
+                @for (seccion of secciones; track seccion.id) {
+                  <optgroup [label]="seccion.etiqueta">
+                    @for (campo of seccion.campos; track campo.campoId) {
+                      @if (estaDisponible(nota, campo.campoId) || nota.campoId === campo.campoId) {
+                        <option [value]="campo.campoId">{{ campo.campoEtiqueta }}</option>
+                      }
+                    }
+                  </optgroup>
+                }
+              </select>
+            </label>
+            <app-boton importancia="terciaria" tamano="menudo"
+                       [etiqueta]="'Quitar la observación ' + ($index + 1)"
+                       (accion)="quitar($index)">Quitar</app-boton>
+          </div>
+
+          <label class="mt-3 block">
+            <span class="mb-1 block text-dato font-bold text-slate-600">Qué hay que corregir</span>
+            <textarea rows="2" [(ngModel)]="nota.nota"
+                      [attr.aria-label]="'Instrucción para la observación ' + ($index + 1)"
+                      class="w-full rounded-lg border border-slate-300 px-3 py-2 text-cuerpo leading-relaxed text-slate-800 focus:border-morado focus:outline-none"></textarea>
+          </label>
+        </li>
+      } @empty {
+        <li class="text-cuerpo text-slate-500">
+          Sin campos señalados, la Edición queda tal como la registró la organización.
+        </li>
+      }
+    </ul>
+  </div>
+
+  <!-- ── La observación general ──────────────────────────────────────────── -->
+  <label class="mt-6 block">
+    <span class="mb-1 block text-dato font-bold text-slate-600">
+      Observación general <span class="font-normal text-slate-500">(lo que no cabe en ningún campo)</span>
+    </span>
+    <textarea rows="2" [(ngModel)]="general"
+              class="w-full rounded-lg border border-slate-300 px-3 py-2 text-cuerpo leading-relaxed text-slate-800 focus:border-morado focus:outline-none"></textarea>
+  </label>
+
+  <div class="mt-6 flex flex-wrap items-center justify-end gap-2 border-t border-slate-200 pt-4">
+    <app-boton importancia="secundaria" [deshabilitado]="guardando()" (accion)="guardar(false)">Guardar borrador</app-boton>
+    <app-boton importancia="principal" [deshabilitado]="guardando()" (accion)="guardar(true)">Enviar ajustes</app-boton>
+  </div>
+</ng-template>

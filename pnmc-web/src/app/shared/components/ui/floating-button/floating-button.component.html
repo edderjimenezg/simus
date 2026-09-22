@@ -1,0 +1,14 @@
+@if (shouldShow()) {
+  <button type="button"
+    class="fixed bottom-6 right-6 z-[60] flex items-center bg-[#00DA5E] text-[#291242] p-2 rounded-full shadow-2xl hover:scale-105 active:scale-95 transition-all duration-500 border border-white/20 group max-w-[54px] hover:max-w-[280px] overflow-hidden whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#291242] focus-visible:ring-offset-2 cursor-pointer"
+    (click)="navigateToStrategy()"
+    aria-label="Abrir estrategia Celebra la música"
+  >
+    <div class="w-10 h-10 bg-[#291242] text-[#00DA5E] rounded-full flex items-center justify-center shrink-0">
+      <svg lucidePartyPopper [size]="18"></svg>
+    </div>
+    <span class="font-alternate text-[0.65rem] font-bold uppercase tracking-widest px-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+      Celebra la música
+    </span>
+  </button>
+}

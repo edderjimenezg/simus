@@ -1,0 +1,133 @@
+<div data-testid="boletin-panel" class="space-y-5">
+  <!--
+    SIN ENCABEZADO PROPIO Y SIN EL NOMBRE DE LA TABLA EN PANTALLA.
+
+    Aquí había un segundo título —«Boletín · lista de correos»— con su descripción, debajo del que
+    ya pone la consola. Y dentro de esa descripción, en tipografía de código, «Tabla:
+    BoletinSuscripciones»: el nombre de una tabla de la base de datos, a la vista de quien gestiona
+    el boletín. Eso es una nota de desarrollo, y las notas de desarrollo no van en la interfaz.
+  -->
+  <h2 id="boletin-consola-titulo" class="sr-only">Boletín · lista de correos</h2>
+
+  <app-barra-de-lista>
+    <app-buscador-de-lista identificador="boletin-panel-busqueda" etiqueta="Buscar por correo"
+      marcador="Buscar por correo…" [valor]="busqueda()" (cambiar)="buscar($event)" />
+    <app-filtro-desplegable identificador="boletin-panel-estado" etiqueta="Filtrar suscripciones por estado"
+      [opciones]="FILTRO_DE_ESTADO" [elegida]="estado()" (cambiar)="cambiarEstado($event)" />
+    <!--
+      LAS TRES CIFRAS ERAN TRES TARJETAS, y una de ellas se deduce de las otras dos: con 4 activas
+      y 1 baja, «Registros en la lista: 5» no añade un dato, añade una suma. Ahora es una línea.
+    -->
+    <p class="barra-de-lista__resumen">
+      <b data-testid="boletin-panel-activas">{{ activas() }}</b>
+      {{ activas() === 1 ? 'suscripción activa' : 'suscripciones activas' }}
+      <!--
+        LA CIFRA DE BAJAS SE PINTA SIEMPRE, y con el filtro en «activas» dice «—». Con ese filtro
+        `total` ya son solo las activas y la resta daría cero: «0 bajas» sería una afirmación falsa.
+      -->
+      <span>· <b data-testid="boletin-panel-bajas">{{ bajas() === null ? '—' : bajas() }}</b> {{ bajas() === 1 ? 'baja' : 'bajas' }}</span>
+      <span class="sr-only" data-testid="boletin-panel-total">{{ total() }}</span>
+    </p>
+    <ng-container extremo>
+      <app-boton importancia="terciaria" etiqueta="Actualizar la lista" identificador="boletin-panel-refrescar" [ocupado]="cargando()" (accion)="consultar()">
+        <svg lucideRefreshCw [size]="15" aria-hidden="true"></svg>
+      </app-boton>
+      <!--
+        ESTE BOTON ES EL PUENTE hacia el mailing o el CRM: una lista descargable entra en
+        cualquier herramienta de envios sin guardar aqui las credenciales de un tercero.
+      -->
+      <app-boton importancia="principal" identificador="boletin-panel-csv" (accion)="descargarCsv()">Descargar CSV</app-boton>
+    </ng-container>
+  </app-barra-de-lista>
+
+  @if (error()) {
+    <p data-testid="boletin-panel-error" role="alert" class="mb-4 text-cuerpo font-semibold text-red-700">{{ error() }}</p>
+  }
+  @if (aviso() && !error()) {
+    <p data-testid="boletin-panel-aviso" role="status" class="mb-4 text-cuerpo font-semibold text-verde-texto">{{ aviso() }}</p>
+  }
+
+  @if (cargando() && filas().length === 0) {
+    <app-estado-de-lista tipo="cargando" titulo="Consultando la lista…" />
+  } @else if (filas().length === 0) {
+    <app-lista-sin-filas entidad="correos suscritos" [hayFiltros]="hayFiltrosPuestos()"
+      comoLlegan="Las suscripciones entran desde la portada y desde las noticias del portal público; ninguna se da de alta desde aquí."
+      (limpiar)="limpiarFiltros()" />
+    <span class="sr-only" data-testid="boletin-panel-vacio">Todavía no hay correos registrados en el boletín.</span>
+  } @else {
+    <div class="overflow-x-auto">
+      <table class="tabla-administrativa tabla-del-boletin">
+        <colgroup>
+          <col class="tabla-del-boletin__correo" />
+          <col class="tabla-del-boletin__estado" />
+          <col class="tabla-del-boletin__origen" />
+          <col class="tabla-del-boletin__alta" />
+          <col class="tabla-del-boletin__baja" />
+          <col class="tabla-del-boletin__acciones" />
+        </colgroup>
+        <thead class="tabla-administrativa__cabecera">
+          <!-- EL ORDEN LO RESUELVE EL SERVIDOR sobre la lista entera; la página es solo la que se pinta. -->
+          <tr><app-cabecera-de-tabla [columnas]="COLUMNAS" [orden]="orden" (ordenarPor)="ordenarPor($event)" /></tr>
+        </thead>
+        <tbody>
+          @for (fila of filasVisibles(); track fila.id) {
+            <tr data-testid="boletin-panel-fila" class="tabla-administrativa__fila">
+              <td><span class="tabla-administrativa__principal">{{ fila.correo }}</span></td>
+              <td>
+                <!-- Era una cápsula de color: el proyecto dice los estados con icono y texto. -->
+                <app-indicador-de-estado
+                  [etiqueta]="fila.estado === 'activa' ? 'Activa' : 'Baja'"
+                  [tono]="tonoDelEstado(fila.estado === 'activa' ? 'activo' : 'inactivo')"
+                  [matiz]="matizDelEstado(fila.estado === 'activa' ? 'activo' : 'inactivo')"
+                  [conTexto]="true"></app-indicador-de-estado>
+              </td>
+              <!-- «portada», «noticias», «registro»: códigos del servidor, escritos legibles. -->
+              <td class="text-prosa">{{ etiquetaDeEstado(fila.origen) }}</td>
+              <td class="tabular-nums text-rotulo">{{ fecha(fila.fechaAlta) }}</td>
+              <td class="tabular-nums text-rotulo">{{ fecha(fila.fechaBaja) }}</td>
+              <!--
+                UN SOLO CONTROL POR FILA, como en el resto de la consola: aquí «Dar de baja» era un
+                botón suelto que solo aparecía en unas filas, así que la última columna cambiaba de
+                ancho según lo que hubiera en cada una.
+              -->
+              <td class="tabla-administrativa__acciones">
+                <app-menu-de-acciones
+                  [acciones]="accionesDe(fila)"
+                  [descripcion]="fila.correo"
+                  (elegida)="ejecutarAccion(fila, $event)"></app-menu-de-acciones>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+
+      @if (total() > 0) {
+        <div class="tabla-administrativa__pie">
+          <p class="barra-de-lista__resumen" data-testid="boletin-panel-paginacion">
+            Mostrando {{ filas().length }} de {{ total() }}
+          </p>
+          <div class="flex flex-wrap items-center gap-2">
+            <app-boton importancia="secundaria" tamano="menudo" [deshabilitado]="pagina() === 0" (accion)="paginaAnterior()">Anterior</app-boton>
+            <app-boton importancia="secundaria" tamano="menudo" [deshabilitado]="!hayMas()" (accion)="paginaSiguiente()">Siguiente</app-boton>
+          </div>
+        </div>
+      }
+    </div>
+  }
+
+  <!--
+    LA EVIDENCIA DE LA AUTORIZACION NO SE PINTA EN LA TABLA a proposito: es el mismo texto en
+    todas las filas y ocuparia la pantalla sin decir nada nuevo. Viaja en la respuesta y en el
+    respaldo; cuando alguien pregunte por una fila concreta, esta ahi.
+  -->
+
+  @if (bajaPendiente(); as fila) {
+    <app-confirmacion
+      titulo="Dar de baja la suscripción"
+      [detalle]="fila.correo + ' dejará de recibir el boletín. Para volver a recibirlo tendría que suscribirse otra vez desde el portal.'"
+      accion="Dar de baja"
+      identificador="confirmar-baja-de-boletin"
+      (confirmar)="confirmarLaBaja()"
+      (cancelar)="cerrarLaConfirmacion()" />
+  }
+</div>

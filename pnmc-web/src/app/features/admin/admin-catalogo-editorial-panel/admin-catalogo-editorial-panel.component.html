@@ -1,0 +1,1201 @@
+@if (!enabled()) {
+  <div class="rounded-2xl border border-slate-200 bg-white p-8 text-center text-sm text-slate-500">
+    Su rol no permite administrar el Catálogo Editorial.
+  </div>
+} @else {
+  <div class="space-y-6">
+
+    <!--
+      ═══════════════════ EL INDICE DEL ACERVO ═══════════════════
+
+      LO QUE HABIA ERA UNA BANDEJA DE TRABAJO: una caja de búsqueda por título o código y cuatro
+      botones de estado. Para un módulo donde lo que importa es qué falta aprobar, basta. Aquí no:
+      son 171 publicaciones INDEPENDIENTES, y quien las gestiona no pregunta «¿qué está en borrador?»
+      sino «¿qué hay de Banda?», «¿qué publicó el Programa Nacional de Estímulos?». El estado no
+      desaparece —publicar y retirar se siguen decidiendo aquí—: deja de ser el único eje.
+    -->
+    <!--
+      DOS ZONAS, Y SE TIENE QUE VER QUE SON DOS.
+
+      Izquierda: por dónde se entra al acervo —buscar, categorías, facetas—. Derecha: lo que salió
+      y lo que se hace con ello. Se percibían como una sola superficie continua, y el dueño del
+      proyecto lo pidió así: «una separación visual sutil pero clara», «no una división pesada ni
+      dos interfaces independientes».
+
+      Se resuelve con lo que el sistema ya tiene —aire y un filete— y no con una tarjeta ni un
+      fondo de color: un recuadro alrededor del explorador lo convertiría en un objeto aparte, que
+      es justo lo que no se quiere. El filete vertical solo aparece cuando las dos columnas caben
+      de verdad; por debajo, una zona va encima de la otra y el aire basta.
+
+      Y el explorador ADELGAZA de 16 a 15 rem con más aire a su derecha: la superficie que gana la
+      tabla es la que se estaba yendo en un hueco que no separaba nada.
+    -->
+    <div class="explorador-y-resultados">
+
+      <!-- ── Por dónde se entra al acervo ── -->
+      <aside class="explorador-y-resultados__explorador space-y-5" aria-label="Filtros del catálogo">
+        <div>
+          <label for="buscar-acervo" class="font-alternate text-dato font-bold uppercase tracking-[0.18em] text-seccion">Buscar</label>
+          <!--
+            EL BUSCADOR COMPARTIDO, con `ancho` porque aquí ocupa toda la columna del explorador y
+            no una posición de la barra de lista. `espera` en cero: el Catálogo trae todo el acervo
+            de una vez y filtra en memoria, así que no hay petición que amortiguar.
+          -->
+          <div class="mt-1">
+            <app-buscador-de-lista ancho [etiquetaVisible]="true" identificador="buscar-acervo"
+              etiqueta="Buscar en el acervo" marcador="Título, código, autoría…" [espera]="0"
+              [valor]="texto()" (cambiar)="texto.set($event)" />
+          </div>
+          <small class="mt-1 block text-dato text-slate-400">Busca también en la autoría y en las palabras clave.</small>
+        </div>
+
+        <!--
+          LA UBICACION ES UN ARBOL, no una lista. Elegir una sección la filtra Y despliega sus
+          rutas: son el mismo gesto porque son la misma intención —mirar ahí dentro—. Las 22 rutas
+          juntas serían una lista plana que no enseña que «Repertorio > Banda» está DENTRO de
+          «Repertorio».
+        -->
+        <!--
+          SE ENSEÑA SIEMPRE QUE EL ACERVO TENGA MAS DE UNA SECCION, y no cuando el resultado
+          filtrado la tenga: el filtro puesto no puede hacer desaparecer el control con el que se
+          quita. Antes bastaba acotar lo suficiente para que el árbol se fuera de la pantalla.
+        -->
+        @if (hayVariasUbicaciones()) {
+          <div>
+            <h3 class="font-alternate text-dato font-bold uppercase tracking-[0.18em] text-seccion">Ubicación</h3>
+            <ul class="mt-1.5 space-y-0.5">
+              @for (opcion of ubicaciones(); track opcion.valor) {
+                <li>
+                  <!--
+                    LA JERARQUIA SE VE, NO SE DEDUCE. Cada sección lleva el número de ramas que tiene
+                    y un chevrón que dice si está desplegada; cada rama entra sangrada y colgando de
+                    una línea vertical. Sin esas tres señales, sección y ruta se leían como dos listas
+                    del mismo rango y no como dos niveles del mismo árbol.
+                  -->
+                  <!--
+                    DOS GESTOS Y DOS RESULTADOS. Antes la flecha y el nombre eran el mismo botón:
+                    abrir la sección para mirar qué rutas tiene filtraba también por ella, así que
+                    no había forma de asomarse sin acotar el listado. Ahora la flecha SOLO
+                    despliega y el nombre SOLO filtra, cada uno con su propio anuncio.
+
+                    Y fuera el recuento de rutas: la cifra que importa es cuántas publicaciones
+                    hay, y «5 rutas 44» junto al nombre hacía dudar de cuál de las dos era.
+                  -->
+                  <div class="flex items-center gap-0.5">
+                    <button type="button" (click)="alternarSeccionAbierta(opcion.valor)"
+                      [attr.aria-expanded]="seccionAbierta() === opcion.valor"
+                      [attr.aria-label]="(seccionAbierta() === opcion.valor ? 'Plegar' : 'Desplegar') + ' las rutas de ' + opcion.valor"
+                      class="grid h-11 w-5 shrink-0 place-items-center rounded text-dato text-slate-400 transition hover:bg-slate-100 hover:text-morado">
+                      <span aria-hidden="true">{{ seccionAbierta() === opcion.valor ? '▾' : '▸' }}</span>
+                    </button>
+                    <button type="button" (click)="alternarUbicacion(opcion.valor)"
+                      [attr.aria-pressed]="facetaUbicacion() === opcion.valor"
+                      class="flex min-h-11 min-w-0 flex-1 items-center gap-1.5 rounded-lg px-1.5 text-left text-dato transition"
+                      [ngClass]="facetaUbicacion() === opcion.valor ? 'bg-morado text-white font-bold' : 'text-slate-700 hover:bg-slate-100'">
+                      <span class="min-w-0 flex-1 break-words">{{ opcion.valor }}</span>
+                      <span class="shrink-0 tabular-nums font-bold opacity-80">{{ opcion.cuantas }}</span>
+                    </button>
+                  </div>
+                  @if (seccionAbierta() === opcion.valor) {
+                    <ul class="mb-1 ml-[0.9rem] border-l-2 border-slate-200 pl-2">
+                      @for (rama of rutasDe(opcion.valor); track rama.valor) {
+                        <li class="relative">
+                          <!-- El codo que une la rama con su tronco: hace visible de qué cuelga. -->
+                          <span aria-hidden="true" class="absolute -left-2 top-1/2 h-px w-2 bg-slate-200"></span>
+                          <button type="button" (click)="alternarRuta(rama.valor)"
+                            [attr.aria-pressed]="facetaRuta() === rama.valor"
+                            class="flex min-h-11 w-full items-center justify-between gap-2 rounded-lg px-2 text-left text-dato transition"
+                            [ngClass]="facetaRuta() === rama.valor ? 'bg-morado-claro text-white font-bold' : 'text-slate-500 hover:bg-slate-100'">
+                            <span class="min-w-0 break-words">{{ rama.hoja }}</span>
+                            <span class="shrink-0 tabular-nums opacity-70">{{ rama.cuantas }}</span>
+                          </button>
+                        </li>
+                      }
+                    </ul>
+                  }
+                </li>
+              }
+            </ul>
+          </div>
+        }
+
+        @for (grupo of [
+          { titulo: 'Práctica musical', valores: practicas(), activo: facetaPractica(), eje: 'practica' },
+          { titulo: 'Formato', valores: formatos(), activo: facetaFormato(), eje: 'formato' },
+          { titulo: 'Años', valores: lustros(), activo: facetaLustro(), eje: 'lustro' },
+          { titulo: 'Estado', valores: estados(), activo: facetaEstado(), eje: 'estado' }
+        ]; track grupo.titulo) {
+          @if (grupo.valores.length > 1) {
+            <div>
+              <h3 class="font-alternate text-dato font-bold uppercase tracking-[0.18em] text-seccion">{{ grupo.titulo }}</h3>
+              <ul class="mt-1.5 space-y-0.5">
+                @for (opcion of grupo.valores; track opcion.valor) {
+                  <li>
+                    <button type="button"
+                      (click)="grupo.eje === 'practica' ? alternarPractica(opcion.valor) : grupo.eje === 'formato' ? alternarFormato(opcion.valor) : grupo.eje === 'lustro' ? alternarLustro(opcion.valor) : alternarEstado(opcion.valor)"
+                      [attr.aria-pressed]="grupo.activo === opcion.valor"
+                      class="flex min-h-11 w-full items-center justify-between gap-2 rounded-lg px-2 text-left text-dato transition"
+                      [ngClass]="grupo.activo === opcion.valor ? 'bg-morado text-white font-bold' : 'text-slate-600 hover:bg-slate-100'">
+                      <span class="min-w-0 break-words">{{ opcion.valor }}</span>
+                      <span class="shrink-0 tabular-nums opacity-70">{{ opcion.cuantas }}</span>
+                    </button>
+                  </li>
+                }
+              </ul>
+            </div>
+          }
+        }
+
+        <!--
+          EL FICHERO DE AUTORIDADES, que es la dimensión que faltaba: se podía llegar a una
+          publicación por su título o por su sitio, pero no por quién la hizo. Comprobado: 86 agentes
+          tienen más de una obra. Los que aparecen una sola vez se alcanzan con la búsqueda.
+        -->
+        @if (indiceDeAutoria().length > 0) {
+          <div>
+            <h3 class="font-alternate text-dato font-bold uppercase tracking-[0.18em] text-seccion">Autoría con varias obras</h3>
+            <ul class="mt-1.5 max-h-64 space-y-0.5 overflow-y-auto pr-1">
+              @for (agente of indiceDeAutoria(); track agente.nombre) {
+                <li>
+                  <button type="button" (click)="alternarAgente(agente.nombre)"
+                    [attr.aria-pressed]="facetaAgente() === agente.nombre"
+                    class="flex min-h-11 w-full items-center justify-between gap-2 rounded-lg px-2 text-left text-dato transition"
+                    [ngClass]="facetaAgente() === agente.nombre ? 'bg-morado text-white font-bold' : 'text-slate-600 hover:bg-slate-100'">
+                    <span class="min-w-0 break-words">{{ agente.nombre }}</span>
+                    <span class="shrink-0 tabular-nums opacity-70">{{ agente.cuantas }}</span>
+                  </button>
+                </li>
+              }
+            </ul>
+          </div>
+        }
+
+      </aside>
+
+      <!-- ── Y lo que queda ── -->
+      <div class="min-w-0 space-y-4">
+        <!--
+          LA RUTA POR LA QUE SE HA LLEGADO, EN PIEZAS QUE SE QUITAN UNA A UNA.
+          Con las facetas repartidas por la columna, después de tres clics nadie sabe qué tiene
+          puesto sin repasarla entera, y la única salida era borrarlo todo. Aquí se ve el camino
+          completo y se retrocede un paso, que es como se explora de verdad.
+        -->
+        @if (rutaActiva().length > 0) {
+          <nav aria-label="Filtros activos" class="flex flex-wrap items-center gap-2 rounded-xl bg-slate-50 p-3">
+            @for (pieza of rutaActiva(); track pieza.eje + pieza.valor) {
+              <button type="button" (click)="pieza.quitar()"
+                class="inline-flex min-h-11 items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 text-dato text-slate-700 transition hover:border-morado hover:text-morado">
+                <span class="font-black uppercase tracking-wider text-slate-400">{{ pieza.eje }}</span>
+                <span class="max-w-[16rem] truncate font-bold">{{ pieza.valor }}</span>
+                <span aria-hidden="true" class="text-slate-400">×</span>
+                <span class="sr-only">Quitar este filtro</span>
+              </button>
+            }
+            <app-boton importancia="terciaria" tamano="menudo" (accion)="limpiarFiltros()">Quitar todo</app-boton>
+          </nav>
+        }
+
+        <!--
+          EL INDICE ALFABETICO: la navegación más vieja de un catálogo y la mejor para encontrar
+          algo cuyo nombre se recuerda a medias. Los 171 títulos reparten 26 iniciales. Las letras
+          sin fichas se enseñan apagadas: un abecedario con huecos se lee peor que uno completo.
+        -->
+        <div class="flex flex-wrap gap-0.5" role="group" aria-label="Índice alfabético por título">
+          @for (entrada of abecedario(); track entrada.letra) {
+            <button type="button" (click)="alternarLetra(entrada.letra)"
+              [disabled]="entrada.cuantas === 0"
+              [attr.aria-pressed]="facetaLetra() === entrada.letra"
+              [attr.aria-label]="entrada.letra + ': ' + entrada.cuantas + ' publicaciones'"
+              class="h-9 w-7 rounded text-dato font-bold transition disabled:cursor-default disabled:text-slate-200"
+              [ngClass]="facetaLetra() === entrada.letra ? 'bg-morado text-white' : 'text-slate-500 hover:bg-slate-100'">
+              {{ entrada.letra }}
+            </button>
+          }
+        </div>
+
+        <!--
+          ACTUAR SOBRE VARIAS. Con 171 publicaciones, retirar una sección entera del portal
+          significaba abrir el menú de cada fila. El índice ya sabe acotar el conjunto; esto actúa
+          sobre él. Solo alcanza a lo VISIBLE: una acción sobre registros fuera de la pantalla es
+          justo el accidente del que hay que proteger.
+        -->
+        <!--
+          LA BARRA DE LO SELECCIONADO.
+
+          <b>ERA UNA CAJA MORADA CON CUATRO BOTONES IGUALES</b> —Borrador, En revisión, Publicado,
+          Retirado— todos del mismo peso, y ninguno decía cuál es el que saca 40 publicaciones del
+          portal. Ahora: la cifra manda, la acción esperada es la confirmadora, las dos que mueven
+          hacia atrás en el circuito van de secundarias, y «Retirar del portal» va separada al
+          final y en rojo, porque es la única con consecuencia pública.
+
+          <b>NO AÑADE ALTURA:</b> ocupa el sitio de la barra de resultados mientras hay algo
+          elegido, en vez de empujar la tabla hacia abajo. Y es un contrato de estilo compartido
+          -`.barra-de-seleccion`-, no un bloque de este panel: cualquier tabla con multiselección
+          usará el mismo.
+        -->
+        @if (seleccionadas().length > 0) {
+          <div class="barra-de-seleccion" role="group" aria-label="Acciones sobre las publicaciones seleccionadas">
+            <p class="barra-de-seleccion__cuenta">
+              <b>{{ seleccionadas().length }}</b>
+              {{ seleccionadas().length === 1 ? 'publicación seleccionada' : 'publicaciones seleccionadas' }}
+              @if (!todasSeleccionadas() && fichasVisibles().length > seleccionadas().length) {
+                <button type="button" class="barra-de-seleccion__enlace" (click)="alternarTodas()">
+                  Seleccionar las {{ fichasVisibles().length }} de esta lista
+                </button>
+              }
+            </p>
+            @if (puedePublicar()) {
+              <!--
+                SOLO LO QUE CAMBIA ALGO. Ofrecía los cuatro estados siempre, así que con algo ya
+                publicado seleccionado seguía diciendo «Publicar» —que no haría nada— en vez de
+                «Despublicar», que es la decisión que cabe.
+              -->
+              <div class="barra-de-seleccion__acciones">
+                @for (accion of accionesEnLote(); track accion.id) {
+                  <app-boton [importancia]="accion.importancia" tamano="menudo"
+                    [deshabilitado]="trabajando() !== null"
+                    (accion)="publicarSeleccionadas(accion.estado)">{{ accion.etiqueta }}</app-boton>
+                }
+                @if (cuantasSePuedenDespublicar() > 0) {
+                  <!-- La única con consecuencia pública: separada por un filete y en rojo. -->
+                  <span class="barra-de-seleccion__separador" aria-hidden="true"></span>
+                  <app-boton importancia="destructiva" tamano="menudo" [deshabilitado]="trabajando() !== null"
+                    (accion)="publicarSeleccionadas('retirado')">{{ rotuloDeDespublicar() }}</app-boton>
+                }
+                <!-- Dentro del grupo y no detrás de él: suelto, se iba a una segunda línea. -->
+                <app-boton importancia="terciaria" tamano="menudo" (accion)="quitarLaSeleccion()">Quitar la selección</app-boton>
+              </div>
+            } @else {
+              <app-boton importancia="terciaria" tamano="menudo" (accion)="quitarLaSeleccion()">Quitar la selección</app-boton>
+            }
+          </div>
+        }
+
+        <app-barra-de-lista [hidden]="seleccionadas().length > 0">
+          <p class="barra-de-lista__resumen">
+            <b>{{ fichasVisibles().length }}</b>
+            {{ fichasVisibles().length === 1 ? 'publicación' : 'publicaciones' }}
+            @if (hayFiltros()) { <span>de {{ acervo().length }}</span> }
+          </p>
+          <!--
+            DOS MANERAS DE MIRAR LO MISMO. La lista es para gestionar —estados, acciones, la ruta
+            entera—; el mosaico es para RECONOCER. En un catálogo la portada es el dato: cuando no se
+            recuerda el título exacto, se reconoce la cubierta antes que ninguna otra cosa.
+
+            Era un par de cápsulas rellenas de morado: el proyecto no usa píldoras y el control de
+            dos posiciones ya existe, con su subrayado, en `app-selector-segmentado`.
+          -->
+          <app-selector-segmentado
+            [opciones]="MANERAS_DE_VER"
+            [elegida]="vista()"
+            [conFilete]="false"
+            etiquetaDelGrupo="Manera de ver el acervo"
+            (elegir)="vista.set($any($event))" />
+          <!--
+            EL DESPLEGABLE Y LAS CABECERAS ESCRIBEN EN EL MISMO SITIO. Antes este era el único
+            control de orden y las cabeceras eran texto muerto; ahora se puede ordenar desde las
+            dos partes y el desplegable siempre enseña por qué está ordenada la tabla.
+          -->
+          <app-filtro-desplegable identificador="orden" etiqueta="Ordenar el acervo"
+            [opciones]="filtroDeOrden()" [elegida]="orden.columna()" (cambiar)="ordenarPorCriterio($event)" />
+          <ng-container extremo>
+            <!--
+              DOS CAMINOS PARA LA MISMA ALTA, y el segundo es el que ahorra el trabajo: si la
+              publicación tiene su PDF, el documento ya sabe cómo se titula, cuántas páginas tiene y
+              qué ISBN lleva. Escribirlo a mano teniéndolo delante es transcribir.
+            -->
+            <app-boton importancia="secundaria" (accion)="abrirLectura()">Desde un documento</app-boton>
+            <app-boton importancia="principal" (accion)="nueva()">Nueva publicación</app-boton>
+          </ng-container>
+        </app-barra-de-lista>
+    @if (leyendoDocumento()) {
+      <div class="rounded-2xl border border-morado/30 bg-morado/5 p-4">
+        <app-importar-desde-documento
+          ruta="/api/v1/institucional/catalogo-editorial/desde-documento"
+          queSeCrea="publicación"
+          (propuesta)="usarLaPropuesta($event)"></app-importar-desde-documento>
+        <div class="mt-3"><app-boton importancia="terciaria" tamano="menudo" (accion)="cerrarLectura()">Cancelar</app-boton></div>
+      </div>
+    }
+
+    @if (error()) {
+      <div role="alert" class="rounded-xl border border-rose-200 bg-rose-50 p-4 text-xs font-bold text-rose-800">{{ error() }}</div>
+    }
+    @if (aviso()) {
+      <div role="status" class="rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-xs font-bold text-emerald-800">{{ aviso() }}</div>
+    }
+
+    @if (cargando() && !hayFichas()) {
+      <app-estado-de-lista tipo="cargando" titulo="Consultando el catálogo…" />
+    } @else if (!hayFichas()) {
+      <!--
+        ESTADO VACIO HONESTO. El catálogo no se sembró con fichas de demostración: una revisión anterior lo
+        decidió y la migración no inserta ni una fila. Decir que está vacío es más útil que
+        enseñar ejemplos que alguien acabaría publicando por error.
+      -->
+      <app-estado-de-lista
+        titulo="Todavía no hay fichas en el catálogo"
+        detalle="El modelo, los estados y el circuito de publicación ya están montados. La carga del acervo espera la confirmación institucional de derechos y licencias." />
+    } @else {
+      @if (vista() === 'mosaico') {
+        <ul class="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+          @for (ficha of fichasVisibles(); track ficha.id) {
+            <li class="min-w-0">
+              <button type="button" (click)="editar(ficha)"
+                class="group flex w-full flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white text-left transition hover:border-morado">
+                <!--
+                  LA PORTADA ENTERA Y NO RECORTADA: las cubiertas del acervo no comparten proporción,
+                  y `object-cover` le corta el título a unas y la firma a otras. En un catálogo eso es
+                  justo lo que hay que poder leer.
+                -->
+                <span class="relative block w-full bg-slate-100" style="aspect-ratio: 4 / 5;">
+                  @if (ficha.miniaturaRuta) {
+                    <img [src]="ficha.miniaturaRuta" [alt]="'Portada de ' + ficha.titulo"
+                      width="320" height="400" loading="lazy" decoding="async"
+                      class="absolute inset-0 h-full w-full object-contain" />
+                  } @else {
+                    <span class="absolute inset-0 grid place-items-center text-dato font-bold uppercase tracking-wider text-slate-300">Sin portada</span>
+                  }
+                </span>
+                <span class="flex min-w-0 flex-1 flex-col gap-1 p-3">
+                  <b class="line-clamp-2 text-cuerpo leading-snug text-slate-900 group-hover:text-morado">{{ ficha.titulo }}</b>
+                  @if (ficha.subtitulo) {
+                    <span class="line-clamp-1 text-dato leading-snug text-slate-500">{{ ficha.subtitulo }}</span>
+                  }
+                  <span class="line-clamp-1 text-dato text-slate-500">{{ autoriaDe(ficha) }}</span>
+                  <span class="mt-auto font-mono text-dato text-slate-400">{{ ficha.codigo }}{{ ficha.anioInicio ? ' · ' + ficha.anioInicio : '' }}</span>
+                </span>
+              </button>
+            </li>
+          }
+        </ul>
+      } @else {
+      <div class="overflow-x-auto">
+        <table class="tabla-administrativa tabla-del-acervo">
+          <!--
+            EL ANCHO DE CADA COLUMNA SE DECLARA, no lo reparte el navegador: si lo reparte, cambiar
+            de orden o filtrar mueve la tabla entera y hay que volver a leerla.
+          -->
+          <colgroup>
+            <col class="tabla-del-acervo__marca" />
+            <col class="tabla-del-acervo__obra" />
+            <col class="tabla-del-acervo__autoria" />
+            <col class="tabla-del-acervo__publicacion" />
+            <col class="tabla-del-acervo__acciones" />
+          </colgroup>
+          <thead class="tabla-administrativa__cabecera">
+            <tr>
+              <th scope="col" class="tabla-administrativa__marca">
+                <label class="casilla-de-fila">
+                  <input type="checkbox" [checked]="todasSeleccionadas()"
+                    [indeterminate]="algunasSeleccionadas()" (change)="alternarTodas()" />
+                  <span class="sr-only">Seleccionar todas las publicaciones visibles</span>
+                </label>
+              </th>
+              <app-cabecera-de-tabla [columnas]="COLUMNAS" [orden]="orden" (ordenarPor)="orden.alternar($event)" />
+            </tr>
+          </thead>
+          <tbody>
+            @for (ficha of fichasVisibles(); track ficha.id) {
+              <tr class="tabla-administrativa__fila" [ngClass]="estaSeleccionada(ficha.id) ? 'bg-morado/5' : ''">
+                <td class="tabla-administrativa__marca">
+                  <label class="casilla-de-fila">
+                    <input type="checkbox" [checked]="estaSeleccionada(ficha.id)" (change)="alternarSeleccion(ficha.id)" />
+                    <span class="sr-only">Seleccionar «{{ ficha.titulo }}»</span>
+                  </label>
+                </td>
+                <!--
+                  LA PORTADA JUNTO AL TITULO, y no en el mosaico solamente. En un catálogo la
+                  cubierta es un dato de identificación: se reconoce antes que el título exacto.
+                  El sitio salió de retirar la columna «Catalogación», donde 168 de 171 filas decían
+                  «Validada» —una columna que no distingue nada y se lleva el ancho de una que sí—.
+                -->
+                <td class="min-w-0">
+                  <div class="flex items-start gap-3">
+                    <span class="miniatura-de-obra" aria-hidden="true">
+                      @if (ficha.miniaturaRuta) {
+                        <img [src]="ficha.miniaturaRuta" alt="" width="40" height="52" loading="lazy" decoding="async" />
+                      } @else {
+                        <!-- Sin portada: un marco discreto, no un hueco ni un icono que grite. -->
+                        <svg lucideBookOpen [size]="16"></svg>
+                      }
+                    </span>
+                    <span class="min-w-0 flex-1">
+                      <span class="tabla-administrativa__principal">{{ ficha.titulo }}</span>
+                      <!--
+                        EL SUBTITULO EN LA FILA: nueve series del acervo repiten título, y sin él dos
+                        filas «Acento» son indistinguibles también aquí.
+                      -->
+                      @if (ficha.subtitulo || ficha.designacionVolumen) {
+                        <span class="tabla-administrativa__secundaria">
+                          {{ ficha.subtitulo }}@if (ficha.subtitulo && ficha.designacionVolumen) {<span> · </span>}{{ ficha.designacionVolumen }}
+                        </span>
+                      }
+                      <span class="tabla-administrativa__secundaria font-mono">{{ ficha.codigo }}{{ ficha.anioInicio ? ' · ' + ficha.anioInicio : '' }}</span>
+                      <span class="tabla-administrativa__secundaria"><app-sello-de-procedencia [procedencia]="ficha.procedencia"></app-sello-de-procedencia></span>
+                    </span>
+                  </div>
+                </td>
+                <!--
+                  QUIEN Y DONDE, que es por lo que se busca una publicación cuando no se recuerda el
+                  título. El nombre es pulsable: lleva al resto de la obra de esa autoría.
+                -->
+                <td class="min-w-0 py-3 pr-3">
+                  <!--
+                    LA AUTORIA Y LA RUTA LLEVAN AL RESTO DEL ACERVO. El índice llevaba del acervo a
+                    una publicación, pero desde la publicación no se volvía: para ver qué más hay en
+                    esa ruta había que cerrar, buscar la faceta y acordarse del nombre exacto. Y es
+                    justo el momento en que aparece la pregunta, porque se está mirando ese dato.
+                  -->
+                  @if (autoriaPrincipalDe(ficha); as autor) {
+                    <button type="button" (click)="explorarDesdeLaFicha('agente', autor)"
+                      [attr.title]="'Ver todo lo de ' + autor"
+                      class="block min-h-11 text-left text-dato leading-snug text-slate-700 underline-offset-2 hover:text-morado hover:underline">
+                      {{ autoriaDe(ficha) }}
+                    </button>
+                  } @else {
+                    <span class="block text-dato leading-snug text-slate-400">{{ autoriaDe(ficha) }}</span>
+                  }
+                  @if (ficha.rutaSeccion) {
+                    <!--
+                      LA RUTA EN TRAMOS, con el último en oscuro. Escrita de corrido, «Formación >
+                      Pedagogía Instrumental > Guías y Cuadernos de instrumento» es una línea que se
+                      salta al leer; partida, se ve de dónde cuelga la ficha y dónde está de verdad.
+                    -->
+                    <small class="mt-0.5 flex flex-wrap items-center gap-x-1 text-dato leading-snug">
+                      <!--
+                        CADA TRAMO FILTRA A SU NIVEL. Los tres llamaban al mismo sitio con la ruta
+                        ENTERA, así que pulsar «Repertorio» dejaba puesto «Dentro de: Orquesta» y
+                        3 publicaciones en vez de 23.
+                      -->
+                      @for (tramo of tramosDeLaRuta(ficha.rutaSeccion); track $index) {
+                        @if ($index > 0) { <span aria-hidden="true" class="text-slate-300">›</span> }
+                        <button type="button" (click)="explorarDesdeElTramo(ficha.rutaSeccion, $index)"
+                          [attr.title]="'Ver todo lo de ' + tramo"
+                          class="rounded text-left underline-offset-2 hover:text-morado hover:underline"
+                          [ngClass]="$last ? 'font-bold text-slate-600' : 'text-slate-400'">{{ tramo }}</button>
+                      }
+                    </small>
+                  }
+                </td>
+                <td>
+                  <app-indicador-de-estado
+                    [etiqueta]="etiquetaPublicacion(ficha.estadoPublicacion)"
+                    [tono]="tonoDelEstado(ficha.estadoPublicacion)"
+                    [matiz]="matizDelEstado(ficha.estadoPublicacion)"
+                    [conTexto]="true"></app-indicador-de-estado>
+                  <!--
+                    EL RESPALDO VA AQUI Y NO EN SU PROPIA COLUMNA. Son las dos condiciones que la
+                    gente olvida —sin fuentes o sin derechos, publicar se rechaza—, así que
+                    informan de ESTE estado y no de otra cosa. Con columna propia, la tabla tenía
+                    siete y el rótulo «Catalogación» se solapaba con el de al lado.
+                  -->
+                  <span class="tabla-administrativa__secundaria">
+                    <span [class.text-rose-600]="ficha.fuentes.length === 0">
+                      {{ ficha.fuentes.length }} {{ ficha.fuentes.length === 1 ? 'fuente' : 'fuentes' }}
+                    </span>
+                    ·
+                    <span [class.text-rose-600]="!ficha.derechos.permitePublicarFicha">
+                      {{ ficha.derechos.permitePublicarFicha ? 'derechos al día' : 'sin derechos' }}
+                    </span>
+                  </span>
+                  <!--
+                    LA CATALOGACION SOLO SE DICE CUANDO ES UNA EXCEPCION. Tenía columna propia y en
+                    168 de 171 filas decía «Validada»: ruido que se llevaba el ancho de la columna
+                    que sí identifica. El dato no se retira del sistema —vive en la ficha, y el
+                    filtro de la izquierda sigue listando por él—; aquí solo aparece cuando dice
+                    algo, que es cuando la ficha NO está validada.
+                  -->
+                  @if (ficha.estadoCatalogacion !== 'validada') {
+                    <span class="tabla-administrativa__secundaria font-semibold text-amber-700">
+                      Catalogación: {{ etiquetaCatalogacion(ficha.estadoCatalogacion) }}
+                    </span>
+                  }
+                </td>
+                <td>
+                  <!--
+                    UN SOLO CONTROL POR FILA. «Validar» y «Publicar» siguen siendo dos decisiones
+                    distintas —una dice que la ficha está bien hecha, la otra que se ve— y por eso
+                    conservan sus dos entradas; lo que desaparece son los seis botones iguales.
+                  -->
+                  <app-menu-de-acciones
+                    [acciones]="accionesDe(ficha)"
+                    [descripcion]="ficha.titulo"
+                    (elegida)="ejecutarAccion(ficha, $event)"></app-menu-de-acciones>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+      }
+      }
+      </div>
+    </div>
+
+    <!--
+      COMO SE VERA EN SU LISTADO, antes de publicarlo. Se carga la pantalla pública real dentro de un
+      marco y el registro entra por el mismo servicio que la alimenta, así que la tarjeta que se ve es
+      la de verdad. Ver `PrevisualizacionEnListadoService`.
+    -->
+    @if (previsualizando(); as registro) {
+      <app-dialogo-de-previsualizacion
+        modulo="catalogo-editorial"
+        [id]="registro.id"
+        [nombre]="nombreParaPrevisualizar(registro)"
+        [estadoEtiqueta]="estadoParaPrevisualizar(registro)"
+        (cerrar)="cerrarPrevisualizacion()" />
+    }
+
+    <!--
+      LA FICHA EN LA CONSOLA. Es la versión de trabajo del mismo registro: la ficha catalográfica tal
+      como la ve el portal —el mismo componente, no una copia— y encima lo que el portal no enseña:
+      los dos estados, la confianza, las banderas de revisión, los derechos con su verificador, la
+      procedencia y el hilo de revisiones y anotaciones.
+
+      OCUPA LA PANTALLA Y NO UN DIALOGO: se viene a leerla y a trabajar sobre ella, no a mirarla de
+      paso, y el hilo de anotaciones se escribe aquí.
+    -->
+    @if (fichaEnConsola(); as elegida) {
+      <div class="dialogo-velo dialogo-velo--con-desplazamiento" role="dialog" aria-modal="true" appDialogo (cerrar)="cerrarFichaEnConsola()">
+        <div class="dialogo dialogo--ancho dialogo--hoja">
+          <app-ficha-en-consola
+            [publicacion]="elegida"
+            (cerrar)="cerrarFichaEnConsola()"
+            (cambio)="cargar()"></app-ficha-en-consola>
+        </div>
+      </div>
+    }
+
+    @if (historialAbierto(); as elegida) {
+      <app-historial-de-registro
+        [titulo]="elegida.titulo"
+        [registro]="{ tabla: tablaDeAuditoria, id: elegida.id }"
+        [procedencia]="elegida.procedencia"
+        (cerrar)="cerrarHistorial()"></app-historial-de-registro>
+    }
+
+    @if (ficha(); as f) {
+      <div class="dialogo-velo" role="dialog" aria-modal="true" aria-labelledby="ficha-form-titulo" appDialogo (cerrar)="cerrarFicha()">
+        <div class="dialogo dialogo--ancho">
+          <div class="flex items-start justify-between gap-4">
+            <div>
+              <p class="font-alternate text-dato font-bold uppercase tracking-[0.18em] text-seccion">Catálogo Editorial</p>
+              <h3 id="ficha-form-titulo" class="dialogo__titulo">
+                {{ f.id === null ? 'Nueva publicación' : 'Editar publicación' }}
+              </h3>
+            </div>
+            <app-boton importancia="terciaria" tamano="menudo" etiqueta="Cerrar sin guardar" (accion)="cerrarFicha()">Cerrar</app-boton>
+          </div>
+
+          @if (borradorRecuperable(); as pendiente) {
+            <!--
+              SE OFRECE, NO SE APLICA SOLO. Recuperar sin preguntar sorprendería a quien abrió el
+              formulario para catalogar otra cosa.
+            -->
+            <div class="mt-4 rounded-xl border border-morado bg-slate-50 px-4 py-3" role="status">
+              <p class="text-xs text-slate-700">
+                Quedó una ficha a medio escribir del
+                {{ pendiente.fecha | date: 'd MMM y, HH:mm':'':'es-CO' }}.
+              </p>
+              <div class="mt-2 flex flex-wrap gap-2">
+                <app-boton importancia="principal" tamano="menudo" (accion)="recuperarBorrador()">Recuperarla</app-boton>
+                <app-boton importancia="secundaria" tamano="menudo" (accion)="descartarBorrador()">Empezar de cero</app-boton>
+              </div>
+            </div>
+          }
+
+          <div class="mt-6">
+            <app-indicador-de-pasos [pasos]="pasos" [pasoActivo]="paso()" etiqueta="Pasos de la ficha"
+              (irAlPaso)="irAlPaso($event)"></app-indicador-de-pasos>
+          </div>
+
+          <!--
+            ═══════════════════ EL FORMULARIO DE UNA FICHA CATALOGRAFICA ═══════════════════
+
+            PEDIA DOCE CAMPOS PARA UN REGISTRO DE MAS DE TREINTA, y dejaba fuera las cuatro listas
+            que son justamente lo que distingue una ficha de biblioteca de un formulario cualquiera:
+            la autoría con su papel, los identificadores con su cualificador, las vías de consulta y
+            las facetas de tipología. El criterio es este: «no se acerca para nada al
+            detalle que tienen realmente este tipo de registros».
+
+            Y TODO LO QUE TIENE LISTA SE ELIGE. Aquí había un comentario que decía que los
+            vocabularios se escribían a mano porque «siguen TBC». El acervo demuestra el coste de
+            esa espera: 56 tipos de publicación distintos para 171 fichas, con «Libro», «Libro
+            impreso» y «Libro Cuaderno de ejercicios» conviviendo. Las listas ya existen —salen del
+            propio acervo, contadas por uso— y por eso ahora se eligen.
+          -->
+          @if (paso() === 1) {
+          <div class="mt-6 grid gap-4 sm:grid-cols-2">
+            <label class="block">
+              <span class="font-alternate text-dato font-bold uppercase tracking-[0.18em] text-seccion">Título *</span>
+              <input type="text" [ngModel]="f.titulo" (ngModelChange)="campo('titulo', $event)"
+                class="campo__control" />
+            </label>
+            <label class="block sm:col-span-2">
+              <span class="font-alternate text-dato font-bold uppercase tracking-[0.18em] text-seccion">Subtítulo</span>
+              <input type="text" [ngModel]="f.subtitulo" (ngModelChange)="campo('subtitulo', $event)"
+                class="campo__control" />
+              <small class="campo__ayuda">Nueve series del acervo repiten título: el subtítulo es lo que las distingue en el listado.</small>
+            </label>
+            <label class="block">
+              <span class="font-alternate text-dato font-bold uppercase tracking-[0.18em] text-seccion">Designación de volumen</span>
+              <input type="text" [ngModel]="f.designacionVolumen" (ngModelChange)="campo('designacionVolumen', $event)"
+                placeholder="Volumen I"
+                class="campo__control" />
+            </label>
+            <label class="block">
+              <span class="font-alternate text-dato font-bold uppercase tracking-[0.18em] text-seccion">Serie o colección</span>
+              <input type="text" [ngModel]="f.serieOColeccion" (ngModelChange)="campo('serieOColeccion', $event)"
+                class="campo__control" />
+            </label>
+          </div>
+
+          <!--
+            LOS IDENTIFICADORES SON UNA LISTA, no un campo. `PNMC-ED-103` trae CINCO ISBN —PDF,
+            EPUB, HTML, iBook y MOBI—, y sin el cualificador serían cinco líneas idénticas.
+          -->
+          <fieldset class="mt-8 border-t border-filete pt-5">
+            <legend class="px-2 font-alternate text-dato font-bold uppercase tracking-[0.18em] text-seccion">Identificadores normalizados</legend>
+            @for (identificador of f.identificadores; track $index) {
+              <div class="mb-3 grid gap-2 sm:grid-cols-[7rem_1fr_9rem_auto]">
+                <label class="block">
+                  <span class="sr-only">Esquema del identificador {{ $index + 1 }}</span>
+                  <select [ngModel]="identificador.esquema" (ngModelChange)="campoDelIdentificador($index, { esquema: $event })"
+                    class="campo__control">
+                    @for (esquema of vocabularios()?.esquemasIdentificador ?? []; track esquema.valor) {
+                      <option [value]="esquema.valor">{{ esquema.valor }}</option>
+                    }
+                  </select>
+                </label>
+                <label class="block">
+                  <span class="sr-only">Código del identificador {{ $index + 1 }}</span>
+                  <input type="text" [ngModel]="identificador.codigo" (ngModelChange)="campoDelIdentificador($index, { codigo: $event })"
+                    placeholder="978-958-753-485-6"
+                    class="w-full rounded-xl border border-slate-200 px-3 py-2 font-mono text-sm outline-none focus:border-morado" />
+                </label>
+                <label class="block">
+                  <span class="sr-only">Cualificador del identificador {{ $index + 1 }}</span>
+                  <input type="text" [ngModel]="identificador.cualificador" (ngModelChange)="campoDelIdentificador($index, { cualificador: $event })"
+                    placeholder="PDF"
+                    class="campo__control" />
+                </label>
+                <app-boton importancia="destructiva" tamano="menudo" (accion)="quitarIdentificador($index)">Quitar</app-boton>
+              </div>
+            }
+            <app-boton importancia="secundaria" tamano="menudo" (accion)="agregarIdentificador()">Agregar un identificador</app-boton>
+          </fieldset>
+          }
+
+          @if (paso() === 2) {
+          <fieldset class="mt-8 border-t border-filete pt-5">
+            <legend class="px-2 font-alternate text-dato font-bold uppercase tracking-[0.18em] text-seccion">Qué es el recurso</legend>
+            <p class="mb-3 text-dato leading-relaxed text-slate-500">
+              El tipo y el formato describen el objeto; las cuatro facetas lo normalizan contra RDA y
+              Dublin Core, que es lo que hace la ficha intercambiable. Las facetas no se publican.
+            </p>
+            <div class="grid gap-4 sm:grid-cols-2">
+              <label class="block">
+                <span class="font-alternate text-dato font-bold uppercase tracking-[0.18em] text-seccion">Tipo de publicación</span>
+                <select [ngModel]="f.tipoPublicacion" (ngModelChange)="campo('tipoPublicacion', $event)"
+                  class="campo__control">
+                  <option value="">Sin declarar</option>
+                  @for (tipo of vocabularios()?.tiposDePublicacion ?? []; track tipo.valor) {
+                    <option [value]="tipo.valor">{{ tipo.valor }} · {{ tipo.usos }}</option>
+                  }
+                </select>
+                <small class="campo__ayuda">Ordenados por uso. El número delata las variantes que sobran.</small>
+              </label>
+              <label class="block">
+                <span class="font-alternate text-dato font-bold uppercase tracking-[0.18em] text-seccion">Formato</span>
+                <select [ngModel]="f.formato" (ngModelChange)="campo('formato', $event)"
+                  class="campo__control">
+                  <option value="">Sin declarar</option>
+                  @for (formato of vocabularios()?.formatos ?? []; track formato.valor) {
+                    <option [value]="formato.valor">{{ formato.valor }} · {{ formato.usos }}</option>
+                  }
+                </select>
+              </label>
+              @for (eje of ejesDeTipologia; track eje.clave) {
+                <label class="block">
+                  <span class="font-alternate text-dato font-bold uppercase tracking-[0.18em] text-seccion">{{ eje.rotulo }}</span>
+                  <select [ngModel]="tipologiaDelEje(eje.clave)" (ngModelChange)="elegirTipologia(eje.clave, $event)"
+                    class="campo__control">
+                    <option value="">Sin declarar</option>
+                    @for (opcion of opcionesDeTipologia(eje.clave); track opcion.codigo) {
+                      <option [value]="opcion.codigo">{{ opcion.etiqueta }}</option>
+                    }
+                  </select>
+                  <small class="campo__ayuda">{{ eje.norma }}</small>
+                </label>
+              }
+            </div>
+          </fieldset>
+
+          }
+
+          @if (paso() === 3) {
+          <fieldset class="mt-8 border-t border-filete pt-5">
+            <legend class="px-2 font-alternate text-dato font-bold uppercase tracking-[0.18em] text-seccion">Contenido</legend>
+            <div class="grid gap-4">
+              <label class="block">
+                <span class="font-alternate text-dato font-bold uppercase tracking-[0.18em] text-seccion">Resumen</span>
+                <textarea rows="4" [ngModel]="f.resumen" (ngModelChange)="campo('resumen', $event)"
+                  class="campo__control"></textarea>
+              </label>
+              <label class="block">
+                <span class="font-alternate text-dato font-bold uppercase tracking-[0.18em] text-seccion">Texto de portada</span>
+                <textarea rows="3" [ngModel]="f.textoPortada" (ngModelChange)="campo('textoPortada', $event)"
+                  class="campo__control"></textarea>
+                <small class="campo__ayuda">Lo que dice la contracubierta. Se enseña en la ficha cuando no hay resumen.</small>
+              </label>
+            </div>
+          </fieldset>
+
+          <fieldset class="mt-8 border-t border-filete pt-5">
+            <legend class="px-2 font-alternate text-dato font-bold uppercase tracking-[0.18em] text-seccion">Fecha e idioma</legend>
+            <div class="grid gap-4 sm:grid-cols-2">
+              <label class="block">
+                <span class="font-alternate text-dato font-bold uppercase tracking-[0.18em] text-seccion">Año inicial</span>
+                <input type="number" [ngModel]="f.anioInicio" (ngModelChange)="campo('anioInicio', $event)"
+                  class="campo__control" />
+              </label>
+              <label class="block">
+                <span class="font-alternate text-dato font-bold uppercase tracking-[0.18em] text-seccion">Año final</span>
+                <input type="number" [ngModel]="f.anioFin" (ngModelChange)="campo('anioFin', $event)"
+                  class="campo__control" />
+                <small class="campo__ayuda">Solo si la obra abarca un rango. Si coincide con el inicial, la ficha enseña un año.</small>
+              </label>
+              <label class="block">
+                <span class="font-alternate text-dato font-bold uppercase tracking-[0.18em] text-seccion">Fecha normalizada (EDTF)</span>
+                <input type="text" [ngModel]="f.fechaEdtf" (ngModelChange)="campo('fechaEdtf', $event)"
+                  placeholder="2011  ·  2009/2011  ·  2011-05"
+                  class="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2 font-mono text-sm outline-none focus:border-morado" />
+                <small class="campo__ayuda">Formato de fecha extendido. Es lo que permite intercambiar la ficha con otro catálogo.</small>
+              </label>
+              <label class="block">
+                <span class="font-alternate text-dato font-bold uppercase tracking-[0.18em] text-seccion">Nota sobre la fecha</span>
+                <input type="text" [ngModel]="f.notaFecha" (ngModelChange)="campo('notaFecha', $event)"
+                  placeholder="Fecha aproximada"
+                  class="campo__control" />
+              </label>
+              <!--
+                UN IDIOMA SE ELIGE; UN SEGUNDO IDIOMA SE AÑADE.
+                La versión anterior pintaba una casilla por idioma del vocabulario y el dueño del
+                proyecto lo paró. Tenía razón: de 171 fichas, 164 son solo en español, así que
+                puntear una lista de siete obliga a todo el mundo a resolver el caso raro. Añadir es
+                una acción, y solo la ejecuta quien la necesita.
+              -->
+              <div class="block sm:col-span-2">
+                <span class="font-alternate text-dato font-bold uppercase tracking-[0.18em] text-seccion">Idioma</span>
+                <div class="mt-1 space-y-2">
+                  @for (codigo of idiomasDeLaFicha(); track $index) {
+                    <div class="flex flex-wrap items-center gap-2">
+                      <label class="min-w-0 flex-1">
+                        <span class="sr-only">Idioma {{ $index + 1 }}</span>
+                        <select [ngModel]="codigo" (ngModelChange)="cambiarIdioma($index, $event)"
+                          [name]="'idioma-' + $index"
+                          class="campo__control">
+                          @for (idioma of vocabularios()?.idiomas ?? []; track idioma.codigo) {
+                            <option [value]="idioma.codigo">{{ idioma.nombre }}</option>
+                          }
+                        </select>
+                      </label>
+                      @if (idiomasDeLaFicha().length > 1) {
+                        <app-boton importancia="destructiva" tamano="menudo" (accion)="cambiarIdioma($index, '')">Quitar</app-boton>
+                      }
+                    </div>
+                  }
+                </div>
+                @if (quedanIdiomasPorAgregar()) {
+                  <button type="button" (click)="agregarIdioma()"
+                    class="mt-2 min-h-11 rounded-xl border border-dashed border-slate-300 px-4 text-dato font-bold text-morado hover:border-morado">
+                    Agregar otro idioma
+                  </button>
+                }
+                <small class="mt-2 block text-dato text-slate-400">
+                  «Lengua nativa (sin especificar)» es lo que dice la fuente cuando no identifica la
+                  lengua: conviene sustituirlo cuando se sepa cuál es.
+                </small>
+              </div>
+            </div>
+          </fieldset>
+
+          <!--
+            LA DESCRIPCION FISICA SOLO APARECE SI HAY OBJETO FISICO, y la duración va por su cuenta.
+            El criterio es este: «la descripción física solamente aplica cuando el formato
+            es físico, o mixto, no cuando es digital». Comprobado contra el acervo: de las 17
+            digitales, las cuatro que traen tamaño son tres plegables IMPRESOS y la versión digital de
+            un libro de 500 páginas; es decir, casos mixtos o mal clasificados, no un contraejemplo.
+
+            LA DURACION NO SIGUE ESA REGLA y por eso se separó: 33 publicaciones físicas la declaran,
+            pero también DOS videoclips digitales. Lo que la hace pertinente no es el soporte sino que
+            el contenido transcurra en el tiempo, así que la gobierna la faceta de contenido.
+          -->
+          @if (aplicaDescripcionFisica()) {
+            <fieldset class="mt-8 border-t border-filete pt-5">
+              <legend class="px-2 font-alternate text-dato font-bold uppercase tracking-[0.18em] text-seccion">Descripción física</legend>
+              <div class="grid gap-4 sm:grid-cols-2">
+                <label class="block">
+                  <span class="font-alternate text-dato font-bold uppercase tracking-[0.18em] text-seccion">Tamaño o formato</span>
+                  <input type="text" [ngModel]="f.tamanoFormato" (ngModelChange)="campo('tamanoFormato', $event)"
+                    name="tamanoFormato" placeholder="24 x 34,5 cm"
+                    class="campo__control" />
+                </label>
+                <label class="block">
+                  <span class="font-alternate text-dato font-bold uppercase tracking-[0.18em] text-seccion">Páginas</span>
+                  <input type="text" [ngModel]="f.paginas" (ngModelChange)="campo('paginas', $event)"
+                    name="paginas" placeholder="78 p."
+                    class="campo__control" />
+                </label>
+              </div>
+            </fieldset>
+          } @else {
+            <p class="mt-6 rounded-xl bg-slate-50 p-4 text-dato leading-relaxed text-slate-500">
+              El tamaño y el número de páginas no se piden porque esta publicación se declaró
+              <b>{{ f.formato }}</b>. Si además existe en papel, cámbiala a «Mixto» en el paso anterior.
+            </p>
+          }
+
+          @if (aplicaDuracion()) {
+            <fieldset class="mt-8 border-t border-filete pt-5">
+              <legend class="px-2 font-alternate text-dato font-bold uppercase tracking-[0.18em] text-seccion">Duración</legend>
+              <label class="block sm:max-w-xs">
+                <span class="sr-only">Duración</span>
+                <input type="text" [ngModel]="f.duracion" (ngModelChange)="campo('duracion', $event)"
+                  name="duracion" placeholder="4’30’’"
+                  class="campo__control" />
+                <small class="campo__ayuda">Aparece porque el contenido transcurre en el tiempo: audio, vídeo o palabra hablada.</small>
+              </label>
+            </fieldset>
+          }
+
+          <!--
+            LA PORTADA SE SUBE, NO SE PEGA. Pedía la ruta de un fichero, así que había que subirlo
+            por otro sitio y acertar a escribirla; y una URL de fuera deja la portada del catálogo
+            dependiendo de un servidor ajeno. El criterio es este: «las portadas deberían
+            poderse subir y no poner en un link».
+          -->
+          <fieldset class="mt-8 border-t border-filete pt-5">
+            <legend class="px-2 font-alternate text-dato font-bold uppercase tracking-[0.18em] text-seccion">Portada</legend>
+            <app-cargador-de-imagen
+              etiqueta="Portada de la publicación"
+              [rutaActual]="f.miniaturaRuta"
+              (rutaCambia)="campo('miniaturaRuta', $event)"></app-cargador-de-imagen>
+          </fieldset>
+          }
+
+          @if (paso() === 4) {
+          <fieldset class="mt-8 border-t border-filete pt-5">
+            <legend class="px-2 font-alternate text-dato font-bold uppercase tracking-[0.18em] text-seccion">Dónde encaja en el acervo</legend>
+            <div class="grid gap-4 sm:grid-cols-2">
+              <!--
+                SE ELIGE EL SITIO Y LA SECCION SALE SOLA.
+                Antes había dos campos: un desplegable de sección y la ruta ESCRITA A MANO. El dueño
+                del proyecto pidió que la ruta se calculara «como se hace en el resto», y los datos
+                dicen cómo: no sale de las categorías —la subcategoría aparece en la ruta en 17 de
+                170 fichas y la categoría secundaria en NINGUNA—, pero la SECCION sí sale de la ruta,
+                y en las 170. Hay 22 rutas para 9 secciones: es una taxonomía cerrada que se recorre,
+                no un texto que se escribe.
+              -->
+              <div class="block sm:col-span-2">
+                <label for="publicacion-ruta" class="font-alternate text-dato font-bold uppercase tracking-[0.18em] text-seccion">Ubicación en el acervo *</label>
+                <select id="publicacion-ruta" name="rutaSeccion"
+                  [ngModel]="f.rutaSeccion" (ngModelChange)="elegirRuta($event)"
+                  class="campo__control">
+                  <option value="">Sin ubicar</option>
+                  @for (grupo of rutasPorSeccion(); track grupo.seccion) {
+                    <optgroup [label]="grupo.seccion">
+                      @for (sitio of grupo.rutas; track sitio.ruta) {
+                        <option [value]="sitio.ruta">{{ sitio.hoja }} · {{ sitio.usos }}</option>
+                      }
+                    </optgroup>
+                  }
+                </select>
+                @if (f.seccionPrincipal) {
+                  <small class="campo__ayuda">
+                    Sección: <b>{{ f.seccionPrincipal }}</b>, y la ruta completa queda
+                    «{{ f.rutaSeccion }}». Las dos salen de aquí.
+                  </small>
+                } @else {
+                  <small class="campo__ayuda">La sección se deduce del sitio que elijas.</small>
+                }
+              </div>
+              <label class="block">
+                <span class="font-alternate text-dato font-bold uppercase tracking-[0.18em] text-seccion">Categoría secundaria</span>
+                <select [ngModel]="f.categoriaSecundaria" (ngModelChange)="campo('categoriaSecundaria', $event)"
+                  class="campo__control">
+                  <option value="">Ninguna</option>
+                  @for (categoria of vocabularios()?.categoriasSecundarias ?? []; track categoria.valor) {
+                    <option [value]="categoria.valor">{{ categoria.valor }} · {{ categoria.usos }}</option>
+                  }
+                </select>
+              </label>
+              <label class="block">
+                <span class="font-alternate text-dato font-bold uppercase tracking-[0.18em] text-seccion">Subcategoría</span>
+                <select [ngModel]="f.subcategoria" (ngModelChange)="campo('subcategoria', $event)"
+                  class="campo__control">
+                  <option value="">Ninguna</option>
+                  @for (sub of vocabularios()?.subcategorias ?? []; track sub.valor) {
+                    <option [value]="sub.valor">{{ sub.valor }} · {{ sub.usos }}</option>
+                  }
+                </select>
+              </label>
+              <label class="block">
+                <span class="font-alternate text-dato font-bold uppercase tracking-[0.18em] text-seccion">Práctica musical</span>
+                <select [ngModel]="f.practicaMusical" (ngModelChange)="campo('practicaMusical', $event)"
+                  class="campo__control">
+                  <option value="">Sin declarar</option>
+                  @for (practica of vocabularios()?.practicasMusicales ?? []; track practica.valor) {
+                    <option [value]="practica.valor">{{ practica.valor }} · {{ practica.usos }}</option>
+                  }
+                </select>
+              </label>
+              <!--
+                AMBITO Y «AMBITO EN LETRA» ERAN DOS ROTULOS QUE NO EXPLICABAN NADA. El dueño del
+                proyecto lo dijo: «no entiendo la aplicación entre ámbito y ámbito en letra». Medido
+                sobre las 16 fichas que traen el segundo, lo que guarda es DETALLE TERRITORIAL
+                —«Tolima - Saldaña», «Norte del Cauca», «Nacional y población afrochocoana»— y, en
+                tres casos, una errata del propio ámbito («Naiconal») o una URL pegada. O sea: el
+                primero es la escala y el segundo es el lugar concreto. Así se rotulan ahora.
+              -->
+              <label class="block">
+                <span class="font-alternate text-dato font-bold uppercase tracking-[0.18em] text-seccion">Ámbito territorial</span>
+                <select [ngModel]="f.ambito" (ngModelChange)="campo('ambito', $event)" name="ambito"
+                  class="campo__control">
+                  <option value="">Sin declarar</option>
+                  @for (ambito of vocabularios()?.ambitos ?? []; track ambito.valor) {
+                    <option [value]="ambito.valor">{{ ambito.valor }} · {{ ambito.usos }}</option>
+                  }
+                </select>
+                <small class="campo__ayuda">La escala: nacional, una región o internacional.</small>
+              </label>
+              <label class="block">
+                <span class="font-alternate text-dato font-bold uppercase tracking-[0.18em] text-seccion">Detalle territorial</span>
+                <input type="text" [ngModel]="f.ambitoTexto" (ngModelChange)="campo('ambitoTexto', $event)"
+                  name="ambitoTexto" placeholder="Tolima – Saldaña"
+                  class="campo__control" />
+                <small class="campo__ayuda">Opcional. El lugar concreto, cuando la escala se queda corta.</small>
+              </label>
+              <label class="block sm:col-span-2">
+                <span class="font-alternate text-dato font-bold uppercase tracking-[0.18em] text-seccion">Palabras clave</span>
+                <input type="text" [ngModel]="f.palabrasClave" (ngModelChange)="campo('palabrasClave', $event)"
+                  placeholder="banda, arreglos, formación"
+                  class="campo__control" />
+                <small class="campo__ayuda">Separadas por comas. El catálogo las guarda una a una y filtra por ellas.</small>
+              </label>
+            </div>
+          </fieldset>
+
+          <!--
+            LOS CATALOGOS TRANSVERSALES, DETRAS DE UNA ACCION.
+            Comprobado: la categoría del sistema la usan CERO publicaciones, los vínculos con prácticas
+            musicales CERO y los de territorios sonoros CERO, mientras la taxonomía editorial la usan
+            las 171. Estaban delante y convertían este paso en un muro de treinta y un controles.
+            No se recortan —sirven para cruzar la publicación con las fichas de prácticas y
+            territorios—: se apartan del camino de quien cataloga un libro.
+          -->
+          <div class="mt-6">
+            @if (!cruzarConElSistema()) {
+              <app-boton importancia="secundaria" tamano="menudo" (accion)="cruzarConElSistema.set(true)">Cruzar con los catálogos del sistema</app-boton>
+              <p class="mt-2 text-dato leading-relaxed text-prosa">
+                Opcional. Sirve para que el portal relacione esta publicación con las fichas de
+                prácticas musicales y territorios sonoros. La clasificación editorial de arriba es la
+                que usa el catálogo.
+              </p>
+            } @else {
+              <div class="space-y-4">
+                <div class="block">
+                  <label for="publicacion-categoria" class="font-alternate text-dato font-bold uppercase tracking-[0.18em] text-seccion">Categoría</label>
+                  <app-selector-de-categoria modulo="editorial" idCampo="publicacion-categoria"
+                    [categoriaId]="f.categoriaId" (categoriaIdChange)="campo('categoriaId', $event)"></app-selector-de-categoria>
+                </div>
+                <app-selector-de-clasificacion
+              [practicasElegidas]="f.practicasMusicalesIds"
+              [territoriosElegidos]="f.territoriosSonorosIds"
+              (practicasElegidasChange)="campo('practicasMusicalesIds', $event)"
+                  (territoriosElegidosChange)="campo('territoriosSonorosIds', $event)"></app-selector-de-clasificacion>
+              </div>
+            }
+          </div>
+          }
+
+          @if (paso() === 5) {
+          <!--
+            LOS CREDITOS SON LO QUE HACE CITABLE LA OBRA. El agente se escribe por su nombre y el
+            servidor lo busca en el fichero de autoridades; si no está, lo crea y lo marca para que
+            alguien confirme después que no es un duplicado escrito de otra forma.
+          -->
+          <fieldset class="mt-8 border-t border-filete pt-5">
+            <legend class="px-2 font-alternate text-dato font-bold uppercase tracking-[0.18em] text-seccion">Créditos</legend>
+            @for (credito of f.creditos; track $index) {
+              <div class="mb-3 grid gap-2 sm:grid-cols-[1fr_8rem_12rem_auto_auto]">
+                <label class="block min-w-0">
+                  <span class="sr-only">Nombre del crédito {{ $index + 1 }}</span>
+                  <input type="text" [ngModel]="credito.nombre" (ngModelChange)="campoDelCredito($index, { nombre: $event })"
+                    [name]="'credito-nombre-' + $index"
+                    placeholder="Nombres y apellidos, de una sola persona"
+                    class="campo__control" />
+                  @if (pareceDosPersonas(credito.nombre)) {
+                    <!--
+                      NUEVE AGENTES DEL ACERVO ERAN DOS PERSONAS EN UN MISMO REGISTRO, escritas con
+                      una coma en medio. Se separaron; esto evita que entre el décimo. Avisa y no
+                      impide: un nombre legítimo puede llevar coma y eso lo decide quien cataloga.
+                    -->
+                    <small class="mt-1 block text-dato text-amber-700">
+                      ¿Son dos personas? Cada una va en su propio crédito.
+                    </small>
+                  }
+                </label>
+                <label class="block">
+                  <span class="sr-only">Tipo de agente del crédito {{ $index + 1 }}</span>
+                  <select [ngModel]="credito.tipo" (ngModelChange)="campoDelCredito($index, { tipo: $event })"
+                    class="campo__control">
+                    <option value="persona">Persona</option>
+                    <option value="entidad">Entidad</option>
+                  </select>
+                </label>
+                <label class="block">
+                  <span class="sr-only">Papel del crédito {{ $index + 1 }}</span>
+                  <select [ngModel]="credito.rolCodigo" (ngModelChange)="elegirRol($index, $event)"
+                    class="campo__control">
+                    @for (rol of vocabularios()?.rolesDeCredito ?? []; track rol.codigo + rol.etiqueta) {
+                      <option [value]="rol.codigo">{{ rol.etiqueta }}</option>
+                    }
+                  </select>
+                </label>
+                <label class="flex items-center gap-2 px-1">
+                  <input type="checkbox" [ngModel]="credito.principal" (ngModelChange)="campoDelCredito($index, { principal: $event })"
+                    class="h-4 w-4 rounded border-slate-300 text-morado" />
+                  <span class="text-dato font-bold uppercase tracking-wider text-slate-500">Principal</span>
+                </label>
+                <app-boton importancia="destructiva" tamano="menudo" (accion)="quitarCredito($index)">Quitar</app-boton>
+              </div>
+            }
+            <app-boton importancia="secundaria" tamano="menudo" (accion)="agregarCredito()">Agregar un crédito</app-boton>
+            <p class="mt-3 text-dato leading-relaxed text-prosa">
+              <b>El nombre se escribe completo y en su orden natural</b>: nombres y luego apellidos,
+              «Ibis Amador Martelo». Así están los 370 agentes del acervo, y así se busca. Una persona
+              por crédito: si la obra es de dos, van dos créditos.
+            </p>
+            <p class="mt-2 text-dato leading-relaxed text-prosa">
+              «Principal» marca la autoría con la que se cita la obra. Si no se marca ninguna, la
+              ficha usa las entidades acreditadas y, si tampoco hay, las personas.
+            </p>
+          </fieldset>
+
+          <fieldset class="mt-8 border-t border-filete pt-5">
+            <legend class="px-2 font-alternate text-dato font-bold uppercase tracking-[0.18em] text-seccion">Dónde se consulta</legend>
+            @for (acceso of f.accesos; track $index) {
+              <div class="mb-3 rounded-xl border border-slate-100 p-3">
+                <div class="grid gap-2 sm:grid-cols-[8rem_1fr_auto]">
+                  <label class="block">
+                    <span class="sr-only">Tipo de la vía {{ $index + 1 }}</span>
+                    <select [ngModel]="acceso.tipo" (ngModelChange)="campoDelAcceso($index, { tipo: $event })"
+                      class="campo__control">
+                      <option value="enlace">Enlace</option>
+                      <option value="ubicacion">Consulta presencial</option>
+                    </select>
+                  </label>
+                  @if (acceso.tipo === 'enlace') {
+                    <label class="block">
+                      <span class="sr-only">Dirección de la vía {{ $index + 1 }}</span>
+                      <input type="url" [ngModel]="acceso.url" (ngModelChange)="campoDelAcceso($index, { url: $event })"
+                        placeholder="https://www.mincultura.gov.co/…"
+                        class="w-full rounded-xl border border-slate-200 px-3 py-2 font-mono text-xs outline-none focus:border-morado" />
+                    </label>
+                  } @else {
+                    <label class="block">
+                      <span class="sr-only">Lugar de la vía {{ $index + 1 }}</span>
+                      <input type="text" [ngModel]="acceso.ubicacionFisica" (ngModelChange)="campoDelAcceso($index, { ubicacionFisica: $event })"
+                        placeholder="Biblioteca Nacional, oficina del Área de Música"
+                        class="campo__control" />
+                    </label>
+                  }
+                  <app-boton importancia="destructiva" tamano="menudo" (accion)="quitarAcceso($index)">Quitar</app-boton>
+                </div>
+                <label class="mt-2 block">
+                  <span class="sr-only">Nota de la vía {{ $index + 1 }}</span>
+                  <input type="text" [ngModel]="acceso.nota" (ngModelChange)="campoDelAcceso($index, { nota: $event })"
+                    placeholder="Nota (opcional)"
+                    class="w-full rounded-xl border border-slate-200 px-3 py-2 text-xs outline-none focus:border-morado" />
+                </label>
+              </div>
+            }
+            <div class="flex flex-wrap gap-2">
+              <app-boton importancia="secundaria" tamano="menudo" (accion)="agregarAcceso('enlace')">Agregar un enlace</app-boton>
+              <app-boton importancia="secundaria" tamano="menudo" (accion)="agregarAcceso('ubicacion')">Agregar una consulta presencial</app-boton>
+            </div>
+            <p class="mt-3 text-dato leading-relaxed text-prosa">
+              La ficha deriva el texto del botón de la dirección: un «.pdf» ofrece descargarlo y un
+              vídeo ofrece verlo. No hace falta escribir la etiqueta.
+            </p>
+          </fieldset>
+          }
+
+          @if (paso() === 6) {
+          <!--
+            EL ULTIMO PASO NO PIDE NADA: enseña lo escrito. Decidir con los campos delante evita el
+            «guardo y ya veré» que deja fichas a medias.
+          -->
+          <dl class="mt-6 grid gap-3 rounded-xl border border-slate-200 p-4 text-xs">
+            @for (fila of resumenDeLaFicha(); track fila.rotulo) {
+              <div class="flex flex-wrap gap-2">
+                <dt class="w-40 shrink-0 font-black uppercase tracking-wider text-slate-500">{{ fila.rotulo }}</dt>
+                <dd class="min-w-0 flex-1 break-words text-slate-800">{{ fila.valor }}</dd>
+              </div>
+            }
+          </dl>
+
+          <!--
+            LO QUE ESTE FORMULARIO SIGUE SIN EDITAR, dicho en pantalla en vez de dejar que alguien lo
+            busque: las fuentes y los derechos son lo que decide si una ficha puede publicarse, y se
+            deciden aparte a propósito —publicar la ficha y repartir el archivo son dos
+            autorizaciones distintas—.
+          -->
+          <p class="mt-5 rounded-xl bg-slate-50 p-4 text-dato leading-relaxed text-slate-500">
+            Las fuentes y los derechos no se editan aquí. Sin al menos una fuente y sin derechos
+            verificados, la ficha se guarda pero no sale al portal.
+          </p>
+          }
+
+          @if (error()) {
+            <div role="alert" class="mt-4 rounded-xl border border-rose-200 bg-rose-50 p-3 text-xs font-bold text-rose-800">{{ error() }}</div>
+          }
+
+          <div class="mt-6 flex flex-wrap items-center justify-between gap-3">
+            <!--
+              EL AUTOGUARDADO SE VE. Un mecanismo silencioso no tranquiliza a nadie, y cuando falla
+              hay que decirlo: es el momento en que conviene copiar el texto a otro sitio.
+            -->
+            <p class="text-dato text-slate-500" role="status" aria-live="polite">
+              @switch (autoguardado.estado()) {
+                @case ('guardando') { Guardando borrador… }
+                @case ('guardado') { Borrador guardado {{ autoguardado.ultimoGuardado() | date: 'HH:mm':'':'es-CO' }} }
+                @case ('fallido') { <span class="text-amber-700">No se pudo guardar el borrador. Copia el texto antes de cerrar.</span> }
+              }
+            </p>
+
+            <div class="flex flex-wrap items-center justify-end gap-2">
+              <app-boton importancia="secundaria" (accion)="cerrarFicha()">Cancelar</app-boton>
+              @if (paso() > 1) {
+                <app-boton importancia="secundaria" (accion)="pasoAnterior()">Atrás</app-boton>
+              }
+              @if (paso() < pasos.length) {
+                <app-boton importancia="principal" (accion)="siguientePaso()">Siguiente</app-boton>
+              } @else {
+                <!--
+                  GUARDAR YA NO EXIGE EL CODIGO, y eso era una regresión de verdad: al quitarlo del
+                  formulario, la condición se quedó pidiendo un campo que ya nadie rellena, así que
+                  el botón nunca se habilitaba y NO SE PODIA CREAR NINGUNA FICHA. Lo destapó el
+                  recorrido completo de un registro, no una prueba unitaria: ninguna miraba el botón.
+                -->
+                <app-boton importancia="principal" [deshabilitado]="!sePuedeGuardar()" (accion)="guardarFicha()">{{ guardando() ? 'Guardando…' : 'Guardar' }}</app-boton>
+              }
+            </div>
+          </div>
+        </div>
+      </div>
+    }
+  </div>
+}

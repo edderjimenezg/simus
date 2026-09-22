@@ -1,0 +1,27 @@
+<main class="mx-auto w-full max-w-xl px-4 py-16 sm:px-6">
+  <h1 class="font-alternate text-2xl font-bold uppercase tracking-wide text-morado">Confirmación de correo</h1>
+
+  @if (trabajando()) {
+    <p role="status" class="mt-6 text-sm text-slate-600">Comprobando el enlace…</p>
+  } @else if (confirmado()) {
+    <div class="mt-6 rounded-2xl border border-emerald-200 bg-emerald-50 p-5">
+      <p class="text-base font-bold text-emerald-900">Tu correo quedó confirmado.</p>
+      <p class="mt-2 text-sm leading-relaxed text-emerald-900">
+        Tu organización ya puede enviar sus procesos a revisión y publicar sus ediciones.
+      </p>
+      <a routerLink="/ecosistema/mi-panel"
+         class="mt-5 inline-block rounded-xl bg-morado px-4 py-2 text-xs font-black uppercase tracking-wider text-white no-underline">
+        Ir a mi panel
+      </a>
+    </div>
+  } @else {
+    <!-- EL MOTIVO EXACTO Y QUE HACER CON EL: «venció» pide otro enlace, «no existe» pide revisar. -->
+    <div class="mt-6 rounded-2xl border border-amber-200 bg-amber-50 p-5">
+      <p role="alert" class="text-sm leading-relaxed text-amber-900">{{ error() }}</p>
+      <a routerLink="/ecosistema/mi-panel"
+         class="mt-5 inline-block rounded-xl border border-amber-300 bg-white px-4 py-2 text-xs font-bold text-morado no-underline">
+        Entrar a mi panel y pedir otro enlace
+      </a>
+    </div>
+  }
+</main>

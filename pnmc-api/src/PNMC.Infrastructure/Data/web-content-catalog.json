@@ -1,0 +1,3615 @@
+{
+  "version": 1,
+  "entries": [
+    {
+      "key": "about_hero_tag",
+      "groupId": "about_hero_presentation",
+      "groupLabel": "Hero y Presentación",
+      "section": "Sobre PNMC",
+      "label": "Hero - Etiqueta",
+      "limit": 50,
+      "defaultValue": "Sobre el PNMC"
+    },
+    {
+      "key": "about_hero_title",
+      "groupId": "about_hero_presentation",
+      "groupLabel": "Hero y Presentación",
+      "section": "Sobre PNMC",
+      "label": "Hero - Título",
+      "limit": 80,
+      "defaultValue": "Sobre el"
+    },
+    {
+      "key": "about_hero_accent",
+      "groupId": "about_hero_presentation",
+      "groupLabel": "Hero y Presentación",
+      "section": "Sobre PNMC",
+      "label": "Hero - Título acentuado",
+      "limit": 50,
+      "defaultValue": "PNMC"
+    },
+    {
+      "key": "about_description",
+      "groupId": "about_hero_presentation",
+      "groupLabel": "Hero y Presentación",
+      "section": "Sobre PNMC",
+      "label": "Hero - Descripción",
+      "limit": 300,
+      "defaultValue": "Reconocemos la música como una expresión transformadora para el cuidado de la vida."
+    },
+    {
+      "key": "about_presentation_bg",
+      "groupId": "about_hero_presentation",
+      "groupLabel": "Hero y Presentación",
+      "section": "Sobre PNMC",
+      "label": "Presentación - Palabra de fondo",
+      "limit": 50,
+      "defaultValue": "POLÍTICA"
+    },
+    {
+      "key": "about_presentation_title",
+      "groupId": "about_hero_presentation",
+      "groupLabel": "Hero y Presentación",
+      "section": "Sobre PNMC",
+      "label": "Presentación - Título",
+      "limit": 80,
+      "defaultValue": "Presentación"
+    },
+    {
+      "key": "about_presentation_intro_1",
+      "groupId": "about_hero_presentation",
+      "groupLabel": "Hero y Presentación",
+      "section": "Sobre PNMC",
+      "label": "Presentación - Párrafo 1",
+      "limit": 700,
+      "defaultValue": "La música nos conecta y nos permite expresar quiénes somos. En Colombia, nuestra diversidad sonora fortalece los vínculos comunitarios y refleja la riqueza cultural de cada región. Desde hace 20 años, el Plan Nacional de Música para la Convivencia (PNMC) protege y proyecta nuestra pluralidad musical."
+    },
+    {
+      "key": "about_presentation_intro_2",
+      "groupId": "about_hero_presentation",
+      "groupLabel": "Hero y Presentación",
+      "section": "Sobre PNMC",
+      "label": "Presentación - Párrafo 2",
+      "limit": 700,
+      "defaultValue": "Entendemos la música como un derecho cultural y una herramienta fundamental para la equidad y la construcción de paz. Nuestra nueva hoja de ruta, “Huellas y apuestas de la diversidad sonora”, nace de un proceso participativo sin precedentes en todo el país. Es una política renovada, inclusiva y descentralizada para los retos del futuro."
+    },
+    {
+      "key": "about_base_tag",
+      "groupId": "about_hero_presentation",
+      "groupLabel": "Hero y Presentación",
+      "section": "Sobre PNMC",
+      "label": "Apuesta base - Etiqueta",
+      "limit": 80,
+      "defaultValue": "Apuesta Base"
+    },
+    {
+      "key": "about_base_quote",
+      "groupId": "about_hero_presentation",
+      "groupLabel": "Hero y Presentación",
+      "section": "Sobre PNMC",
+      "label": "Apuesta base - Texto",
+      "limit": 500,
+      "defaultValue": "Consolidar la equidad de condiciones y oportunidades en el campo musical, promoviendo la participación y el ejercicio pleno de los derechos culturales."
+    },
+    {
+      "key": "about_base_objective_label",
+      "groupId": "about_hero_presentation",
+      "groupLabel": "Hero y Presentación",
+      "section": "Sobre PNMC",
+      "label": "Apuesta base - Etiqueta objetivo",
+      "limit": 80,
+      "defaultValue": "Objetivo General"
+    },
+    {
+      "key": "about_base_plan_label",
+      "groupId": "about_hero_presentation",
+      "groupLabel": "Hero y Presentación",
+      "section": "Sobre PNMC",
+      "label": "Apuesta base - Etiqueta plan",
+      "limit": 100,
+      "defaultValue": "Plan Nacional de Música"
+    },
+    {
+      "key": "about_collective_tag",
+      "groupId": "about_hero_presentation",
+      "groupLabel": "Hero y Presentación",
+      "section": "Sobre PNMC",
+      "label": "Construcción colectiva - Etiqueta",
+      "limit": 80,
+      "defaultValue": "Construcción Colectiva"
+    },
+    {
+      "key": "about_collective_text",
+      "groupId": "about_hero_presentation",
+      "groupLabel": "Hero y Presentación",
+      "section": "Sobre PNMC",
+      "label": "Construcción colectiva - Texto",
+      "limit": 500,
+      "defaultValue": "El PNMC 2025–2035, Huellas y apuestas de la diversidad sonora, nace de un proceso participativo sin precedentes, recogiendo voces a través de encuentros territoriales en todo el país."
+    },
+    {
+      "key": "about_objectives_bg",
+      "groupId": "about_objectives",
+      "groupLabel": "Objetivos",
+      "section": "Sobre PNMC",
+      "label": "Objetivos - Palabra de fondo",
+      "limit": 50,
+      "defaultValue": "ESTRATEGIA"
+    },
+    {
+      "key": "about_objectives_title",
+      "groupId": "about_objectives",
+      "groupLabel": "Objetivos",
+      "section": "Sobre PNMC",
+      "label": "Objetivos - Título",
+      "limit": 80,
+      "defaultValue": "Objetivos de Eje"
+    },
+    {
+      "key": "about_objective_1_axis",
+      "groupId": "about_objectives",
+      "groupLabel": "Objetivos",
+      "section": "Sobre PNMC",
+      "label": "Objetivo 1 - Nombre del eje",
+      "limit": 200,
+      "defaultValue": "MÚSICA PARA LA VIDA, EL DIÁLOGO INTERCULTURAL Y LA DIVERSIDAD BIOCULTURAL"
+    },
+    {
+      "key": "about_objective_1_title",
+      "groupId": "about_objectives",
+      "groupLabel": "Objetivos",
+      "section": "Sobre PNMC",
+      "label": "Objetivo 1 - Título",
+      "limit": 100,
+      "defaultValue": "Formación y Cuidado"
+    },
+    {
+      "key": "about_objective_1_desc",
+      "groupId": "about_objectives",
+      "groupLabel": "Objetivos",
+      "section": "Sobre PNMC",
+      "label": "Objetivo 1 - Descripción",
+      "limit": 500,
+      "defaultValue": "Promover procesos de formación y práctica musical que fortalezcan la relación ética, sensible y sostenible entre las personas y sus territorios, como medio para el cuidado biocultural y la paz."
+    },
+    {
+      "key": "about_objective_1_button",
+      "groupId": "about_objectives",
+      "groupLabel": "Objetivos",
+      "section": "Sobre PNMC",
+      "label": "Objetivo 1 - Botón",
+      "limit": 40,
+      "defaultValue": "Explorar eje"
+    },
+    {
+      "key": "about_objective_2_axis",
+      "groupId": "about_objectives",
+      "groupLabel": "Objetivos",
+      "section": "Sobre PNMC",
+      "label": "Objetivo 2 - Nombre del eje",
+      "limit": 200,
+      "defaultValue": "FORTALECIMIENTO DE LAS PRÁCTICAS, EXPRESIONES Y OFICIOS DE LA MÚSICA"
+    },
+    {
+      "key": "about_objective_2_title",
+      "groupId": "about_objectives",
+      "groupLabel": "Objetivos",
+      "section": "Sobre PNMC",
+      "label": "Objetivo 2 - Título",
+      "limit": 100,
+      "defaultValue": "Desarrollo Integral"
+    },
+    {
+      "key": "about_objective_2_desc",
+      "groupId": "about_objectives",
+      "groupLabel": "Objetivos",
+      "section": "Sobre PNMC",
+      "label": "Objetivo 2 - Descripción",
+      "limit": 500,
+      "defaultValue": "Cualificar procesos de creación, producción y circulación. Fomentar la formalización de oficios y saberes para lograr el reconocimiento profesional y la equidad en todas las regiones."
+    },
+    {
+      "key": "about_objective_2_button",
+      "groupId": "about_objectives",
+      "groupLabel": "Objetivos",
+      "section": "Sobre PNMC",
+      "label": "Objetivo 2 - Botón",
+      "limit": 40,
+      "defaultValue": "Explorar eje"
+    },
+    {
+      "key": "about_objective_3_axis",
+      "groupId": "about_objectives",
+      "groupLabel": "Objetivos",
+      "section": "Sobre PNMC",
+      "label": "Objetivo 3 - Nombre del eje",
+      "limit": 200,
+      "defaultValue": "GOBERNANZA MUSICAL E INTEGRACIÓN CULTURAL E INTERSECTORIAL"
+    },
+    {
+      "key": "about_objective_3_title",
+      "groupId": "about_objectives",
+      "groupLabel": "Objetivos",
+      "section": "Sobre PNMC",
+      "label": "Objetivo 3 - Título",
+      "limit": 100,
+      "defaultValue": "Gobernanza y Gestión"
+    },
+    {
+      "key": "about_objective_3_desc",
+      "groupId": "about_objectives",
+      "groupLabel": "Objetivos",
+      "section": "Sobre PNMC",
+      "label": "Objetivo 3 - Descripción",
+      "limit": 500,
+      "defaultValue": "Impulsar la legitimidad y articulación de los mecanismos de organización del sector con el Estado, orientada a la sostenibilidad cultural y la dignificación de los oficios musicales."
+    },
+    {
+      "key": "about_objective_3_button",
+      "groupId": "about_objectives",
+      "groupLabel": "Objetivos",
+      "section": "Sobre PNMC",
+      "label": "Objetivo 3 - Botón",
+      "limit": 40,
+      "defaultValue": "Explorar eje"
+    },
+    {
+      "key": "about_approaches_tag",
+      "groupId": "about_approaches",
+      "groupLabel": "Enfoques transversales",
+      "section": "Sobre PNMC",
+      "label": "Enfoques - Etiqueta",
+      "limit": 60,
+      "defaultValue": "TRANSVERSALIDAD"
+    },
+    {
+      "key": "about_approaches_title",
+      "groupId": "about_approaches",
+      "groupLabel": "Enfoques transversales",
+      "section": "Sobre PNMC",
+      "label": "Enfoques - Título",
+      "limit": 100,
+      "defaultValue": "Enfoques del Sistema"
+    },
+    {
+      "key": "about_approaches_desc",
+      "groupId": "about_approaches",
+      "groupLabel": "Enfoques transversales",
+      "section": "Sobre PNMC",
+      "label": "Enfoques - Descripción",
+      "limit": 400,
+      "defaultValue": "Consideramos las particularidades sociales y geográficas para garantizar un acceso equitativo a la cultura."
+    },
+    {
+      "key": "about_approach_1_title",
+      "groupId": "about_approaches",
+      "groupLabel": "Enfoques transversales",
+      "section": "Sobre PNMC",
+      "label": "Enfoque 1 - Título",
+      "limit": 80,
+      "defaultValue": "Biocultural"
+    },
+    {
+      "key": "about_approach_1_desc",
+      "groupId": "about_approaches",
+      "groupLabel": "Enfoques transversales",
+      "section": "Sobre PNMC",
+      "label": "Enfoque 1 - Descripción",
+      "limit": 350,
+      "defaultValue": "Relación música-entorno natural. Integración de saberes ancestrales y preservación sonora ambiental."
+    },
+    {
+      "key": "about_approach_2_title",
+      "groupId": "about_approaches",
+      "groupLabel": "Enfoques transversales",
+      "section": "Sobre PNMC",
+      "label": "Enfoque 2 - Título",
+      "limit": 80,
+      "defaultValue": "Poblacional"
+    },
+    {
+      "key": "about_approach_2_desc",
+      "groupId": "about_approaches",
+      "groupLabel": "Enfoques transversales",
+      "section": "Sobre PNMC",
+      "label": "Enfoque 2 - Descripción",
+      "limit": 350,
+      "defaultValue": "Equidad para infancia, mujeres, diversidades de género, pueblos étnicos y personas con capacidades diversas."
+    },
+    {
+      "key": "about_approach_3_title",
+      "groupId": "about_approaches",
+      "groupLabel": "Enfoques transversales",
+      "section": "Sobre PNMC",
+      "label": "Enfoque 3 - Título",
+      "limit": 80,
+      "defaultValue": "Territorial"
+    },
+    {
+      "key": "about_approach_3_desc",
+      "groupId": "about_approaches",
+      "groupLabel": "Enfoques transversales",
+      "section": "Sobre PNMC",
+      "label": "Enfoque 3 - Descripción",
+      "limit": 350,
+      "defaultValue": "Estrategias diferenciadas según geografía, infraestructura local y financiamiento por contextos."
+    },
+    {
+      "key": "about_actors_bg",
+      "groupId": "about_actors",
+      "groupLabel": "Actores del Plan",
+      "section": "Sobre PNMC",
+      "label": "Actores - Palabra de fondo",
+      "limit": 50,
+      "defaultValue": "ECOSISTEMA"
+    },
+    {
+      "key": "about_actors_title",
+      "groupId": "about_actors",
+      "groupLabel": "Actores del Plan",
+      "section": "Sobre PNMC",
+      "label": "Actores - Título",
+      "limit": 80,
+      "defaultValue": "Actores del Plan"
+    },
+    {
+      "key": "about_actors_tag",
+      "groupId": "about_actors",
+      "groupLabel": "Actores del Plan",
+      "section": "Sobre PNMC",
+      "label": "Actores - Etiqueta",
+      "limit": 80,
+      "defaultValue": "Ecosistema humano"
+    },
+    {
+      "key": "about_actors_heading",
+      "groupId": "about_actors",
+      "groupLabel": "Actores del Plan",
+      "section": "Sobre PNMC",
+      "label": "Actores - Encabezado",
+      "limit": 120,
+      "defaultValue": "Tres capas de articulación"
+    },
+    {
+      "key": "about_actors_desc",
+      "groupId": "about_actors",
+      "groupLabel": "Actores del Plan",
+      "section": "Sobre PNMC",
+      "label": "Actores - Descripción",
+      "limit": 500,
+      "defaultValue": "El plan conecta sector musical, institucionalidad y sociedad civil en una misma arquitectura de colaboración para la formación, circulación, sostenibilidad y gobernanza de la música."
+    },
+    {
+      "key": "about_actors_sector_title",
+      "groupId": "about_actors",
+      "groupLabel": "Actores del Plan",
+      "section": "Sobre PNMC",
+      "label": "Actores sectoriales - Título",
+      "limit": 100,
+      "defaultValue": "Agentes Sectoriales"
+    },
+    {
+      "key": "about_actors_sector_items",
+      "groupId": "about_actors",
+      "groupLabel": "Actores del Plan",
+      "section": "Sobre PNMC",
+      "label": "Actores sectoriales - Lista (una línea por elemento)",
+      "limit": 700,
+      "defaultValue": "Creadores y compositores\nIntérpretes y agrupaciones\nDocentes y formadores\nInvestigadores\nProductores y técnicos\nGestores y promotores\nConstructores de instrumentos"
+    },
+    {
+      "key": "about_actors_institutional_title",
+      "groupId": "about_actors",
+      "groupLabel": "Actores del Plan",
+      "section": "Sobre PNMC",
+      "label": "Actores institucionales - Título",
+      "limit": 100,
+      "defaultValue": "Agentes Institucionales"
+    },
+    {
+      "key": "about_actors_institutional_items",
+      "groupId": "about_actors",
+      "groupLabel": "Actores del Plan",
+      "section": "Sobre PNMC",
+      "label": "Actores institucionales - Lista (una línea por elemento)",
+      "limit": 700,
+      "defaultValue": "Gobiernos locales\nEscuelas de Música\nCasas de la Cultura\nMinisterios nacionales\nAliados del Estado\nCooperación Ibermúsicas"
+    },
+    {
+      "key": "about_actors_civil_title",
+      "groupId": "about_actors",
+      "groupLabel": "Actores del Plan",
+      "section": "Sobre PNMC",
+      "label": "Sociedad civil - Título",
+      "limit": 100,
+      "defaultValue": "Sociedad Civil"
+    },
+    {
+      "key": "about_actors_civil_items",
+      "groupId": "about_actors",
+      "groupLabel": "Actores del Plan",
+      "section": "Sobre PNMC",
+      "label": "Sociedad civil - Lista (una línea por elemento)",
+      "limit": 700,
+      "defaultValue": "Asociaciones de músicos\nOrganizaciones sin ánimo de lucro\nAsociaciones de padres\nCabildos indígenas\nConsejos afrodescendientes"
+    },
+    {
+      "key": "about_timeline_bg",
+      "groupId": "about_timeline",
+      "groupLabel": "Hitos",
+      "section": "Sobre PNMC",
+      "label": "Hitos - Palabra de fondo",
+      "limit": 50,
+      "defaultValue": "EVOLUCIÓN"
+    },
+    {
+      "key": "about_timeline_title",
+      "groupId": "about_timeline",
+      "groupLabel": "Hitos",
+      "section": "Sobre PNMC",
+      "label": "Hitos - Título",
+      "limit": 80,
+      "defaultValue": "Hitos del PNMC"
+    },
+    {
+      "key": "about_timeline_intro",
+      "groupId": "about_timeline",
+      "groupLabel": "Hitos",
+      "section": "Sobre PNMC",
+      "label": "Hitos - Introducción",
+      "limit": 700,
+      "defaultValue": "Desde hace más de medio siglo, Colombia ha construido una política musical que reconoce la música como un derecho cultural y puente de convivencia. El PNMC, creado en 2003, es el resultado de una trayectoria que inició con Colcultura en 1968, garantizando hoy que todas las personas puedan vivir plenamente la música como experiencia y bien común."
+    },
+    {
+      "key": "about_timeline_1_year",
+      "groupId": "about_timeline",
+      "groupLabel": "Hitos",
+      "section": "Sobre PNMC",
+      "label": "Hito 1 - Periodo",
+      "limit": 30,
+      "defaultValue": "2003-2006"
+    },
+    {
+      "key": "about_timeline_1_title",
+      "groupId": "about_timeline",
+      "groupLabel": "Hitos",
+      "section": "Sobre PNMC",
+      "label": "Hito 1 - Título",
+      "limit": 120,
+      "defaultValue": "Creación e Institucionalización"
+    },
+    {
+      "key": "about_timeline_1_desc",
+      "groupId": "about_timeline",
+      "groupLabel": "Hitos",
+      "section": "Sobre PNMC",
+      "label": "Hito 1 - Descripción",
+      "limit": 1400,
+      "defaultValue": "La aprobación del CONPES 3409 de 2006 formalizó el PNMC y consolidó las Escuelas Municipales de Música (EMM) como espacios centrales para la formación musical colectiva. Este periodo estableció los cimientos del programa: acceso, democratización, convivencia y fortalecimiento de las músicas locales. Se amplió la dotación instrumental, se fortalecieron los equipos territoriales y se empezó a articular una red nacional de formación basada en la práctica comunitaria."
+    },
+    {
+      "key": "about_timeline_2_year",
+      "groupId": "about_timeline",
+      "groupLabel": "Hitos",
+      "section": "Sobre PNMC",
+      "label": "Hito 2 - Periodo",
+      "limit": 30,
+      "defaultValue": "2007-2014"
+    },
+    {
+      "key": "about_timeline_2_title",
+      "groupId": "about_timeline",
+      "groupLabel": "Hitos",
+      "section": "Sobre PNMC",
+      "label": "Hito 2 - Título",
+      "limit": 120,
+      "defaultValue": "Territorialización y saberes"
+    },
+    {
+      "key": "about_timeline_2_desc",
+      "groupId": "about_timeline",
+      "groupLabel": "Hitos",
+      "section": "Sobre PNMC",
+      "label": "Hito 2 - Descripción",
+      "limit": 1400,
+      "defaultValue": "Durante esta etapa se profundizó en la institucionalización territorial, con énfasis en la formación de formadores, la cualificación de músicos en ejercicio y el impulso a las músicas tradicionales. Se promovió la descentralización, se consolidaron procesos comunitarios sostenidos y se promovió el reconocimiento de músicos empíricos y sabedores. Este periodo marcó un avance significativo en la diversidad musical, al visibilizar prácticas propias de cada región y promover su circulación."
+    },
+    {
+      "key": "about_timeline_3_year",
+      "groupId": "about_timeline",
+      "groupLabel": "Hitos",
+      "section": "Sobre PNMC",
+      "label": "Hito 3 - Periodo",
+      "limit": 30,
+      "defaultValue": "2015-2018"
+    },
+    {
+      "key": "about_timeline_3_title",
+      "groupId": "about_timeline",
+      "groupLabel": "Hitos",
+      "section": "Sobre PNMC",
+      "label": "Hito 3 - Título",
+      "limit": 120,
+      "defaultValue": "Profesionalización y SIMUS"
+    },
+    {
+      "key": "about_timeline_3_desc",
+      "groupId": "about_timeline",
+      "groupLabel": "Hitos",
+      "section": "Sobre PNMC",
+      "label": "Hito 3 - Descripción",
+      "limit": 1400,
+      "defaultValue": "En estos años se desarrollaron las líneas estratégicas de Musicalización de la Ciudadanía y Estructuración del Campo Profesional de la Música, orientadas a fortalecer la formación integral y la profesionalización del sector. Se creó el Sistema de Información de la Música (SIMUS), herramienta clave para la toma de decisiones y la caracterización del ecosistema musical. Además, se implementaron nuevas estrategias de circulación y se amplió la presencia del PNMC en festivales, mercados y espacios de movilidad artística."
+    },
+    {
+      "key": "about_timeline_4_year",
+      "groupId": "about_timeline",
+      "groupLabel": "Hitos",
+      "section": "Sobre PNMC",
+      "label": "Hito 4 - Periodo",
+      "limit": 30,
+      "defaultValue": "2018-2022"
+    },
+    {
+      "key": "about_timeline_4_title",
+      "groupId": "about_timeline",
+      "groupLabel": "Hitos",
+      "section": "Sobre PNMC",
+      "label": "Hito 4 - Título",
+      "limit": 120,
+      "defaultValue": "Evaluación y Consolidación"
+    },
+    {
+      "key": "about_timeline_4_desc",
+      "groupId": "about_timeline",
+      "groupLabel": "Hitos",
+      "section": "Sobre PNMC",
+      "label": "Hito 4 - Descripción",
+      "limit": 1400,
+      "defaultValue": "El Departamento Nacional de Planeación (DNP) realizó una evaluación integral del PNMC, destacando su impacto en la formación musical, el fortalecimiento del tejido social y la dignificación del trabajo artístico. A partir de esta evaluación se identificaron retos y oportunidades, como mejorar la articulación interinstitucional, fortalecer SIMUS, ampliar la presencia del PNMC en educación superior, incentivar economías creativas en los territorios y mejorar las condiciones laborales de los músicos y formadores."
+    },
+    {
+      "key": "about_timeline_5_year",
+      "groupId": "about_timeline",
+      "groupLabel": "Hitos",
+      "section": "Sobre PNMC",
+      "label": "Hito 5 - Periodo",
+      "limit": 30,
+      "defaultValue": "2023-2025"
+    },
+    {
+      "key": "about_timeline_5_title",
+      "groupId": "about_timeline",
+      "groupLabel": "Hitos",
+      "section": "Sobre PNMC",
+      "label": "Hito 5 - Título",
+      "limit": 120,
+      "defaultValue": "Actualización y Proyección 2035"
+    },
+    {
+      "key": "about_timeline_5_desc",
+      "groupId": "about_timeline",
+      "groupLabel": "Hitos",
+      "section": "Sobre PNMC",
+      "label": "Hito 5 - Descripción",
+      "limit": 1400,
+      "defaultValue": "En un ejercicio nacional sin precedentes, el Ministerio de las Culturas abrió espacios de participación a través de 34 Encuentros Territoriales, mesas sectoriales, la Mesa Nacional Vinculante y el VII Congreso Nacional de Música. Estas iniciativas permitieron recoger las necesidades, visiones y apuestas del sector musical en todo el país y dieron origen al PNMC 2025-2035, “Huellas y apuestas de la diversidad sonora”. Este nuevo Plan articula la música con la vida, el diálogo intercultural, la bioculturalidad, la equidad, la sostenibilidad y la gobernanza participativa, proyectando un ecosistema musical diverso, justo y sostenible para la próxima década."
+    },
+    {
+      "key": "about_normative_bg",
+      "groupId": "about_normative",
+      "groupLabel": "Marco normativo",
+      "section": "Sobre PNMC",
+      "label": "Marco normativo - Palabra de fondo",
+      "limit": 50,
+      "defaultValue": "MARCO"
+    },
+    {
+      "key": "about_normative_title",
+      "groupId": "about_normative",
+      "groupLabel": "Marco normativo",
+      "section": "Sobre PNMC",
+      "label": "Marco normativo - Título",
+      "limit": 80,
+      "defaultValue": "Marco Normativo"
+    },
+    {
+      "key": "about_normative_intro",
+      "groupId": "about_normative",
+      "groupLabel": "Marco normativo",
+      "section": "Sobre PNMC",
+      "label": "Marco normativo - Introducción",
+      "limit": 700,
+      "defaultValue": "El PNMC se sustenta en una trayectoria normativa que ha consolidado la cultura y la música como derechos, políticas públicas y herramientas de transformación territorial. Este marco articula leyes, decretos, documentos de política y planes nacionales que orientan la formación, la circulación, la participación y la gobernanza cultural en Colombia."
+    },
+    {
+      "key": "about_normative_1_year",
+      "groupId": "about_normative",
+      "groupLabel": "Marco normativo",
+      "section": "Sobre PNMC",
+      "label": "Norma 1 - Año",
+      "limit": 30,
+      "defaultValue": "1997"
+    },
+    {
+      "key": "about_normative_1_title",
+      "groupId": "about_normative",
+      "groupLabel": "Marco normativo",
+      "section": "Sobre PNMC",
+      "label": "Norma 1 - Título",
+      "limit": 120,
+      "defaultValue": "Ley 397 de 1997"
+    },
+    {
+      "key": "about_normative_1_desc",
+      "groupId": "about_normative",
+      "groupLabel": "Marco normativo",
+      "section": "Sobre PNMC",
+      "label": "Norma 1 - Descripción",
+      "limit": 1400,
+      "defaultValue": "La Ley General de Cultura establece los principios, objetivos y mecanismos para proteger, fomentar y difundir la cultura en Colombia. Reconoce la diversidad cultural como fundamento de la identidad nacional y define la cultura como derecho. En su estructura se incluyen disposiciones para el fomento de las artes, la formación artística y la protección del patrimonio cultural, elementos esenciales para el desarrollo del PNMC. Actualizada por la Ley 1185 de 2008."
+    },
+    {
+      "key": "about_normative_2_year",
+      "groupId": "about_normative",
+      "groupLabel": "Marco normativo",
+      "section": "Sobre PNMC",
+      "label": "Norma 2 - Año",
+      "limit": 30,
+      "defaultValue": "2006"
+    },
+    {
+      "key": "about_normative_2_title",
+      "groupId": "about_normative",
+      "groupLabel": "Marco normativo",
+      "section": "Sobre PNMC",
+      "label": "Norma 2 - Título",
+      "limit": 120,
+      "defaultValue": "CONPES 3409 de 2006"
+    },
+    {
+      "key": "about_normative_2_desc",
+      "groupId": "about_normative",
+      "groupLabel": "Marco normativo",
+      "section": "Sobre PNMC",
+      "label": "Norma 2 - Descripción",
+      "limit": 1400,
+      "defaultValue": "Este documento aprobó la política del Plan Nacional de Música para la Convivencia, institucionalizando las Escuelas Municipales de Música y definiendo estrategias para mejorar la formación musical, la dotación instrumental y la gestión cultural en los territorios. Fue la base técnica y financiera que permitió consolidar el PNMC como política pública estable."
+    },
+    {
+      "key": "about_normative_3_year",
+      "groupId": "about_normative",
+      "groupLabel": "Marco normativo",
+      "section": "Sobre PNMC",
+      "label": "Norma 3 - Año",
+      "limit": 30,
+      "defaultValue": "2011"
+    },
+    {
+      "key": "about_normative_3_title",
+      "groupId": "about_normative",
+      "groupLabel": "Marco normativo",
+      "section": "Sobre PNMC",
+      "label": "Norma 3 - Título",
+      "limit": 120,
+      "defaultValue": "Ley 1493 de 2011"
+    },
+    {
+      "key": "about_normative_3_desc",
+      "groupId": "about_normative",
+      "groupLabel": "Marco normativo",
+      "section": "Sobre PNMC",
+      "label": "Norma 3 - Descripción",
+      "limit": 1400,
+      "defaultValue": "La Ley de Espectáculos Públicos regula la organización de espectáculos públicos de las artes escénicas y promueve la circulación artística en condiciones más equitativas. Aunque su alcance es más amplio que la música, ha tenido un impacto directo en la infraestructura cultural y en la movilidad de artistas y agrupaciones musicales en el país, facilitando escenarios más dignos y accesibles."
+    },
+    {
+      "key": "about_normative_4_year",
+      "groupId": "about_normative",
+      "groupLabel": "Marco normativo",
+      "section": "Sobre PNMC",
+      "label": "Norma 4 - Año",
+      "limit": 30,
+      "defaultValue": "2018"
+    },
+    {
+      "key": "about_normative_4_title",
+      "groupId": "about_normative",
+      "groupLabel": "Marco normativo",
+      "section": "Sobre PNMC",
+      "label": "Norma 4 - Título",
+      "limit": 120,
+      "defaultValue": "Decreto 2120 de 2018"
+    },
+    {
+      "key": "about_normative_4_desc",
+      "groupId": "about_normative",
+      "groupLabel": "Marco normativo",
+      "section": "Sobre PNMC",
+      "label": "Norma 4 - Descripción",
+      "limit": 1400,
+      "defaultValue": "Este decreto reglamenta la organización, funcionamiento y articulación de los subsistemas que integran el Sistema Nacional de Cultura. Para el PNMC es clave porque define los espacios de participación ciudadana, la gobernanza territorial y las responsabilidades institucionales en procesos formativos y comunitarios, incluyendo los vinculados a las músicas del país."
+    },
+    {
+      "key": "about_normative_5_year",
+      "groupId": "about_normative",
+      "groupLabel": "Marco normativo",
+      "section": "Sobre PNMC",
+      "label": "Norma 5 - Año",
+      "limit": 30,
+      "defaultValue": "2024-2038"
+    },
+    {
+      "key": "about_normative_5_title",
+      "groupId": "about_normative",
+      "groupLabel": "Marco normativo",
+      "section": "Sobre PNMC",
+      "label": "Norma 5 - Título",
+      "limit": 120,
+      "defaultValue": "Plan Nacional de Cultura"
+    },
+    {
+      "key": "about_normative_5_desc",
+      "groupId": "about_normative",
+      "groupLabel": "Marco normativo",
+      "section": "Sobre PNMC",
+      "label": "Norma 5 - Descripción",
+      "limit": 1400,
+      "defaultValue": "El nuevo PNC establece la visión cultural del país para los próximos 14 años. Define la cultura como eje del cuidado de la vida, la diversidad y la paz, y orienta las políticas del Ministerio de las Culturas, las Artes y los Saberes. El PNMC 2025-2035 se enmarca plenamente en esta estrategia, en sus componentes institucional y subsectorial, articulando lineamientos de diversidad sonora, ecosistemas culturales, gobernanza y sostenibilidad."
+    },
+    {
+      "key": "about_normative_6_year",
+      "groupId": "about_normative",
+      "groupLabel": "Marco normativo",
+      "section": "Sobre PNMC",
+      "label": "Norma 6 - Año",
+      "limit": 30,
+      "defaultValue": "2025"
+    },
+    {
+      "key": "about_normative_6_title",
+      "groupId": "about_normative",
+      "groupLabel": "Marco normativo",
+      "section": "Sobre PNMC",
+      "label": "Norma 6 - Título",
+      "limit": 120,
+      "defaultValue": "Ley 2555 de 2025"
+    },
+    {
+      "key": "about_normative_6_desc",
+      "groupId": "about_normative",
+      "groupLabel": "Marco normativo",
+      "section": "Sobre PNMC",
+      "label": "Norma 6 - Descripción",
+      "limit": 1400,
+      "defaultValue": "La Ley Artes al Aula convierte la educación artística en un mandato para todas las instituciones educativas oficiales del país. Reconoce las artes, incluida la música, como un derecho cultural fundamental y exige su incorporación transversal en los procesos pedagógicos, fortaleciendo competencias creativas, socioemocionales y ciudadanas. Impulsa la formación docente en pedagogías artísticas, promueve la articulación entre escuela, comunidad y territorio, y orienta la implementación desde el SINEFAC, facilitando la coordinación entre los sectores de educación y cultura."
+    },
+    {
+      "key": "about_team_bg",
+      "groupId": "about_team",
+      "groupLabel": "Equipo de Trabajo",
+      "section": "Sobre PNMC",
+      "label": "Palabra de fondo",
+      "limit": 50,
+      "defaultValue": "EQUIPO"
+    },
+    {
+      "key": "about_team_title",
+      "groupId": "about_team",
+      "groupLabel": "Equipo de Trabajo",
+      "section": "Sobre PNMC",
+      "label": "Título",
+      "limit": 80,
+      "defaultValue": "Equipo de Trabajo"
+    },
+    {
+      "key": "about_team_intro",
+      "groupId": "about_team",
+      "groupLabel": "Equipo de Trabajo",
+      "section": "Sobre PNMC",
+      "label": "Introducción",
+      "limit": 700,
+      "defaultValue": "El PNMC se construye y acompaña desde un equipo técnico que articula componentes, seguimiento institucional y trabajo con los territorios. Aquí puedes identificar los referentes del plan por coordinación y componente, con sus canales de contacto institucional."
+    },
+    {
+      "key": "about_team_coordination_label",
+      "groupId": "about_team",
+      "groupLabel": "Equipo de Trabajo",
+      "section": "Sobre PNMC",
+      "label": "Etiqueta coordinación",
+      "limit": 80,
+      "defaultValue": "Coordinación General"
+    },
+    {
+      "key": "about_team_leadership_label",
+      "groupId": "about_team",
+      "groupLabel": "Equipo de Trabajo",
+      "section": "Sobre PNMC",
+      "label": "Etiqueta liderazgos",
+      "limit": 100,
+      "defaultValue": "Liderazgos por componente"
+    },
+    {
+      "key": "about_team_name_placeholder",
+      "groupId": "about_team",
+      "groupLabel": "Equipo de Trabajo",
+      "section": "Sobre PNMC",
+      "label": "Nombre pendiente",
+      "limit": 80,
+      "defaultValue": "Por definir"
+    },
+    {
+      "key": "about_team_email_placeholder",
+      "groupId": "about_team",
+      "groupLabel": "Equipo de Trabajo",
+      "section": "Sobre PNMC",
+      "label": "Correo pendiente",
+      "limit": 80,
+      "defaultValue": "Correo pendiente"
+    },
+    {
+      "key": "home_tag",
+      "groupId": "home_hero",
+      "groupLabel": "Encabezado Principal (Hero)",
+      "section": "Home",
+      "label": "Etiqueta superior",
+      "limit": 100,
+      "defaultValue": "PLAN NACIONAL DE MÚSICA PARA LA CONVIVENCIA 2025—2035"
+    },
+    {
+      "key": "home_title",
+      "groupId": "home_hero",
+      "groupLabel": "Encabezado Principal (Hero)",
+      "section": "Home",
+      "label": "Título principal",
+      "limit": 120,
+      "defaultValue": "Huellas y Apuestas de la"
+    },
+    {
+      "key": "home_title_accent",
+      "groupId": "home_hero",
+      "groupLabel": "Encabezado Principal (Hero)",
+      "section": "Home",
+      "label": "Título acentuado",
+      "limit": 80,
+      "defaultValue": "Diversidad Sonora"
+    },
+    {
+      "key": "home_description",
+      "groupId": "home_hero",
+      "groupLabel": "Encabezado Principal (Hero)",
+      "section": "Home",
+      "label": "Descripción",
+      "limit": 400,
+      "defaultValue": "Un pacto colectivo que reconoce la música como un derecho cultural y un bien común en todo el territorio nacional."
+    },
+    {
+      "key": "home_about_bg_word",
+      "groupId": "home_about",
+      "groupLabel": "Sección Identidad",
+      "section": "Home",
+      "label": "Palabra de fondo",
+      "limit": 50,
+      "defaultValue": "IDENTIDAD"
+    },
+    {
+      "key": "home_about_title",
+      "groupId": "home_about",
+      "groupLabel": "Sección Identidad",
+      "section": "Home",
+      "label": "Título secundario",
+      "limit": 100,
+      "defaultValue": "HUELLA Y EVOLUCIÓN"
+    },
+    {
+      "key": "home_about_quote",
+      "groupId": "home_about",
+      "groupLabel": "Sección Identidad",
+      "section": "Home",
+      "label": "Cita del PNMC",
+      "limit": 200,
+      "defaultValue": "El PNMC 2025-2035 es una herramienta para que la música sea motor de vida, paz y justicia social."
+    },
+    {
+      "key": "home_about_desc",
+      "groupId": "home_about",
+      "groupLabel": "Sección Identidad",
+      "section": "Home",
+      "label": "Descripción amplia",
+      "limit": 500,
+      "defaultValue": "Desde hace más de dos décadas, el Plan Nacional de Música para la Convivencia (PNMC) promueve la diversidad cultural de Colombia como un pilar para la paz y la equidad."
+    },
+    {
+      "key": "home_ejes_tag",
+      "groupId": "home_ejes",
+      "groupLabel": "Estructura Ejes Base",
+      "section": "Home",
+      "label": "Tag superior",
+      "limit": 120,
+      "defaultValue": "EL PNMC TIENE UNA ESTRUCTURA ESTRATÉGICA"
+    },
+    {
+      "key": "home_ejes_title",
+      "groupId": "home_ejes",
+      "groupLabel": "Estructura Ejes Base",
+      "section": "Home",
+      "label": "Título ejes",
+      "limit": 120,
+      "defaultValue": "PLANTEADA EN TRES EJES BASE"
+    },
+    {
+      "key": "home_bulletin_title",
+      "groupId": "home_bulletin",
+      "groupLabel": "Boletín y Redes",
+      "section": "Home",
+      "label": "Boletín - Título del boletín",
+      "limit": 80,
+      "defaultValue": "Recibe las Novedades"
+    },
+    {
+      "key": "home_bulletin_desc",
+      "groupId": "home_bulletin",
+      "groupLabel": "Boletín y Redes",
+      "section": "Home",
+      "label": "Boletín - Descripción",
+      "limit": 200,
+      "defaultValue": "Convocatorias y lanzamientos semanales del PNMC."
+    },
+    {
+      "key": "home_bulletin_placeholder",
+      "groupId": "home_bulletin",
+      "groupLabel": "Boletín y Redes",
+      "section": "Home",
+      "label": "Boletín - Marcador email",
+      "limit": 55,
+      "defaultValue": "Ingresa tu correo"
+    },
+    {
+      "key": "home_bulletin_btn",
+      "groupId": "home_bulletin",
+      "groupLabel": "Boletín y Redes",
+      "section": "Home",
+      "label": "Boletín - Botón registro",
+      "limit": 40,
+      "defaultValue": "Registrarme"
+    },
+    {
+      "key": "home_social_title",
+      "groupId": "home_bulletin",
+      "groupLabel": "Boletín y Redes",
+      "section": "Home",
+      "label": "Redes - Título redes",
+      "limit": 80,
+      "defaultValue": "Conéctate con el Plan"
+    },
+    {
+      "key": "home_social_desc",
+      "groupId": "home_bulletin",
+      "groupLabel": "Boletín y Redes",
+      "section": "Home",
+      "label": "Redes - Subtexto oficial",
+      "limit": 120,
+      "defaultValue": "Síguenos en nuestras redes oficiales"
+    },
+    {
+      "key": "home_banner1_tag",
+      "groupId": "home_banner",
+      "groupLabel": "Banner deslizante",
+      "section": "Home",
+      "label": "Diapositiva 1 - Etiqueta",
+      "limit": 60,
+      "defaultValue": "Ecosistema musical"
+    },
+    {
+      "key": "home_banner1_title",
+      "groupId": "home_banner",
+      "groupLabel": "Banner deslizante",
+      "section": "Home",
+      "label": "Diapositiva 1 - Título",
+      "limit": 90,
+      "defaultValue": "Sé parte del ecosistema"
+    },
+    {
+      "key": "home_banner1_desc",
+      "groupId": "home_banner",
+      "groupLabel": "Banner deslizante",
+      "section": "Home",
+      "label": "Diapositiva 1 - Descripción",
+      "limit": 300,
+      "defaultValue": "Registra tu proceso, organización, festival, mercado, colectivo, espacio o perfil individual y haz parte de esta lectura territorial de la música en Colombia."
+    },
+    {
+      "key": "home_banner1_cta",
+      "groupId": "home_banner",
+      "groupLabel": "Banner deslizante",
+      "section": "Home",
+      "label": "Diapositiva 1 - Botón",
+      "limit": 50,
+      "defaultValue": "Ser parte del ecosistema"
+    },
+    {
+      "key": "home_banner2_tag",
+      "groupId": "home_banner",
+      "groupLabel": "Banner deslizante",
+      "section": "Home",
+      "label": "Diapositiva 2 - Etiqueta",
+      "limit": 60,
+      "defaultValue": "Celebra la Música"
+    },
+    {
+      "key": "home_banner2_title",
+      "groupId": "home_banner",
+      "groupLabel": "Banner deslizante",
+      "section": "Home",
+      "label": "Diapositiva 2 - Título",
+      "limit": 90,
+      "defaultValue": "Activa la circulación musical en tu territorio"
+    },
+    {
+      "key": "home_banner2_desc",
+      "groupId": "home_banner",
+      "groupLabel": "Banner deslizante",
+      "section": "Home",
+      "label": "Diapositiva 2 - Descripción",
+      "limit": 300,
+      "defaultValue": "Conoce la estrategia, los recursos y las rutas de participación de Celebra la Música como movimiento nacional de circulación y encuentro."
+    },
+    {
+      "key": "home_banner2_cta",
+      "groupId": "home_banner",
+      "groupLabel": "Banner deslizante",
+      "section": "Home",
+      "label": "Diapositiva 2 - Botón",
+      "limit": 50,
+      "defaultValue": "Explorar estrategia"
+    },
+    {
+      "key": "home_banner3_tag",
+      "groupId": "home_banner",
+      "groupLabel": "Banner deslizante",
+      "section": "Home",
+      "label": "Diapositiva 3 - Etiqueta",
+      "limit": 60,
+      "defaultValue": "Territorios Sonoros"
+    },
+    {
+      "key": "home_banner3_title",
+      "groupId": "home_banner",
+      "groupLabel": "Banner deslizante",
+      "section": "Home",
+      "label": "Diapositiva 3 - Título",
+      "limit": 90,
+      "defaultValue": "Explora turismo cultural y músicas regionales"
+    },
+    {
+      "key": "home_banner3_desc",
+      "groupId": "home_banner",
+      "groupLabel": "Banner deslizante",
+      "section": "Home",
+      "label": "Diapositiva 3 - Descripción",
+      "limit": 300,
+      "defaultValue": "Descubre cómo esta línea articula circulación, turismo cultural, saberes locales y experiencias territoriales en torno a la música."
+    },
+    {
+      "key": "home_banner3_cta",
+      "groupId": "home_banner",
+      "groupLabel": "Banner deslizante",
+      "section": "Home",
+      "label": "Diapositiva 3 - Botón",
+      "limit": 50,
+      "defaultValue": "Ver territorios sonoros"
+    },
+    {
+      "key": "home_eco_bg_word",
+      "groupId": "home_ecosistema",
+      "groupLabel": "Ecosistema en la portada",
+      "section": "Home",
+      "label": "Palabra de fondo",
+      "limit": 50,
+      "defaultValue": "REGISTROS"
+    },
+    {
+      "key": "home_eco_title",
+      "groupId": "home_ecosistema",
+      "groupLabel": "Ecosistema en la portada",
+      "section": "Home",
+      "label": "Título de la sección",
+      "limit": 100,
+      "defaultValue": "Ecosistema Musical de Colombia"
+    },
+    {
+      "key": "home_eco_intro",
+      "groupId": "home_ecosistema",
+      "groupLabel": "Ecosistema en la portada",
+      "section": "Home",
+      "label": "Introducción",
+      "limit": 400,
+      "defaultValue": "Escuelas de música, escenarios, festivales, mercados musicales, redes y documentación, y lutería: los seis procesos del ecosistema musical colombiano, con directorio propio y una lectura territorial compartida."
+    },
+    {
+      "key": "home_eco_simus_tag",
+      "groupId": "home_ecosistema",
+      "groupLabel": "Ecosistema en la portada",
+      "section": "Home",
+      "label": "Bloque morado - Antetítulo",
+      "limit": 80,
+      "defaultValue": "Sistema de Información de la Música"
+    },
+    {
+      "key": "home_eco_simus_title",
+      "groupId": "home_ecosistema",
+      "groupLabel": "Ecosistema en la portada",
+      "section": "Home",
+      "label": "Bloque morado - Título",
+      "limit": 120,
+      "defaultValue": "Toda la música de Colombia, en un solo lugar"
+    },
+    {
+      "key": "home_strat_tag",
+      "groupId": "home_strategies_title",
+      "groupLabel": "Rutas de Acción Territorial · cabecera",
+      "section": "Home",
+      "label": "Tag superior",
+      "limit": 80,
+      "defaultValue": "Procesos destacados"
+    },
+    {
+      "key": "home_strat_title",
+      "groupId": "home_strategies_title",
+      "groupLabel": "Rutas de Acción Territorial · cabecera",
+      "section": "Home",
+      "label": "Título principal",
+      "limit": 120,
+      "defaultValue": "Rutas de Acción Territorial"
+    },
+    {
+      "key": "home_strat_desc",
+      "groupId": "home_strategies_title",
+      "groupLabel": "Rutas de Acción Territorial · cabecera",
+      "section": "Home",
+      "label": "Introducción",
+      "limit": 300,
+      "defaultValue": "Conoce los marcos operativos y pedagógicos que impulsan la formación, investigación, circulación y gobernanza musical en todas las regiones de Colombia."
+    },
+    {
+      "key": "strat_celebra_tag",
+      "groupId": "home_strategies_cards",
+      "groupLabel": "Rutas de Acción Territorial · 8 tarjetas",
+      "section": "Home",
+      "label": "Card 1 - Categoría Tag",
+      "limit": 60,
+      "defaultValue": "Estrategia de Circulación"
+    },
+    {
+      "key": "strat_celebra_title",
+      "groupId": "home_strategies_cards",
+      "groupLabel": "Rutas de Acción Territorial · 8 tarjetas",
+      "section": "Home",
+      "label": "Card 1 - Título",
+      "limit": 80,
+      "defaultValue": "Celebra la Música"
+    },
+    {
+      "key": "strat_celebra_desc",
+      "groupId": "home_strategies_cards",
+      "groupLabel": "Rutas de Acción Territorial · 8 tarjetas",
+      "section": "Home",
+      "label": "Card 1 - Descripción",
+      "limit": 200,
+      "defaultValue": "Activa escenarios, programación y redes territoriales para que los procesos musicales circulen, se conecten y ganen visibilidad."
+    },
+    {
+      "key": "strat_territorios_tag",
+      "groupId": "home_strategies_cards",
+      "groupLabel": "Rutas de Acción Territorial · 8 tarjetas",
+      "section": "Home",
+      "label": "Card 2 - Categoría Tag",
+      "limit": 60,
+      "defaultValue": "Estrategia de Investigación"
+    },
+    {
+      "key": "strat_territorios_title",
+      "groupId": "home_strategies_cards",
+      "groupLabel": "Rutas de Acción Territorial · 8 tarjetas",
+      "section": "Home",
+      "label": "Card 2 - Título",
+      "limit": 80,
+      "defaultValue": "Territorios Sonoros"
+    },
+    {
+      "key": "strat_territorios_desc",
+      "groupId": "home_strategies_cards",
+      "groupLabel": "Rutas de Acción Territorial · 8 tarjetas",
+      "section": "Home",
+      "label": "Card 2 - Descripción",
+      "limit": 200,
+      "defaultValue": "Impulsa procesos de investigación, cartografía y documentación para reconocer, interpretar y proyectar la diversidad sonora del país."
+    },
+    {
+      "key": "strat_congreso_tag",
+      "groupId": "home_strategies_cards",
+      "groupLabel": "Rutas de Acción Territorial · 8 tarjetas",
+      "section": "Home",
+      "label": "Card 3 - Categoría Tag",
+      "limit": 60,
+      "defaultValue": "Estrategia de Gobernanza y Participación"
+    },
+    {
+      "key": "strat_congreso_title",
+      "groupId": "home_strategies_cards",
+      "groupLabel": "Rutas de Acción Territorial · 8 tarjetas",
+      "section": "Home",
+      "label": "Card 3 - Título",
+      "limit": 80,
+      "defaultValue": "8vo Congreso Nacional de Música"
+    },
+    {
+      "key": "strat_congreso_desc",
+      "groupId": "home_strategies_cards",
+      "groupLabel": "Rutas de Acción Territorial · 8 tarjetas",
+      "section": "Home",
+      "label": "Card 3 - Descripción",
+      "limit": 200,
+      "defaultValue": "Espacio de diálogo académico, social e institucional para consolidar las políticas del sector y fortalecer la gobernanza musical en el país."
+    },
+    {
+      "key": "strat_tempos_tag",
+      "groupId": "home_strategies_cards",
+      "groupLabel": "Rutas de Acción Territorial · 8 tarjetas",
+      "section": "Home",
+      "label": "Card 4 - Categoría Tag",
+      "limit": 60,
+      "defaultValue": "Estrategia de Formación"
+    },
+    {
+      "key": "strat_tempos_title",
+      "groupId": "home_strategies_cards",
+      "groupLabel": "Rutas de Acción Territorial · 8 tarjetas",
+      "section": "Home",
+      "label": "Card 4 - Título",
+      "limit": 80,
+      "defaultValue": "Tempos de Memorias"
+    },
+    {
+      "key": "strat_tempos_desc",
+      "groupId": "home_strategies_cards",
+      "groupLabel": "Rutas de Acción Territorial · 8 tarjetas",
+      "section": "Home",
+      "label": "Card 4 - Descripción",
+      "limit": 200,
+      "defaultValue": "Laboratorio formativo enfocado en la cualificación de saberes tradicionales, lutería, pedagogía y preservación de patrimonios sonoros locales."
+    },
+    {
+      "key": "strat_voces_tag",
+      "groupId": "home_strategies_cards",
+      "groupLabel": "Rutas de Acción Territorial · 8 tarjetas",
+      "section": "Home",
+      "label": "Card 5 - Categoría Tag",
+      "limit": 60,
+      "defaultValue": "Estrategia de Investigación"
+    },
+    {
+      "key": "strat_voces_title",
+      "groupId": "home_strategies_cards",
+      "groupLabel": "Rutas de Acción Territorial · 8 tarjetas",
+      "section": "Home",
+      "label": "Card 5 - Título",
+      "limit": 80,
+      "defaultValue": "Voces y Saberes"
+    },
+    {
+      "key": "strat_voces_desc",
+      "groupId": "home_strategies_cards",
+      "groupLabel": "Rutas de Acción Territorial · 8 tarjetas",
+      "section": "Home",
+      "label": "Card 5 - Descripción",
+      "limit": 200,
+      "defaultValue": "Proceso nacional de documentación y registro para catalogar las expresiones orales y la memoria viva de nuestros cantautores y sabedores."
+    },
+    {
+      "key": "strat_jazz_tag",
+      "groupId": "home_strategies_cards",
+      "groupLabel": "Rutas de Acción Territorial · 8 tarjetas",
+      "section": "Home",
+      "label": "Card 6 - Categoría Tag",
+      "limit": 60,
+      "defaultValue": "Estrategia de Circulación"
+    },
+    {
+      "key": "strat_jazz_title",
+      "groupId": "home_strategies_cards",
+      "groupLabel": "Rutas de Acción Territorial · 8 tarjetas",
+      "section": "Home",
+      "label": "Card 6 - Título",
+      "limit": 80,
+      "defaultValue": "Red Nacional de Jazz"
+    },
+    {
+      "key": "strat_jazz_desc",
+      "groupId": "home_strategies_cards",
+      "groupLabel": "Rutas de Acción Territorial · 8 tarjetas",
+      "section": "Home",
+      "label": "Card 6 - Descripción",
+      "limit": 200,
+      "defaultValue": "Plataforma de circulación colaborativa que conecta festivales, clubes y músicos de jazz en circuitos nacionales y de intercambio."
+    },
+    {
+      "key": "strat_mercados_tag",
+      "groupId": "home_strategies_cards",
+      "groupLabel": "Rutas de Acción Territorial · 8 tarjetas",
+      "section": "Home",
+      "label": "Card 7 - Categoría Tag",
+      "limit": 60,
+      "defaultValue": "Estrategia de Circulación"
+    },
+    {
+      "key": "strat_mercados_title",
+      "groupId": "home_strategies_cards",
+      "groupLabel": "Rutas de Acción Territorial · 8 tarjetas",
+      "section": "Home",
+      "label": "Card 7 - Título",
+      "limit": 80,
+      "defaultValue": "Mercados Musicales de Colombia"
+    },
+    {
+      "key": "strat_mercados_desc",
+      "groupId": "home_strategies_cards",
+      "groupLabel": "Rutas de Acción Territorial · 8 tarjetas",
+      "section": "Home",
+      "label": "Card 7 - Descripción",
+      "limit": 200,
+      "defaultValue": "Fortalece el encuentro entre programadores, directores y agrupaciones nacionales para dinamizar la circulación nacional e internacional."
+    },
+    {
+      "key": "strat_mesas_tag",
+      "groupId": "home_strategies_cards",
+      "groupLabel": "Rutas de Acción Territorial · 8 tarjetas",
+      "section": "Home",
+      "label": "Card 8 - Categoría Tag",
+      "limit": 60,
+      "defaultValue": "Estrategia de Gobernanza y Circulación"
+    },
+    {
+      "key": "strat_mesas_title",
+      "groupId": "home_strategies_cards",
+      "groupLabel": "Rutas de Acción Territorial · 8 tarjetas",
+      "section": "Home",
+      "label": "Card 8 - Título",
+      "limit": 80,
+      "defaultValue": "Mesas de Participación"
+    },
+    {
+      "key": "strat_mesas_desc",
+      "groupId": "home_strategies_cards",
+      "groupLabel": "Rutas de Acción Territorial · 8 tarjetas",
+      "section": "Home",
+      "label": "Card 8 - Descripción",
+      "limit": 200,
+      "defaultValue": "Nodos comunitarios de concertación que articulan el tejido asociativo y las veedurías locales del Plan Nacional de Música."
+    },
+    {
+      "key": "map_tutorial_1_title",
+      "groupId": "map_tutorial",
+      "groupLabel": "Tutorial del geovisor",
+      "section": "Mapa Ecosistémico",
+      "label": "Paso 1, título",
+      "limit": 80,
+      "defaultValue": "Un mapa que se lee de varias formas"
+    },
+    {
+      "key": "map_tutorial_1_desc",
+      "groupId": "map_tutorial",
+      "groupLabel": "Tutorial del geovisor",
+      "section": "Mapa Ecosistémico",
+      "label": "Paso 1, texto",
+      "limit": 400,
+      "defaultValue": "Aquí están los procesos musicales del país situados en su territorio. En dieciocho pasos verás qué hace cada control: qué se está mirando, cómo acotarlo, las tres formas de dibujarlo y las tres de leerlo. Puedes salir cuando quieras y volver desde el botón de ayuda."
+    },
+    {
+      "key": "map_tutorial_2_title",
+      "groupId": "map_tutorial",
+      "groupLabel": "Tutorial del geovisor",
+      "section": "Mapa Ecosistémico",
+      "label": "Paso 2, título",
+      "limit": 80,
+      "defaultValue": "Qué se está mirando"
+    },
+    {
+      "key": "map_tutorial_2_desc",
+      "groupId": "map_tutorial",
+      "groupLabel": "Tutorial del geovisor",
+      "section": "Mapa Ecosistémico",
+      "label": "Paso 2, texto",
+      "limit": 400,
+      "defaultValue": "Las capas dicen qué tipo de proceso hay en el mapa. Hoy puedes consultar Festivales y Agenda; las otras cuatro están en preparación y aparecen desactivadas, no vacías. La cifra de al lado es cuántos registros tiene la capa puesta."
+    },
+    {
+      "key": "map_tutorial_3_title",
+      "groupId": "map_tutorial",
+      "groupLabel": "Tutorial del geovisor",
+      "section": "Mapa Ecosistémico",
+      "label": "Paso 3, título",
+      "limit": 80,
+      "defaultValue": "Acotar: buscar y territorio"
+    },
+    {
+      "key": "map_tutorial_3_desc",
+      "groupId": "map_tutorial",
+      "groupLabel": "Tutorial del geovisor",
+      "section": "Mapa Ecosistémico",
+      "label": "Paso 3, texto",
+      "limit": 400,
+      "defaultValue": "Busca por nombre, municipio o palabra, o elige departamento y municipio. Lo que pongas aparece como una etiqueta arriba de esta columna y puedes quitarlo de uno en uno, sin deshacer el resto."
+    },
+    {
+      "key": "map_tutorial_4_title",
+      "groupId": "map_tutorial",
+      "groupLabel": "Tutorial del geovisor",
+      "section": "Mapa Ecosistémico",
+      "label": "Paso 4, título",
+      "limit": 80,
+      "defaultValue": "El lente: con qué se colorea"
+    },
+    {
+      "key": "map_tutorial_4_desc",
+      "groupId": "map_tutorial",
+      "groupLabel": "Tutorial del geovisor",
+      "section": "Mapa Ecosistémico",
+      "label": "Paso 4, texto",
+      "limit": 400,
+      "defaultValue": "Gira el selector para elegir con qué se reparte el color: por territorios sonoros, por prácticas musicales o por división administrativa. El lente no filtra nada; cambia el criterio con el que se pinta lo mismo, y ese criterio viaja a las otras dos vistas."
+    },
+    {
+      "key": "map_tutorial_5_title",
+      "groupId": "map_tutorial",
+      "groupLabel": "Tutorial del geovisor",
+      "section": "Mapa Ecosistémico",
+      "label": "Paso 5, título",
+      "limit": 80,
+      "defaultValue": "Coropleta: el departamento entero, teñido"
+    },
+    {
+      "key": "map_tutorial_5_desc",
+      "groupId": "map_tutorial",
+      "groupLabel": "Tutorial del geovisor",
+      "section": "Mapa Ecosistémico",
+      "label": "Paso 5, texto",
+      "limit": 400,
+      "defaultValue": "Cada departamento se colorea según lo que domina en él o cuántos registros tiene. Se lee de un vistazo, pero tiene una trampa conocida: un departamento grande pesa más en la vista aunque tenga menos procesos. Para comparar cantidades, mejor la siguiente."
+    },
+    {
+      "key": "map_tutorial_6_title",
+      "groupId": "map_tutorial",
+      "groupLabel": "Tutorial del geovisor",
+      "section": "Mapa Ecosistémico",
+      "label": "Paso 6, título",
+      "limit": 80,
+      "defaultValue": "Símbolos proporcionales: un círculo por municipio"
+    },
+    {
+      "key": "map_tutorial_6_desc",
+      "groupId": "map_tutorial",
+      "groupLabel": "Tutorial del geovisor",
+      "section": "Mapa Ecosistémico",
+      "label": "Paso 6, texto",
+      "limit": 400,
+      "defaultValue": "Un círculo en cada municipio, más grande cuantos más procesos tenga. A diferencia de la coropleta, el tamaño no depende de lo extenso que sea el territorio, así que sirve para comparar de verdad. Los círculos cercanos se agrupan y se separan al acercar."
+    },
+    {
+      "key": "map_tutorial_7_title",
+      "groupId": "map_tutorial",
+      "groupLabel": "Tutorial del geovisor",
+      "section": "Mapa Ecosistémico",
+      "label": "Paso 7, título",
+      "limit": 80,
+      "defaultValue": "Mapa de calor: la práctica que desborda"
+    },
+    {
+      "key": "map_tutorial_7_desc",
+      "groupId": "map_tutorial",
+      "groupLabel": "Tutorial del geovisor",
+      "section": "Mapa Ecosistémico",
+      "label": "Paso 7, texto",
+      "limit": 400,
+      "defaultValue": "Una mancha continua que ignora los límites administrativos. Es la forma de ver lo que las otras dos no pueden: una práctica musical no se detiene en la frontera de un departamento, y aquí se ve dónde se concentra de verdad."
+    },
+    {
+      "key": "map_tutorial_8_title",
+      "groupId": "map_tutorial",
+      "groupLabel": "Tutorial del geovisor",
+      "section": "Mapa Ecosistémico",
+      "label": "Paso 8, título",
+      "limit": 80,
+      "defaultValue": "Cómo leer lo que ves"
+    },
+    {
+      "key": "map_tutorial_8_desc",
+      "groupId": "map_tutorial",
+      "groupLabel": "Tutorial del geovisor",
+      "section": "Mapa Ecosistémico",
+      "label": "Paso 8, texto",
+      "limit": 400,
+      "defaultValue": "Esta nota explica qué significan los colores y los tamaños del dibujo que esté puesto, y cambia con él. Puedes plegarla cuando ya no la necesites y volver a abrirla en cualquier momento."
+    },
+    {
+      "key": "map_tutorial_9_title",
+      "groupId": "map_tutorial",
+      "groupLabel": "Tutorial del geovisor",
+      "section": "Mapa Ecosistémico",
+      "label": "Paso 9, título",
+      "limit": 80,
+      "defaultValue": "El mapa responde"
+    },
+    {
+      "key": "map_tutorial_9_desc",
+      "groupId": "map_tutorial",
+      "groupLabel": "Tutorial del geovisor",
+      "section": "Mapa Ecosistémico",
+      "label": "Paso 9, texto",
+      "limit": 400,
+      "defaultValue": "Pulsa un departamento para entrar en él y ver sus municipios; pulsa un municipio para abrir la lista de sus procesos. Puedes acercar con la rueda y volver al país entero quitando el filtro de departamento."
+    },
+    {
+      "key": "map_tutorial_10_title",
+      "groupId": "map_tutorial",
+      "groupLabel": "Tutorial del geovisor",
+      "section": "Mapa Ecosistémico",
+      "label": "Paso 10, título",
+      "limit": 80,
+      "defaultValue": "Mapa, gráfico o tabla"
+    },
+    {
+      "key": "map_tutorial_10_desc",
+      "groupId": "map_tutorial",
+      "groupLabel": "Tutorial del geovisor",
+      "section": "Mapa Ecosistémico",
+      "label": "Paso 10, texto",
+      "limit": 400,
+      "defaultValue": "Los mismos datos en tres presentaciones, y el conmutador está siempre a mano. Sobre el mapa son tres iconos en la esquina para no tapar territorio; en gráfico y tabla sube arriba con sus rótulos, porque ahí la pregunta es cómo se vuelve."
+    },
+    {
+      "key": "map_tutorial_11_title",
+      "groupId": "map_tutorial",
+      "groupLabel": "Tutorial del geovisor",
+      "section": "Mapa Ecosistémico",
+      "label": "Paso 11, título",
+      "limit": 80,
+      "defaultValue": "El gráfico: siete lecturas del mismo conjunto"
+    },
+    {
+      "key": "map_tutorial_11_desc",
+      "groupId": "map_tutorial",
+      "groupLabel": "Tutorial del geovisor",
+      "section": "Mapa Ecosistémico",
+      "label": "Paso 11, texto",
+      "limit": 400,
+      "defaultValue": "Cada posición de esta tira es a la vez una cifra y un control: dice el dato y, al pulsarla, cambia lo que se dibuja debajo. Registros, lo más declarado, municipios, calendario, cobertura… ninguna repite lo que otra ya dice."
+    },
+    {
+      "key": "map_tutorial_12_title",
+      "groupId": "map_tutorial",
+      "groupLabel": "Tutorial del geovisor",
+      "section": "Mapa Ecosistémico",
+      "label": "Paso 12, título",
+      "limit": 80,
+      "defaultValue": "Registros por departamento, en barras"
+    },
+    {
+      "key": "map_tutorial_12_desc",
+      "groupId": "map_tutorial",
+      "groupLabel": "Tutorial del geovisor",
+      "section": "Mapa Ecosistémico",
+      "label": "Paso 12, texto",
+      "limit": 400,
+      "defaultValue": "El orden y el valor. Las barras están a escala del mayor, con la rejilla en sus cuartos para poder decir «este está por la mitad» sin medir. Pulsa una fila y el mapa se va a ese departamento."
+    },
+    {
+      "key": "map_tutorial_13_title",
+      "groupId": "map_tutorial",
+      "groupLabel": "Tutorial del geovisor",
+      "section": "Mapa Ecosistémico",
+      "label": "Paso 13, título",
+      "limit": 80,
+      "defaultValue": "Los mismos datos, en áreas"
+    },
+    {
+      "key": "map_tutorial_13_desc",
+      "groupId": "map_tutorial",
+      "groupLabel": "Tutorial del geovisor",
+      "section": "Mapa Ecosistémico",
+      "label": "Paso 13, texto",
+      "limit": 400,
+      "defaultValue": "Aquí el área de cada bloque es su parte del total: los bloques juntos son el país entero. La barra dice el orden; el área dice la proporción. No son la misma figura con otro aspecto: responden dos preguntas distintas."
+    },
+    {
+      "key": "map_tutorial_14_title",
+      "groupId": "map_tutorial",
+      "groupLabel": "Tutorial del geovisor",
+      "section": "Mapa Ecosistémico",
+      "label": "Paso 14, título",
+      "limit": 80,
+      "defaultValue": "Lo más declarado, y sobre qué"
+    },
+    {
+      "key": "map_tutorial_14_desc",
+      "groupId": "map_tutorial",
+      "groupLabel": "Tutorial del geovisor",
+      "section": "Mapa Ecosistémico",
+      "label": "Paso 14, texto",
+      "limit": 400,
+      "defaultValue": "De qué está hecho el ecosistema según lo que los registros declaran. Puedes medirlo por territorios sonoros o por prácticas y géneros: son dos clasificaciones distintas del mismo conjunto. Cada fila lleva el color que el lente le da en el mapa."
+    },
+    {
+      "key": "map_tutorial_15_title",
+      "groupId": "map_tutorial",
+      "groupLabel": "Tutorial del geovisor",
+      "section": "Mapa Ecosistémico",
+      "label": "Paso 15, título",
+      "limit": 80,
+      "defaultValue": "Barras o unidades"
+    },
+    {
+      "key": "map_tutorial_15_desc",
+      "groupId": "map_tutorial",
+      "groupLabel": "Tutorial del geovisor",
+      "section": "Mapa Ecosistémico",
+      "label": "Paso 15, texto",
+      "limit": 400,
+      "defaultValue": "Las barras comparan proporciones; las unidades cuentan. En unidades cada cuadro es un registro, así que se puede contar con el dedo: es útil cuando las cifras son pocas y la diferencia entre cuatro y cinco importa."
+    },
+    {
+      "key": "map_tutorial_16_title",
+      "groupId": "map_tutorial",
+      "groupLabel": "Tutorial del geovisor",
+      "section": "Mapa Ecosistémico",
+      "label": "Paso 16, título",
+      "limit": 80,
+      "defaultValue": "La tabla: el conjunto entero"
+    },
+    {
+      "key": "map_tutorial_16_desc",
+      "groupId": "map_tutorial",
+      "groupLabel": "Tutorial del geovisor",
+      "section": "Mapa Ecosistémico",
+      "label": "Paso 16, texto",
+      "limit": 400,
+      "defaultValue": "Para recorrer la lista completa, comparar municipios o imprimirla. Ocupa el ancho entero porque aquí lo que se quiere es leer muchas filas seguidas, no buscar una. Desde este mismo control vuelves al mapa."
+    },
+    {
+      "key": "map_tutorial_17_title",
+      "groupId": "map_tutorial",
+      "groupLabel": "Tutorial del geovisor",
+      "section": "Mapa Ecosistémico",
+      "label": "Paso 17, título",
+      "limit": 80,
+      "defaultValue": "El directorio: los registros, uno a uno"
+    },
+    {
+      "key": "map_tutorial_17_desc",
+      "groupId": "map_tutorial",
+      "groupLabel": "Tutorial del geovisor",
+      "section": "Mapa Ecosistémico",
+      "label": "Paso 17, texto",
+      "limit": 400,
+      "defaultValue": "Lista lo que hay en el ámbito que tengas puesto y sigue a los filtros: al entrar en un departamento se acota a él. Pulsa «Ubicar en el mapa» en cualquier ficha para llevar el mapa hasta su municipio."
+    },
+    {
+      "key": "map_tutorial_18_title",
+      "groupId": "map_tutorial",
+      "groupLabel": "Tutorial del geovisor",
+      "section": "Mapa Ecosistémico",
+      "label": "Paso 18, título",
+      "limit": 80,
+      "defaultValue": "La agenda: lo que tiene fecha"
+    },
+    {
+      "key": "map_tutorial_18_desc",
+      "groupId": "map_tutorial",
+      "groupLabel": "Tutorial del geovisor",
+      "section": "Mapa Ecosistémico",
+      "label": "Paso 18, texto",
+      "limit": 400,
+      "defaultValue": "Los eventos publicados del territorio abierto, con su fecha y su lugar. Aparece cuando tiene sentido —al abrir un departamento— y no al filtrar por práctica musical, porque un evento no se clasifica así."
+    },
+    {
+      "key": "map_explorar_capas",
+      "groupId": "map_explorar",
+      "groupLabel": "Modo explorar del geovisor",
+      "section": "Mapa Ecosistémico",
+      "label": "Capas",
+      "limit": 300,
+      "defaultValue": "Qué tipo de proceso hay en el mapa. Hoy se consultan Festivales y Agenda; las otras cuatro están en preparación y aparecen desactivadas."
+    },
+    {
+      "key": "map_explorar_filtros",
+      "groupId": "map_explorar",
+      "groupLabel": "Modo explorar del geovisor",
+      "section": "Mapa Ecosistémico",
+      "label": "Filtrar",
+      "limit": 300,
+      "defaultValue": "Acota lo que se ve: por nombre, por departamento o por municipio. Lo que pongas aparece como etiqueta y se quita de uno en uno."
+    },
+    {
+      "key": "map_explorar_lente",
+      "groupId": "map_explorar",
+      "groupLabel": "Modo explorar del geovisor",
+      "section": "Mapa Ecosistémico",
+      "label": "El lente",
+      "limit": 300,
+      "defaultValue": "Con qué criterio se reparte el color: territorios sonoros, prácticas musicales o división administrativa. No filtra nada; cambia cómo se pinta lo mismo."
+    },
+    {
+      "key": "map_explorar_dibujo",
+      "groupId": "map_explorar",
+      "groupLabel": "Modo explorar del geovisor",
+      "section": "Mapa Ecosistémico",
+      "label": "Cómo se dibuja",
+      "limit": 300,
+      "defaultValue": "Tres maneras de proyectar lo mismo: coropleta tiñe departamentos enteros, símbolos pone un círculo por municipio, y calor dibuja una mancha que ignora los límites."
+    },
+    {
+      "key": "map_explorar_lienzo",
+      "groupId": "map_explorar",
+      "groupLabel": "Modo explorar del geovisor",
+      "section": "Mapa Ecosistémico",
+      "label": "El mapa",
+      "limit": 300,
+      "defaultValue": "Pulsa un departamento para entrar en él; pulsa un municipio para ver sus procesos. La rueda acerca y aleja."
+    },
+    {
+      "key": "map_explorar_leyenda",
+      "groupId": "map_explorar",
+      "groupLabel": "Modo explorar del geovisor",
+      "section": "Mapa Ecosistémico",
+      "label": "Cómo leer esta vista",
+      "limit": 300,
+      "defaultValue": "Qué significan los colores y los tamaños del dibujo que esté puesto. Cambia con él, y se puede plegar."
+    },
+    {
+      "key": "map_explorar_vistas",
+      "groupId": "map_explorar",
+      "groupLabel": "Modo explorar del geovisor",
+      "section": "Mapa Ecosistémico",
+      "label": "Mapa, gráfico o tabla",
+      "limit": 300,
+      "defaultValue": "Los mismos datos en tres presentaciones. El gráfico ordena y compara; la tabla sirve para recorrer la lista entera o imprimirla."
+    },
+    {
+      "key": "map_explorar_lecturas",
+      "groupId": "map_explorar",
+      "groupLabel": "Modo explorar del geovisor",
+      "section": "Mapa Ecosistémico",
+      "label": "Las lecturas",
+      "limit": 300,
+      "defaultValue": "Siete maneras de leer el mismo conjunto. Cada posición dice su cifra y, al pulsarla, cambia lo que se dibuja debajo."
+    },
+    {
+      "key": "map_explorar_figura",
+      "groupId": "map_explorar",
+      "groupLabel": "Modo explorar del geovisor",
+      "section": "Mapa Ecosistémico",
+      "label": "La figura",
+      "limit": 300,
+      "defaultValue": "Dos dibujos para la misma lectura, que no dicen lo mismo: la barra da el orden y el valor, el área da la parte del todo, las unidades se pueden contar."
+    },
+    {
+      "key": "map_explorar_dimension",
+      "groupId": "map_explorar",
+      "groupLabel": "Modo explorar del geovisor",
+      "section": "Mapa Ecosistémico",
+      "label": "La dimensión",
+      "limit": 300,
+      "defaultValue": "Sobre qué se mide la composición: territorios sonoros o prácticas y géneros. Son dos clasificaciones distintas del mismo conjunto."
+    },
+    {
+      "key": "map_explorar_listado",
+      "groupId": "map_explorar",
+      "groupLabel": "Modo explorar del geovisor",
+      "section": "Mapa Ecosistémico",
+      "label": "Directorio y agenda",
+      "limit": 300,
+      "defaultValue": "El directorio lista lo que hay en el ámbito puesto; la agenda, lo que tiene fecha. Desde cualquier ficha se puede ubicar el proceso en el mapa."
+    },
+    {
+      "key": "ejes_hero_tag",
+      "groupId": "ejes_hero",
+      "groupLabel": "Encabezado de la página",
+      "section": "Ejes",
+      "label": "Antetítulo",
+      "limit": 60,
+      "defaultValue": "Ejes"
+    },
+    {
+      "key": "ejes_hero_title",
+      "groupId": "ejes_hero",
+      "groupLabel": "Encabezado de la página",
+      "section": "Ejes",
+      "label": "Título",
+      "limit": 40,
+      "defaultValue": "Ejes de"
+    },
+    {
+      "key": "ejes_hero_accent",
+      "groupId": "ejes_hero",
+      "groupLabel": "Encabezado de la página",
+      "section": "Ejes",
+      "label": "Título acentuado",
+      "limit": 60,
+      "defaultValue": "Transformación"
+    },
+    {
+      "key": "ejes_hero_desc",
+      "groupId": "ejes_hero",
+      "groupLabel": "Encabezado de la página",
+      "section": "Ejes",
+      "label": "Descripción del encabezado",
+      "limit": 300,
+      "defaultValue": "Explora las dimensiones fundamentales del PNMC."
+    },
+    {
+      "key": "eje01_title",
+      "groupId": "eje1_details",
+      "groupLabel": "Eje 1 - Música para la Vida",
+      "section": "Ejes",
+      "label": "Título del Eje",
+      "limit": 200,
+      "defaultValue": "MÚSICA PARA LA VIDA, EL DIÁLOGO INTERCULTURAL Y LA DIVERSIDAD BIOCULTURAL"
+    },
+    {
+      "key": "eje01_desc1",
+      "groupId": "eje1_details",
+      "groupLabel": "Eje 1 - Música para la Vida",
+      "section": "Ejes",
+      "label": "Explicación Párrafo 1",
+      "limit": 500,
+      "defaultValue": "Este eje promueve el acceso, la apropiación y la práctica musical como derechos culturales fundamentales, entendiendo la música y lo sonoro como bienes comunes que fortalecen identidades, cohesión social y equidad en el país."
+    },
+    {
+      "key": "eje01_desc2",
+      "groupId": "eje1_details",
+      "groupLabel": "Eje 1 - Música para la Vida",
+      "section": "Ejes",
+      "label": "Explicación Párrafo 2",
+      "limit": 500,
+      "defaultValue": "Desde una perspectiva de diversidad cultural y biocultural, este eje impulsa procesos que reconocen la música como herramienta para el diálogo intercultural, la construcción de paz y la participación ciudadana."
+    },
+    {
+      "key": "eje01_purpose",
+      "groupId": "eje1_details",
+      "groupLabel": "Eje 1 - Música para la Vida",
+      "section": "Ejes",
+      "label": "Propósito General",
+      "limit": 400,
+      "defaultValue": "Establecer la música como vehículo de inclusión, identidad y reconciliación, garantizando que todas las personas, sin distinción, puedan vivirla plenamente como parte de su vida, su territorio y su comunidad."
+    },
+    {
+      "key": "eje01_c1_title",
+      "groupId": "eje1_details",
+      "groupLabel": "Eje 1 - Música para la Vida",
+      "section": "Ejes",
+      "label": "Comp 1: Título",
+      "limit": 120,
+      "defaultValue": "Apropiación de la música y de los derechos culturales"
+    },
+    {
+      "key": "eje01_c1_desc",
+      "groupId": "eje1_details",
+      "groupLabel": "Eje 1 - Música para la Vida",
+      "section": "Ejes",
+      "label": "Comp 1: Detalle",
+      "limit": 400,
+      "defaultValue": "Este componente busca fortalecer el vínculo de la ciudadanía con la música como derecho cultural y bien común. Promueve el acceso equitativo, la participación activa y el disfrute de la música en espacios comunitarios, educativos y culturales."
+    },
+    {
+      "key": "eje01_c2_title",
+      "groupId": "eje1_details",
+      "groupLabel": "Eje 1 - Música para la Vida",
+      "section": "Ejes",
+      "label": "Comp 2: Título",
+      "limit": 120,
+      "defaultValue": "Enfoque poblacional y cultura de paz"
+    },
+    {
+      "key": "eje01_c2_desc",
+      "groupId": "eje1_details",
+      "groupLabel": "Eje 1 - Música para la Vida",
+      "section": "Ejes",
+      "label": "Comp 2: Detalle",
+      "limit": 400,
+      "defaultValue": "Promueve la inclusión de poblaciones históricamente excluidas en el ecosistema musical, reconociendo sus particularidades culturales y garantizando su acceso equitativo a procesos asociados a la música."
+    },
+    {
+      "key": "eje02_title",
+      "groupId": "eje2_details",
+      "groupLabel": "Eje 2 - Prácticas y Oficios",
+      "section": "Ejes",
+      "label": "Título del Eje",
+      "limit": 200,
+      "defaultValue": "FORTALECIMIENTO DE LAS PRÁCTICAS, EXPRESIONES Y OFICIOS DE LA MÚSICA"
+    },
+    {
+      "key": "eje02_desc1",
+      "groupId": "eje2_details",
+      "groupLabel": "Eje 2 - Prácticas y Oficios",
+      "section": "Ejes",
+      "label": "Explicación Párrafo 1",
+      "limit": 500,
+      "defaultValue": "Este eje busca fortalecer de manera integral el campo musical en Colombia, garantizando mejores condiciones para la formación, la creación, la producción, la investigación, la dotación y la circulación musical en el país."
+    },
+    {
+      "key": "eje02_desc2",
+      "groupId": "eje2_details",
+      "groupLabel": "Eje 2 - Prácticas y Oficios",
+      "section": "Ejes",
+      "label": "Explicación Párrafo 2",
+      "limit": 500,
+      "defaultValue": "Se destaca la importancia de la memoria, la identidad y la diversidad cultural como bases para la producción artística y para la construcción del presente y el futuro del sector musical."
+    },
+    {
+      "key": "eje02_purpose",
+      "groupId": "eje2_details",
+      "groupLabel": "Eje 2 - Prácticas y Oficios",
+      "section": "Ejes",
+      "label": "Propósito General",
+      "limit": 400,
+      "defaultValue": "Dignificar y reconocer profesionalmente los oficios y saberes vinculados a la música, promover la equidad de oportunidades y asegurar la sostenibilidad de las diversas expresiones sonoras del territorio."
+    },
+    {
+      "key": "eje02_c1_title",
+      "groupId": "eje2_details",
+      "groupLabel": "Eje 2 - Prácticas y Oficios",
+      "section": "Ejes",
+      "label": "Comp 1: Título",
+      "limit": 120,
+      "defaultValue": "Formación"
+    },
+    {
+      "key": "eje02_c1_desc",
+      "groupId": "eje2_details",
+      "groupLabel": "Eje 2 - Prácticas y Oficios",
+      "section": "Ejes",
+      "label": "Comp 1: Detalle",
+      "limit": 450,
+      "defaultValue": "Este componente impulsa procesos de cualificación para músicos, sabedores, pedagogos, licenciados, formadores, investigadores, gestores y otros oficios del ecosistema musical. Busca consolidar la educación y formación musical como un pilar del desarrollo cultural y social del país, articulando acciones con el sistema educativo, el SINEFAC y las Escuelas Municipales y Comunitarias de Música."
+    },
+    {
+      "key": "eje02_c2_title",
+      "groupId": "eje2_details",
+      "groupLabel": "Eje 2 - Prácticas y Oficios",
+      "section": "Ejes",
+      "label": "Comp 2: Título",
+      "limit": 120,
+      "defaultValue": "Creación y producción"
+    },
+    {
+      "key": "eje02_c2_desc",
+      "groupId": "eje2_details",
+      "groupLabel": "Eje 2 - Prácticas y Oficios",
+      "section": "Ejes",
+      "label": "Comp 2: Detalle",
+      "limit": 400,
+      "defaultValue": "Este componente fortalece las condiciones necesarias para la composición, interpretación, experimentación, grabación y producción musical en el país. Promueve estímulos, laboratorios y herramientas técnicas para desarrollar nuevas obras, integrar saberes tradicionales, potenciar la innovación y ampliar la diversidad sonora del territorio."
+    },
+    {
+      "key": "eje02_c3_title",
+      "groupId": "eje2_details",
+      "groupLabel": "Eje 2 - Prácticas y Oficios",
+      "section": "Ejes",
+      "label": "Comp 3: Título",
+      "limit": 120,
+      "defaultValue": "Circulación"
+    },
+    {
+      "key": "eje02_c3_desc",
+      "groupId": "eje2_details",
+      "groupLabel": "Eje 2 - Prácticas y Oficios",
+      "section": "Ejes",
+      "label": "Comp 3: Detalle",
+      "limit": 500,
+      "defaultValue": "La circulación es un pilar fundamental para el fortalecimiento del ecosistema musical en Colombia, ya que permite la movilidad y visibilización de las músicas y los músicos en distintos escenarios locales, nacionales e internacionales. Este componente busca consolidar redes de colaboración, potenciar festivales y mercados musicales, e integrar a los artistas en diversos circuitos culturales, facilitando el acceso a oportunidades de difusión y profesionalización."
+    },
+    {
+      "key": "eje02_c4_title",
+      "groupId": "eje2_details",
+      "groupLabel": "Eje 2 - Prácticas y Oficios",
+      "section": "Ejes",
+      "label": "Comp 4: Título",
+      "limit": 120,
+      "defaultValue": "Memoria, investigación y documentación"
+    },
+    {
+      "key": "eje02_c4_desc",
+      "groupId": "eje2_details",
+      "groupLabel": "Eje 2 - Prácticas y Oficios",
+      "section": "Ejes",
+      "label": "Comp 4: Detalle",
+      "limit": 400,
+      "defaultValue": "Este componente impulsa la preservación, investigación y difusión del patrimonio sonoro del país. Articula el conocimiento académico con los saberes comunitarios y ancestrales para documentar repertorios, prácticas y trayectorias musicales."
+    },
+    {
+      "key": "eje02_c5_title",
+      "groupId": "eje2_details",
+      "groupLabel": "Eje 2 - Prácticas y Oficios",
+      "section": "Ejes",
+      "label": "Comp 5: Título",
+      "limit": 120,
+      "defaultValue": "Información y comunicación"
+    },
+    {
+      "key": "eje02_c5_desc",
+      "groupId": "eje2_details",
+      "groupLabel": "Eje 2 - Prácticas y Oficios",
+      "section": "Ejes",
+      "label": "Comp 5: Detalle",
+      "limit": 500,
+      "defaultValue": "El acceso a información clara, actualizada y estructurada es clave para la toma de decisiones y el diseño de políticas públicas pertinentes. Este componente fortalece la recopilación, sistematización y divulgación de datos del sector musical, promoviendo herramientas como el SIMUS y estrategias de comunicación que permitan a gestores, instituciones, investigadores y ciudadanía comprender y usar la información del ecosistema musical."
+    },
+    {
+      "key": "eje02_c6_title",
+      "groupId": "eje2_details",
+      "groupLabel": "Eje 2 - Prácticas y Oficios",
+      "section": "Ejes",
+      "label": "Comp 6: Título",
+      "limit": 120,
+      "defaultValue": "Dotación e infraestructura"
+    },
+    {
+      "key": "eje02_c6_desc",
+      "groupId": "eje2_details",
+      "groupLabel": "Eje 2 - Prácticas y Oficios",
+      "section": "Ejes",
+      "label": "Comp 6: Detalle",
+      "limit": 400,
+      "defaultValue": "Este componente garantiza el acceso a instrumentos, herramientas técnicas y espacios adecuados para la formación, creación y circulación musical."
+    },
+    {
+      "key": "eje03_title",
+      "groupId": "eje3_details",
+      "groupLabel": "Eje 3 - Gobernanza",
+      "section": "Ejes",
+      "label": "Título del Eje",
+      "limit": 200,
+      "defaultValue": "GOBERNANZA MUSICAL E INTEGRACIÓN CULTURAL E INTERSECTORIAL"
+    },
+    {
+      "key": "eje03_desc1",
+      "groupId": "eje3_details",
+      "groupLabel": "Eje 3 - Gobernanza",
+      "section": "Ejes",
+      "label": "Explicación Párrafo 1",
+      "limit": 500,
+      "defaultValue": "Este eje promueve el fortalecimiento de los mecanismos de organización, participación y articulación del sector musical con y desde el Estado."
+    },
+    {
+      "key": "eje03_desc2",
+      "groupId": "eje3_details",
+      "groupLabel": "Eje 3 - Gobernanza",
+      "section": "Ejes",
+      "label": "Explicación Párrafo 2",
+      "limit": 500,
+      "defaultValue": "Consolidando una gobernanza efectiva que garantice la sostenibilidad cultural del ecosistema musical en Colombia."
+    },
+    {
+      "key": "eje03_purpose",
+      "groupId": "eje3_details",
+      "groupLabel": "Eje 3 - Gobernanza",
+      "section": "Ejes",
+      "label": "Propósito General",
+      "limit": 400,
+      "defaultValue": "Consolidar una gobernanza sólida y una articulación intersectorial amplia que potencie la capacidad de la música para incidir en la transformación social, la construcción de paz y la reducción de desigualdades."
+    },
+    {
+      "key": "eje03_c1_title",
+      "groupId": "eje3_details",
+      "groupLabel": "Eje 3 - Gobernanza",
+      "section": "Ejes",
+      "label": "Comp 1: Título",
+      "limit": 120,
+      "defaultValue": "Participación ciudadana, intersectorialidad y articulación territorial"
+    },
+    {
+      "key": "eje03_c1_desc",
+      "groupId": "eje3_details",
+      "groupLabel": "Eje 3 - Gobernanza",
+      "section": "Ejes",
+      "label": "Comp 1: Detalle",
+      "limit": 400,
+      "defaultValue": "Este componente busca fortalecer la participación activa del sector musical en la formulación y ejecución de políticas públicas, promoviendo espacios de diálogo, concertación y decisión colectiva como los Comités Departamentales de Música y los Planes Departamentales de Desarrollo Musical."
+    },
+    {
+      "key": "eje03_c2_title",
+      "groupId": "eje3_details",
+      "groupLabel": "Eje 3 - Gobernanza",
+      "section": "Ejes",
+      "label": "Comp 2: Título",
+      "limit": 120,
+      "defaultValue": "Sostenibilidad, condiciones laborales y economías de la música"
+    },
+    {
+      "key": "eje03_c2_desc",
+      "groupId": "eje3_details",
+      "groupLabel": "Eje 3 - Gobernanza",
+      "section": "Ejes",
+      "label": "Comp 2: Detalle",
+      "limit": 450,
+      "defaultValue": "Este componente se centra en mejorar las condiciones laborales y económicas de los actores del ecosistema musical, promoviendo la formalización, la seguridad social, la dignificación del trabajo y el fortalecimiento de capacidades en gestión, producción y emprendimiento."
+    },
+    {
+      "key": "component_products_title",
+      "groupId": "component_detail",
+      "groupLabel": "Ficha de componente",
+      "section": "Ejes",
+      "label": "Productos, título",
+      "limit": 60,
+      "defaultValue": "Productos relacionados"
+    },
+    {
+      "key": "component_products_desc",
+      "groupId": "component_detail",
+      "groupLabel": "Ficha de componente",
+      "section": "Ejes",
+      "label": "Productos, bajada",
+      "limit": 200,
+      "defaultValue": "Material del acervo editorial vinculado a este componente."
+    },
+    {
+      "key": "component_agenda_title",
+      "groupId": "component_detail",
+      "groupLabel": "Ficha de componente",
+      "section": "Ejes",
+      "label": "Agenda, título",
+      "limit": 60,
+      "defaultValue": "Agenda relacionada"
+    },
+    {
+      "key": "component_agenda_desc",
+      "groupId": "component_detail",
+      "groupLabel": "Ficha de componente",
+      "section": "Ejes",
+      "label": "Agenda, bajada",
+      "limit": 200,
+      "defaultValue": "Eventos de la agenda vinculados a este componente."
+    },
+    {
+      "key": "component_missing_title",
+      "groupId": "component_detail",
+      "groupLabel": "Ficha de componente",
+      "section": "Ejes",
+      "label": "Componente inexistente",
+      "limit": 80,
+      "defaultValue": "Componente no encontrado"
+    },
+    {
+      "key": "strategy_celebra_hero_desc",
+      "groupId": "strategy_celebra_details",
+      "groupLabel": "Celebra la Música",
+      "section": "Estrategias",
+      "label": "Descripción Hero",
+      "limit": 300,
+      "defaultValue": "Una estrategia nacional que articula territorios, agentes e instituciones para visibilizar la diversidad sonora de Colombia."
+    },
+    {
+      "key": "strategy_celebra_section_title",
+      "groupId": "strategy_celebra_details",
+      "groupLabel": "Celebra la Música",
+      "section": "Estrategias",
+      "label": "Título sección",
+      "limit": 120,
+      "defaultValue": "La celebración de la música"
+    },
+    {
+      "key": "strategy_celebra_intro",
+      "groupId": "strategy_celebra_details",
+      "groupLabel": "Celebra la Música",
+      "section": "Estrategias",
+      "label": "Introducción",
+      "limit": 400,
+      "defaultValue": "Como parte del Plan Nacional de Música para la Convivencia del Ministerio de las Culturas del Gobierno de Colombia, Celebra la Música busca que el sonido y la creatividad lleguen a todos los rincones del país, para que cada territorio haga oír su voz."
+    },
+    {
+      "key": "strategy_celebra_mission",
+      "groupId": "strategy_celebra_details",
+      "groupLabel": "Celebra la Música",
+      "section": "Estrategias",
+      "label": "Misión",
+      "limit": 500,
+      "defaultValue": "Su propósito es conectar a artistas, comunidades e instituciones para fortalecer los procesos de formación, creación y circulación musical. Promueve la música como un derecho, un espacio de encuentro y una oportunidad para construir memoria, dignificar el trabajo artístico y enriquecer la vida cultural del país."
+    },
+    {
+      "key": "strategy_celebra_edition_intro",
+      "groupId": "strategy_celebra_details",
+      "groupLabel": "Celebra la Música",
+      "section": "Estrategias",
+      "label": "Edición Intro",
+      "limit": 500,
+      "defaultValue": "En 2025, Celebra la Música se renueva para convertirse en un gran proceso nacional que promueve la circulación musical en el país y que no será solo una jornada conmemorativa, sino un movimiento que, durante 29 días, unirá a los 32 departamentos de Colombia en torno a la diversidad sonora."
+    },
+    {
+      "key": "strategy_celebra_edition_vision",
+      "groupId": "strategy_celebra_details",
+      "groupLabel": "Celebra la Música",
+      "section": "Estrategias",
+      "label": "Edición Visión",
+      "limit": 500,
+      "defaultValue": "Esta edición se articula con el Plan Nacional de Cultura 2024-2038 y el Plan Nacional de Música para la Convivencia 2025-2035, impulsando espacios de formación, creación, circulación y memoria."
+    },
+    {
+      "key": "strategy_celebra_edition_closing",
+      "groupId": "strategy_celebra_details",
+      "groupLabel": "Celebra la Música",
+      "section": "Estrategias",
+      "label": "Conclusión",
+      "limit": 300,
+      "defaultValue": "Celebra la Música 2025 es una apuesta por hacer de la música un camino para la convivencia, la paz y la vida."
+    },
+    {
+      "key": "strategy_territorios_hero_desc",
+      "groupId": "strategy_territorios_details",
+      "groupLabel": "Territorios Sonoros",
+      "section": "Estrategias",
+      "label": "Descripción Hero",
+      "limit": 300,
+      "defaultValue": "Una ruta para reconocer, documentar y fortalecer la diversidad musical desde los territorios de Colombia."
+    },
+    {
+      "key": "strategy_territorios_intro",
+      "groupId": "strategy_territorios_details",
+      "groupLabel": "Territorios Sonoros",
+      "section": "Estrategias",
+      "label": "Introducción",
+      "limit": 400,
+      "defaultValue": "Territorios Sonoros conecta comunidades, investigadores, portadores de saberes e instituciones para comprender las prácticas musicales en su contexto y convertir ese conocimiento en acciones de política pública."
+    },
+    {
+      "key": "access_eyebrow",
+      "groupId": "access_external_portal",
+      "groupLabel": "Portada de acceso externo",
+      "section": "Acceso externo",
+      "label": "Rótulo superior · Registrarse",
+      "limit": 40,
+      "defaultValue": "Acceso externo"
+    },
+    {
+      "key": "access_title",
+      "groupId": "access_external_portal",
+      "groupLabel": "Portada de acceso externo",
+      "section": "Acceso externo",
+      "label": "Título · Registrarse",
+      "limit": 60,
+      "defaultValue": "Haz parte del ecosistema"
+    },
+    {
+      "key": "access_intro",
+      "groupId": "access_external_portal",
+      "groupLabel": "Portada de acceso externo",
+      "section": "Acceso externo",
+      "label": "Presentación · Registrarse",
+      "limit": 220,
+      "defaultValue": "Crea tu cuenta, gestiona organizaciones y mantiene actualizada la información del ecosistema musical."
+    },
+    {
+      "key": "access_register_intro",
+      "groupId": "access_external_portal",
+      "groupLabel": "Portada de acceso externo",
+      "section": "Acceso externo",
+      "label": "Alta, entradilla",
+      "limit": 240,
+      "defaultValue": "Registra tu organización y la persona que responderá por ella. Con ese mismo correo y contraseña entrarás después."
+    },
+    {
+      "key": "access_footer_note",
+      "groupId": "access_external_portal",
+      "groupLabel": "Portada de acceso externo",
+      "section": "Acceso externo",
+      "label": "Nota al pie",
+      "limit": 200,
+      "defaultValue": "Este es el acceso externo del PNMC. El acceso institucional se mantiene separado."
+    },
+    {
+      "key": "ecosistema_hero_tag",
+      "groupId": "ecosistema_hero",
+      "groupLabel": "Encabezado",
+      "section": "Ecosistema",
+      "label": "Antetítulo",
+      "limit": 60,
+      "defaultValue": "Ecosistema musical de Colombia"
+    },
+    {
+      "key": "ecosistema_hero_title",
+      "groupId": "ecosistema_hero",
+      "groupLabel": "Encabezado",
+      "section": "Ecosistema",
+      "label": "Título",
+      "limit": 40,
+      "defaultValue": "Ecosistema"
+    },
+    {
+      "key": "ecosistema_hero_accent",
+      "groupId": "ecosistema_hero",
+      "groupLabel": "Encabezado",
+      "section": "Ecosistema",
+      "label": "Título acentuado",
+      "limit": 60,
+      "defaultValue": "que conecta el territorio"
+    },
+    {
+      "key": "ecosistema_hero_desc",
+      "groupId": "ecosistema_hero",
+      "groupLabel": "Encabezado",
+      "section": "Ecosistema",
+      "label": "Descripción del encabezado",
+      "limit": 300,
+      "defaultValue": "Un espacio público para conocer, consultar y fortalecer la información sobre las músicas, sus procesos y quienes las hacen posibles en Colombia."
+    },
+    {
+      "key": "ecosistema_about_tag",
+      "groupId": "ecosistema_about",
+      "groupLabel": "Qué reúne",
+      "section": "Ecosistema",
+      "label": "Qué reúne, antetítulo",
+      "limit": 40,
+      "defaultValue": "Consulta pública"
+    },
+    {
+      "key": "ecosistema_about_title",
+      "groupId": "ecosistema_about",
+      "groupLabel": "Qué reúne",
+      "section": "Ecosistema",
+      "label": "Qué reúne, título",
+      "limit": 120,
+      "defaultValue": "Una puerta de entrada al ecosistema musical."
+    },
+    {
+      "key": "ecosistema_about_p1",
+      "groupId": "ecosistema_about",
+      "groupLabel": "Qué reúne",
+      "section": "Ecosistema",
+      "label": "Qué reúne, párrafo 1",
+      "limit": 400,
+      "defaultValue": "SIMUS, el Sistema de Información de la Música, registra, organiza, relaciona y actualiza información estructurada sobre el ecosistema musical colombiano. Reúne agentes, organizaciones, procesos, prácticas, territorios e infraestructuras para hacer visible la riqueza musical del país."
+    },
+    {
+      "key": "ecosistema_about_p2",
+      "groupId": "ecosistema_about",
+      "groupLabel": "Qué reúne",
+      "section": "Ecosistema",
+      "label": "Qué reúne, párrafo 2",
+      "limit": 400,
+      "defaultValue": "Escuelas, festivales, mercados, escenarios, documentación, agenda y contenidos editoriales se conectan aquí para facilitar la consulta pública. El Mapa Ecosistémico ofrece una mirada territorial integral; los directorios especializados permiten profundizar en cada registro."
+    },
+    {
+      "key": "ecosistema_explore_tag",
+      "groupId": "ecosistema_explore",
+      "groupLabel": "Actualidad y conocimiento",
+      "section": "Ecosistema",
+      "label": "Actualidad y conocimiento - Antetítulo",
+      "limit": 40,
+      "defaultValue": "Actualidad y conocimiento"
+    },
+    {
+      "key": "ecosistema_explore_title",
+      "groupId": "ecosistema_explore",
+      "groupLabel": "Actualidad y conocimiento",
+      "section": "Ecosistema",
+      "label": "Actualidad y conocimiento - Título",
+      "limit": 120,
+      "defaultValue": "Sigue las músicas en movimiento"
+    },
+    {
+      "key": "ecosistema_explore_desc",
+      "groupId": "ecosistema_explore",
+      "groupLabel": "Actualidad y conocimiento",
+      "section": "Ecosistema",
+      "label": "Rutas de consulta - Introducción",
+      "limit": 300,
+      "defaultValue": "Consulta información disponible, conoce la actualidad musical o recorre las publicaciones del PNMC."
+    },
+    {
+      "key": "ecosistema_explore_map_title",
+      "groupId": "ecosistema_explore",
+      "groupLabel": "Actualidad y conocimiento",
+      "section": "Ecosistema",
+      "label": "Consulta «Mapa» - Título",
+      "limit": 60,
+      "defaultValue": "Lee el territorio"
+    },
+    {
+      "key": "ecosistema_explore_map_desc",
+      "groupId": "ecosistema_explore",
+      "groupLabel": "Actualidad y conocimiento",
+      "section": "Ecosistema",
+      "label": "Consulta «Mapa» - Descripción",
+      "limit": 200,
+      "defaultValue": "Conecta las categorías y su presencia geográfica en el Mapa Ecosistémico."
+    },
+    {
+      "key": "ecosistema_explore_editorial_title",
+      "groupId": "ecosistema_explore",
+      "groupLabel": "Actualidad y conocimiento",
+      "section": "Ecosistema",
+      "label": "Consulta «Editorial» - Título",
+      "limit": 60,
+      "defaultValue": "Consulta contenidos"
+    },
+    {
+      "key": "ecosistema_explore_editorial_desc",
+      "groupId": "ecosistema_explore",
+      "groupLabel": "Actualidad y conocimiento",
+      "section": "Ecosistema",
+      "label": "Consulta «Editorial» - Descripción",
+      "limit": 200,
+      "defaultValue": "Accede a publicaciones, documentos y recursos desde Editorial."
+    },
+    {
+      "key": "ecosistema_explore_news_title",
+      "groupId": "ecosistema_explore",
+      "groupLabel": "Actualidad y conocimiento",
+      "section": "Ecosistema",
+      "label": "Consulta «Noticias» - Título",
+      "limit": 60,
+      "defaultValue": "Mantente al día"
+    },
+    {
+      "key": "ecosistema_explore_news_desc",
+      "groupId": "ecosistema_explore",
+      "groupLabel": "Actualidad y conocimiento",
+      "section": "Ecosistema",
+      "label": "Consulta «Noticias» - Descripción",
+      "limit": 200,
+      "defaultValue": "Conoce noticias y agenda de la actividad musical del país."
+    },
+    {
+      "key": "ecosistema_map_tag",
+      "groupId": "ecosistema_map",
+      "groupLabel": "Guía de exploración",
+      "section": "Ecosistema",
+      "label": "Guía de exploración - Antetítulo",
+      "limit": 40,
+      "defaultValue": "Guía de exploración"
+    },
+    {
+      "key": "ecosistema_map_title",
+      "groupId": "ecosistema_map",
+      "groupLabel": "Guía de exploración",
+      "section": "Ecosistema",
+      "label": "Guía de exploración - Título",
+      "limit": 120,
+      "defaultValue": "Cómo explorar SIMUS"
+    },
+    {
+      "key": "ecosistema_map_desc",
+      "groupId": "ecosistema_map",
+      "groupLabel": "Guía de exploración",
+      "section": "Ecosistema",
+      "label": "Botón «Ver en el mapa» - Descripción de apoyo",
+      "limit": 300,
+      "defaultValue": "Consulta la distribución territorial de los registros disponibles."
+    },
+    {
+      "key": "ecosistema_map_cta",
+      "groupId": "ecosistema_map",
+      "groupLabel": "Guía de exploración",
+      "section": "Ecosistema",
+      "label": "Botón «Ver en el mapa»",
+      "limit": 60,
+      "defaultValue": "Ver en el mapa ecosistémico"
+    },
+    {
+      "key": "ecosistema_nav_1_title",
+      "groupId": "ecosistema_map",
+      "groupLabel": "Guía de exploración",
+      "section": "Ecosistema",
+      "label": "Guía - Paso 1, título",
+      "limit": 40,
+      "defaultValue": "Directorios"
+    },
+    {
+      "key": "ecosistema_nav_1_desc",
+      "groupId": "ecosistema_map",
+      "groupLabel": "Guía de exploración",
+      "section": "Ecosistema",
+      "label": "Guía - Paso 1, texto",
+      "limit": 200,
+      "defaultValue": "Consulta registros específicos mediante búsqueda, filtros territoriales, prácticas musicales, lista, mosaico y fichas individuales."
+    },
+    {
+      "key": "ecosistema_nav_2_title",
+      "groupId": "ecosistema_map",
+      "groupLabel": "Guía de exploración",
+      "section": "Ecosistema",
+      "label": "Guía - Paso 2, título",
+      "limit": 40,
+      "defaultValue": "Mapa Ecosistémico"
+    },
+    {
+      "key": "ecosistema_nav_2_desc",
+      "groupId": "ecosistema_map",
+      "groupLabel": "Guía de exploración",
+      "section": "Ecosistema",
+      "label": "Guía - Paso 2, texto",
+      "limit": 200,
+      "defaultValue": "Observa distribuciones, concentraciones y capas territoriales; desde allí puedes interpretar los datos y volver a cada ficha."
+    },
+    {
+      "key": "ecosistema_nav_3_title",
+      "groupId": "ecosistema_map",
+      "groupLabel": "Guía de exploración",
+      "section": "Ecosistema",
+      "label": "Guía - Paso 3, título",
+      "limit": 40,
+      "defaultValue": "Contenidos y actualidad"
+    },
+    {
+      "key": "ecosistema_nav_3_desc",
+      "groupId": "ecosistema_map",
+      "groupLabel": "Guía de exploración",
+      "section": "Ecosistema",
+      "label": "Guía - Paso 3, texto",
+      "limit": 200,
+      "defaultValue": "Recorre la agenda, las noticias, la editorial y la galería para conocer la actividad musical y sus contextos."
+    },
+    {
+      "key": "ecosistema_processes_tag",
+      "groupId": "ecosistema_categories",
+      "groupLabel": "Directorios públicos",
+      "section": "Ecosistema",
+      "label": "Antetítulo",
+      "limit": 40,
+      "defaultValue": "Directorios públicos"
+    },
+    {
+      "key": "ecosistema_processes_title",
+      "groupId": "ecosistema_categories",
+      "groupLabel": "Directorios públicos",
+      "section": "Ecosistema",
+      "label": "Título",
+      "limit": 120,
+      "defaultValue": "Explora los registros"
+    },
+    {
+      "key": "ecosistema_processes_desc",
+      "groupId": "ecosistema_categories",
+      "groupLabel": "Directorios públicos",
+      "section": "Ecosistema",
+      "label": "Introducción",
+      "limit": 300,
+      "defaultValue": "Busca, filtra por territorio y consulta fichas individuales de los procesos disponibles."
+    },
+    {
+      "key": "ecosistema_join_tag",
+      "groupId": "ecosistema_participate",
+      "groupLabel": "Ayuda y tutoriales",
+      "section": "Ecosistema",
+      "label": "Antetítulo",
+      "limit": 60,
+      "defaultValue": "Ayuda y tutoriales"
+    },
+    {
+      "key": "ecosistema_join_title",
+      "groupId": "ecosistema_participate",
+      "groupLabel": "Ayuda y tutoriales",
+      "section": "Ecosistema",
+      "label": "Título",
+      "limit": 120,
+      "defaultValue": "Acompañamiento para navegar"
+    },
+    {
+      "key": "ecosistema_join_desc",
+      "groupId": "ecosistema_participate",
+      "groupLabel": "Ayuda y tutoriales",
+      "section": "Ecosistema",
+      "label": "Texto",
+      "limit": 400,
+      "defaultValue": "Este espacio reunirá guías para registrarse, actualizar información, consultar el mapa y utilizar los filtros. Mientras se amplía, puedes revisar la ayuda o contactar al equipo del PNMC."
+    },
+    {
+      "key": "ecosistema_join_cta",
+      "groupId": "ecosistema_participate",
+      "groupLabel": "Ayuda y tutoriales",
+      "section": "Ecosistema",
+      "label": "Botón",
+      "limit": 60,
+      "defaultValue": "Ver ayuda y tutoriales"
+    },
+    {
+      "key": "ecosistema_festivals_title",
+      "groupId": "ecosistema_directorios",
+      "groupLabel": "Festivales publicados",
+      "section": "Ecosistema",
+      "label": "Título del encabezado",
+      "limit": 60,
+      "defaultValue": "Festivales"
+    },
+    {
+      "key": "ecosistema_festivals_subtitle",
+      "groupId": "ecosistema_directorios",
+      "groupLabel": "Festivales publicados",
+      "section": "Ecosistema",
+      "label": "Subtítulo",
+      "limit": 100,
+      "defaultValue": "Procesos de circulación y encuentro"
+    },
+    {
+      "key": "ecosistema_festivals_tag",
+      "groupId": "ecosistema_directorios",
+      "groupLabel": "Festivales publicados",
+      "section": "Ecosistema",
+      "label": "Antetítulo",
+      "limit": 40,
+      "defaultValue": "Consulta pública"
+    },
+    {
+      "key": "ecosistema_festivals_heading",
+      "groupId": "ecosistema_directorios",
+      "groupLabel": "Festivales publicados",
+      "section": "Ecosistema",
+      "label": "Título de la consulta",
+      "limit": 120,
+      "defaultValue": "Festivales musicales"
+    },
+    {
+      "key": "ecosistema_festivals_search_label",
+      "groupId": "ecosistema_directorios",
+      "groupLabel": "Festivales publicados",
+      "section": "Ecosistema",
+      "label": "Rótulo del buscador",
+      "limit": 80,
+      "defaultValue": "Buscar Festival, territorio o práctica"
+    },
+    {
+      "key": "ecosistema_festivals_empty_title",
+      "groupId": "ecosistema_directorios",
+      "groupLabel": "Festivales publicados",
+      "section": "Ecosistema",
+      "label": "Sin resultados, título",
+      "limit": 80,
+      "defaultValue": "No hay Festivales para esta consulta"
+    },
+    {
+      "key": "ecosistema_festivals_empty_desc",
+      "groupId": "ecosistema_directorios",
+      "groupLabel": "Festivales publicados",
+      "section": "Ecosistema",
+      "label": "Sin resultados, texto",
+      "limit": 200,
+      "defaultValue": "Prueba con otro nombre, territorio o práctica musical."
+    },
+    {
+      "key": "notfound_eyebrow",
+      "groupId": "general_404",
+      "groupLabel": "Página no encontrada (error 404)",
+      "section": "Navegación y Footer",
+      "label": "Rótulo superior",
+      "limit": 40,
+      "defaultValue": "Error 404"
+    },
+    {
+      "key": "notfound_title",
+      "groupId": "general_404",
+      "groupLabel": "Página no encontrada (error 404)",
+      "section": "Navegación y Footer",
+      "label": "Título",
+      "limit": 60,
+      "defaultValue": "Página no encontrada"
+    },
+    {
+      "key": "notfound_desc",
+      "groupId": "general_404",
+      "groupLabel": "Página no encontrada (error 404)",
+      "section": "Navegación y Footer",
+      "label": "Explicación",
+      "limit": 300,
+      "defaultValue": "La página que buscas no existe o fue movida. Verifica la dirección o vuelve al inicio para seguir explorando el Plan Nacional de Música para la Convivencia."
+    },
+    {
+      "key": "notfound_cta_home",
+      "groupId": "general_404",
+      "groupLabel": "Página no encontrada (error 404)",
+      "section": "Navegación y Footer",
+      "label": "Botón al inicio",
+      "limit": 40,
+      "defaultValue": "Volver al inicio"
+    },
+    {
+      "key": "notfound_cta_map",
+      "groupId": "general_404",
+      "groupLabel": "Página no encontrada (error 404)",
+      "section": "Navegación y Footer",
+      "label": "Botón al mapa",
+      "limit": 40,
+      "defaultValue": "Ir al mapa ecosistémico"
+    },
+    {
+      "key": "nav_pnmc",
+      "groupId": "general_nav_footer",
+      "groupLabel": "Enlaces y Contacto",
+      "section": "Navegación y Footer",
+      "label": "Menú - Sobre el PNMC",
+      "limit": 40,
+      "defaultValue": "Sobre el PNMC"
+    },
+    {
+      "key": "nav_ejes",
+      "groupId": "general_nav_footer",
+      "groupLabel": "Enlaces y Contacto",
+      "section": "Navegación y Footer",
+      "label": "Menú - Ejes de Transformación",
+      "limit": 40,
+      "defaultValue": "Ejes"
+    },
+    {
+      "key": "nav_editorial",
+      "groupId": "general_nav_footer",
+      "groupLabel": "Enlaces y Contacto",
+      "section": "Navegación y Footer",
+      "label": "Menú - Editorial",
+      "limit": 40,
+      "defaultValue": "Editorial"
+    },
+    {
+      "key": "nav_galeria",
+      "groupId": "general_nav_footer",
+      "groupLabel": "Enlaces y Contacto",
+      "section": "Navegación y Footer",
+      "label": "Menú - Galería",
+      "limit": 40,
+      "defaultValue": "Galería"
+    },
+    {
+      "key": "nav_noticias",
+      "groupId": "general_nav_footer",
+      "groupLabel": "Enlaces y Contacto",
+      "section": "Navegación y Footer",
+      "label": "Menú - Noticias",
+      "limit": 40,
+      "defaultValue": "Noticias"
+    },
+    {
+      "key": "nav_agenda",
+      "groupId": "general_nav_footer",
+      "groupLabel": "Enlaces y Contacto",
+      "section": "Navegación y Footer",
+      "label": "Menú - Agenda",
+      "limit": 40,
+      "defaultValue": "Agenda"
+    },
+    {
+      "key": "nav_ecosistema",
+      "groupId": "general_nav_footer",
+      "groupLabel": "Enlaces y Contacto",
+      "section": "Navegación y Footer",
+      "label": "Menú - Ecosistema",
+      "limit": 40,
+      "defaultValue": "Ecosistema"
+    },
+    {
+      "key": "nav_components_title",
+      "groupId": "general_nav_footer",
+      "groupLabel": "Enlaces y Contacto",
+      "section": "Navegación y Footer",
+      "label": "Menú - Título de componentes",
+      "limit": 60,
+      "defaultValue": "Componentes del eje"
+    },
+    {
+      "key": "footer_col2_title",
+      "groupId": "general_nav_footer",
+      "groupLabel": "Enlaces y Contacto",
+      "section": "Navegación y Footer",
+      "label": "Footer - Col 2 Título (Ministerio)",
+      "limit": 120,
+      "defaultValue": "Ministerio de las Culturas, las Artes y los Saberes"
+    },
+    {
+      "key": "footer_col2_address",
+      "groupId": "general_nav_footer",
+      "groupLabel": "Enlaces y Contacto",
+      "section": "Navegación y Footer",
+      "label": "Footer - Col 2 Dirección",
+      "limit": 120,
+      "defaultValue": "Dirección: Calle 9 No. 8 - 31 Bogotá"
+    },
+    {
+      "key": "footer_col2_schedule",
+      "groupId": "general_nav_footer",
+      "groupLabel": "Enlaces y Contacto",
+      "section": "Navegación y Footer",
+      "label": "Footer - Col 2 Horario",
+      "limit": 150,
+      "defaultValue": "Horario de atención: 8:00 a.m. a 5:00 p.m. jornada continua."
+    },
+    {
+      "key": "footer_col2_phone",
+      "groupId": "general_nav_footer",
+      "groupLabel": "Enlaces y Contacto",
+      "section": "Navegación y Footer",
+      "label": "Footer - Col 2 Teléfono",
+      "limit": 60,
+      "defaultValue": "Teléfono: +57 (601) 3424100"
+    },
+    {
+      "key": "footer_col2_free_line",
+      "groupId": "general_nav_footer",
+      "groupLabel": "Enlaces y Contacto",
+      "section": "Navegación y Footer",
+      "label": "Footer - Col 2 Línea Gratuita",
+      "limit": 60,
+      "defaultValue": "Línea gratuita: 018000 938081"
+    },
+    {
+      "key": "footer_col3_title",
+      "groupId": "general_nav_footer",
+      "groupLabel": "Enlaces y Contacto",
+      "section": "Navegación y Footer",
+      "label": "Footer - Col 3 Título (Correspondencia)",
+      "limit": 120,
+      "defaultValue": "Contacto Correspondencia"
+    },
+    {
+      "key": "footer_col3_address",
+      "groupId": "general_nav_footer",
+      "groupLabel": "Enlaces y Contacto",
+      "section": "Navegación y Footer",
+      "label": "Footer - Col 3 Dirección",
+      "limit": 120,
+      "defaultValue": "Dirección: Calle 9 No. 8 - 31 Bogotá"
+    },
+    {
+      "key": "footer_col3_schedule",
+      "groupId": "general_nav_footer",
+      "groupLabel": "Enlaces y Contacto",
+      "section": "Navegación y Footer",
+      "label": "Footer - Col 3 Horario",
+      "limit": 150,
+      "defaultValue": "Lunes a viernes de 8:00 a.m. a 4:00 p.m. jornada continua"
+    },
+    {
+      "key": "footer_col3_email_label",
+      "groupId": "general_nav_footer",
+      "groupLabel": "Enlaces y Contacto",
+      "section": "Navegación y Footer",
+      "label": "Footer - Col 3 Etiqueta Correo",
+      "limit": 30,
+      "defaultValue": "Correo:"
+    },
+    {
+      "key": "footer_col3_email",
+      "groupId": "general_nav_footer",
+      "groupLabel": "Enlaces y Contacto",
+      "section": "Navegación y Footer",
+      "label": "Footer - Col 3 Correo Servicio",
+      "limit": 80,
+      "defaultValue": "servicioalciudadano@mincultura.gov.co"
+    },
+    {
+      "key": "footer_col3_email_note",
+      "groupId": "general_nav_footer",
+      "groupLabel": "Enlaces y Contacto",
+      "section": "Navegación y Footer",
+      "label": "Footer - Col 3 Correo Aviso",
+      "limit": 150,
+      "defaultValue": "(Los correos que se reciban después de las 5:00 p. m., se radicarán el siguiente día hábil)"
+    },
+    {
+      "key": "footer_col3_corruption_title",
+      "groupId": "general_nav_footer",
+      "groupLabel": "Enlaces y Contacto",
+      "section": "Navegación y Footer",
+      "label": "Footer - Denuncias Corrupción",
+      "limit": 100,
+      "defaultValue": "Registro de denuncias de corrupción:"
+    },
+    {
+      "key": "footer_col3_corruption_email",
+      "groupId": "general_nav_footer",
+      "groupLabel": "Enlaces y Contacto",
+      "section": "Navegación y Footer",
+      "label": "Footer - Denuncias Correo",
+      "limit": 80,
+      "defaultValue": "soytransparente@mincultura.gov.co"
+    },
+    {
+      "key": "footer_col3_legal_title",
+      "groupId": "general_nav_footer",
+      "groupLabel": "Enlaces y Contacto",
+      "section": "Navegación y Footer",
+      "label": "Footer - Notificaciones Título",
+      "limit": 100,
+      "defaultValue": "Notificaciones judiciales:"
+    },
+    {
+      "key": "footer_col3_legal_email",
+      "groupId": "general_nav_footer",
+      "groupLabel": "Enlaces y Contacto",
+      "section": "Navegación y Footer",
+      "label": "Footer - Notificaciones Correo",
+      "limit": 80,
+      "defaultValue": "notificaciones@mincultura.gov.co"
+    },
+    {
+      "key": "footer_col4_services_title",
+      "groupId": "general_nav_footer",
+      "groupLabel": "Enlaces y Contacto",
+      "section": "Navegación y Footer",
+      "label": "Footer - Col 4 Servicios Título",
+      "limit": 80,
+      "defaultValue": "Servicios a la Ciudadanía"
+    },
+    {
+      "key": "footer_col4_about_title",
+      "groupId": "general_nav_footer",
+      "groupLabel": "Enlaces y Contacto",
+      "section": "Navegación y Footer",
+      "label": "Footer - Col 4 Acerca Título",
+      "limit": 80,
+      "defaultValue": "Acerca del sitio"
+    },
+    {
+      "key": "footer_credits_text",
+      "groupId": "general_nav_footer",
+      "groupLabel": "Enlaces y Contacto",
+      "section": "Navegación y Footer",
+      "label": "Footer - Créditos Copyright",
+      "limit": 120,
+      "defaultValue": "Copyright ©"
+    },
+    {
+      "key": "footer_credits_tagline",
+      "groupId": "general_nav_footer",
+      "groupLabel": "Enlaces y Contacto",
+      "section": "Navegación y Footer",
+      "label": "Footer - Lema Institucional",
+      "limit": 100,
+      "defaultValue": "Colombia - Potencia de la Vida"
+    }
+  ],
+  "team": [
+    {
+      "id": "team-1",
+      "group": "coordination",
+      "role": "Coordinación Grupo de Música",
+      "name": "Jorge Enrique Sossa Santos",
+      "email": "jsossa@mincultura.gov.co",
+      "photo": ""
+    },
+    {
+      "id": "team-2",
+      "group": "coordination",
+      "role": "Apoyo a la coordinación",
+      "name": "Dora Carolina Rojas Rivera",
+      "email": "drojas@mincultura.gov.co",
+      "photo": ""
+    },
+    {
+      "id": "team-3",
+      "group": "leadership",
+      "role": "Líder Componente: Formación",
+      "name": "Diego Rodríguez",
+      "email": "drodriguezc@mincultura.gov.co",
+      "photo": ""
+    },
+    {
+      "id": "team-4",
+      "group": "leadership",
+      "role": "Líder Componente: Investigación",
+      "name": "Raúl Hernán Daza",
+      "email": "rdaza@mincultura.gov.co",
+      "photo": ""
+    },
+    {
+      "id": "team-5",
+      "group": "leadership",
+      "role": "Líder Componente: Circulación",
+      "name": "Carolina Ruiz Barragán",
+      "email": "druizb@mincultura.gov.co",
+      "photo": ""
+    },
+    {
+      "id": "team-6",
+      "group": "leadership",
+      "role": "Líder Componente: Dotación",
+      "name": "Guadalupe Gil",
+      "email": "ggil@mincultura.gov.co",
+      "photo": ""
+    },
+    {
+      "id": "team-7",
+      "group": "leadership",
+      "role": "Líder Componente: Creación",
+      "name": "Isabel Durán",
+      "email": "iduranp@mincultura.gov.co",
+      "photo": ""
+    },
+    {
+      "id": "team-9",
+      "group": "leadership",
+      "role": "Líder Componente: Información",
+      "name": "Yazmín López",
+      "email": "ylopez@mincultura.gov.co",
+      "photo": ""
+    },
+    {
+      "id": "team-10",
+      "group": "leadership",
+      "role": "Líder Componente: Comunicación",
+      "name": "Shirley Giomar Gómez",
+      "email": "sgomezc@mincultura.gov.co",
+      "photo": ""
+    }
+  ],
+  "images": [
+    {
+      "key": "home_hero_1",
+      "groupId": "home_media",
+      "groupLabel": "Portadas rotatorias del Home",
+      "section": "Home",
+      "label": "Portada 1 (la primera que se ve)",
+      "use": "fondo",
+      "editable": true,
+      "alt": "Musicos en escena",
+      "suggestedWidth": 1670,
+      "suggestedHeight": 1044,
+      "defaultUrl": "https://images.unsplash.com/photo-1774557482533-76b2ed54afce?q=80&w=1015&auto=format&fit=crop"
+    },
+    {
+      "key": "home_hero_2",
+      "groupId": "home_media",
+      "groupLabel": "Portadas rotatorias del Home",
+      "section": "Home",
+      "label": "Portada 2",
+      "use": "fondo",
+      "editable": true,
+      "alt": "Presentacion musical",
+      "suggestedWidth": 1670,
+      "suggestedHeight": 1044,
+      "defaultUrl": "https://images.unsplash.com/photo-1774558396280-c14b21198674?q=80&w=1470&auto=format&fit=crop"
+    },
+    {
+      "key": "home_hero_3",
+      "groupId": "home_media",
+      "groupLabel": "Portadas rotatorias del Home",
+      "section": "Home",
+      "label": "Portada 3",
+      "use": "fondo",
+      "editable": true,
+      "alt": "Trabajo de campo con musicos",
+      "suggestedWidth": 1670,
+      "suggestedHeight": 1044,
+      "defaultUrl": "https://images.unsplash.com/photo-1774558396253-be05d7a37d82?q=80&w=1470&auto=format&fit=crop"
+    },
+    {
+      "key": "home_hero_4",
+      "groupId": "home_media",
+      "groupLabel": "Portadas rotatorias del Home",
+      "section": "Home",
+      "label": "Portada 4",
+      "use": "fondo",
+      "editable": true,
+      "alt": "Practica musical comunitaria",
+      "suggestedWidth": 1670,
+      "suggestedHeight": 1044,
+      "defaultUrl": "https://images.unsplash.com/photo-1774558396250-1571cdddc61c?q=80&w=687&auto=format&fit=crop"
+    },
+    {
+      "key": "home_identidad_media",
+      "groupId": "home_identidad",
+      "groupLabel": "Fotografía de «Huella y evolución»",
+      "section": "Home",
+      "label": "Fotografía de «Huella y evolución»",
+      "use": "fondo",
+      "editable": true,
+      "alt": "Músicos del Plan Nacional de Música",
+      "suggestedWidth": 676,
+      "suggestedHeight": 275,
+      "defaultUrl": "/assets/home/identidad.webp"
+    },
+    {
+      "key": "home_ruta_1",
+      "groupId": "home_rutas",
+      "groupLabel": "Fotos de «Rutas de Acción Territorial»",
+      "section": "Home",
+      "label": "Ruta 1 · Celebra la Música",
+      "use": "fondo",
+      "editable": true,
+      "alt": "Celebra la Música",
+      "suggestedWidth": 491,
+      "suggestedHeight": 318,
+      "defaultUrl": "/assets/home/ruta-1.webp"
+    },
+    {
+      "key": "home_ruta_2",
+      "groupId": "home_rutas",
+      "groupLabel": "Fotos de «Rutas de Acción Territorial»",
+      "section": "Home",
+      "label": "Ruta 2 · Territorios Sonoros",
+      "use": "fondo",
+      "editable": true,
+      "alt": "Territorios Sonoros",
+      "suggestedWidth": 491,
+      "suggestedHeight": 318,
+      "defaultUrl": "/assets/home/ruta-2.webp"
+    },
+    {
+      "key": "home_ruta_3",
+      "groupId": "home_rutas",
+      "groupLabel": "Fotos de «Rutas de Acción Territorial»",
+      "section": "Home",
+      "label": "Ruta 3 · Congreso Nacional de Música",
+      "use": "fondo",
+      "editable": true,
+      "alt": "Congreso Nacional de Música",
+      "suggestedWidth": 491,
+      "suggestedHeight": 318,
+      "defaultUrl": "/assets/home/ruta-3.webp"
+    },
+    {
+      "key": "home_ruta_4",
+      "groupId": "home_rutas",
+      "groupLabel": "Fotos de «Rutas de Acción Territorial»",
+      "section": "Home",
+      "label": "Ruta 4 · Tempos de Memorias",
+      "use": "fondo",
+      "editable": true,
+      "alt": "Tempos de Memorias",
+      "suggestedWidth": 491,
+      "suggestedHeight": 318,
+      "defaultUrl": "/assets/home/ruta-4.webp"
+    },
+    {
+      "key": "home_ruta_5",
+      "groupId": "home_rutas",
+      "groupLabel": "Fotos de «Rutas de Acción Territorial»",
+      "section": "Home",
+      "label": "Ruta 5 · Voces y Saberes",
+      "use": "fondo",
+      "editable": true,
+      "alt": "Voces y Saberes",
+      "suggestedWidth": 491,
+      "suggestedHeight": 318,
+      "defaultUrl": "/assets/home/ruta-5.webp"
+    },
+    {
+      "key": "home_ruta_6",
+      "groupId": "home_rutas",
+      "groupLabel": "Fotos de «Rutas de Acción Territorial»",
+      "section": "Home",
+      "label": "Ruta 6 · Red Nacional de Jazz",
+      "use": "fondo",
+      "editable": true,
+      "alt": "Red Nacional de Jazz",
+      "suggestedWidth": 491,
+      "suggestedHeight": 318,
+      "defaultUrl": "/assets/home/ruta-6.webp"
+    },
+    {
+      "key": "home_ruta_7",
+      "groupId": "home_rutas",
+      "groupLabel": "Fotos de «Rutas de Acción Territorial»",
+      "section": "Home",
+      "label": "Ruta 7 · Mercados Musicales",
+      "use": "fondo",
+      "editable": true,
+      "alt": "Mercados Musicales de Colombia",
+      "suggestedWidth": 491,
+      "suggestedHeight": 318,
+      "defaultUrl": "/assets/home/ruta-7.webp"
+    },
+    {
+      "key": "home_ruta_8",
+      "groupId": "home_rutas",
+      "groupLabel": "Fotos de «Rutas de Acción Territorial»",
+      "section": "Home",
+      "label": "Ruta 8 · Mesas de Participación",
+      "use": "fondo",
+      "editable": true,
+      "alt": "Mesas de Participación",
+      "suggestedWidth": 491,
+      "suggestedHeight": 318,
+      "defaultUrl": "/assets/home/ruta-8.webp"
+    },
+    {
+      "key": "home_banner_1",
+      "groupId": "home_banner",
+      "groupLabel": "Fondos del banner deslizante",
+      "section": "Home",
+      "label": "Banner 1 · Sé parte del ecosistema",
+      "use": "fondo",
+      "editable": true,
+      "alt": "Público en un auditorio",
+      "suggestedWidth": 1920,
+      "suggestedHeight": 520,
+      "defaultUrl": "/assets/home/banner-1.webp"
+    },
+    {
+      "key": "home_banner_2",
+      "groupId": "home_banner",
+      "groupLabel": "Fondos del banner deslizante",
+      "section": "Home",
+      "label": "Banner 2 · Celebra la Música",
+      "use": "fondo",
+      "editable": true,
+      "alt": "Celebra la Música",
+      "suggestedWidth": 1920,
+      "suggestedHeight": 520,
+      "defaultUrl": "/assets/home/banner-2.webp"
+    },
+    {
+      "key": "home_banner_3",
+      "groupId": "home_banner",
+      "groupLabel": "Fondos del banner deslizante",
+      "section": "Home",
+      "label": "Banner 3 · Territorios Sonoros",
+      "use": "fondo",
+      "editable": true,
+      "alt": "Territorios Sonoros",
+      "suggestedWidth": 1920,
+      "suggestedHeight": 520,
+      "defaultUrl": "/assets/home/banner-3.webp"
+    },
+    {
+      "key": "home_eco_1",
+      "groupId": "home_ecosistema",
+      "groupLabel": "Fotos de los procesos del Ecosistema",
+      "section": "Home",
+      "label": "Proceso 1 · Escuelas de música",
+      "use": "fondo",
+      "editable": true,
+      "alt": "Escuelas de música",
+      "suggestedWidth": 405,
+      "suggestedHeight": 208,
+      "defaultUrl": "/assets/home/eco-1.webp"
+    },
+    {
+      "key": "home_eco_2",
+      "groupId": "home_ecosistema",
+      "groupLabel": "Fotos de los procesos del Ecosistema",
+      "section": "Home",
+      "label": "Proceso 2 · Escenarios",
+      "use": "fondo",
+      "editable": true,
+      "alt": "Escenarios",
+      "suggestedWidth": 405,
+      "suggestedHeight": 208,
+      "defaultUrl": "/assets/home/eco-2.webp"
+    },
+    {
+      "key": "home_eco_3",
+      "groupId": "home_ecosistema",
+      "groupLabel": "Fotos de los procesos del Ecosistema",
+      "section": "Home",
+      "label": "Proceso 3 · Festivales",
+      "use": "fondo",
+      "editable": true,
+      "alt": "Festivales",
+      "suggestedWidth": 405,
+      "suggestedHeight": 208,
+      "defaultUrl": "/assets/home/eco-3.webp"
+    },
+    {
+      "key": "home_eco_4",
+      "groupId": "home_ecosistema",
+      "groupLabel": "Fotos de los procesos del Ecosistema",
+      "section": "Home",
+      "label": "Proceso 4 · Mercados musicales",
+      "use": "fondo",
+      "editable": true,
+      "alt": "Mercados musicales",
+      "suggestedWidth": 405,
+      "suggestedHeight": 208,
+      "defaultUrl": "/assets/home/eco-4.webp"
+    },
+    {
+      "key": "home_eco_5",
+      "groupId": "home_ecosistema",
+      "groupLabel": "Fotos de los procesos del Ecosistema",
+      "section": "Home",
+      "label": "Proceso 5 · Redes y documentación",
+      "use": "fondo",
+      "editable": true,
+      "alt": "Redes y documentación",
+      "suggestedWidth": 405,
+      "suggestedHeight": 208,
+      "defaultUrl": "/assets/home/eco-5.webp"
+    },
+    {
+      "key": "home_eco_6",
+      "groupId": "home_ecosistema",
+      "groupLabel": "Fotos de los procesos del Ecosistema",
+      "section": "Home",
+      "label": "Proceso 6 · Lutería",
+      "use": "fondo",
+      "editable": true,
+      "alt": "Lutería",
+      "suggestedWidth": 405,
+      "suggestedHeight": 208,
+      "defaultUrl": "/assets/home/eco-6.webp"
+    },
+    {
+      "key": "about_hito_1",
+      "groupId": "about_hitos",
+      "groupLabel": "Fotos de los cinco hitos",
+      "section": "Sobre PNMC",
+      "label": "Hito 1 · 2003-2006",
+      "use": "fondo",
+      "editable": true,
+      "alt": "Creacion e institucionalizacion del PNMC",
+      "suggestedWidth": 700,
+      "suggestedHeight": 398,
+      "defaultUrl": "/assets/pnmc/hito-1.webp"
+    },
+    {
+      "key": "about_hito_2",
+      "groupId": "about_hitos",
+      "groupLabel": "Fotos de los cinco hitos",
+      "section": "Sobre PNMC",
+      "label": "Hito 2 · 2007-2014",
+      "use": "fondo",
+      "editable": true,
+      "alt": "Territorializacion y saberes",
+      "suggestedWidth": 700,
+      "suggestedHeight": 398,
+      "defaultUrl": "/assets/pnmc/hito-2.webp"
+    },
+    {
+      "key": "about_hito_3",
+      "groupId": "about_hitos",
+      "groupLabel": "Fotos de los cinco hitos",
+      "section": "Sobre PNMC",
+      "label": "Hito 3 · 2015-2018",
+      "use": "fondo",
+      "editable": true,
+      "alt": "Profesionalizacion y SIMUS",
+      "suggestedWidth": 700,
+      "suggestedHeight": 398,
+      "defaultUrl": "/assets/pnmc/hito-3.webp"
+    },
+    {
+      "key": "about_hito_4",
+      "groupId": "about_hitos",
+      "groupLabel": "Fotos de los cinco hitos",
+      "section": "Sobre PNMC",
+      "label": "Hito 4 · 2018-2022",
+      "use": "fondo",
+      "editable": true,
+      "alt": "Evaluacion y consolidacion",
+      "suggestedWidth": 700,
+      "suggestedHeight": 398,
+      "defaultUrl": "/assets/pnmc/hito-4.webp"
+    },
+    {
+      "key": "about_hito_5",
+      "groupId": "about_hitos",
+      "groupLabel": "Fotos de los cinco hitos",
+      "section": "Sobre PNMC",
+      "label": "Hito 5 · 2023-2025",
+      "use": "fondo",
+      "editable": true,
+      "alt": "Actualizacion y proyeccion 2035",
+      "suggestedWidth": 700,
+      "suggestedHeight": 398,
+      "defaultUrl": "/assets/pnmc/hito-5.webp"
+    },
+    {
+      "key": "about_norma_1",
+      "groupId": "about_normas",
+      "groupLabel": "Fotos del marco normativo",
+      "section": "Sobre PNMC",
+      "label": "Norma 1 · Ley 397 de 1997",
+      "use": "fondo",
+      "editable": true,
+      "alt": "Ley General de Cultura",
+      "suggestedWidth": 629,
+      "suggestedHeight": 398,
+      "defaultUrl": "/assets/pnmc/norma-1.webp"
+    },
+    {
+      "key": "about_norma_2",
+      "groupId": "about_normas",
+      "groupLabel": "Fotos del marco normativo",
+      "section": "Sobre PNMC",
+      "label": "Norma 2 · CONPES 3409 de 2006",
+      "use": "fondo",
+      "editable": true,
+      "alt": "CONPES 3409",
+      "suggestedWidth": 629,
+      "suggestedHeight": 398,
+      "defaultUrl": "/assets/pnmc/norma-2.webp"
+    },
+    {
+      "key": "about_norma_3",
+      "groupId": "about_normas",
+      "groupLabel": "Fotos del marco normativo",
+      "section": "Sobre PNMC",
+      "label": "Norma 3 · Ley 1493 de 2011",
+      "use": "fondo",
+      "editable": true,
+      "alt": "Ley de Espectaculos Publicos",
+      "suggestedWidth": 629,
+      "suggestedHeight": 398,
+      "defaultUrl": "/assets/pnmc/norma-3.webp"
+    },
+    {
+      "key": "about_norma_4",
+      "groupId": "about_normas",
+      "groupLabel": "Fotos del marco normativo",
+      "section": "Sobre PNMC",
+      "label": "Norma 4 · Decreto 2120 de 2018",
+      "use": "fondo",
+      "editable": true,
+      "alt": "Decreto 2120 de 2018",
+      "suggestedWidth": 629,
+      "suggestedHeight": 398,
+      "defaultUrl": "/assets/pnmc/norma-4.webp"
+    },
+    {
+      "key": "about_norma_5",
+      "groupId": "about_normas",
+      "groupLabel": "Fotos del marco normativo",
+      "section": "Sobre PNMC",
+      "label": "Norma 5 · Plan Nacional de Cultura",
+      "use": "fondo",
+      "editable": true,
+      "alt": "Plan Nacional de Cultura 2024-2038",
+      "suggestedWidth": 629,
+      "suggestedHeight": 398,
+      "defaultUrl": "/assets/pnmc/norma-5.webp"
+    },
+    {
+      "key": "about_norma_6",
+      "groupId": "about_normas",
+      "groupLabel": "Fotos del marco normativo",
+      "section": "Sobre PNMC",
+      "label": "Norma 6 · Ley 2555 de 2025",
+      "use": "fondo",
+      "editable": true,
+      "alt": "Ley 2555 de 2025",
+      "suggestedWidth": 629,
+      "suggestedHeight": 398,
+      "defaultUrl": "/assets/pnmc/norma-6.webp"
+    },
+    {
+      "key": "hero_sobre_pnmc",
+      "groupId": "about_portada",
+      "groupLabel": "Portada de la pagina",
+      "section": "Sobre PNMC",
+      "label": "Portada de «Sobre el PNMC»",
+      "use": "fondo",
+      "editable": true,
+      "alt": "Portada de Sobre el PNMC",
+      "suggestedWidth": 1440,
+      "suggestedHeight": 324,
+      "defaultUrl": "https://images.unsplash.com/photo-1774558396280-c14b21198674?q=80&w=1470&auto=format&fit=crop"
+    },
+    {
+      "key": "hero_ejes",
+      "groupId": "ejes_portada",
+      "groupLabel": "Portada de la pagina",
+      "section": "Ejes",
+      "label": "Portada de «Ejes»",
+      "use": "fondo",
+      "editable": true,
+      "alt": "Portada de los ejes del Plan",
+      "suggestedWidth": 1440,
+      "suggestedHeight": 324,
+      "defaultUrl": "https://images.unsplash.com/photo-1774558396253-be05d7a37d82?q=80&w=1470&auto=format&fit=crop"
+    },
+    {
+      "key": "hero_ecosistema",
+      "groupId": "ecosistema_portada",
+      "groupLabel": "Portada de la pagina",
+      "section": "Ecosistema",
+      "label": "Portada de «Ecosistema»",
+      "use": "fondo",
+      "editable": true,
+      "alt": "Portada del ecosistema musical",
+      "suggestedWidth": 1440,
+      "suggestedHeight": 324,
+      "defaultUrl": "https://images.unsplash.com/photo-1774558396253-be05d7a37d82?q=80&w=1470&auto=format&fit=crop"
+    },
+    {
+      "key": "eje_01_media",
+      "groupId": "ejes_media",
+      "groupLabel": "Imagenes de los ejes",
+      "section": "Ejes",
+      "label": "Imagen del eje 1",
+      "use": "fondo",
+      "editable": true,
+      "alt": "Imagen del primer eje",
+      "suggestedWidth": 1280,
+      "suggestedHeight": 720,
+      "defaultUrl": "https://images.unsplash.com/photo-1774558396253-be05d7a37d82?q=80&w=1470&auto=format&fit=crop"
+    },
+    {
+      "key": "eje_02_media",
+      "groupId": "ejes_media",
+      "groupLabel": "Imagenes de los ejes",
+      "section": "Ejes",
+      "label": "Imagen del eje 2",
+      "use": "fondo",
+      "editable": true,
+      "alt": "Imagen del segundo eje",
+      "suggestedWidth": 1280,
+      "suggestedHeight": 720,
+      "defaultUrl": "https://images.unsplash.com/photo-1774558396280-c14b21198674?q=80&w=1470&auto=format&fit=crop"
+    },
+    {
+      "key": "eje_03_media",
+      "groupId": "ejes_media",
+      "groupLabel": "Imagenes de los ejes",
+      "section": "Ejes",
+      "label": "Imagen del eje 3",
+      "use": "fondo",
+      "editable": true,
+      "alt": "Imagen del tercer eje",
+      "suggestedWidth": 1280,
+      "suggestedHeight": 720,
+      "defaultUrl": "https://images.unsplash.com/photo-1774558396253-be05d7a37d82?q=80&w=1470&auto=format&fit=crop"
+    },
+    {
+      "key": "estrategia_celebra_media",
+      "groupId": "estrategias_media",
+      "groupLabel": "Imagenes de las estrategias",
+      "section": "Estrategias",
+      "label": "Imagen de «Celebra la Musica»",
+      "use": "fondo",
+      "editable": true,
+      "alt": "Celebra la Musica",
+      "suggestedWidth": 1440,
+      "suggestedHeight": 702,
+      "defaultUrl": "https://images.unsplash.com/photo-1501386761578-eac5c94b800a?q=80&w=1600&auto=format&fit=crop"
+    },
+    {
+      "key": "estrategia_territorios_media",
+      "groupId": "estrategias_media",
+      "groupLabel": "Imagenes de las estrategias",
+      "section": "Estrategias",
+      "label": "Imagen de «Territorios Sonoros»",
+      "use": "fondo",
+      "editable": true,
+      "alt": "Territorios Sonoros",
+      "suggestedWidth": 1440,
+      "suggestedHeight": 702,
+      "defaultUrl": "https://images.unsplash.com/photo-1511379938547-c1f69419868d?q=80&w=1600&auto=format&fit=crop"
+    },
+    {
+      "key": "marca_pnmc_blanco",
+      "groupId": "marca",
+      "groupLabel": "Identidad institucional",
+      "section": "Navegación y Footer",
+      "label": "Logotipo del PNMC (fondo oscuro)",
+      "use": "logotipo",
+      "editable": true,
+      "alt": "PNMC",
+      "suggestedWidth": 206,
+      "suggestedHeight": 128,
+      "defaultUrl": "/assets/branding/pnmc-blanco.png"
+    },
+    {
+      "key": "marca_gov_co",
+      "groupId": "marca",
+      "groupLabel": "Identidad institucional",
+      "section": "Navegación y Footer",
+      "label": "Marca GOV.CO",
+      "use": "logotipo",
+      "editable": false,
+      "alt": "GOV.CO",
+      "suggestedWidth": 200,
+      "suggestedHeight": 40,
+      "defaultUrl": "/assets/branding/logo-gov-co.png"
+    },
+    {
+      "key": "marca_gov_co_sello",
+      "groupId": "marca",
+      "groupLabel": "Identidad institucional",
+      "section": "Navegación y Footer",
+      "label": "Sello de Colombia",
+      "use": "logotipo",
+      "editable": false,
+      "alt": "Colombia",
+      "suggestedWidth": 71,
+      "suggestedHeight": 70,
+      "defaultUrl": "/assets/branding/gov-co-footer.png"
+    }
+  ],
+  "catalogHash": "39cb780319c22cc0"
+}

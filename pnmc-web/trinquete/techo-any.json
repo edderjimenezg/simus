@@ -1,0 +1,163 @@
+{
+  "_lee_esto_primero": "Techo de deuda de tipado (PNMC-058). Lo mantiene trinquete-any.mjs. La herramienta SOLO baja este numero; nunca lo sube. Si ves un cambio que lo sube, es una edicion a mano y hay que discutirla en la revision, no aprobarla de paso.",
+  "metrica": "ocurrencias de 'any' (incluido any[]) en pnmc-web/src/**/*.ts",
+  "comando_oficial": "grep -roE ':\\s*any\\b|<any>|as any|any\\[\\]' --include='*.ts' src | wc -l",
+  "nota_metrica": "Son OCURRENCIAS, no lineas ni ficheros. La cifra se cerro asi tras un desacuerdo que produjo cuatro numeros distintos para el mismo hecho. No cambiar el patron sin cambiar tambien el techo en la misma decision.",
+  "techo": 286,
+  "medido_en": "2026-09-18T14:40:03.662Z",
+  "medido_en_local": "2026-09-10 19:27 (America/Bogota)",
+  "ficheros_escaneados": 390,
+  "rama": "codex/revision-ux-panel-organizaciones",
+  "historial": [
+    {
+      "fecha": "2026-08-22T04:30:29Z",
+      "techo": 533,
+      "delta": 0,
+      "via": "sello inicial",
+      "nota": "Cifra medida de cero, no heredada. Las tres cifras que circulaban eran distintas de esta: eslint.config.js documentaba 553, el brief de PNMC-058 traia 526 de unas horas antes, y el codigo se habia movido en medio. Reales hoy: 533. El techo inicial es la cifra de hoy y no cero a proposito: un trinquete demasiado estricto se convierte en un impuesto que el equipo aprende a rodear."
+    },
+    {
+      "fecha": "2026-08-22T17:16:43.450Z",
+      "techo": 518,
+      "delta": -15,
+      "via": "--sellar"
+    },
+    {
+      "fecha": "2026-08-24T00:00:00.000Z",
+      "techo": 518,
+      "delta": 0,
+      "via": "correccion a mano del desglose",
+      "nota": "El techo NO cambia (518). Se corrigen los dos bloques _al_sellar, que habian quedado del sello inicial de 533 mientras el techo bajaba a 518: el reparto sumaba 533 y admin.service.ts figuraba con 150, que era la cifra de HEAD y no la del arbol sellado (135). Un desglose que describe un estado distinto del que anuncia su total no es informacion incompleta, es informacion falsa: el 24 de agosto indujo a otra sesion a deducir un +18 inexistente mientras diagnosticaba una subida del trinquete. Desde este cambio, --sellar remide ambos bloques y se niega a escribir si el reparto no suma el total."
+    },
+    {
+      "fecha": "2026-09-10T21:05:13.592Z",
+      "techo": 514,
+      "delta": -4,
+      "via": "--sellar"
+    },
+    {
+      "fecha": "2026-09-10T21:32:04.460Z",
+      "techo": 493,
+      "delta": -21,
+      "via": "--sellar"
+    },
+    {
+      "fecha": "2026-09-10T21:38:30.333Z",
+      "techo": 491,
+      "delta": -2,
+      "via": "--sellar"
+    },
+    {
+      "fecha": "2026-09-10T22:49:01.000Z",
+      "techo": 446,
+      "delta": -45,
+      "via": "medicion equivalente a --sellar"
+    },
+    {
+      "fecha": "2026-09-11T00:27:34.000Z",
+      "techo": 413,
+      "delta": -33,
+      "via": "medicion equivalente a --sellar"
+    },
+    {
+      "fecha": "2026-09-11T01:20:38.297Z",
+      "techo": 402,
+      "delta": -11,
+      "via": "--sellar"
+    },
+    {
+      "fecha": "2026-09-11T03:13:08.002Z",
+      "techo": 377,
+      "delta": -25,
+      "via": "--sellar"
+    },
+    {
+      "fecha": "2026-09-11T16:31:30.927Z",
+      "techo": 368,
+      "delta": -9,
+      "via": "--sellar"
+    },
+    {
+      "fecha": "2026-09-11T17:30:24.382Z",
+      "techo": 362,
+      "delta": -6,
+      "via": "--sellar"
+    },
+    {
+      "fecha": "2026-09-11T19:07:12.469Z",
+      "techo": 361,
+      "delta": -1,
+      "via": "--sellar"
+    },
+    {
+      "fecha": "2026-09-11T21:18:30.945Z",
+      "techo": 316,
+      "delta": -45,
+      "via": "--sellar"
+    },
+    {
+      "fecha": "2026-09-12T03:27:04.536Z",
+      "techo": 312,
+      "delta": -4,
+      "via": "--sellar"
+    },
+    {
+      "fecha": "2026-09-12T17:14:36.881Z",
+      "techo": 309,
+      "delta": -3,
+      "via": "--sellar"
+    },
+    {
+      "fecha": "2026-09-14T03:28:46.313Z",
+      "techo": 308,
+      "delta": -1,
+      "via": "--sellar"
+    },
+    {
+      "fecha": "2026-09-15T18:35:58.094Z",
+      "techo": 307,
+      "delta": -1,
+      "via": "--sellar"
+    },
+    {
+      "fecha": "2026-09-15T19:06:19.410Z",
+      "techo": 294,
+      "delta": -13,
+      "via": "--sellar"
+    },
+    {
+      "fecha": "2026-09-18T14:40:03.662Z",
+      "techo": 286,
+      "delta": -8,
+      "via": "--sellar"
+    }
+  ],
+  "reparto_por_alternativa_al_sellar": {
+    ": any": 177,
+    "<any>": 58,
+    "as any": 19,
+    "any[]": 32
+  },
+  "mayores_deudores_al_sellar": [
+    {
+      "fichero": "app/features/map/pages/mapa-ecosistemico-page/mapa-ecosistemico-page.component.ts",
+      "ocurrencias": 67
+    },
+    {
+      "fichero": "app/features/map/domain/map-domain.ts",
+      "ocurrencias": 61
+    },
+    {
+      "fichero": "app/core/services/admin.service.ts",
+      "ocurrencias": 52
+    },
+    {
+      "fichero": "app/features/admin/components/admin-preparacion-asistida-panel/admin-preparacion-asistida-panel.component.ts",
+      "ocurrencias": 15
+    },
+    {
+      "fichero": "app/core/services/catalog.service.spec.ts",
+      "ocurrencias": 9
+    }
+  ]
+}

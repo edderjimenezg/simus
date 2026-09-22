@@ -1,0 +1,23 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <!--
+      PNMC-013: la auditoria de NuGet deja de ser un aviso decorativo.
+      NU1903 salia en cada compilacion y nadie lo miraba. Escalado a error, la
+      restauracion RECHAZA el paquete vulnerable en vez de anunciarlo.
+      Solo ALTA (NU1903) y CRITICA (NU1904) rompen la compilacion. BAJA (NU1901)
+      y MEDIA (NU1902) siguen saliendo como aviso: se ven, pero un aviso menor
+      nuevo en cualquiera de los 106 paquetes del grafo no tumba la compilacion
+      de madrugada. NU1900 queda FUERA a proposito: significa "no pude leer el
+      origen de auditoria" (red caida) y no debe romper una compilacion sin conexion.
+    -->
+    <NuGetAudit>true</NuGetAudit>
+    <NuGetAuditMode>all</NuGetAuditMode>
+    <NuGetAuditLevel>low</NuGetAuditLevel>
+    <WarningsAsErrors>$(WarningsAsErrors);NU1903;NU1904</WarningsAsErrors>
+  </PropertyGroup>
+
+</Project>

@@ -1,0 +1,368 @@
+<div class="space-y-5">
+  @if (cargando()) {
+    <p role="status" class="py-10 text-center text-sm text-slate-500">Consultando el Festival…</p>
+  } @else if (error() && !festival()) {
+    <p role="alert" class="border-l-4 border-red-500 bg-red-50 p-4 text-sm text-red-800">{{ error() }}</p>
+    <a routerLink="/gestion/procesos/festivales" class="font-alternate text-xs font-bold uppercase tracking-widest text-verde-texto no-underline hover:underline">Volver a Festivales</a>
+  } @else if (festival(); as f) {
+    <!--
+      LA RUTA NOMBRA LA ENTIDAD CONCRETA. Decía «GESTIÓN / PROCESOS / FESTIVAL», que no dice CUÁL
+      festival y nombra la familia en vez del proceso. «Procesos» es una palabra del modelo —sirve
+      para hablar de festivales, mercados y escuelas cuando todavía no se sabe cuál—; en cuanto se
+      sabe, se nombra. El mismo criterio en el enlace de retorno de arriba.
+    -->
+    <header class="border-b border-slate-200 pb-6">
+      <nav aria-label="Ubicación dentro de Gestión" class="flex flex-wrap items-center gap-1.5 font-alternate text-dato font-bold uppercase tracking-widest">
+        <a routerLink="/gestion/resumen" class="text-slate-500 no-underline transition hover:text-morado">Gestión</a>
+        <span aria-hidden="true" class="text-slate-300">/</span>
+        <a routerLink="/gestion/procesos/festivales" class="text-slate-500 no-underline transition hover:text-morado">Festivales</a>
+        <span aria-hidden="true" class="text-slate-300">/</span>
+        <span class="text-morado" data-migas-nombre>{{ f.nombre }}</span>
+      </nav>
+
+      <div class="mt-3 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+        <div class="min-w-0">
+          <h1 class="font-alternate text-2xl font-bold uppercase leading-tight tracking-wide text-morado sm:text-3xl">{{ f.nombre }}</h1>
+          <p class="mt-2 text-sm text-slate-600">{{ nombreOrganizacion() }}</p>
+        </div>
+        <div class="flex shrink-0 flex-wrap items-center gap-2">
+          <!--
+            UN ICONO Y EL TEXTO AL LADO, no una píldora. En una cabecera hay sitio para escribir el
+            estado, así que se escribe; lo que se retira es el recuadro de color que lo encerraba.
+          -->
+          <app-indicador-de-estado
+            [etiqueta]="estadoEtiqueta()"
+            [tono]="tonoDelEstado(f.estado)"
+            [matiz]="matizDelEstado(f.estado)"
+            [conTexto]="true"></app-indicador-de-estado>
+          <!--
+            LA CABECERA LLEVA ACCIONES; NAVEGAR ES TRABAJO DEL MENU LATERAL.
+            Aquí había dos botones y los dos sobraban en parte:
+
+            «Ediciones» hacía exactamente lo mismo que la pestaña «Ediciones» del menú de la
+            izquierda, visible en la misma pantalla y a dos centímetros: dos controles para un solo
+            destino, que es lo que este proyecto evita en todas partes.
+
+            «Editar» se pintaba en TODOS los estados, también en un Festival publicado o en revisión,
+            donde `FichaFestivalComponent` no deja editar nada. Ahora sale solo cuando de verdad se
+            puede —«Borrador» y «Ajustes solicitados»—, que es la regla que ya aplica la ficha.
+
+            Y DICE SOBRE QUE EDITA. Un «Editar» a secas en una pantalla que además tiene «Editar
+            información» —el de la orientación general— y «Editar contacto» no distingue nada: un
+            lector de pantalla los lee seguidos en su lista de botones, fuera del bloque donde están.
+          -->
+          @if (informacionEditable()) {
+            <button type="button" (click)="abrirPerfil()" data-editar-festival
+                    class="rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs font-bold text-morado transition hover:border-morado">Editar el Festival</button>
+          }
+        </div>
+      </div>
+    </header>
+
+    @if (mensajeDeLlegada()) {
+      <p role="status" class="border-l-4 border-emerald-500 bg-emerald-50 p-3 text-sm text-emerald-800">{{ mensajeDeLlegada() }}</p>
+    }
+
+    <div class="grid gap-6 lg:grid-cols-[11.5rem_minmax(0,1fr)] lg:gap-9">
+      <nav aria-label="Secciones del Festival" class="-mx-2 flex overflow-x-auto px-2 lg:sticky lg:top-24 lg:mx-0 lg:flex-col lg:self-start lg:overflow-visible lg:px-0">
+        @for (seccion of secciones; track seccion.id) {
+          <button
+            type="button"
+            [attr.aria-current]="seccionActiva() === seccion.id ? 'page' : null"
+            (click)="irASeccion(seccion.id)"
+            [class]="seccionActiva() === seccion.id
+              ? 'shrink-0 border-b-2 border-morado px-3 py-3 text-left font-alternate text-xs font-bold uppercase tracking-widest text-morado lg:border-b-0 lg:border-l-2 lg:bg-morado/5 lg:px-4'
+              : 'shrink-0 border-b-2 border-transparent px-3 py-3 text-left font-alternate text-xs font-bold uppercase tracking-widest text-slate-500 transition hover:text-morado focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-morado lg:border-b-0 lg:border-l-2 lg:px-4'">
+            <span class="inline-flex items-center gap-2">
+              {{ seccion.etiqueta }}
+            </span>
+          </button>
+        }
+      </nav>
+
+      <main class="min-w-0">
+        <p class="mb-6 max-w-3xl text-sm leading-relaxed text-slate-600">{{ descripcionDeLaSeccion() }}</p>
+
+        @if (seccionActiva() === 'resumen') {
+          <!--
+            EL RESUMEN, REHECHO EL 12 DE SEPTIEMBRE DE 2026.
+
+            QUE SE FUE. Un bloque con una línea verde vertical a la izquierda que ocupaba media
+            pantalla para decir, en un titular de 20px y dos párrafos, lo mismo que ya decía el sello
+            de estado de la cabecera. El criterio es este: «no lo considero necesario y termina
+            añadiendo ruido visual». Con él se fueron los textos explicativos que no llevaban a
+            ninguna acción —«La información identifica al Festival de forma permanente»— y la tarjeta
+            «Datos esenciales», que repetía territorio y periodicidad.
+
+            QUE QUEDA. Una rejilla de datos que se leen de un vistazo, una sola tarjeta de siguiente
+            acción cuando de verdad hay algo que hacer, y las alertas solo si existen.
+          -->
+          <dl class="grid gap-x-8 gap-y-6 sm:grid-cols-2 xl:grid-cols-3">
+            <div>
+              <dt class="text-dato font-bold uppercase tracking-[0.15em] text-slate-400">Estado</dt>
+              <dd class="mt-1 text-sm font-semibold text-slate-900">{{ estadoEtiqueta() }}</dd>
+            </div>
+            <div>
+              <dt class="text-dato font-bold uppercase tracking-[0.15em] text-slate-400">Organización responsable</dt>
+              <dd class="mt-1 text-sm font-semibold text-slate-900">{{ nombreOrganizacion() }}</dd>
+            </div>
+            <div>
+              <dt class="text-dato font-bold uppercase tracking-[0.15em] text-slate-400">Territorio principal</dt>
+              <dd class="mt-1 text-sm font-semibold text-slate-900">{{ territorioDelFestival() }}</dd>
+            </div>
+            <div>
+              <dt class="text-dato font-bold uppercase tracking-[0.15em] text-slate-400">Periodicidad</dt>
+              <dd class="mt-1 text-sm font-semibold text-slate-900">{{ etiquetaDePeriodicidad(f.periodicidad) || 'Por definir' }}</dd>
+            </div>
+            <div>
+              <!--
+                LA MAS RECIENTE Y NO SOLO CUANTAS. «4 ediciones» no dice si la última es de 2019 o de
+                este año, que es justo lo que hay que saber de un vistazo.
+              -->
+              <dt class="text-dato font-bold uppercase tracking-[0.15em] text-slate-400">Edición más reciente</dt>
+              <dd class="mt-1 text-sm font-semibold text-slate-900" data-edicion-reciente>{{ edicionMasRecienteEnPalabras() }}</dd>
+              @if (f.cuantasEdiciones) {
+                <dd class="mt-0.5 text-xs text-slate-500">{{ f.cuantasEdiciones }} {{ f.cuantasEdiciones === 1 ? 'edición registrada' : 'ediciones registradas' }}</dd>
+              }
+            </div>
+            <div>
+              <dt class="text-dato font-bold uppercase tracking-[0.15em] text-slate-400">Última actualización</dt>
+              <dd class="mt-1 text-sm font-semibold text-slate-900">
+                {{ f.fechaActualizacion ? (f.fechaActualizacion | date: 'd MMM y':'':'es-CO') : 'Sin cambios registrados' }}
+              </dd>
+            </div>
+          </dl>
+
+          <!--
+            LA SIGUIENTE ACCION, SOLO CUANDO LA HAY. Un Festival publicado y sin nada pendiente no
+            necesita que una tarjeta se lo diga: los accesos a editar y a sus ediciones están arriba.
+          -->
+          @if (festivalEnRevision()) {
+            <section data-siguiente-accion aria-labelledby="siguiente-accion-festival" class="mt-8 rounded-2xl bg-slate-50 px-5 py-5 sm:px-6">
+              <h2 id="siguiente-accion-festival" class="text-lectura font-semibold text-valor">La información está siendo revisada.</h2>
+              <p class="mt-2 max-w-2xl text-cuerpo leading-relaxed text-prosa">No necesitas hacer nada por ahora. La decisión quedará registrada en el historial.</p>
+              <button type="button" (click)="irASeccion('historial')" class="mt-4 rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-morado transition hover:border-morado">Consultar historial</button>
+            </section>
+          } @else if (festivalConAjustes() && !ajustesCompletos()) {
+            <section data-siguiente-accion aria-labelledby="siguiente-accion-festival" class="mt-8 rounded-2xl border border-amber-200 bg-amber-50 px-5 py-5 sm:px-6">
+              <p class="text-dato font-bold uppercase tracking-[0.15em] text-amber-800">Acción requerida</p>
+              <h2 id="siguiente-accion-festival" class="mt-1 text-base font-bold text-slate-900">Atiende {{ revision.cuantasPendientes() }} {{ revision.cuantasPendientes() === 1 ? 'ajuste sugerido' : 'ajustes sugeridos' }}.</h2>
+              <button type="button" (click)="abrirFlujoDeAjustes()" class="mt-4 rounded-lg bg-morado px-4 py-2 text-sm font-bold text-white transition hover:bg-morado/90">Resolver ajustes</button>
+            </section>
+          } @else if (festivalConAjustes() && ajustesCompletos()) {
+            <section data-siguiente-accion aria-labelledby="siguiente-accion-festival" class="mt-8 rounded-2xl border border-emerald-200 bg-emerald-50 px-5 py-5 sm:px-6">
+              <h2 id="siguiente-accion-festival" class="text-lectura font-semibold text-valor">Los ajustes están resueltos.</h2>
+              <p class="mt-2 max-w-2xl text-cuerpo leading-relaxed text-prosa">Puedes volver a enviar el Festival a revisión.</p>
+              <button type="button" [disabled]="enviandoFestival()" (click)="enviarFestivalARevision()" class="mt-4 rounded-lg bg-morado px-4 py-2 text-sm font-bold text-white transition hover:bg-morado/90 disabled:opacity-50">{{ enviandoFestival() ? 'Enviando…' : 'Volver a enviar a revisión' }}</button>
+            </section>
+          } @else if (festivalRechazado()) {
+            <section data-siguiente-accion aria-labelledby="siguiente-accion-festival" class="mt-8 rounded-2xl border border-rose-200 bg-rose-50 px-5 py-5 sm:px-6">
+              <h2 id="siguiente-accion-festival" class="text-lectura font-semibold text-valor">El registro no fue aprobado.</h2>
+              <p class="mt-2 max-w-2xl text-cuerpo leading-relaxed text-prosa">Consulta la decisión antes de definir un nuevo trámite sobre este Festival.</p>
+              <button type="button" (click)="irASeccion('historial')" class="mt-4 rounded-lg border border-rose-300 bg-white px-4 py-2 text-sm font-semibold text-morado">Consultar historial</button>
+            </section>
+          } @else if (!festivalPublicado()) {
+            <section data-siguiente-accion aria-labelledby="siguiente-accion-festival" class="mt-8 rounded-2xl bg-slate-50 px-5 py-5 sm:px-6">
+              <h2 id="siguiente-accion-festival" class="text-lectura font-semibold text-valor">Completa el registro antes de enviarlo.</h2>
+              <div class="mt-4 flex flex-wrap gap-3">
+                <button type="button" (click)="abrirPerfil()" class="rounded-lg bg-morado px-4 py-2 text-sm font-bold text-white transition hover:bg-morado/90">Completar información</button>
+                @if (puedeEnviarFestival()) {
+                  <button type="button" [disabled]="enviandoFestival()" (click)="enviarFestivalARevision()" class="rounded-lg border border-verde-texto bg-white px-4 py-2 text-sm font-bold text-verde-texto disabled:opacity-50">{{ enviandoFestival() ? 'Enviando…' : 'Enviar a revisión' }}</button>
+                }
+              </div>
+            </section>
+          }
+
+          @if (error()) {
+            <p role="alert" class="mt-5 rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-800">{{ error() }}</p>
+          }
+        }
+
+        @if (seccionActiva() === 'informacion') {
+          @if (festivalConAjustes()) {
+            @if (ajustesCompletos()) {
+              <section data-testid="festival-listo-para-reenvio" aria-labelledby="festival-listo-titulo" class="mb-6 border-l-4 border-emerald-500 bg-emerald-50/70 px-4 py-4 sm:px-5">
+                <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                  <div>
+                    <p class="text-xs font-bold uppercase tracking-widest text-emerald-800">Ajustes completados</p>
+                    <h2 id="festival-listo-titulo" class="mt-1 text-lg font-bold text-slate-900">La información está lista para volver a revisión.</h2>
+                    <p class="mt-2 max-w-2xl text-cuerpo leading-relaxed text-prosa">Puedes enviarla ahora o continuar ajustando otros datos del Festival.</p>
+                  </div>
+                  <div class="flex shrink-0 flex-wrap gap-2">
+                    <button type="button" [disabled]="enviandoFestival()" (click)="enviarFestivalARevision()" class="rounded-lg bg-morado px-4 py-2 text-sm font-bold text-white transition hover:bg-morado/90 disabled:opacity-50">{{ enviandoFestival() ? 'Enviando…' : 'Volver a enviar a revisión' }}</button>
+                    <button type="button" (click)="abrirPerfil()" class="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-morado transition hover:border-verde-medio hover:text-verde-texto">Seguir ajustando información</button>
+                  </div>
+                </div>
+              </section>
+            } @else {
+              <div class="mb-6 flex flex-col gap-3 border-l-4 border-amber-400 bg-amber-50/70 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
+                <p class="text-sm text-slate-800"><span class="font-bold">{{ revision.cuantasPendientes() }} {{ revision.cuantasPendientes() === 1 ? 'ajuste sugerido pendiente' : 'ajustes sugeridos pendientes' }}.</span> Los campos señalados incluyen un indicador de información.</p>
+                @if (!revision.hayNotas() && revision.revision()?.observacionGeneral && !inspectorAjustesAbierto()) {
+                  <button type="button" (click)="abrirFlujoDeAjustes()" class="shrink-0 rounded-lg border border-amber-400 bg-white px-3 py-2 text-sm font-bold text-morado transition hover:border-morado">Revisar orientación</button>
+                }
+              </div>
+            }
+          }
+
+          @if (revision.error()) { <p role="alert" class="mb-5 border-l-4 border-red-500 bg-red-50 p-3 text-sm text-red-800">{{ revision.error() }}</p> }
+          @if (errorAjuste()) { <p role="alert" class="mb-5 border-l-4 border-red-500 bg-red-50 p-3 text-sm text-red-800">{{ errorAjuste() }}</p> }
+          @if (mensajeAjuste()) { <p role="status" class="mb-5 border-l-4 border-emerald-500 bg-emerald-50 p-3 text-sm text-emerald-900">{{ mensajeAjuste() }}</p> }
+
+          <div [class]="inspectorAjustesAbierto() ? 'grid min-w-0 max-w-full items-start gap-6 2xl:grid-cols-[minmax(0,1fr)_minmax(20rem,25rem)]' : 'block'">
+            <div class="min-w-0">
+              @if (editandoAjuste() && !ajusteSeleccionado()) {
+                @if (revision.revision()?.observacionGeneral; as orientacion) {
+                  <div class="mb-5 border-l-4 border-amber-400 bg-amber-50 px-4 py-3"><p class="text-xs font-bold uppercase tracking-widest text-amber-800">Orientación general</p><p class="mt-1 text-sm leading-relaxed text-slate-900">{{ orientacion }}</p></div>
+                }
+                <app-ficha-festival
+                  [festival]="f"
+                  [organizacionId]="organizacionId()"
+                  [nombreOrganizacion]="nombreOrganizacion()"
+                  [abrirEnEdicion]="true"
+                  [campoInicial]="campoInicial()"
+                  [ocultarSugerenciasContextuales]="true"
+                  [cerrarAlCancelar]="true"
+                  etiquetaGuardar="Guardar cambios"
+                  [modoIncrustado]="true"
+                  (cerrar)="cancelarEdicionDelAjuste()"
+                  (guardado)="alGuardarOrientacionGeneral()"></app-ficha-festival>
+              } @else {
+                <app-ficha-festival
+                  [festival]="f"
+                  [organizacionId]="organizacionId()"
+                  [nombreOrganizacion]="nombreOrganizacion()"
+                  [abrirEnEdicion]="abrirEnEdicion()"
+                  [campoInicial]="campoInicial()"
+                  [ocultarAcciones]="inspectorAjustesAbierto()"
+                  [modoIncrustado]="true"
+                  (cerrar)="irASeccion('resumen')"
+                  (guardado)="alGuardarLaFicha()"></app-ficha-festival>
+              }
+            </div>
+
+            @if (inspectorAjustesAbierto()) {
+              <aside id="inspector-ajustes" aria-label="Detalle del ajuste sugerido" class="order-first w-full min-w-0 max-w-full overflow-x-hidden border-l-4 border-amber-400 bg-amber-50/60 px-4 py-4 sm:px-5 2xl:order-last 2xl:sticky 2xl:top-24 2xl:self-start">
+                @if (ajusteSeleccionado(); as nota) {
+                  <div class="min-w-0 max-w-full" aria-live="polite">
+                    <div class="flex min-w-0 items-start justify-between gap-3">
+                      <div class="min-w-0">
+                        <p class="text-dato font-bold uppercase tracking-widest text-amber-800">Ajuste sugerido</p>
+                        <p class="mt-1 break-words text-base font-bold text-slate-900">{{ nota.campoEtiqueta }}</p>
+                      </div>
+                      <button type="button" (click)="cerrarInspectorDeAjustes()" [disabled]="editandoAjuste()" aria-label="Cerrar ajuste" title="Cerrar ajuste" class="grid h-8 w-8 shrink-0 place-items-center rounded-md text-slate-500 transition hover:bg-white hover:text-morado focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-morado disabled:opacity-40">×</button>
+                    </div>
+                    <p class="mt-2 break-words text-sm leading-relaxed text-slate-800">{{ nota.nota }}</p>
+                    @if (nota.valorObservado && !editandoAjuste()) { <p class="mt-3 break-words text-xs leading-relaxed text-slate-600"><span class="font-semibold">Información revisada:</span> {{ nota.valorObservado }}</p> }
+
+                    @if (nota.estado === 'pendiente' && editandoAjuste()) {
+                      <div class="mt-5 w-full min-w-0 max-w-full overflow-x-hidden border-t border-amber-200 pt-4" data-testid="editor-contextual-del-ajuste">
+                        <app-ficha-festival
+                          class="block w-full min-w-0 max-w-full"
+                          [festival]="f"
+                          [organizacionId]="organizacionId()"
+                          [nombreOrganizacion]="nombreOrganizacion()"
+                          [abrirEnEdicion]="true"
+                          [campoInicial]="campoInicial()"
+                          [campoVisible]="nota.campoId"
+                          [seccionVisible]="seccionEditableDelAjuste(nota)"
+                          [ocultarSugerenciasContextuales]="true"
+                          [cerrarAlCancelar]="true"
+                          etiquetaGuardar="Guardar ajuste"
+                          [modoIncrustado]="true"
+                          [modoCampoContextual]="true"
+                          (cerrar)="cancelarEdicionDelAjuste()"
+                          (guardado)="alGuardarElAjuste()"></app-ficha-festival>
+                        @if (guardandoResolucion()) { <p role="status" class="mt-3 text-sm text-slate-600">Registrando la resolución del ajuste…</p> }
+                      </div>
+                    } @else if (nota.estado === 'pendiente') {
+                      <button type="button" (click)="editarElAjuste(nota)" class="mt-4 rounded-lg bg-morado px-4 py-2 text-sm font-bold text-white transition hover:bg-violet-800">Editar este campo</button>
+                    }
+                    <p class="mt-4 text-right text-dato font-semibold text-slate-500">{{ etiquetaSeccionDelAjuste(nota) }}</p>
+                  </div>
+                } @else if (revision.revision()?.observacionGeneral; as orientacion) {
+                  <div class="min-w-0 max-w-full" aria-live="polite">
+                    <div class="flex items-start justify-between gap-3">
+                      <div class="min-w-0"><p class="text-dato font-bold uppercase tracking-widest text-amber-800">Orientación general</p><p class="mt-2 break-words text-sm leading-relaxed text-slate-800">{{ orientacion }}</p></div>
+                      <button type="button" (click)="cerrarInspectorDeAjustes()" [disabled]="editandoAjuste()" aria-label="Cerrar orientación" title="Cerrar orientación" class="grid h-8 w-8 shrink-0 place-items-center rounded-md text-slate-500 hover:bg-white hover:text-morado disabled:opacity-40">×</button>
+                    </div>
+                    @if (!editandoAjuste()) { <button type="button" (click)="editarOrientacionGeneral()" class="mt-4 rounded-lg bg-morado px-4 py-2 text-sm font-bold text-white hover:bg-violet-800">Editar información</button> }
+                  </div>
+                }
+              </aside>
+            }
+          </div>
+
+          @if (festivalPublicado()) {
+            <section class="mt-9 border-t border-slate-200 pt-7" aria-labelledby="contacto-publico-titulo">
+              <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+                <div class="max-w-2xl">
+                  <h2 id="contacto-publico-titulo" class="font-alternate text-sm font-bold uppercase tracking-wide text-morado">Actualización directa del contacto</h2>
+                  <!--
+                    «PUBLICOS» LOS CUATRO ENLACES, Y NO LOS OTROS DOS. El correo y el teléfono se
+                    guardan y los usa el PNMC para comunicarse, pero NO salen en la ficha del portal:
+                    la lectura pública no lleva datos personales, por decisión de la dirección de producto
+                    —está escrita en `FestivalesPublicosEndpoints`—. Llamarlos «públicos» a los seis
+                    hacía creer que el correo aparece en el portal.
+                  -->
+                  <p class="mt-1 text-sm leading-relaxed text-slate-600">Estos datos se actualizan directamente, sin iniciar una propuesta institucional.</p>
+                  <p class="mt-1 text-sm leading-relaxed text-slate-600">Los cuatro enlaces aparecen en la ficha pública del Festival. El correo y el teléfono no: se guardan para que el PNMC pueda comunicarse contigo.</p>
+                </div>
+                @if (!editandoContactoPublico()) {
+                  <button type="button" (click)="abrirContactoPublico()" class="shrink-0 rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-morado transition hover:border-verde-medio hover:text-verde-texto">Editar contacto</button>
+                }
+              </div>
+              @if (mensajeContactoPublico()) {
+                <p role="status" class="mt-4 border-l-4 border-emerald-500 bg-emerald-50 p-3 text-sm text-emerald-800">{{ mensajeContactoPublico() }}</p>
+              }
+              @if (errorContactoPublico()) {
+                <p role="alert" class="mt-4 border-l-4 border-rose-500 bg-rose-50 p-3 text-sm text-rose-800">{{ errorContactoPublico() }}</p>
+              }
+              @if (editandoContactoPublico()) {
+                <form data-simus-form (ngSubmit)="guardarContactoPublico()" class="mt-5 grid gap-4 sm:grid-cols-2">
+                  <label class="block text-sm font-semibold text-slate-700">Correo electrónico<input type="email" [ngModel]="contactoPublico().correoContacto" (ngModelChange)="contactoPublico.set({...contactoPublico(), correoContacto: $event || null})" name="correoContacto" class="mt-1 block w-full rounded-lg border border-slate-300 px-3 py-2" /></label>
+                  <label class="block text-sm font-semibold text-slate-700">Teléfono celular<input type="tel" [ngModel]="contactoPublico().telefonoCelular" (ngModelChange)="contactoPublico.set({...contactoPublico(), telefonoCelular: $event || null})" name="telefonoCelular" class="mt-1 block w-full rounded-lg border border-slate-300 px-3 py-2" /></label>
+                  <label class="block text-sm font-semibold text-slate-700">Instagram<input type="url" [ngModel]="contactoPublico().instagram" (ngModelChange)="contactoPublico.set({...contactoPublico(), instagram: $event || null})" name="instagram" placeholder="https://…" class="mt-1 block w-full rounded-lg border border-slate-300 px-3 py-2" /></label>
+                  <label class="block text-sm font-semibold text-slate-700">Facebook<input type="url" [ngModel]="contactoPublico().facebook" (ngModelChange)="contactoPublico.set({...contactoPublico(), facebook: $event || null})" name="facebook" placeholder="https://…" class="mt-1 block w-full rounded-lg border border-slate-300 px-3 py-2" /></label>
+                  <label class="block text-sm font-semibold text-slate-700">Página web<input type="url" [ngModel]="contactoPublico().paginaWeb" (ngModelChange)="contactoPublico.set({...contactoPublico(), paginaWeb: $event || null})" name="paginaWeb" placeholder="https://…" class="mt-1 block w-full rounded-lg border border-slate-300 px-3 py-2" /></label>
+                  <label class="block text-sm font-semibold text-slate-700">Otro enlace<input type="url" [ngModel]="contactoPublico().otroEnlace" (ngModelChange)="contactoPublico.set({...contactoPublico(), otroEnlace: $event || null})" name="otroEnlace" placeholder="https://…" class="mt-1 block w-full rounded-lg border border-slate-300 px-3 py-2" /></label>
+                  <div class="flex flex-wrap justify-end gap-2 sm:col-span-2">
+                    <button type="button" (click)="cancelarContactoPublico()" [disabled]="guardandoContactoPublico()" class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700">Cancelar</button>
+                    <button type="submit" [disabled]="guardandoContactoPublico()" class="rounded-lg bg-morado px-4 py-2 text-sm font-bold text-white disabled:opacity-50">{{ guardandoContactoPublico() ? 'Guardando…' : 'Guardar contacto' }}</button>
+                  </div>
+                </form>
+              }
+            </section>
+          }
+        }
+
+        @if (seccionActiva() === 'ediciones') {
+          <app-ediciones-temporales [festivalId]="f.id" [festivalPublicado]="festivalPublicado()"></app-ediciones-temporales>
+        }
+
+        @if (seccionActiva() === 'historial') {
+          <section aria-label="Historial del Festival">
+            @if (cargandoHistorial()) {
+              <p role="status" class="py-5 text-sm text-slate-500">Consultando historial…</p>
+            } @else if (errorHistorial()) {
+              <p role="alert" class="border-l-4 border-red-500 bg-red-50 p-4 text-sm text-red-800">{{ errorHistorial() }}</p>
+            } @else if (!historial().length) {
+              <div class="bg-slate-50 px-5 py-6"><h2 class="text-lectura font-semibold text-valor">Aún no hay movimientos registrados.</h2><p class="mt-2 text-cuerpo leading-relaxed text-prosa">Los envíos, decisiones y cambios de estado del Festival y sus Ediciones aparecerán aquí.</p></div>
+            } @else {
+              <ol class="relative ml-2 border-l border-slate-300">
+                @for (entrada of historial(); track entrada.fecha + entrada.accion) {
+                  <li class="relative pb-7 pl-6 last:pb-0">
+                    <span aria-hidden="true" class="absolute -left-[5px] top-1.5 h-2.5 w-2.5 rounded-full bg-morado ring-4 ring-white"></span>
+                    <div class="flex flex-col gap-1 sm:flex-row sm:items-baseline sm:justify-between sm:gap-4"><h2 class="text-sm font-bold text-slate-900">{{ etiquetaAccionHistorial(entrada.accion) }}</h2><time class="shrink-0 text-xs text-slate-500">{{ entrada.fecha | date: 'd MMM y, HH:mm' }}</time></div>
+                    <p class="mt-1 text-xs font-semibold uppercase tracking-wide text-slate-500">{{ entrada.modulo }}</p>
+                    @if (entrada.estadoAnterior || entrada.estadoNuevo) { <p class="mt-2 text-sm text-slate-600">Estado anterior: <strong>{{ entrada.estadoAnterior || 'No aplica' }}</strong>. Estado resultante: <strong>{{ entrada.estadoNuevo || 'No aplica' }}</strong>.</p> }
+                    @if (entrada.comentario) { <p class="mt-2 max-w-3xl text-sm leading-relaxed text-slate-700">{{ entrada.comentario }}</p> }
+                  </li>
+                }
+              </ol>
+            }
+          </section>
+        }
+      </main>
+    </div>
+  }
+</div>
