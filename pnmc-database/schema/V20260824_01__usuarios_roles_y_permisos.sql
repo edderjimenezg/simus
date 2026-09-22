@@ -110,7 +110,7 @@ SET NOCOUNT ON;
 /*
     EL UNICO INTERRUPTOR DEL FICHERO.  Ver seccion 11.  Puesto a 1 retira dbo.Usuarios.IdRol.
 
-    ACTIVO, Y ESE ES EL ORDEN CORRECTO: la fase B -el codigo que dejo
+    ACTIVO, Y ESE ES EL ORDEN CORRECTO: el codigo que deja
     de leer la columna- se desplego el mismo dia, commit 740653d.  Encenderlo ANTES habria tumbado
     el API; encenderlo despues es lo que hace comprobable el invariante "los roles de una persona
     son exactamente las filas de dbo.UsuariosRoles", sin segunda fuente que pueda contradecirlo.
@@ -179,10 +179,7 @@ BEGIN
         CONSTRAINT UQ_UsuariosRoles UNIQUE (IdUsuario, IdRol),
 
         /*
-            SIN CASCADA HACIA Usuarios (U4).  La primera version puso ON DELETE CASCADE con esta
-            justificacion: «hoy borrar un usuario se lleva su rol, y la ruta DELETE
-            /admin/auth/users/{id} no sabe nada de tablas hijas, asi que sin cascada empezaria a
-            fallar con Msg 547».  ERA FALSA, y se comprobo abriendo la ruta: no borra nada.
+            SIN CASCADA HACIA Usuarios (U4). ERA FALSA, y se comprobo abriendo la ruta: no borra nada.
             AdminAuthEndpoints.cs-551 hace `user.IsActive = false; user.UpdatedAt = ...` -baja
             LOGICA- y `Users.Remove` / `Remove(user` no aparece NI UNA VEZ en `src` ni en `tests`.
             En PNMC nadie borra filas de dbo.Usuarios, de modo que el Msg 547 que la cascada venia

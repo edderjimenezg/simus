@@ -18,7 +18,7 @@
     QUE PASA CON `RevisionesFestival`, QUE YA EXISTE
     ------------------------------------------------
     NO SE TOCA EN ESTE GUION. Migrar los expedientes de Festival —abiertos y cerrados— a la forma
-    nueva es un cambio sobre datos que ya existen y merece su propio corte, con su marcha atrás y su
+    nueva es un cambio sobre datos que ya existen y merece su propio modelo, con su marcha atrás y su
     recuento antes y después. Hasta entonces conviven las dos, y eso es una deuda NOMBRADA: está
     escrita aquí, en el plan de paridad y en la bitácora, no escondida. Lo que este guion impide es
     que la deuda crezca con cada proceso nuevo.

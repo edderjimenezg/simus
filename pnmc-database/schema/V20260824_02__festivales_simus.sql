@@ -522,8 +522,8 @@ GO
    zona —urbana o rural— y su titulacion colectiva. La cabecera de la version guarda un solo
    municipio y ninguna de las dos cosas.
 
-   LLEVA CLAVE FORANEA A `Divipola`, como las nueve tablas territorializadas del sistema que ya
-   la tienen. `Divipola` es la fuente unica de departamentos y municipios.
+   LLEVA CLAVE FORANEA A `Divipola`, como toda tabla que guarde un par departamento/municipio.
+   `Divipola` es la fuente unica de territorio del sistema.
 
    `CodigoMunicipio` es NOT NULL a proposito: una fila sin municipio no diria nada que el
    `NivelCobertura` de la version no diga ya, y `Divipola` no tiene filas de solo departamento.
@@ -703,10 +703,9 @@ GO
 /* =====================================================================================
    §F · LA FORANEA A `Divipola` EN `VersionesFestival` Y `PropuestasCambioFestival`
 
-   Son las dos ultimas tablas territorializadas del sistema sin clave foranea a `Divipola`.
-   Las otras nueve —Agenda, Entidades, EscuelasMusica, Festivales, Lutieres, MercadosMusicales,
-   MetricasMunicipioMapa, RedesDocumentacion y RegistrosEcosistema— ya la declaran. Esta seccion
-   las alinea con ellas.
+   Toda tabla que guarde un par departamento/municipio declara su clave foranea a `Divipola`, que
+   es la fuente unica de territorio del sistema. Esta seccion alinea con esa regla a las dos que
+   faltaban.
 
    POR QUE HACE FALTA UN `ALTER COLUMN` Y NO BASTA ANADIR LA RESTRICCION. Las dos guardaban el
    par en `nvarchar(20)` mientras `Divipola` lo declara `char(2)` / `char(5)`, y SQL Server exige
@@ -732,9 +731,9 @@ BEGIN
 END;
 GO
 
-/* Compuesta, como las nueve hermanas. NOT FOR REPLICATION no aplica; sin cascada, como todo
-   en PNMC. El par es anulable a los dos lados, y SQL Server no exige la foranea cuando alguna
-   de las dos columnas es NULL: una edicion de cobertura nacional sigue siendo representable. */
+/* Compuesta, sobre las dos columnas, y sin cascada como el resto del modelo. El par es anulable
+   a los dos lados, y SQL Server no exige la foranea cuando alguna de las dos columnas es NULL:
+   una edicion de cobertura nacional sigue siendo representable. */
 IF NOT EXISTS (SELECT 1 FROM sys.foreign_keys WHERE name = N'FK_VersionesFestival_Divipola')
     ALTER TABLE dbo.VersionesFestival
         ADD CONSTRAINT FK_VersionesFestival_Divipola

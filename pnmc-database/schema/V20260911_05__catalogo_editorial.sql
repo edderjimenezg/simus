@@ -17,7 +17,7 @@
   porque cada acceso lleva su propia decisión de derechos.
 
   NO SIEMBRA NADA. Ni publicaciones, ni agentes, ni vocabularios descriptivos, ni el programa
-  «Proyecto Editorial». La fuente institucional y las licencias siguen TBC: el sistema se puede
+  «Proyecto Editorial». La fuente institucional y las licencias estan por confirmar: el sistema se puede
   construir con estas puertas, pero no puede publicar hasta que esas decisiones se registren.
 
   NINGUNA FORANEA LLEVA CASCADA, y no es descuido ni rigidez: es la regla del esquema, que

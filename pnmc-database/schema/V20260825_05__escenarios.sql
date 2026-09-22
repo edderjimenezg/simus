@@ -17,11 +17,10 @@
 
     DOS DIFERENCIAS DELIBERADAS FRENTE A LAS OTRAS TABLAS DE PROCESO
     ----------------------------------------------------------------
-    1. `OrganizacionResponsableId` NACE CON EL PROCESO. `Lutieres`, `EscuelasMusica`,
-       `MercadosMusicales` y `RedesDocumentacion` no tienen dueno: sus unicas foraneas son a
-       `Divipola` y a `EstadosContenido`. Solo `Festivales` lo tiene, y hubo que anadirselo despues
-       (, con backfill, indice que soltar y rehacer, y tres semillas que corregir).
-       Escenarios se crea ya con el, para no repetir esa deuda una quinta vez.
+    1. `OrganizacionResponsableId` NACE CON EL PROCESO. Un proceso del Ecosistema pertenece a la
+       organizacion que lo administra, y esa columna se declara al crear la tabla: anadirla despues
+       obliga a rellenarla, a rehacer indices y a corregir las semillas que ya escribieron filas
+       sin ella.
 
        Nace ANULABLE y no `NOT NULL`: la tabla arranca vacia, asi que la obligatoriedad no cuesta
        nada hoy y costaria una migracion en cuanto haya filas de origen incompletas. Se cierra

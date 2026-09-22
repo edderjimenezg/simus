@@ -7,10 +7,8 @@
     AQUI NO HAY `DELETE FROM dbo.Divipola`, Y LO HUBO HASTA EL 24 DE AGOSTO DE 2026.
 
     Lo quitaba todo y volvia a insertar los 1.122 municipios. Sobre una base virgen funciona.
-    Sobre una base YA SEMBRADA, no: doce claves foraneas apuntan a dbo.Divipola -- Agenda,
-    Entidades, EscuelasMusica, Festivales, Lutieres, MercadosMusicales, MetricasMunicipioMapa,
-    RedesDocumentacion, RegistrosEcosistema, VersionesFestival, PropuestasCambioFestival y
-    VersionesFestivalLocalizaciones -- y el DELETE choca con la primera que tenga filas:
+    Sobre una base YA SEMBRADA, no: toda tabla que guarde un par departamento/municipio apunta a
+    dbo.Divipola con una clave foranea, y el DELETE choca con la primera que tenga filas:
 
       Msg 547  - The DELETE statement conflicted with the REFERENCE constraint
                  "FK_Entidades_Divipola"

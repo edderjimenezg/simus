@@ -34,7 +34,7 @@
     DOS COSAS QUE ESTA COPIA HACE Y QUE LA PRIMERA VERSION NO HACIA:
 
     (U5) SOLO COPIA A QUIEN NO TIENE NINGUNA FILA TODAVIA, no «a quien no tenga ESTA fila».  La
-    diferencia aparece en la segunda ejecucion: mientras el codigo de la fase B no este desplegado,
+    diferencia aparece en la segunda ejecucion: mientras el codigo no este desplegado,
     la consola sigue moviendo `Usuarios.IdRol`.  Un usuario degradado de webmaster a gestor_interno
     entre dos pasadas acababa con LAS DOS filas -la vieja no la borra nadie- y por tanto con mas
     puertas abiertas que antes de degradarlo.  Volver a ejecutar un guion de migracion no puede

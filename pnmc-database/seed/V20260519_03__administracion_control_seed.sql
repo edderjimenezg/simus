@@ -91,9 +91,9 @@ WHEN NOT MATCHED THEN
     VALUES (origen.NombreEtiqueta, origen.Slug);
 
 /*
-    EL ROL VA EN dbo.UsuariosRoles, NO EN UNA COLUMNA (fase C, 25 ago 2026).
+    EL ROL VA EN dbo.UsuariosRoles, NO EN UNA COLUMNA.
 
-    Hasta la fase C esta seccion escribia `Usuarios.IdRol`.  Esa columna ya no existe: la retira
+    Una version anterior de esta seccion escribia `Usuarios.IdRol`.  Esa columna ya no existe: la retira
     `schema/V20260824_01__usuarios_roles_y_permisos.sql` seccion 11, y `schema/` corre ENTERO antes
     que `seed/`, de modo que cuando este fichero se ejecuta la columna se ha ido.  Escribirla aqui
     fallaria con Msg 207 y se llevaria por delante toda la siembra que viene detras.

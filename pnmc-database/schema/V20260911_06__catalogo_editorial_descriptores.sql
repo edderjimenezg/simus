@@ -5,11 +5,11 @@
   tipo, su categoría, su ámbito y sus palabras clave, y la ilustra con una miniatura. El contrato
   De una revisión anterior modeló la identidad, la autoría, los identificadores, los accesos y los derechos
   —lo que sostiene una ficha bibliográfica— pero no estos descriptores, porque son los que el
-  propio corte dejó marcados TBC.
+  propio modelo dejó por confirmar.
 
   SE GUARDAN COMO TEXTO, Y ESO ES DELIBERADO. Una revisión anterior decidió que «tipos de publicación,
   prácticas, funciones, ámbitos, formatos, líneas y roles editoriales se administrarán mediante
-  catálogos versionados» y que «sus listas definitivas permanecen TBC». Así que aquí NO hay una
+  catálogos versionados» y que «sus listas definitivas estan por confirmar». Así que aquí NO hay una
   lista cerrada en CHECK ni una clave foránea a una tabla de vocabulario: eso convertiría en regla
   institucional unos valores que nadie ha aprobado todavía.
 

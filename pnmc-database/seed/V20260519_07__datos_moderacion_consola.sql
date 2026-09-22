@@ -60,7 +60,7 @@ BEGIN
     RAISERROR(N'Faltan roles base (webmaster / gestor_interno / externo). Aplica seed/V20260519_03 antes que este fichero.', 16, 1);
 END;
 
--- EL ROL VA EN dbo.UsuariosRoles, NO EN UNA COLUMNA (fase C, 25 ago 2026).
+-- EL ROL VA EN dbo.UsuariosRoles, NO EN UNA COLUMNA.
 -- `Usuarios.IdRol` ya no existe cuando este fichero corre: la retira la seccion 11 de
 -- schema/V20260824_01, y `schema/` va entero antes que `seed/`. Escribirla aqui fallaria con
 -- Msg 207 y se llevaria por delante las tres secciones que vienen detras.

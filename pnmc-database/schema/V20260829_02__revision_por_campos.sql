@@ -184,11 +184,10 @@ BEGIN
 
         CONSTRAINT PK_RevisionesFestivalObservaciones PRIMARY KEY (IdObservacion),
 
-        -- SIN CASCADA, COMO TODA LA BASE. La primera version de este guion la llevaba, con el
-        -- argumento de que una nota sin revision no es nada; la puerta
-        -- `EstructuraSimusSqlServerTests.Ninguna_Foranea_Tiene_Cascada` la puso en rojo el 29 de
-        -- agosto de 2026 y tenia razon: PNMC tiene CERO cascadas, y lo grave no es la cascada sino
-        -- la incoherencia —el mismo DELETE haciendo dos cosas distintas segun la tabla—.
+        -- SIN CASCADA, COMO TODA LA BASE. El modelo no usa cascadas en ninguna clave foranea, y
+        -- `EstructuraSimusSqlServerTests.Ninguna_Foranea_Tiene_Cascada` lo comprueba. Lo grave de
+        -- una cascada suelta no es la cascada sino la incoherencia: el mismo DELETE haciendo dos
+        -- cosas distintas segun la tabla.
         --
         -- Y NO HACIA FALTA: ninguna ruta borra una fila de `RevisionesFestival`. Las revisiones se
         -- cierran, no se borran, que es lo que las convierte en historial. Lo que si se borra son
