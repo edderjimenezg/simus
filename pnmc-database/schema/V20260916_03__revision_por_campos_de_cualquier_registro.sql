@@ -12,7 +12,7 @@
     ------------------------------------------
     Porque la alternativa es un juego de tablas por proceso, y con seis procesos son seis copias de
     la misma lógica que divergen en cuanto una cambie. quedó fijado
-    de septiembre de 2026 pidiendo que Mercados funcione «como festivales […] todas las opciones
+    pidiendo que Mercados funcione «como festivales […] todas las opciones
     posibles de festivales, replicado»: replicar el COMPORTAMIENTO, no el esquema.
 
     QUE PASA CON `RevisionesFestival`, QUE YA EXISTE

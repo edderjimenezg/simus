@@ -1,24 +1,13 @@
 /*
     PNMC · Festivales · completar el modelo de SIMUS
 
-    QUE ES ESTO Y POR QUE EXISTE
-    ----------------------------
-    `V20260824_02__festivales_simus.sql` trajo la ESTRUCTURA del modelo de Festivales de SIMUS:
-    `dbo.VersionesFestival` con 26 columnas, sus siete tablas puente y nueve catalogos. Lo trajo
-    entero salvo doce columnas, y dejo los nueve catalogos VACIOS a proposito (decision D12 del
-    24 de agosto: «el contenido de los catalogos se decide en PNMC, informado por SIMUS, no
-    copiado de SIMUS»).
+    QUE ANADE ESTE GUION
+    --------------------
+    Doce columnas a `dbo.VersionesFestival`: once campos de datos y el estado por version. Con
+    ellas, la version guarda todo lo que describe una edicion; el contenido de los catalogos se
+    siembra aparte, en `seed/V20260828_01__catalogos_festival_seed.sql`.
 
-    Medido en PNMC_LOCAL: las nueve tablas de catalogo tienen CERO filas,
-    `dbo.VersionesFestival` tiene CERO filas, y ninguna ruta del API las lee ni las escribe. El
-    modelo estaba puesto y desconectado.
-
-    El 28 de agosto se define traer «los campos y toda la informacion de ese script y las
-    relaciones», y que esa sea «la forma de todos los datos que tiene un festival». Este guion
-    aplica la mitad estructural de ese pedido; el contenido de los catalogos va en
-    `seed/V20260828_01__catalogos_festival_seed.sql`, que es donde el proyecto siembra catalogos.
-
-    LAS DOCE COLUMNAS QUE FALTABAN, contadas contra `ART_MUS_FESTIVALES_VERSION` (31 columnas)
+    LAS DOCE COLUMNAS
     ------------------------------------------------------------------------------------------
     Once son campos de datos y una es el estado por version:
 

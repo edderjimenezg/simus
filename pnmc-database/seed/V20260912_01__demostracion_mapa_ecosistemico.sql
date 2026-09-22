@@ -251,8 +251,6 @@ JOIN @Legibles ld ON ld.Original = p.NombreDepartamento;
 -- ─────────────────────────────────────────────────────────────────────────────────────────────
 DECLARE @Hoy date = CONVERT(date, SYSUTCDATETIME());
 
-
-
 -- Separada de `@FestivalesSembrados`, que guarda los de la pasada ANTERIOR y ya se borraron.
 DECLARE @Sembrados TABLE (Id int PRIMARY KEY);
 

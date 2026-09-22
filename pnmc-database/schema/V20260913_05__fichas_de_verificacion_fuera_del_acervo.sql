@@ -1,7 +1,7 @@
 /*
   SIMUS · Catálogo Editorial — las tres fichas de verificación dejan libre el código del acervo
 
-  QUE PASA. El 11 de septiembre de 2026, al conectar el diseño del catálogo, se crearon a mano tres
+  QUE PASA. al conectar el diseño del catálogo, se crearon a mano tres
   fichas para poder verlo funcionando: «Acento», «La música cuenta» y «Clásicos del siglo XX», con
   los códigos PNMC-ED-001, -002 y -003. Sirvieron para lo que se hicieron.
 

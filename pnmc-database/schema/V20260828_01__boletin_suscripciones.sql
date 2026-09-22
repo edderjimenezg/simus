@@ -4,7 +4,7 @@
     QUE ES ESTO
     -----------
     Una fila por persona que deja su correo en el boletin de la portada. Lo pidio el usuario el 28
-    de agosto de 2026 sobre ese formulario, con estas palabras: «este registro deberia llegar a una
+    con este criterio: «este registro deberia llegar a una
     base de datos en la pestaña de comunicaciones en el cms donde salga Mailins, o CRM de lead
     interesados en informacion del plan».
 

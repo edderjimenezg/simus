@@ -4,7 +4,7 @@
 --
 -- QUE CIERRA. El circuito Festival tiene tres tablas con estado —`Festivales`,
 -- `VersionesFestival` y `PropuestasCambioFestival`— y solo las dos primeras tenian algo que
--- impidiera escribir cualquier cosa. Medido contra `PNMC_LOCAL`.
+-- impidiera escribir cualquier cosa. Comprobado en la base.
 --
 -- 1. LA PROPUESTA NO TENIA NI CHECK NI FORANEA. `PropuestasCambioFestival.Estado` admitia
 --    cualquier cadena. El codigo si la controla —`ResolverDecision` traduce la accion del

@@ -24,7 +24,7 @@
 
   Esto es lo que convierte un cambio de modelo en algo aplicable sobre una base viva.
 
-  MEDIDO EN PNMC_LOCAL EL 24 AGO 2026 POR SELECT [V]: 6 usuarios, con IdRol 4 (externo, 3
+  EN UNA BASE YA SEMBRADA: 6 usuarios, con IdRol 4 (externo, 3
   usuarios), 5 (gestor_interno, 1) y 6 (webmaster, 2).  Los ids de dbo.Roles NO son 1-2-3: son
   4-5-6, porque los tres primeros se gastaron en los roles aliado_* retirados el 22 ago 2026.
   De ahi que TODO en este fichero se resuelva por NombreRol y jamas por id literal.  Un guion que
@@ -79,7 +79,7 @@ END;
 
 /*
     Y AL REVES: NADIE SE QUEDA CON CERO ROLES.  Con IdRol NOT NULL, "usuario sin rol" no era
-    representable en PNMC -es exactamente lo que dice D8-.  Con la tabla puente vuelve a serlo, y
+    representable en PNMC —que es justo lo que el modelo anterior impedia—.  Con la tabla puente vuelve a serlo, y
     eso es una GARANTIA QUE SE PIERDE, no un detalle: un usuario con cero roles obtiene cookie, no
     cruza ninguna politica y recibe 403 en todas partes sin que nada explique por que.  Se nombra
     aqui para no descubrirlo en produccion.
@@ -93,7 +93,7 @@ END;
 
     LA GUARDA VIVE DONDE YA VIVE SU HERMANA.  AdminAuthEndpoints ya sostiene un candado de este
     tipo -"no se puede desactivar al ultimo webmaster que pueda entrar", con
-    CandadoDelUltimoWebmasterTests midiendolo [V]-.  "No se puede dejar a nadie sin roles" es la
+    CandadoDelUltimoWebmasterTests midiendolo-.  "No se puede dejar a nadie sin roles" es la
     misma clase de invariante y va al mismo sitio.  Aqui solo se comprueba.
 */
 IF EXISTS (
@@ -102,5 +102,4 @@ IF EXISTS (
 BEGIN
     THROW 51002, N'Migracion abortada: hay usuarios con cero roles en dbo.UsuariosRoles.', 1;
 END;
-
 

@@ -3,8 +3,7 @@
    =================================================================================================
 
    EL MODELO: NADA. Cada imagen del sitio publico esta escrita a mano, y no solo en las
-   plantillas: nueve de las dieciseis viven en ficheros de configuracion de TypeScript. Medido con
-   grep sobre pnmc-web/src/app:
+   plantillas: nueve de las dieciseis viven en ficheros de configuracion de TypeScript:
 
      core/services/media-library.config.ts,30,31,32     4 portadas rotatorias del Home
      features/pnmc/.../sobre-el-pnmc-page.component.html:7          hero, atributo bgImage literal
@@ -29,7 +28,7 @@
 
    POR QUE EL BYTE VA EN LA BASE Y NO EN DISCO
    -------------------------------------------
-   Porque el respaldo de PNMC_LOCAL tiene que seguir bastando para restaurar el sitio. Con los
+   Porque el respaldo de la base tiene que seguir bastando para restaurar el sitio. Con los
    bytes en un directorio, un .bak restaurado sobre un disco vacio deja dieciseis filas apuntando a
    archivos que no existen y el sitio pierde las imagenes sin decir por que. El precedente propio
    del repositorio va en la misma direccion: las fotografias del equipo viven en base64 dentro de
@@ -44,8 +43,8 @@
 
    LO QUE CUESTA, CON EL NUMERO
    ----------------------------
-   Tope por archivo 2 MiB. El fichero mas grande que hay hoy es pnmc-blanco.png con 227.579 bytes,
-   medido. Un hero de 1600 px en WebP q80 ronda 250-300 KB.
+   Tope por archivo 2 MiB. El fichero mas grande que hay hoy es pnmc-blanco.png con 227.579 bytes.
+   Un hero de 1600 px en WebP q80 ronda 250-300 KB.
 
      techo absoluto  16 claves x 2 mitades x 2 MiB               =  64 MiB
                      16 claves x 6 entradas de historial x 2 MiB = 192 MiB

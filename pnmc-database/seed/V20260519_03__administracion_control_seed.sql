@@ -35,7 +35,7 @@ USING (VALUES
     -- Estado de una Entidad recien dada de alta por el canal externo, no de un contenido.
     -- ExternalOrganizationEndpoints lo escribia desde el principio y la
     -- tabla no lo tenia, de modo que FK_Entidades_EstadosContenido rechazaba el alta: crear
-    -- una organizacion era imposible contra SQL Server. Comprobado el 22 ago 2026.
+    -- una organizacion era imposible contra SQL Server. Comprobado.
     (N'registrada', N'Registrada', N'Entidad dada de alta por su responsable, activa y sin aprobacion ministerial previa.')
 ) AS origen (CodigoEstado, NombreEstado, DescripcionEstado)
 ON destino.CodigoEstado = origen.CodigoEstado
@@ -149,7 +149,7 @@ DECLARE @IdUsuarioSistema int = (
     Insertaba una fila `placeholder.txt` con `PesoBytes = 0` y sin contenido, descrita en la propia
     semilla como «Archivo temporal de prueba … para validar metadatos de archivos». El Banco de
     archivos de la consola la listaba como un archivo real y su previsualizacion contestaba 404,
-    porque `GET /publico/archivos/{id}` no tiene bytes que servir. Comprobado el 14 de septiembre
+    porque `GET /publico/archivos/{id}` no tiene bytes que servir. Comprobado
     de 2026 recorriendo la consola: era el archivo 5.
 
     Se retira de la semilla para que una instalacion nueva no la reciba. Las bases que ya la tienen

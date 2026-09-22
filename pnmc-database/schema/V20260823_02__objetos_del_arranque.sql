@@ -1,8 +1,8 @@
 /*
     PNMC - Los objetos que hasta hoy solo creaba el arranque del API.
 
-    EL PROBLEMA (medido). Trece tablas y cinco columnas de
-    PNMC_LOCAL no las declara ningun guion de schema/: las crea DatabaseBootstrapper.cs
+    EL PROBLEMA. Trece tablas y cinco columnas de
+    la base no las declara ningun guion de schema/: las crea DatabaseBootstrapper.cs
     al arrancar el API, con DDL embebido en C#, y SOLO cuando Database:EnsureSupportTables
     esta en true. appsettings.Production.json lo pone en false —con razon: un API de
     produccion no debe tener permisos de DDL—, con lo que sobre una base construida con
@@ -22,9 +22,9 @@
 
     LO QUE HACE ESTE GUION. Mueve ese DDL a la via gobernada. Es literalmente el mismo
     T-SQL que DatabaseBootstrapper.cs ejecutaba —extraido del archivo, no reescrito—, para
-    que una base hecha solo con guiones sea identica a PNMC_LOCAL. Cada sentencia conserva
+    que una base hecha solo con guiones sea identica a la base. Cada sentencia conserva
     su guarda de idempotencia (OBJECT_ID, COL_LENGTH, sys.indexes, sys.foreign_keys), asi
-    que sobre PNMC_LOCAL, donde ya existe todo, no hace nada.
+    que sobre la base, donde ya existe todo, no hace nada.
 
     UNA TRAMPA QUE LAS GUARDAS SORTEAN. COL_LENGTH devuelve NULL tambien cuando la TABLA no
     existe, no solo cuando falta la columna: un ALTER TABLE ADD guardado solo por COL_LENGTH
@@ -46,7 +46,7 @@
     adentro con `sqlcmd ... -b` y SIN `-I`, donde esta OFF, de modo que la siembra local
     abortaba en este fichero. El mismo tropiezo lo tuvo antes V20260823_01, que ya lo declara.
 
-    ESE GUION PASA `-I` DESDE EL 24 AGO 2026, y este SET sigue aqui a proposito. Hicieron
+    ESE GUION PASA `-I` y este SET sigue aqui a proposito. Hicieron
     falta las dos correcciones porque el problema tiene dos caras: crear un indice filtrado
     (esta, la del guion) y ESCRIBIR en una tabla que ya lo tiene (la del que ejecuta, que
     ningun SET de aqui puede arreglar porque quien falla es la semilla de detras). Este SET
@@ -65,20 +65,17 @@ BEGIN
         CONSTRAINT [DF_Usuarios_CanalAcceso] DEFAULT (N'interno') WITH VALUES;
 END;
 
-
 IF COL_LENGTH(N'[Usuarios]', N'TipoPerfil') IS NULL
 BEGIN
     ALTER TABLE [Usuarios]
     ADD [TipoPerfil] nvarchar(80) NULL;
 END;
 
-
 IF COL_LENGTH(N'[Usuarios]', N'Telefono') IS NULL
 BEGIN
     ALTER TABLE [Usuarios]
     ADD [Telefono] nvarchar(80) NULL;
 END;
-
 
 IF OBJECT_ID(N'[UsuariosCodigosVerificacion]', N'U') IS NULL
 BEGIN
@@ -119,7 +116,6 @@ BEGIN
 
     CREATE INDEX [IX_ContenidoWeb_GrupoId] ON [ContenidoWeb] ([GrupoId]);
 END;
-
 
 IF COL_LENGTH(N'[ContenidoWeb]', N'FechaRetiro') IS NULL
 BEGIN
@@ -206,12 +202,10 @@ BEGIN
     );
 END;
 
-
 IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = N'IX_CatalogoEditorial_OrdenFuente' AND object_id = OBJECT_ID(N'[CatalogoEditorial]'))
 BEGIN
     CREATE INDEX [IX_CatalogoEditorial_OrdenFuente] ON [CatalogoEditorial] ([OrdenFuente]);
 END;
-
 
 IF OBJECT_ID(N'[CatalogoEditorial]', N'U') IS NOT NULL
    AND NOT EXISTS (SELECT 1 FROM [CatalogoEditorial])
@@ -254,18 +248,15 @@ BEGIN
         WHERE [NumeroIdentificacion] IS NOT NULL;');
 END;
 
-
 IF COL_LENGTH(N'[Festivales]', N'OrganizacionPrincipalId') IS NULL
 BEGIN
     ALTER TABLE [Festivales] ADD [OrganizacionPrincipalId] int NULL;
 END;
 
-
 IF COL_LENGTH(N'[Festivales]', N'Periodicidad') IS NULL
 BEGIN
     ALTER TABLE [Festivales] ADD [Periodicidad] nvarchar(80) NULL;
 END;
-
 
 IF NOT EXISTS (SELECT 1 FROM sys.foreign_keys WHERE name = N'FK_Festivales_OrganizacionPrincipal')
 BEGIN
@@ -281,7 +272,6 @@ BEGIN
         ON [Festivales] ([OrganizacionPrincipalId], [EstadoRegistro]);');
 END;
 
-
 IF OBJECT_ID(N'[FestivalesPracticasMusicales]', N'U') IS NULL
 BEGIN
     CREATE TABLE [FestivalesPracticasMusicales] (
@@ -296,7 +286,6 @@ BEGIN
     );
 END;
 
-
 IF OBJECT_ID(N'[FestivalesTerritoriosSonoros]', N'U') IS NULL
 BEGIN
     CREATE TABLE [FestivalesTerritoriosSonoros] (
@@ -310,7 +299,6 @@ BEGIN
         CONSTRAINT [UQ_FestivalesTerritoriosSonoros_Festival_TerritorioSonoro] UNIQUE ([FestivalId], [TerritorioSonoroId])
     );
 END;
-
 
 IF OBJECT_ID(N'[VersionesFestival]', N'U') IS NULL
 BEGIN
@@ -341,7 +329,6 @@ IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = N'UX_VersionesFestival_Fes
     CREATE UNIQUE INDEX [UX_VersionesFestival_Festival_Vigente]
         ON [VersionesFestival] ([FestivalOrigenId]) WHERE [EsVigente] = 1;
 
-
 IF OBJECT_ID(N'[VersionesFestivalPracticasMusicales]', N'U') IS NULL
 BEGIN
     CREATE TABLE [VersionesFestivalPracticasMusicales] (
@@ -356,7 +343,6 @@ BEGIN
     );
 END;
 
-
 IF OBJECT_ID(N'[VersionesFestivalTerritoriosSonoros]', N'U') IS NULL
 BEGIN
     CREATE TABLE [VersionesFestivalTerritoriosSonoros] (
@@ -370,7 +356,6 @@ BEGIN
         CONSTRAINT [UQ_VersionesFestivalTerritorios] UNIQUE ([VersionFestivalId], [TerritorioSonoroId])
     );
 END;
-
 
 IF OBJECT_ID(N'[PropuestasCambioFestival]', N'U') IS NULL
 BEGIN
@@ -402,7 +387,6 @@ BEGIN
     );
 END;
 
-
 IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = N'IX_PropuestasCambioFestival_Estado' AND object_id = OBJECT_ID(N'[PropuestasCambioFestival]'))
     CREATE INDEX [IX_PropuestasCambioFestival_Estado] ON [PropuestasCambioFestival] ([Estado]);
 
@@ -410,7 +394,6 @@ IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = N'IX_PropuestasCambioFesti
 IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = N'UX_PropuestasCambioFestival_Activa' AND object_id = OBJECT_ID(N'[PropuestasCambioFestival]'))
     CREATE UNIQUE INDEX [UX_PropuestasCambioFestival_Activa]
         ON [PropuestasCambioFestival] ([FestivalOrigenId]) WHERE [Activa] = 1;
-
 
 IF OBJECT_ID(N'[PropuestasCambioFestivalPracticasMusicales]', N'U') IS NULL
 BEGIN
@@ -425,7 +408,6 @@ BEGIN
         CONSTRAINT [UQ_PropuestasCambioFestivalPracticas] UNIQUE ([PropuestaCambioFestivalId], [PracticaMusicalId])
     );
 END;
-
 
 IF OBJECT_ID(N'[PropuestasCambioFestivalTerritoriosSonoros]', N'U') IS NULL
 BEGIN

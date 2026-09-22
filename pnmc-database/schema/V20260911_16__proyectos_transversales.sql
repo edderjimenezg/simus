@@ -23,7 +23,7 @@ SET NUMERIC_ROUNDABORT OFF;
   A QUE SE ENLAZA, Y A QUE NO.
 
   Se enlazan EVENTOS DE AGENDA y NOTICIAS. NO se enlazan Festivales: lo decidio la direccion el 11
-  de septiembre de 2026. Un Festival es un proceso del ecosistema con su propia vida y su propia
+  Un Festival es un proceso del ecosistema con su propia vida y su propia
   organizacion responsable; lo que puede pertenecer a una iniciativa del Programa es el contenido
   que se publica sobre el, no el proceso entero.
 

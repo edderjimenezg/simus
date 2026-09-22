@@ -3,7 +3,7 @@
  *
  * POR QUE HACE FALTA ESTA MIGRACION. La tabla ya traía
  * `CK_AgentesEditoriales_Tipo CHECK (Tipo IN (N'persona', N'entidad'))`, y parecía suficiente. No lo
- * era: la base está en `SQL_Latin1_General_CP1_CI_AS` —medido sobre `PNMC_LOCAL`, columna y base—,
+ * era: la base está en `SQL_Latin1_General_CP1_CI_AS` —en la columna y en la base—,
  * una intercalación INSENSIBLE A MAYUSCULAS, así que el CHECK admitía «Entidad», «ENTIDAD» o
  * «EnTiDaD» como si fueran el valor bueno. El vocabulario estaba escrito, pero no custodiado.
  *

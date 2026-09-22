@@ -1,27 +1,21 @@
 /*
 ================================================================================================
-    PNMC - Usuarios, roles y permisos.  Implementa D10 y D12 de
+    PNMC - Usuarios, roles y permisos.  Modelo de
 
     QUE ES ESTE FICHERO.  Un DISENO ejecutable, no una migracion ejecutada.  No se ha corrido
     contra ninguna base: lo unico comprobado sobre el es un analisis sintactico (SET PARSEONLY),
-    que no resuelve nombres ni valida semantica.  Todo lo que dice sobre PNMC_LOCAL esta medido
+    que no resuelve nombres ni valida semantica.
     por SELECT; todo lo que dice del resultado de aplicarlo es prevision, no medida.
-
-    MARCAS DE PROCEDENCIA usadas en los comentarios:
-      [V] verificado en esta sesion contra el arbol de PNMC o contra PNMC_LOCAL por SELECT.
-      [S] de segunda mano: lo afirma perfilado/mapeo-usuarios-permisos.md citando el repositorio
-          de SIMUS, que es de solo lectura y NO se ha vuelto a abrir.  No reverificado aqui.
 
     QUE NO HACE, Y ES DELIBERADO
     ----------------------------
     1. NO ABRE NINGUNA PUERTA.  Las politicas de Program.cs siguen siendo la unica puerta:
        FallbackPolicy (Program.cs-163), InstitutionalPolicy / ExternalPolicy
        (Program.cs-172), PoliticaCualquierSesion (Program.cs-183) y PoliticaFuncionario
-       (Program.cs-206) [V].  Un permiso concedido aqui es un filtro ADICIONAL dentro de una
-       ruta que la politica ya autorizo; nunca un sustituto.  Es D10.1, y es la advertencia de
-       D12.1: "mas roles no pueden significar mas puertas".
-    2. NO TRAE DATOS DE SIMUS.  Ni una fila.  Alcance cerrado el 24 ago 2026: solo estructura.
-       Las 272 concesiones de ART_MUSICA_ROL_RECURSO no viajan (D12.3): son el reparto entre 14
+       (Program.cs-206).  Un permiso concedido aqui es un filtro ADICIONAL dentro de una
+       ruta que la politica ya autorizo; nunca un sustituto.  La regla es que "mas roles no pueden significar mas puertas".
+    2. NO TRAE DATOS DE SIMUS.  Ni una fila. Alcance: solo estructura.
+       Las 272 concesiones de ART_MUSICA_ROL_RECURSO no viajan: son el reparto entre 14
        roles de origen, y aqui hay 3.  Los 85 codigos de ART_MUSICA_RECURSO se miran como
        inventario de "que se puede pedir permiso para hacer", no como reparto a copiar.
     3. NO CAMBIA EL COMPORTAMIENTO DE HOY.  La siembra de la seccion 9 es un ESPEJO de las
@@ -37,7 +31,7 @@
     (V2026MMDD_NN__usuarios_roles_y_permisos.sql).  Mientras no este ahi,
     ParidadEsquemaSinArranqueTests pondra en rojo cada tabla nueva que se mapee en
     PnmcDbContext: esa prueba compara el modelo de EF contra una base hecha SOLO con schema/.
-    No es un estorbo, es el medidor: si el guion no esta en la via gobernada, la prueba lo dice
+    No es un estorbo, es la guarda: si el guion no esta en la via gobernada, la prueba lo dice
     sin que nadie tenga que acordarse.
 
     ORDEN DE APLICACION
@@ -52,15 +46,15 @@
     sys.check_constraints / sys.triggers en cada objeto, y MERGE en cada siembra.  Correrlo dos
     veces no hace nada la segunda.
 
-    CONVENCIONES SEGUIDAS  [V] contra pnmc-database/schema/ y contra PNMC_LOCAL
+    CONVENCIONES SEGUIDAS contra pnmc-database/schema/ y contra la base
     --------------------------------------------------------------------------
       - Nombres fisicos en espanol.  Cero nombres de SIMUS, cero nombres en ingles.
       - IdX int IDENTITY(1,1), datetime2(0), prefijos PK_ UQ_ FK_ CK_ DF_ IX_ TR_.
-      - "Codigo", nunca "Cod".  Comprobado: en PNMC_LOCAL no existe NI UNA columna abreviada 'Cod*'
+      - "Codigo", nunca "Cod".  Comprobado: en la base no existe NI UNA columna abreviada 'Cod*'
         (consulta sobre sys.columns, 0 filas).  Divipola.CodigoDepartamento,
         EstadosContenido.CodigoEstado, TiposRegistroEcosistema.CodigoTipoRegistro.
         POR ESO LA COLUMNA SE LLAMA CodigoTipoDocumento Y NO CodTipoDocumento, que es como se
-        llama en SIMUS y como la nombra la LETRA de D12.2.  Desviacion consciente para cumplir su
+        llama en SIMUS y como la nombra el modelo de usuarios.  Desviacion consciente para cumplir su
         intencion; queda como pregunta abierta al propietario en el .md hermano.
       - Catalogo con clave natural por codigo, como dbo.EstadosContenido: las FK del proyecto
         apuntan al codigo (V20260519_03:40, V20260521_01:41-42), no a un id.
@@ -94,7 +88,7 @@ SET QUOTED_IDENTIFIER ON;
     momento **cualquier escritura sobre esa tabla** exige QUOTED_IDENTIFIER ON en la sesion que
     escribe, la haya creado quien la haya creado.
 
-    MEDIDO, NO DEDUCIDO (24 ago 2026, sobre PNMC_SIMUS_ENSAYO y un control en PNMC_CONTROL):
+    COMPROBADO:
       - Base con el esquema y SIN este guion  -> los .sql de pnmc-database/seed/ siembran: 0 errores, 1 usuario.
       - La misma base CON este guion aplicado -> V20260519_03__administracion_control_seed.sql
         aborta con Msg 1934 en su MERGE sobre dbo.Usuarios, y por el -b se lleva la siembra entera.
@@ -129,12 +123,8 @@ SET NOCOUNT ON;
 */
 DECLARE @RetirarIdRol bit = 1;
 
-
 /*
 ================================================================================================
-    PROCEDENCIA. Este fichero se genero el 24 ago 2026 a partir del diseno
-    entero -con todo su razonamiento y sus citas- y es donde hay que leer el POR QUE. Aqui vive
-    el QUE, que es lo unico que se ejecuta.
 
     EL REPARTO EN TRES FICHEROS NO ES COSMETICO: LO EXIGE EL ORDEN DE LA SIEMBRA (defecto U3).
     `scripts/seed-local-db.sh` aplica TODO `schema/` y solo despues `seed/`. Con el diseno
@@ -154,13 +144,13 @@ DECLARE @RetirarIdRol bit = 1;
 
 /*
 ================================================================================================
-  SECCION 1.  dbo.UsuariosRoles - la tabla puente.  D12.1: usuario <-> rol pasa a N:M.
+  SECCION 1.  dbo.UsuariosRoles - la tabla puente.  usuario <-> rol es una relacion N:M.
 ================================================================================================
 
   POR QUE UNA TABLA PUENTE Y NO UNA SEGUNDA COLUMNA.  Con 1:1 habia que elegir una regla para
   colapsar los roles -maximo o minimo- y las dos son lesivas: el minimo retira accesos vigentes,
   el maximo concede de mas.  Con N:M no hay nada que colapsar, asi que no hay regla que
-  equivocar.  Es la primera razon de D12.1, y es la buena: la pregunta desaparece en vez de
+  equivocar.  Es la primera razon, y es la buena: la pregunta desaparece en vez de
   responderse.  N:M contiene a 1:1 como caso particular; subir no pierde nada.
 
   NO HAY COLUMNA "Activo", Y ES UNA DECISION.  Mismo criterio que la seccion 7 aplica a
@@ -171,7 +161,7 @@ DECLARE @RetirarIdRol bit = 1;
   asignacion existe o no existe.
 
   CLAVE SUSTITUTA + UNIQUE, y no clave compuesta.  Se copia la forma de dbo.UsuariosEntidades
-  (PnmcDbContext.cs-870) [V], que es la tabla puente que PNMC ya tiene, para que las dos se
+  (PnmcDbContext.cs-870), que es la tabla puente que PNMC ya tiene, para que las dos se
   lean igual.  El UNIQUE hace el trabajo real; el IdUsuarioRol es lo que espera el patron
   entity.HasKey(x => x.Id) del contexto.
 */
@@ -201,14 +191,14 @@ BEGIN
             Y la cascada no era neutral: una cascada sobre la tabla de ASIGNACION DE ROLES borra
             concesiones en silencio, que es exactamente lo que este mismo bloque rechaza dos
             parrafos mas abajo para la FK hacia Roles.  Ademas PNMC no tiene ninguna: cero
-            foraneas con cascada en PNMC_LOCAL, cero ocurrencias en pnmc-database/.
+            foraneas con cascada en la base, cero ocurrencias en pnmc-database/.
         */
         CONSTRAINT FK_UsuariosRoles_Usuarios FOREIGN KEY (IdUsuario)
             REFERENCES dbo.Usuarios (IdUsuario),
 
         /*
             HACIA Roles, SIN CASCADA, Y TAMBIEN A PROPOSITO.  Borrar un rol que alguien tiene debe
-            FALLAR, no vaciar cuentas en silencio.  Permisos.cs-147 [V] dice que cualquier
+            FALLAR, no vaciar cuentas en silencio.  Permisos.cs dice que cualquier
             nombre fuera de RolesDePlataforma es un residuo; retirarlo es un trabajo con su propio
             guion -como fue V20260823_01__retirada_aliados.sql-, no un efecto colateral.
         */
@@ -219,7 +209,7 @@ END;
 
 /*
     "QUIEN TIENE ESTE ROL" ES UNA PREGUNTA QUE EL API YA HACE.  La guarda del ultimo webmaster
-    (WebmastersQuePuedenEntrarAsync, AdminAuthEndpoints.cs [V]) recorre los usuarios por rol.
+    (WebmastersQuePuedenEntrarAsync, AdminAuthEndpoints.cs) recorre los usuarios por rol.
     El UQ de arriba ordena por (IdUsuario, IdRol) y no sirve para esa direccion.
 */
 IF NOT EXISTS (SELECT 1 FROM sys.indexes
@@ -230,24 +220,23 @@ BEGIN
         ON dbo.UsuariosRoles (IdRol) INCLUDE (IdUsuario);
 END;
 
-
 /*
 ================================================================================================
   SECCION 3.  dbo.Roles gana VersionPermisos.  Es el sello que permite "cero consultas nuevas por
   peticion" SIN que un permiso revocado se quede colgado dentro de una cookie.
 ================================================================================================
 
-  EL PROBLEMA.  Los permisos se resuelven en el login y viajan en los claims (D10).  Un claim
+  EL PROBLEMA.  Los permisos se resuelven en el login y viajan en los claims.  Un claim
   escrito en el login se queda congelado hasta que la cookie expire: 8 horas deslizantes
-  (Program.cs y :120) [V].  Sin nada mas, revocar un permiso no revoca nada durante 8 horas.
+  (Program.cs y :120).  Sin nada mas, revocar un permiso no revoca nada durante 8 horas.
 
   LA SOLUCION QUE PNMC YA TIENE.  RevalidacionDeSesion comprueba por peticion, contra la base y
   con cache de 30 s acotada a [1,300], que la cuenta siga activa y con el mismo rol
-  (RevalidacionDeSesion.cs-107 y Program.cs) [V].  Basta con que compare una tercera cosa.
+  (RevalidacionDeSesion.cs-107 y Program.cs).  Basta con que compare una tercera cosa.
 
   POR QUE UNA COLUMNA Y NO CHECKSUM_AGG.  El diseno previo (perfilado/mapeo-usuarios-permisos.md
   §5.3) proponia calcular el sello al vuelo con CONCAT(COUNT(*), ':', CHECKSUM_AGG(IdPermiso)).
-  ESO SE ROMPE PRECISAMENTE CON N:M, que es lo que D12.1 acaba de decidir: CHECKSUM_AGG es un XOR
+  ESO SE ROMPE PRECISAMENTE CON N:M, que es la relacion que este guion establece: CHECKSUM_AGG es un XOR
   agregado, y con dos roles que concedan el mismo permiso el permiso aparece dos veces y su XOR se
   anula.  Habria que escribir COUNT(DISTINCT ...) y CHECKSUM_AGG(DISTINCT ...), y acordarse
   siempre.  Una columna entera que solo sube no tiene ese filo.
@@ -265,22 +254,20 @@ BEGIN
         CONSTRAINT DF_Roles_VersionPermisos DEFAULT (1) WITH VALUES;
 END;
 
-
 /*
 ================================================================================================
-  SECCION 4.  dbo.TiposDocumento - el catalogo que D12.2 necesita.
+  SECCION 4.  dbo.TiposDocumento - el catalogo de tipos de documento.
 ================================================================================================
 
-  D12.2 anade a dbo.Usuarios el documento de identidad y su tipo.  En SIMUS,
+  Este guion anade a dbo.Usuarios el documento de identidad y su tipo.  En SIMUS,
   ART_MUSICA_USUARIO.CodTipoDocumento es un varchar(50) suelto, sin catalogo ni FK [S]: cualquier
   cadena entra.  Aqui no.
 
   CLAVE NATURAL POR CODIGO, como dbo.EstadosContenido: las FK del proyecto apuntan al codigo
-  (V20260519_03:40, V20260521_01:41-42) [V].  Asi la columna de Usuarios se lee sin join, que es
+  (V20260519_03:40, V20260521_01:41-42).  Asi la columna de Usuarios se lee sin join, que es
   lo que se quiere de un catalogo de ocho filas.
 
-  CODIGOS EN MINUSCULA, como todo codigo de PNMC: 'en_revision', 'gestor_interno', 'organizacion'
-  [V].  Que la calle escriba "CC" no es razon para que la base lo escriba; el rotulo para la
+  CODIGOS EN MINUSCULA, como todo codigo de PNMC: 'en_revision', 'gestor_interno', 'organizacion'.  Que la calle escriba "CC" no es razon para que la base lo escriba; el rotulo para la
   persona es NombreTipoDocumento.
 */
 IF OBJECT_ID(N'dbo.TiposDocumento', N'U') IS NULL
@@ -298,7 +285,7 @@ BEGIN
         CONSTRAINT CK_TiposDocumento_Orden CHECK (OrdenVisualizacion > 0),
 
         /*
-            SIN ESPACIOS AL BORDE, MEDIDO CON DATALENGTH Y NO COMPARADO.
+            SIN ESPACIOS AL BORDE, COMPROBADO CON DATALENGTH Y NO COMPARADO.
             En origen ART_MUSICA_RECURSO.Codigo es NCHAR(30) y trae relleno, y el codigo de SIMUS
             tuvo que defenderse a mano (ManejadorUsuario.cs-46, "TrimEnd defensivo") [S].
             CUIDADO SI ALGUIEN "SIMPLIFICA" ESTO: la version obvia
@@ -313,7 +300,7 @@ BEGIN
 
         /*
             MINUSCULA COMPROBADA EN COLACION BINARIA, Y ES EL SEGUNDO FILO DEL MISMO CUCHILLO.
-            PNMC_LOCAL es SQL_Latin1_General_CP1_CI_AS [V]: ignora mayusculas.  Escrito como
+            La base es SQL_Latin1_General_CP1_CI_AS: ignora mayusculas.  Escrito como
                 CHECK (CodigoTipoDocumento = LOWER(CodigoTipoDocumento))
             el CHECK es CIERTO para 'CC', porque en colacion CI 'CC' = 'cc'.  Un CHECK que no
             puede fallar es un comentario con sintaxis de restriccion.  COLLATE lo arregla.
@@ -325,15 +312,15 @@ BEGIN
 END;
 
 /*
-    EL CONTENIDO LO DECIDE PNMC, NO SIMUS.  D12 lo dice literalmente para los catalogos: "la tabla
+    EL CONTENIDO LO DECIDE PNMC, NO SIMUS.  El criterio para los catalogos es: "la tabla
     si; el contenido lo define PNMC".  Estos ocho son los tipos de documento de PERSONA NATURAL
     vigentes en Colombia; no salen de ART_MUSICA_USUARIO, cuya columna es texto libre.
 
     'nit' NO ESTA, y es una decision.  Identifica a una persona juridica, y en PNMC las personas
     juridicas son Entidades -Entidades.NumeroIdentificacion, con su indice unico filtrado
-    UQ_Entidades_NumeroIdentificacion (V20260823_02:244-249) [V]-, no Usuarios.  Meterlo aqui
+    UQ_Entidades_NumeroIdentificacion (V20260823_02:244-249)-, no Usuarios.  Meterlo aqui
     invitaria a registrar una empresa como si fuera una persona, que es exactamente la confusion
-    que UsuariosEntidades existe para no tener (Permisos.cs-30 [V]: el rol dice que clase de
+    que UsuariosEntidades existe para no tener (Permisos.cs: el rol dice que clase de
     cosas puede hacer, el alcance dice sobre que actor).
 */
 MERGE dbo.TiposDocumento AS destino
@@ -355,24 +342,23 @@ WHEN NOT MATCHED THEN
     INSERT (CodigoTipoDocumento, NombreTipoDocumento, OrdenVisualizacion)
     VALUES (origen.CodigoTipoDocumento, origen.NombreTipoDocumento, origen.OrdenVisualizacion);
 
-
 /*
 ================================================================================================
-  SECCION 5.  dbo.Usuarios gana Identificacion y CodigoTipoDocumento.  D12.2.
+  SECCION 5.  dbo.Usuarios gana Identificacion y CodigoTipoDocumento.
 ================================================================================================
 
   >>>  DATO PERSONAL SENSIBLE.  Ley 1581 de 2012.  <<<
   A partir de aqui dbo.Usuarios guarda documentos de identidad.  Que DTO no puede llevarlo, que
   rutas de PNMC hay que revisar y donde queda el rastro de lectura esta en la seccion 3 del .md
-  hermano, y NO es posterior ni opcional: D12.2 dice literalmente "se anota aqui porque el modulo
+  hermano, y NO es posterior ni opcional: el criterio es "se anota aqui porque el modulo
   de privacidad tiene que enterarse ANTES de que la columna exista".  Esta seccion es ese momento.
 
-  NULABLES LAS DOS.  Los 6 usuarios que ya existen [V] no tienen documento y no hay de donde
+  NULABLES LAS DOS.  Los 6 usuarios que ya existen no tienen documento y no hay de donde
   sacarlo: bajo el alcance de solo estructura, de SIMUS no viene ni una fila.  NOT NULL obligaria
   a inventar un valor, que es convertir un dato ausente en un dato falso.
 
   nvarchar(60) Y NO nvarchar(40), aunque 60 sobre para una cedula.  Es el ancho exacto de
-  Entidades.NumeroIdentificacion (medido: nvarchar(60)) [V].  Las dos columnas guardan la misma
+  Entidades.NumeroIdentificacion (nvarchar(60)).  Las dos columnas guardan la misma
   clase de valor, y algun dia alguien las va a comparar o a copiar; si una es mas estrecha, la
   copia trunca en silencio.  La igualdad de ancho no garantiza nada, pero la desigualdad si
   garantiza un fallo posible, y evitarlo es gratis.
@@ -388,7 +374,7 @@ BEGIN
 END;
 
 /*
-    LAS RESTRICCIONES VAN EN EXEC(N'...') POR LA MISMA RAZON QUE V20260823_02:242-249 [V]: las
+    LAS RESTRICCIONES VAN EN EXEC(N'...') POR LA MISMA RAZON QUE V20260823_02:242-249: las
     columnas pueden haberse anadido en este mismo lote, y un ALTER TABLE ADD CONSTRAINT que las
     nombre estaticamente falla al COMPILAR el lote con Msg 207 (Invalid column name), antes de que
     el ALTER anterior haya llegado a ejecutarse.
@@ -433,10 +419,10 @@ END;
     eso rompe cualquier cosa que despues se cuelgue de la identidad.
 
     TIENE QUE SER UN INDICE FILTRADO, NO UN UNIQUE.  En SQL Server un UNIQUE admite UN SOLO NULL;
-    con las 6 filas actuales -todas con Identificacion NULL [V]- un UNIQUE fallaria al crearse.
+    con las 6 filas actuales -todas con Identificacion NULL- un UNIQUE fallaria al crearse.
     El indice filtrado ignora los nulos y deja que "todavia no lo sabemos" sea lo normal.  Es la
-    misma forma exacta de UQ_Entidades_NumeroIdentificacion, que en PNMC_LOCAL tiene has_filter=1
-    y filtro ([NumeroIdentificacion] IS NOT NULL) [V].  Y por eso el fichero abre con
+    misma forma exacta de UQ_Entidades_NumeroIdentificacion, que en la base tiene has_filter=1
+    y filtro ([NumeroIdentificacion] IS NOT NULL).  Y por eso el fichero abre con
     SET QUOTED_IDENTIFIER ON.
 */
 IF NOT EXISTS (SELECT 1 FROM sys.indexes
@@ -448,13 +434,12 @@ BEGIN
         WHERE Identificacion IS NOT NULL;');
 END;
 
-
 /*
 ================================================================================================
-  SECCION 6.  dbo.Permisos - el catalogo de capacidades.  D10.3 / D12.3.
+  SECCION 6.  dbo.Permisos - el catalogo de capacidades.
 ================================================================================================
 
-  UN PERMISO ES UNA CAPACIDAD, NO UNA PANTALLA.  Es la mitad de la separacion que exige D10.3.
+  UN PERMISO ES UNA CAPACIDAD, NO UNA PANTALLA.  Es la mitad de la separacion entre capacidad y pantalla.
   En SIMUS, ART_MUSICA_RECURSO es a la vez el menu que se pinta y el permiso que se valida, y el
   dano lo escribio el propio equipo de origen [S]:
   sql/versioned/V6_0_2__menu_y_permisos_roles_dotaciones.sql:12-28 explica que "los 22 recursos
@@ -463,7 +448,7 @@ END;
   que encontraron fue explotar una asimetria del codigo para esconderlos.  Con las dos tablas
   separadas ese apano deja de hacer falta: aqui un permiso sin entrada de menu es lo normal.
 
-  LAS 272 CONCESIONES NO VIAJAN (D12.3).  Los 85 codigos de origen son inventario de que se puede
+  LAS CONCESIONES DE ORIGEN NO VIAJAN.  Los 85 codigos de origen son inventario de que se puede
   permitir; el reparto lo decide PNMC, en la seccion 9.
 */
 IF OBJECT_ID(N'dbo.Permisos', N'U') IS NULL
@@ -508,7 +493,6 @@ BEGIN
     );
 END;
 
-
 /*
 ================================================================================================
   SECCION 7.  dbo.RolesPermisos - las concesiones.  EL PERMISO CUELGA DEL ROL, NUNCA DEL USUARIO.
@@ -519,7 +503,7 @@ END;
   de roles, y solo hay tres roles, en todo el sistema existen A LO SUMO CUATRO conjuntos de
   permisos distintos -{externo}, {gestor_interno}, {webmaster}, {gestor_interno, webmaster}-, y
   caben en la memoria del proceso.  Con permisos por usuario hay tantos conjuntos como personas, y
-  vuelve la consulta por peticion que D10 existe para evitar.  Si algun dia hace falta un permiso
+  vuelve la consulta por peticion que este modelo existe para evitar.  Si algun dia hace falta un permiso
   nominal, se crea un rol.
 
   NOTA SOBRE EL PASO A N:M: la variante "solo el sello en la cookie + catalogo en memoria"
@@ -545,7 +529,7 @@ BEGIN
             SIN CASCADA HACIA Permisos, y por coherencia, no por doctrina.  El argumento original
             -«un permiso que ya no existe no puede seguir concedido»- sigue siendo razonable, pero
             PNMC no usa cascadas EN NINGUN SITIO: cero foraneas con ON DELETE CASCADE en
-            PNMC_LOCAL.  Estrenarlas aqui, en la tabla que decide quien puede hacer que, dejaria el
+            la base. Estrenarlas aqui, en la tabla que decide quien puede hacer que, dejaria el
             proyecto con dos politicas de borrado segun la tabla que se toque.
 
             Consecuencia asumida: retirar un permiso del catalogo falla con Msg 547 mientras algun
@@ -574,12 +558,12 @@ END;
 
     POR QUE UN DISPARADOR, SI EL PROYECTO DESCONFIA DE LA MAGIA.  Porque la alternativa -que la
     ruta del API que edite permisos suba la version- falla exactamente en el caso para el que el
-    sello existe.  RevalidacionDeSesion.cs-35 [V] lo dice de su propia ventana de 30 s: "la
+    sello existe.  RevalidacionDeSesion.cs-35 lo dice de su propia ventana de 30 s: "la
     ventana solo cubre los cambios hechos POR FUERA del API -un UPDATE a mano contra la base-".
     Un contador que solo sube cuando el API lo sube no ve el UPDATE a mano, que es justo el cambio
     que nadie va a recordar propagar.
-    Y NO ES UN MECANISMO AJENO A LA CASA: PNMC_LOCAL ya tiene un disparador propio,
-    TR_RegistrosEcosistema_ValidarOrigen (verificado en sys.triggers) [V].
+    Y NO ES UN MECANISMO AJENO A LA CASA: La base ya tiene un disparador propio,
+    TR_RegistrosEcosistema_ValidarOrigen (verificado en sys.triggers).
 
     EL COSTE, DICHO: una escritura invisible sobre dbo.Roles -3 filas- en cada edicion del
     reparto.  Trabaja por conjuntos (nada de un UPDATE por fila) y no puede recursar, porque
@@ -604,22 +588,21 @@ BEGIN
 END;');
 END;
 
-
 /*
 ================================================================================================
-  SECCION 8.  dbo.MenuElementos - la otra mitad de D10.3.  SE CREA VACIA, Y ESO ES EL DISENO.
+  SECCION 8.  dbo.MenuElementos - la otra mitad de esa separacion.  SE CREA VACIA, Y ESO ES EL DISENO.
 ================================================================================================
 
   LEA ESTO ANTES DE SEMBRARLA.  Hoy el menu de la consola NO sale de la base: esta escrito en el
-  frontend, y en dos sitios [V] -pnmc-web/src/app/features/admin/domain/admin-config.ts (los
+  frontend, y en dos sitios -pnmc-web/src/app/features/admin/domain/admin-config.ts (los
   modulos, con su allowedRoles) y
   pnmc-web/src/app/features/admin/admin-shell-page/admin-shell-page.component.ts-933
   (las secciones y el
   webmasterOnly)-.  Sembrar filas aqui mientras eso siga asi produce DOS MENUS: uno que se pinta y
   otro que nadie mira, y el segundo se queda atras sin que nada se ponga rojo.  Es la falla que
-  Permisos.cs-87 [V] describe para las listas de roles repetidas, aplicada al menu.
+  Permisos.cs describe para las listas de roles repetidas, aplicada al menu.
 
-  LA TABLA SE CREA IGUAL, porque D12.3 dice que la ESTRUCTURA viaja y porque tenerla vacia y
+  LA TABLA SE CREA IGUAL, porque la ESTRUCTURA viaja y porque tenerla vacia y
   documentada es lo que permite mover el menu aqui despues sin volver a discutir su forma.
   CONDICION PARA SEMBRARLA: que el frontend lea el menu del API en la misma entrega.  Ni antes.
 */
@@ -679,7 +662,6 @@ BEGIN
         ON dbo.MenuElementos (IdMenuPadre, Orden);
 END;
 
-
 /*
 ================================================================================================
   SECCION 9.  El catalogo de permisos de PNMC y su reparto.
@@ -687,8 +669,8 @@ END;
 ================================================================================================
 
   DE DONDE SALEN ESTOS CODIGOS, Y DE DONDE NO.  No de los 85 recursos de SIMUS: de las decisiones
-  de rol que el codigo de PNMC YA toma hoy, una por una y con la cita al lado [V].  Es lo que
-  exige D12.3: "el catalogo de permisos de PNMC se define en PNMC, mirando los 85 codigos de SIMUS
+  de rol que el codigo de PNMC YA toma hoy, una por una y con la cita al lado.  Es lo que
+  exige que "el catalogo de permisos se define aqui, informado por los codigos de origen
   como inventario de que se puede pedir permiso para hacer, no como reparto a copiar".
 
   POR QUE ESPEJO Y NO MEJORA.  Porque asi, el dia que Permisos.cs empiece a leer esta tabla, el
@@ -699,14 +681,14 @@ END;
   externo SE QUEDA CON CERO CONCESIONES, Y NO ES UN OLVIDO.  Lo que una persona externa puede
   hacer no lo decide un permiso fino sino ExternalPolicy (Program.cs-172) mas su vinculo en
   UsuariosEntidades: "el rol dice que clase de cosas puede hacer; el alcance dice sobre que actor"
-  (Permisos.cs-30) [V].  Darle filas aqui seria empezar a describir su alcance en el sitio
+  (Permisos.cs).  Darle filas aqui seria empezar a describir su alcance en el sitio
   equivocado.
 */
 MERGE dbo.Permisos AS destino
 USING (VALUES
     -- ecosistema
     (N'registros.revisar',            N'Revisar registros',            N'ecosistema',     N'Entrar a la bandeja institucional de revision. Hoy: PoliticaFuncionario sobre el circuito (Program.cs-206).'),
-    (N'registros.publicar',           N'Publicar registros',           N'ecosistema',     N'Aprobar o publicar un registro sectorial. Hoy: cualquier rol interno (Permisos.EsFuncionario, Permisos.cs-176; D3 del modelo de roles).'),
+    (N'registros.publicar',           N'Publicar registros',           N'ecosistema',     N'Aprobar o publicar un registro sectorial. Hoy: cualquier rol interno (cualquier rol interno).'),
     (N'entidades.administrar',        N'Administrar entidades',        N'ecosistema',     N'Alta, edicion y estado de Entidades. Hoy: AdminEntityEndpoints.cs-538.'),
     (N'gobernanza.resolver_vinculos', N'Resolver vinculaciones',       N'ecosistema',     N'Solicitudes de vinculacion, duplicados y banderas de calidad. Hoy no hay lista de roles: deciden los `.RequireAuthorization()` sin politica de RecordGovernanceEndpoints.cs y :38, que caen en el esquema institucional por omision (Program.cs) y admiten a los dos roles internos.'),
     -- festivales
@@ -734,21 +716,21 @@ WHEN NOT MATCHED THEN
     VALUES (origen.CodigoPermiso, origen.NombrePermiso, origen.Modulo, origen.DescripcionPermiso);
 
 /*
-    EL REPARTO.  Por NOMBRE de rol y por CODIGO de permiso, nunca por id: en PNMC_LOCAL los tres
-    roles son IdRol 4, 5 y 6 [V], no 1, 2 y 3.
+    EL REPARTO.  Por NOMBRE de rol y por CODIGO de permiso, nunca por id: en la base los tres
+    roles son IdRol 4, 5 y 6, no 1, 2 y 3.
 
     LA DIFERENCIA ENTRE LOS DOS ROLES INTERNOS SON TRES FILAS, y las tres estan medidas en el
     codigo de hoy: cms.publicar (WebContentEndpoints.cs), usuarios.administrar
     (AdminAuthEndpoints.cs) y sistema.configurar (admin-shell-page.component.ts).  Todo lo
-    demas que hace un webmaster lo hace tambien un gestor_interno, porque la decision D3 del modelo
+    demas que hace un webmaster lo hace tambien un gestor_interno, porque el modelo
     de roles dice que CUALQUIER funcionario decide, publicacion de registros incluida
-    (Permisos.cs-176) [V].  Si esta tabla dijera otra cosa, estaria cambiando la politica de
+    (Permisos.cs).  Si esta tabla dijera otra cosa, estaria cambiando la politica de
     tapadillo, que es lo que la seccion promete no hacer.
 
     EL MERGE NO BORRA LO QUE NO ESTA EN LA LISTA -no lleva WHEN NOT MATCHED BY SOURCE- y es a
     proposito: si manana alguien concede un permiso a mano desde la consola, volver a correr este
     guion no debe deshacerlo en silencio.  El reverso de esa moneda esta documentado en
-    seed/V20260519_03__administracion_control_seed.sql:5-12 [V]: un MERGE que reinsertaba deshacia
+    seed/V20260519_03__administracion_control_seed.sql:5-12: un MERGE que reinsertaba deshacia
     los DELETE de una migracion en la misma ejecucion, sin error y sin aviso.
 */
 MERGE dbo.RolesPermisos AS destino
@@ -789,7 +771,6 @@ ON destino.IdRol = origen.IdRol AND destino.IdPermiso = origen.IdPermiso
 WHEN NOT MATCHED THEN
     INSERT (IdRol, IdPermiso) VALUES (origen.IdRol, origen.IdPermiso);
 
-
 /*
 ================================================================================================
   SECCION 11.  Retirada de dbo.Usuarios.IdRol.  ENCENDIDA EL 25 AGO 2026 (fase C).
@@ -797,16 +778,16 @@ WHEN NOT MATCHED THEN
 
   LA RECOMENDACION ES RETIRARLA.  Las otras dos opciones, y por que se descartan:
 
-  (a) CONSERVARLA COMO "ROL PRINCIPAL".  Devuelve la pregunta que D12.1 elimino.  Su mejor
+  (a) CONSERVARLA COMO "ROL PRINCIPAL".  Devuelve la pregunta que la relacion N:M elimina.  Su mejor
       argumento era que con N:M "la pregunta desaparece en vez de responderse"; un rol principal la
       resucita -cual de los tres es el principal, y quien lo decide cuando cambian- y ademas obliga
       a cada lector a elegir entre dos fuentes para "que rol tiene esta persona".  Dos fuentes para
       un dato es como se llega a que una se quede atras sin que nadie lo note, que es literalmente
-      el argumento de Permisos.cs-87 contra las listas de roles repetidas.
+      el argumento de Permisos.cs contra las listas de roles repetidas.
 
   (b) DEJARLA DE USAR SIN RETIRARLA.  Es la peor de las tres.  La columna seguiria siendo NOT NULL
       con FK, asi que TODO INSERT en Usuarios tendria que escribir algo -vease
-      ExternalAuthEndpoints.cs y DatabaseBootstrapper.cs [V]-, y lo que escriba no lo
+      ExternalAuthEndpoints.cs y DatabaseBootstrapper.cs-, y lo que escriba no lo
       comprueba nadie contra UsuariosRoles.  Es exactamente la patologia de
       ART_MUSICA_ROL_RECURSO.esActivo [S]: una columna que parece decir algo y no lo dice.  Con el
       agravante de que aqui la columna viva y la tabla puente pueden CONTRADECIRSE, y quien lea la
@@ -822,7 +803,7 @@ WHEN NOT MATCHED THEN
   DESPUES de desplegar el codigo, y solo entonces.
 
   Y ANTES DE SOLTAR LA COLUMNA HAY QUE SOLTAR LO QUE CUELGA DE ELLA: FK_Usuarios_Roles
-  (V20260519_02:38) e IX_Usuarios_IdRol (V20260519_02:56-59) [V].  Un DROP COLUMN con una FK
+  (V20260519_02:38) e IX_Usuarios_IdRol (V20260519_02:56-59).  Un DROP COLUMN con una FK
   encima falla con Msg 5074 y deja el guion a medias.
 */
 IF @RetirarIdRol = 1 AND COL_LENGTH(N'dbo.Usuarios', N'IdRol') IS NOT NULL

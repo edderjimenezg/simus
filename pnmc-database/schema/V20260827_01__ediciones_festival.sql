@@ -34,7 +34,7 @@
     EL VOCABULARIO DE `Estado`
     --------------------------
     Cerrado desde el principio, con un CHECK. Los dos primeros valores no son inventados: son los
-    unicos que hay hoy en `Festivales.EstadoVersionAnoActual`, medidos con un SELECT DISTINCT
+    unicos que hay hoy en `Festivales.EstadoVersionAnoActual`
     (`en_preparacion` y `programada`). Los otros dos cierran el ciclo. Anyadir uno obliga a tocar
     este guion, que es exactamente lo que se quiere: que nadie invente un estado escribiendolo en
     un formulario, como paso con `en_evaluacion`.

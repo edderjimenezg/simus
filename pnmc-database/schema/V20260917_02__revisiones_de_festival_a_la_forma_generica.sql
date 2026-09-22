@@ -3,7 +3,7 @@
 
     QUE ES ESTO
     -----------
-    El 16 de septiembre de 2026 nacieron `RevisionesDeRegistro` y sus observaciones, que identifican
+    nacieron `RevisionesDeRegistro` y sus observaciones, que identifican
     el registro por MODULO + IDENTIFICADOR y sirven para cualquier proceso del Ecosistema. Aquel
     guion dejó escrito que `RevisionesFestival` seguiría existiendo aparte y que migrarla era «un
     corte propio, con su marcha atrás y su recuento». Este es ese corte.

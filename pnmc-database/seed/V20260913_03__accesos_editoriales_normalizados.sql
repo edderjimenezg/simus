@@ -1,7 +1,7 @@
 /*
  * LOS ENLACES QUE ESTABAN ESCRITOS DENTRO DE UN PARRAFO.
  *
- * QUE SE ENCONTRO, MEDIDO SOBRE EL ACERVO. El volcado de origen escribía las direcciones dentro del
+ * EL COMPORTAMIENTO DE ORIGEN. El volcado de origen escribía las direcciones dentro del
  * texto libre —unas veces en la nota del acceso, la mayoría dentro de la UBICACION FISICA, en frases
  * como «Ministerio de Cultura, oficina del Área de Música, Biblioteca Nacional. Se encuentra
  * publicado en: https://…»—. Resultado: <b>28 direcciones en 23 publicaciones</b> que el modelo no
@@ -172,7 +172,7 @@ GO
 
 /* ── 5. Un agente que son dos personas se parte en dos ────────────────────────────
  *
- * QUE SE ENCONTRO. Nueve agentes del acervo llevan una coma en el nombre, y NO es el orden
+ * EL COMPORTAMIENTO DE ORIGEN. Nueve agentes del acervo llevan una coma en el nombre, y NO es el orden
  * invertido de apellido y nombre como podría parecer: son DOS PERSONAS metidas en un mismo registro
  * —«Eblis Javier Álvarez Vargas, Carlos Andrés Rico Carvajal»—. La fuente escribió las dos en la
  * misma celda y la carga las tomó por un solo agente.

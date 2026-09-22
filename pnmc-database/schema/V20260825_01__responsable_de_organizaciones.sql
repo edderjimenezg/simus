@@ -41,7 +41,7 @@
 
     LA TABLA VIEJA SE SUELTA AQUI MISMO
     -----------------------------------
-    `EntidadesAcceso` alcanzo a crearse en PNMC_LOCAL antes de este cambio. No la referencia nada
+    `EntidadesAcceso` alcanzo a crearse en la base antes de este cambio. No la referencia nada
     —nacio vacia y ningun codigo la escribio nunca—, asi que soltarla es seguro y es lo que hace
     converger cualquier base que ya la tenga. La alternativa —dejarla ahi— seria peor que el
     problema que se esta corrigiendo.

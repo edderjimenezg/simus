@@ -17,8 +17,8 @@
   libro de partituras es música notada / sin mediación / volumen. El campo `TipoPublicacion` que ya
   existe se conserva: es el valor tal como lo escribió la fuente, y sirve para conciliar.
 
-  POR QUE SON MULTIVALUADOS, QUE ES LO QUE OBLIGA A UNA TABLA DE ENLACE. Medido sobre las 171 fichas
-  del acervo: 23 de ellas declaran más de un valor en al menos un eje. Hay libros que vienen con su
+  POR QUE SON MULTIVALUADOS, QUE ES LO QUE OBLIGA A UNA TABLA DE ENLACE. De las 171 fichas
+  del acervo, 23 declaran más de un valor en al menos un eje. Hay libros que vienen con su
   CD —«disco de audio ; volumen», catorce casos—, hay cajas con DVD, CD y cartilla —«videodisco ;
   disco de audio ; volumen», cuatro— y hay obras que son a la vez sonoras y textuales. Guardar eso
   en una columna de texto con puntos y comas dentro obliga a partir la cadena para poder filtrar, y
@@ -111,8 +111,7 @@ GO
 
 /* ─────────────────────────── Tres columnas que no daban el ancho ───────────────────────────
 
-   LOS TRES MAXIMOS ESTAN MEDIDOS, NO ESTIMADOS, y el desarrollo de septiembre ya los había medido
-   antes con el mismo resultado y sobre las mismas fichas. Cargar el acervo sin esto falla con
+   LOS TRES MAXIMOS SON REALES, tomados del propio acervo. Cargar el acervo sin esto falla con
    truncamiento y, como la semilla corre en una sola transacción, no entra ni una obra:
 
      · `TipoPublicacion`  144 caracteres en E111 — la fuente mete en el tipo una frase con la

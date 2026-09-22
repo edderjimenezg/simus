@@ -15,7 +15,7 @@
       · Y dentro de `ModuloId` convivían dos separadores: el guion bajo de `ediciones_festival` y el
         guion medio de `catalogo-editorial`.
 
-    LO QUE ESO ROMPIA, MEDIDO ANTES DE TOCAR NADA
+    LO QUE ESO ROMPIA
     ----------------------------------------------
     El cruce entre la procedencia de un registro y su historial de revisión —la consulta que
     contesta «de dónde vino esto y qué se hizo con ello»— devolvía CERO filas, sobre 1 050 filas de

@@ -63,7 +63,7 @@ END;
     tabla existente al COMPILAR el lote, no al ejecutarlo: sin el EXEC, el lote entero muere con
     Msg 207 sobre `IdRol` y ni siquiera llega a evaluar el COL_LENGTH que debia protegerlo.
 
-    POR QUE HIZO FALTA, medido el 25 ago 2026: `scripts/seed-local-db.sh` aplica TODO `schema/` en
+    POR QUE HACE FALTA: `scripts/seed-local-db.sh` aplica TODO `schema/` en
     cada ejecucion.  Sobre una base ya migrada, este bloque moria -Msg 1911 en el indice, Msg 207
     en los UPDATE- y se llevaba por delante la tuberia entera en su segundo fichero.  La suite
     estaba en verde: 438 de 438.  Lo que faltaba no era una guarda, era una PRUEBA que aplicara el

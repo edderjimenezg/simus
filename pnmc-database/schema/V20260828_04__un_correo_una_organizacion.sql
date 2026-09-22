@@ -15,7 +15,7 @@
 
    1. SI: un indice unico filtrado sobre el correo de contacto de la organizacion. Se pudo crear
       porque en la base local hay CERO correos repetidos entre las diecinueve organizaciones,
-      medido antes de escribirlo.
+      
 
    2. NO: ningun indice que impida que una cuenta responda por varias organizaciones. No se puede
       crear hoy: la base local tiene CINCO cuentas sembradas que ya lo hacen —externo@pnmc.local

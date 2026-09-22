@@ -21,7 +21,7 @@
 
     LO QUE COSTABA. `scripts/seed-local-db.sh` invoca `sqlcmd -b` y lleva `set -e`, asi que el
     primer error aborta LA SIEMBRA ENTERA en su PRIMER fichero: ni las otras siete semillas ni
-    `sp_ActualizarMetricasMapa` llegaban a correr. Comprobado el 24 ago 2026 sobre una base de
+    `sp_ActualizarMetricasMapa` llegaban a correr. Comprobado sobre una base de
     control construida sin la migracion de SIMUS, para descartar que fuera cosa de ella:
     primera pasada `EXIT=0` y 0 errores; segunda `EXIT=1` y los mismos 4 mensajes.
 
@@ -83,7 +83,6 @@ SET d.NombreTerritorioSonoro = o.Nombre,
     d.OrdenVisualizacion     = o.Orden
 FROM dbo.TerritoriosSonoros AS d
 JOIN @Territorios AS o ON o.Slug = d.Slug;
-
 
 -- -------------------------------------------------------------------------------------------
 -- dbo.PracticasMusicales

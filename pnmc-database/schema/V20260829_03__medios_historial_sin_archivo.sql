@@ -2,7 +2,7 @@
    EL HISTORIAL DE IMAGENES DEJA DE GUARDAR EL ARCHIVO
    =================================================================================================
 
-   DECISION DEL USUARIO, 29 de agosto de 2026, con sus palabras: «No guardes el original, siempre
+   CRITERIO: «No guardes el original, siempre
    se remplaza, y si se remplaza la imagen, desaparece, no se guarda».
 
    QUE CAMBIA. dbo.MediosWebHistorial pierde la columna `Contenido varbinary(max)` y con ella el
@@ -20,7 +20,7 @@
    pasa a costar unos 200 bytes por entrada: 45 claves x 6 entradas son ~54 KB. Es tres ordenes de
    magnitud menos, y desaparece la razon principal por la que el tope de la poda importaba.
 
-   POR QUE UN GUION APARTE Y NO EDITAR EL ANTERIOR. V20260829_01 ya se aplico a PNMC_LOCAL y el
+   POR QUE UN GUION APARTE Y NO EDITAR EL ANTERIOR. V20260829_01 ya se aplico a la base y el
    migrador (DbUp) lleva la cuenta de los guiones ejecutados: editar uno aplicado no vuelve a
    correr y deja la base y el fichero diciendo cosas distintas. La regla del repositorio es que un
    guion aplicado no se toca.

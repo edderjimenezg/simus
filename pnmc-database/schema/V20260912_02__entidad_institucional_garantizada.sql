@@ -12,7 +12,7 @@ SET NUMERIC_ROUNDABORT OFF;
 
   La entidad institucional —la que responde por todo registro que ninguna organizacion ha
   reclamado— se creaba SOLO en `seed/V20260519_03`. Las semillas son opcionales: una base
-  correctamente migrada podia quedarse sin ella, y quedarse sin ella NO es cosmetico. Medido
+  correctamente migrada podia quedarse sin ella, y quedarse sin ella NO es cosmetico.
   sobre la base local:
 
     - Devolver un proceso a custodia institucional se niega: no hay a quien devolverselo.

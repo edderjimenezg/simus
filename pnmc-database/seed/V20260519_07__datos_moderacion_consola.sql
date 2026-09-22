@@ -6,15 +6,15 @@
 -- AQUI NO VA UN `USE`. Y ESTUVO, hasta.
 --
 -- QUE HACIA. Este era el unico de los siete ficheros de `seed/` que abria con
--- `USE [PNMC_LOCAL]; GO`. Los otros seis heredan la base de quien los ejecuta,
+-- `USE [la base]; GO`. Los otros seis heredan la base de quien los ejecuta,
 -- que es `sqlcmd ... -d "$DB_NAME"` en `scripts/seed-local-db.sh`.
 --
 -- POR QUE IMPORTA. `USE` gana al `-d`. Con esta linea dentro, sembrar CUALQUIER
 -- base -una de ensayo, una de un worktree, la que pide PNMC_LOCAL_DB_NAME-
--- escribia igualmente en PNMC_LOCAL, y lo primero que hace este fichero es
+-- escribia igualmente en la base, y lo primero que hace este fichero es
 -- `DELETE FROM ... WHERE IdEntidad >= 100` sobre cuatro tablas. Borraba en la
 -- base compartida los datos de la base que nadie habia pedido tocar. Ocurrio:
--- dos ensayos contra `PNMC_SIMUS_ENSAYO` acabaron dentro de PNMC_LOCAL.
+-- dos ensayos contra `PNMC_SIMUS_ENSAYO` acabaron dentro de la base.
 --
 -- Es exactamente el fallo que `seed-local-db.sh` documenta en su cinturon de
 -- worktrees -aislar el codigo no aisla la base- por otra puerta: alli el guion
@@ -31,7 +31,7 @@
 -- ANTES ESTABAN CABLEADOS COMO NUMEROS: 2, 3, 4, 5 y 7. Y no existian. Una base
 -- construida solo con `scripts/seed-local-db.sh` tiene UN usuario -el
 -- `sistema@pnmc.local` de V20260519_03-; `admin@`, `gestor@` y `externo@` los
--- crea el arranque del API, que la siembra no ejecuta. Comprobado el 24 ago 2026
+-- crea el arranque del API, que la siembra no ejecuta. Comprobado
 -- sobre dos bases recien construidas: 1 usuario, y CERO de las 16 entidades de
 -- este fichero.
 --
@@ -45,7 +45,7 @@
 --
 -- LA LECCION: un identificador subrogado no es un identificador. Lo elige la
 -- base segun el orden de insercion, y de hecho no coincide entre bases -en
--- PNMC_LOCAL el rol `webmaster` es el 6 y en una base recien sembrada es el 3-.
+-- la base el rol `webmaster` es el 6 y en una base recien sembrada es el 3-.
 -- Aqui todo se resuelve por su clave natural: el rol por nombre y el usuario por
 -- correo. Y se crean si faltan, para que el fichero baste por si solo.
 -- -------------------------------------------------------------------------
@@ -275,7 +275,6 @@ DECLARE @IdOrganizacionInstitucional int = (
     SELECT TOP (1) IdEntidad FROM dbo.Entidades WHERE EsInstitucional = 1 ORDER BY IdEntidad
 );
 
-
 INSERT INTO dbo.EscuelasMusica (IdEscuelaMusica, NombreEscuela, CategoriaEscuela, TipoEscuela, EntidadResponsable, CorreoContacto, NivelCobertura, CodigoDepartamento, CodigoMunicipio, EscuelaActiva, Activo, EstadoRegistro, OrganizacionResponsableId, FechaCreacion)
 VALUES 
 (100, N'Semillero Instrumental del Valle (Borrador)', N'Básica', N'Pública', N'Municipio', N'semillero@pnmc.local', N'municipal', '05', '05001', 1, 1, N'borrador', @IdOrganizacionInstitucional, SYSUTCDATETIME()),
@@ -301,7 +300,6 @@ SET IDENTITY_INSERT dbo.Lutieres ON;
 DECLARE @IdOrganizacionInstitucional int = (
     SELECT TOP (1) IdEntidad FROM dbo.Entidades WHERE EsInstitucional = 1 ORDER BY IdEntidad
 );
-
 
 INSERT INTO dbo.Lutieres (IdLutier, Nombre, TipoLutier, NombreTaller, Especialidad, CorreoContacto, NivelCobertura, CodigoDepartamento, CodigoMunicipio, Activo, EstadoRegistro, OrganizacionResponsableId, FechaCreacion)
 VALUES 

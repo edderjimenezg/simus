@@ -9,10 +9,10 @@
     `_ZONA_TITULACION_COLECTIVA`, `ART_MUS_TIPOINGRESO`, `_REGION_OCAD` y `ART_MUS_ZONAXREGION_OCAD`.
 
     POR QUE AHORA, SI EL 24 DE AGOSTO SE DECIDIO LO CONTRARIO. `schema/V20260824_02` creo las nueve
-    tablas VACIAS a proposito, y lo dejo escrito: decision D12, «el contenido de los catalogos se
-    decide en PNMC, informado por SIMUS, no copiado de SIMUS». El 28 de agosto se define
+    tablas VACIAS a proposito, por el criterio de que «el contenido de los catalogos se
+    decide en PNMC, informado por SIMUS, no copiado de SIMUS». El criterio define
     traer «toda la informacion de ese script y las relaciones» y que esa sea «la forma de todos los
-    datos que tiene un festival». Esto ANULA la mitad de D12 que decia «no copiado», y conserva la
+    datos que tiene un festival». Esta siembra sustituye aquel criterio en su parte de «no copiado», y conserva la
     otra mitad, que es la que importaba: SE COPIA EL CONTENIDO, NO LOS IDENTIFICADORES. Los ids de
     SIMUS estan cableados en el codigo de SIMUS; los de aqui los asigna esta base. La convergencia
     va por `Slug`, que es la clave natural, igual que en `seed/V20260519_01__maestras_estaticas_seed.sql`.

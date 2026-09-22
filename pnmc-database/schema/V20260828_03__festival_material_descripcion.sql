@@ -8,7 +8,7 @@
    `RolArchivo NOT NULL`, con tres valores inventados —afiche, programa, logo— que el formulario
    ofrecia en un desplegable rotulado «Que es».
 
-   POR QUE IMPORTA. El 28 de agosto de 2026 Se define, textualmente, que los nombres de los
+   POR QUE IMPORTA. El criterio es que los nombres de los
    campos no se cambien: «a los nombres de los campos no los cambies como vi que hiciste». Un
    desplegable de tres opciones inventadas en lugar de un campo de texto libre no es un cambio de
    rotulo: es un campo distinto, con menos capacidad. «Afiche del dia 3, version en alta» no cabe en

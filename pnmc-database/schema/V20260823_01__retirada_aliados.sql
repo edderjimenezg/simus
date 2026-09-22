@@ -1,7 +1,7 @@
 /*
     PNMC - Retirada del concepto de entidad aliada.
 
-    DECISION (22 de agosto de 2026, Fabrica de Software/00-Gobierno/modelo-del-ecosistema.md):
+    CRITERIO:
     el concepto desaparece. Un aliado hacia exactamente lo mismo que una agrupacion —registrar
     lo suyo, enviarlo a revision, no publicar nunca— pero con rol propio, tablas propias y
     portal propio. Era un quinto tipo de actor con maquinaria duplicada.
@@ -11,7 +11,7 @@
     misma forma que UsuariosEntidadesAliadas —tabla puente persona-entidad, columna de rol,
     bandera Activo, unicidad triple— y es el corazon del modelo nuevo, no un resto del viejo.
 
-    MEDIDO ANTES DE ESCRIBIRLO: las tres tablas tenian cero filas y ningun usuario tenia rol
+    las tres tablas tenian cero filas y ningun usuario tenia rol
     aliado_*. La retirada no pierde ni un dato.
 
     TRES TRAMPAS QUE ESTE GUION SORTEA, y por eso no es un simple DROP TABLE:
@@ -54,7 +54,7 @@ INNER JOIN sys.objects referida ON referida.object_id = fk.referenced_object_id
     EL COLLATE NO ES DECORATIVO, Y EL MOTIVO NO SE VE EN LOCAL.
 
     Azure SQL guarda los METADATOS del catalogo en SQL_Latin1_General_CP1_CI_AS sin
-    importar la intercalacion de la base. Comprobado el 27 ago 2026 contra la base de pruebas:
+    importar la intercalacion de la base. Comprobado contra la base de pruebas:
 
         base de datos               Modern_Spanish_CI_AI   (la fija infra/main.bicep)
         sys.objects.name            SQL_Latin1_General_CP1_CI_AS
@@ -170,7 +170,7 @@ GO
 
 /*
     REENCAUZAR ANTES DE BORRAR. FK_Usuarios_Roles ata IdRol y la columna es NOT NULL, asi que
-    un DELETE sobre un rol con usuarios falla. El dato medido dice cero usuarios aliado_*,
+    un DELETE sobre un rol con usuarios falla. El dato es cero usuarios aliado_*,
     pero el guion no depende de ese dato: primero manda a "externo" a quien quede —que es el
     rol que le corresponde en el modelo nuevo, porque un aliado hacia lo que hace una
     agrupacion— y solo despues borra.
@@ -201,7 +201,7 @@ GO
         existe.  Dentro de esta guarda la columna existe por definicion, de modo que preguntar por
         ella es a la vez correcto y suficiente.
 
-    POR QUE HIZO FALTA, medido el 25 ago 2026: `scripts/seed-local-db.sh` aplica TODO `schema/` en
+    POR QUE HACE FALTA: `scripts/seed-local-db.sh` aplica TODO `schema/` en
     cada ejecucion.  Sobre una base ya migrada este bloque moria y se llevaba por delante la
     tuberia entera en su segundo fichero.  La suite estaba en verde -438 de 438- porque
     SiembraRepetibleTests aplicaba el esquema UNA vez y las semillas dos.  Ahora aplica las dos

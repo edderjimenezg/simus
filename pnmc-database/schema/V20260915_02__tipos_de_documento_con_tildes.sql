@@ -1,7 +1,7 @@
 /*
   SIMUS · Los tipos de documento se leen con su ortografía
 
-  EL DEFECTO, ANOTADO DESDE EL 27 DE AGOSTO DE 2026 Y NUNCA CORREGIDO. `dbo.TiposDocumento` guarda
+  EL DEFECTO. `dbo.TiposDocumento` guarda
   «Cedula de ciudadania», «Cedula de extranjeria» y «Numero unico de identificacion personal», sin
   una sola tilde. Como nadie leía la tabla, el alta externa llevaba las ocho parejas escritas a mano
   CON tildes, anotadas en el código como copia y con la instrucción de borrarlas «el día que la

@@ -50,7 +50,7 @@ WHEN NOT MATCHED THEN
         existe.  Dentro de esta guarda la columna existe por definicion, de modo que preguntar por
         ella es a la vez correcto y suficiente.
 
-    POR QUE HIZO FALTA, medido el 25 ago 2026: `scripts/seed-local-db.sh` aplica TODO `schema/` en
+    POR QUE HACE FALTA: `scripts/seed-local-db.sh` aplica TODO `schema/` en
     cada ejecucion.  Sobre una base ya migrada este bloque moria y se llevaba por delante la
     tuberia entera en su segundo fichero.  La suite estaba en verde -438 de 438- porque
     SiembraRepetibleTests aplicaba el esquema UNA vez y las semillas dos.  Ahora aplica las dos
