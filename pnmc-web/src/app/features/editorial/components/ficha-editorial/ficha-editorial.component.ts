@@ -196,7 +196,7 @@ export class FichaEditorialComponent {
    * <b>ANTES ERA UNA LINEA POR PERSONA, Y ESO SE LEE MAL EN CUANTO HAY DOS.</b> Medido sobre el
    * acervo: 133 de las 171 publicaciones repiten algún papel, así que no es un caso raro sino la
    * norma; la peor, `PNMC-ED-010`, acredita a VEINTIOCHO compositores, que eran veintiocho filas
-   * con el mismo rótulo encima. Lo señaló la dirección de producto: «en lugar de varios elementos que
+   * con el mismo rótulo encima. El criterio es este: «en lugar de varios elementos que
    * digan arreglista y un nombre, arreglista y otro nombre, poner arreglistas y los nombres
    * separados».
    *

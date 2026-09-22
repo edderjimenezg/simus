@@ -149,7 +149,7 @@ internal static class CustodiaDeProcesos
     /// Liberar dice «este proceso sigue vivo y ahora responde el Programa»; archivar dice «este
     /// proceso terminó con la organización». Un festival de una fundación disuelta que ya no se va a
     /// celebrar no debería quedarse publicado a nombre del Programa esperando a que alguien lo
-    /// reclame. La dirección de producto lo pidió: «al eliminar una
+    /// reclame. El criterio es este: «al eliminar una
     /// organización debe dar la opción de también eliminar los procesos registrados o liberarlos».
     /// </para>
     /// <para>

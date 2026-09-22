@@ -16,7 +16,7 @@ namespace PNMC.Api.Tests;
 /// <para>
 /// <b>EL HUECO QUE ESTO CIERRA.</b> `Usuarios.Identificacion` y `Usuarios.CodigoTipoDocumento`
 /// existían en la base y la entidad no las mapeaba, así que la consola no tenía dónde pedirlas: una
-/// cuenta administrativa era un nombre y un correo. La dirección de producto lo señaló el 15 de
+/// cuenta administrativa era un nombre y un correo. Quedó definido el 15 de
 /// septiembre de 2026: «es importante plantear una ruta de modificación de perfil de estos usuarios
 /// administrativos donde podamos pedirles la información básica… porque eso hoy no está planteado».
 /// </para>

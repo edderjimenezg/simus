@@ -988,7 +988,7 @@ public sealed class UserRow
     /// <remarks>
     /// <b>LAS COLUMNAS EXISTIAN Y NADIE LAS LEIA.</b> `Usuarios.Identificacion` y
     /// `Usuarios.CodigoTipoDocumento` estaban en la base desde antes y la entidad no las mapeaba,
-    /// así que la consola no tenía dónde pedirlas. La dirección de producto lo señaló el 15 de
+    /// así que la consola no tenía dónde pedirlas. Quedó definido el 15 de
     /// septiembre de 2026: «es importante plantear una ruta de modificación de perfil de estos
     /// usuarios administrativos donde podamos pedirles la información básica como nombre completo,
     /// número de identificación, etcétera, porque eso hoy no está planteado».
@@ -1000,7 +1000,7 @@ public sealed class UserRow
 
     /// <summary>El nombre, partido igual que en el alta externa.</summary>
     /// <remarks>
-    /// <b>LA MISMA ESTRUCTURA EN TODO EL PROYECTO.</b> La dirección de producto lo pidió el 15 de
+    /// <b>LA MISMA ESTRUCTURA EN TODO EL PROYECTO.</b> Quedó definido el 15 de
     /// septiembre de 2026: «es importante dejar todos los formularios de nombre con la misma
     /// estructura… copiemos esa estructura base de ahí». Un nombre partido en un formulario y entero
     /// en otro obliga a decidir dos veces cómo se guarda y hace imposible comparar personas entre
@@ -1236,7 +1236,7 @@ public sealed class HistorialRevisionRegistroRow
     public DateTime Fecha { get; set; }
     public string? MetadataJson { get; set; }
 
-    // INSTANTANEA (bloque B5). Se copian AL ESCRIBIR y no se resuelven al leer: la ficha de
+    // INSTANTANEA (). Se copian AL ESCRIBIR y no se resuelven al leer: la ficha de
     // revision armaba el nombre de la organizacion por JOIN contra el presente, de modo que
     // renombrarla reescribia en silencio todo su historial pasado.
     //
@@ -2221,7 +2221,7 @@ public sealed class MercadoRow
 /// <summary>Una realización concreta de un mercado musical.</summary>
 /// <remarks>
 /// <b>NO TIENE ESTADO DE REGISTRO NI CIRCUITO DE REVISION.</b> Las ediciones de un mercado no pasan
-/// por revisión institucional: la dirección de producto lo decidió, y
+/// por revisión institucional: quedó fijado, y
 /// es la única diferencia real de ciclo de vida respecto de la edición de un festival. El control
 /// está en la puerta de entrada del mercado. Lo que sí conserva son sus DOS ejes de estado: el ciclo
 /// real del acontecimiento y si se enseña o no, que no son lo mismo —un mercado cancelado que sigue

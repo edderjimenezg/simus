@@ -13,8 +13,7 @@ export interface DatoDeLaPieza {
  * <b>QUE PROBLEMA RESUELVE.</b> «Previsualizar» enseñaba la TARJETA DEL LISTADO público: cómo se ve
  * el registro dentro de la parrilla de noticias o de la agenda. Eso sirve para comprobar que el
  * recorte del título cabe y que la portada no queda vacía, pero no es lo que se pregunta antes de
- * publicar algo, que es cómo se lee. La dirección de producto lo pidió:
- * «el apartado de previsualizar debería mostrar cómo se ve la noticia o el evento como tal, no la
+ * publicar algo, que es cómo se lee. El criterio es este: * «el apartado de previsualizar debería mostrar cómo se ve la noticia o el evento como tal, no la
  * sección de noticias general», y al preguntarle precisó: dentro del panel de gestión.
  *
  * <b>ES UNA LECTURA, NO UN FORMULARIO NI UNA FICHA DE DATOS.</b> La ficha —`app-dato-en-lectura`

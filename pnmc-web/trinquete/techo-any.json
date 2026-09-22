@@ -51,13 +51,13 @@
       "fecha": "2026-09-10T22:49:01.000Z",
       "techo": 446,
       "delta": -45,
-      "via": "corte 02; medicion equivalente a --sellar"
+      "via": "medicion equivalente a --sellar"
     },
     {
       "fecha": "2026-09-11T00:27:34.000Z",
       "techo": 413,
       "delta": -33,
-      "via": "corte 03; medicion equivalente a --sellar"
+      "via": "medicion equivalente a --sellar"
     },
     {
       "fecha": "2026-09-11T01:20:38.297Z",

@@ -12,7 +12,7 @@ namespace PNMC.Api.Endpoints;
 /// </summary>
 /// <remarks>
 /// <para>
-/// QUE HABIA ANTES: NADA. El campo de correo de la portada no estaba conectado. El boton no tenia
+/// EL MODELO: NADA. El campo de correo de la portada no estaba conectado. El boton no tenia
 /// manejador, asi que escribir el correo y pulsar no producia ni peticion, ni error, ni aviso:
 /// quien lo usara se quedaba creyendo que se habia suscrito. Encontrado.
 /// </para>

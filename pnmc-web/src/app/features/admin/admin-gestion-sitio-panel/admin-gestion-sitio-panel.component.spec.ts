@@ -4,7 +4,7 @@ import { AdminGestionSitioPanelComponent } from './admin-gestion-sitio-panel.com
 import { ContenidoWebApiService } from '../../../core/services/contenido-web-api.service';
 
 /**
- * El armazón de Gestión del sitio (corte 05B).
+ * El armazón de Gestión del sitio ().
  *
  * <b>El defecto que estas pruebas fijan, y que era real.</b> El efecto de arranque llamaba a
  * `cargarResumen()` desde su propio cuerpo. Esa función empieza SÍNCRONAMENTE leyendo y

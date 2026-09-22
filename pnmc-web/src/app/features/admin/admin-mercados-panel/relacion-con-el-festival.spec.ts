@@ -10,7 +10,7 @@ import { AdminMercadosPanelComponent } from './admin-mercados-panel.component';
  * festival asociado DOS veces —`idfestivalasociado` con clave ajena y `nombrefestivalasociado` como
  * texto suelto—, sin nada que obligara a que coincidieran; y su formulario ofrecía solo el texto,
  * de modo que el directorio público mostraba nombres de festivales que el sistema no sabía
- * localizar. La dirección de producto lo cortó: «no debe ser un campo
+ * localizar. El criterio es este: «no debe ser un campo
  * de texto libre; debe establecer una relación real entre registros del sistema».
  *
  * <b>LO QUE FIJAN.</b> Que los candidatos se piden por ORGANIZACION, que no se piden mientras no
@@ -112,7 +112,7 @@ describe('la relación de un mercado con un festival', () => {
   });
 
   it('un solo menú de acciones por fila, con lo que aplica al estado', () => {
-    // MERCADOS NACIO CON DOS BOTONES SUELTOS y la dirección de producto lo señaló el 15 de septiembre
+    // MERCADOS NACIO CON DOS BOTONES SUELTOS y quedó definido el 15 de septiembre
     // de 2026: Festivales tiene un menú único. Lo que no aplica al estado no se pinta apagado: no
     // se pinta.
     const base = { id: 1, nombre: 'M', estadoRegistro: 'borrador' } as unknown as Parameters<typeof componente.accionesDe>[0];

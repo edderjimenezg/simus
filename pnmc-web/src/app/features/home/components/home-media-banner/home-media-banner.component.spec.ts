@@ -5,7 +5,7 @@ import { HomeMediaBannerComponent } from './home-media-banner.component';
 /**
  * El botón del banner lleva a donde dice su rótulo.
  *
- * LO QUE HABÍA ANTES. «Ser parte del ecosistema» navegaba al mapa y, medio segundo más tarde,
+ * LO EL MODELO. «Ser parte del ecosistema» navegaba al mapa y, medio segundo más tarde,
  * buscaba en el documento un botón con `[data-open-participation="true"]` y lo pulsaba por su
  * cuenta. Si el mapa tardaba más de 500 ms en pintar, ese botón no existía todavía y no pasaba
  * nada: la persona se quedaba en el mapa sin entender por qué. Sin error y sin traza.

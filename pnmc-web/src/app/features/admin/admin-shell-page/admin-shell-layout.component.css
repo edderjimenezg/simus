@@ -17,8 +17,7 @@
 /* EL RELLENO LATERAL NO VA AQUI, VA EN LOS HIJOS, y esa es la corrección. Con el relleno en la
    barra, el contenedor que se desplaza quedaba metido 13,6 px hacia dentro y SU barra de
    desplazamiento se dibujaba ENCIMA de los botones de sección en vez de en el borde. Antes no
-   pasaba porque se desplazaba la barra entera. Lo reportó la dirección de producto el 15 de septiembre
-   de 2026: «la barra se corrió hacia la izquierda e incluso está superponiendo algunas secciones».
+   pasaba porque se desplazaba la barra entera. Lo reportó la dirección de producto de 2026: «la barra se corrió hacia la izquierda e incluso está superponiendo algunas secciones».
    Con el relleno en los hijos, el contenedor llega al borde y la barra de desplazamiento se dibuja
    donde le corresponde. */
 .foundation-sidebar{position:sticky;top:var(--alto-cabecera,0px);align-self:start;display:flex;flex-direction:column;height:calc(100dvh - var(--alto-cabecera,0px));overflow:hidden;border-right:1px solid var(--color-filete);background:var(--color-hueso);padding:1.9rem 0}

@@ -919,7 +919,7 @@ export class AdminShellPageComponent implements OnInit, OnDestroy {
   /**
    * ¿Esta sesión puede sacar contenido al portal público?
    *
-   * HASTA EL CORTE 05B NADIE SE LO PREGUNTABA. El armazón montaba el editor de textos sin
+   * HASTA NADIE SE LO PREGUNTABA. El armazón montaba el editor de textos sin
    * pasarle `puedePublicar`, así que se quedaba en su valor por omisión —`false`— y los
    * controles de publicación de las imágenes incrustadas no aparecían para NADIE, ni siquiera
    * para un webmaster. No era una decisión de permisos: era un input que nadie conectó.

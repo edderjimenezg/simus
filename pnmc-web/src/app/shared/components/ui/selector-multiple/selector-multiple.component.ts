@@ -11,12 +11,12 @@ export interface OpcionSeleccionable {
  *
  * <b>POR QUE NO ES UN `select multiple`.</b> Ese control del navegador exige mantener pulsada una
  * tecla para marcar mas de una opcion, y un clic normal BORRA todo lo marcado sin avisar. Nada en
- * pantalla lo explica. El usuario lo reporto sobre el formulario del
+ * pantalla lo explica. está definido sobre el formulario del
  * Festival: «no esta funcionando bien el selector».
  *
  * <b>POR QUE TAMPOCO SON TREINTA CASILLAS SUELTAS.</b> Fue el arreglo anterior, y resolvio la
  * perdida de datos a costa de la altura: dieciseis practicas mas catorce territorios ocupaban mas
- * pantalla que el resto del formulario junto. El usuario pidio «una lista desplegable» sobre los dos
+ * pantalla que el resto del formulario junto. Se define «una lista desplegable» sobre los dos
  * bloques el mismo dia. Este control conserva las casillas —una opcion se marca y se desmarca
  * sola— y las guarda dentro de un panel que se abre.
  *

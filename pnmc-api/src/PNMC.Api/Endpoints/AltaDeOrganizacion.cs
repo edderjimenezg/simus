@@ -163,7 +163,7 @@ internal static class AltaDeOrganizacion
         }
         else
         {
-            // UN CORREO, UNA ORGANIZACION. La segunda mitad de la regla que el usuario pidio el 28
+            // UN CORREO, UNA ORGANIZACION. La segunda mitad de la regla que se define el 28
             // de agosto de 2026: si el correo ya es el de otra organizacion, este alta no procede.
             //
             // El valor de entrada y la columna se guardan normalizados en minúsculas y sin

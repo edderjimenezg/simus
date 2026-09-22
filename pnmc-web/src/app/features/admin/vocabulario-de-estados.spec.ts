@@ -53,7 +53,7 @@ describe('El vocabulario de estados de la consola', () => {
   });
 
   it('ningún código llega crudo a la pantalla, ni los que nadie declaró', () => {
-    // LO PIDIO EL DUEÑO DEL PROYECTO, tras encontrarlos en las listas:
+    // EL CRITERIO:
     // «los estados aparecen con nombres como en_revision, no están optimizados para frontend».
     // Lo que fija esta prueba no es la tabla —esa la fija la de arriba— sino el RESPALDO: un código
     // que nadie añadió se humaniza igual, que es lo que impide que el defecto vuelva con el

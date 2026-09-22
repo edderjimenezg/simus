@@ -88,7 +88,7 @@ describe('recorte · la aritmética del marco', () => {
 
   describe('acercar', () => {
     it('no permite alejarse más allá del encaje: la imagen nunca se amplía', () => {
-      // ESTA ES LA PRUEBA DE LA DECISIÓN DEL USUARIO: «más pequeño que el marco» deja de ser un
+      // ESTA ES LA PRUEBA DE EL CRITERIO: «más pequeño que el marco» deja de ser un
       // aviso y pasa a ser imposible. El caso vivo era home_hero_4, que pedía 687 px de ancho para
       // un hueco de 1670 y se ampliaba 2,43 veces sin que nada avisara.
       const minimo = encajeInicial(APAISADA, TARJETA);

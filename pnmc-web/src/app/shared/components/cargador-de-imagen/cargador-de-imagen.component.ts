@@ -10,7 +10,7 @@ import { BancoDeArchivosService } from '../../../core/services/banco-de-archivos
  *
  * <b>POR QUE EXISTE.</b> El formulario del Catálogo Editorial pedía la portada como una RUTA
  * escrita a mano —«/editorial/thumbs/PNMC-ED-001.png»—, lo que obligaba a subir el fichero por otro
- * sitio y acertar a transcribir dónde quedó. Lo pidió la dirección de producto: «las portadas deberían
+ * sitio y acertar a transcribir dónde quedó. El criterio es este: «las portadas deberían
  * poderse subir y no poner en un link». Un formulario que pide la URL de una imagen deja además el
  * contenido del catálogo dependiendo de un servidor ajeno que puede caerse.
  *

@@ -6,12 +6,12 @@
     Dos tablas que sostienen el circuito de devolución de un Festival: quien revisa abre la ficha
     completa, anota QUE hay que cambiar EN CADA CAMPO, guarda el borrador tantas veces como quiera,
     y cuando termina envía la solicitud a la organización. Lo pidió el usuario el 29 de agosto de
-    2026, textual: «en todos los campos poder pedir cambios puntuales sobre alguno de los campos, ir
+    2026: «en todos los campos poder pedir cambios puntuales sobre alguno de los campos, ir
     guardando el borrador, y luego poder enviar la solicitud de cambios y que al devolverlo le
     llegue al usuario para hacer esos cambios sobre el festival […] este proceso debe tener
     gobernanza del dato e historial de cambios en la base de datos, quién envía, quién recibe».
 
-    QUE HABIA ANTES, MEDIDO
+    EL MODELO
     -----------------------
     Un solo campo de texto. `RevisionInstitucionalFestivalesEndpoints.cs` recibe
     `DecisionRevisionFestivalSolicitud.Observacion` y la guarda en

@@ -19,7 +19,7 @@ export interface OpcionSegmentada {
  * Elegir entre dos o tres opciones excluyentes, como un solo objeto con varias posiciones.
  *
  * <b>SUSTITUYE A LAS PILDORAS, Y ESO ES UNA NORMA DEL PROYECTO.</b> El 12 de septiembre de 2026 el
- * dirección de producto lo dijo de los controles de la vista de gráfico del mapa —«Barras / Áreas»,
+ * está definido de los controles de la vista de gráfico del mapa —«Barras / Áreas»,
  * «Territorios sonoros / Prácticas», «Barras / Unidades»—: «ese tipo de botones, así como una
  * píldora, no deben estar presentes en el diseño». Es la misma regla que ya regía para los estados,
  * extendida a los controles.

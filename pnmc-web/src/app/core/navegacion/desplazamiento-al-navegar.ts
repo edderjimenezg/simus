@@ -10,8 +10,7 @@ import { filter } from 'rxjs/operators';
  * <c>scrollPositionRestoration: 'top'</c>, que sube arriba en TODA navegación. Eso es correcto al
  * cambiar de pantalla y es un salto molesto cuando lo único que cambia es el estado de la que ya
  * estás mirando: en el Catálogo Editorial, abrir una ficha desde el mosaico devolvía el listado al
- * principio, así que al cerrarla habías perdido dónde estabas. Lo señaló la dirección de producto:
- * «al abrir las fichas en la vista mosaico se hace un autoscroll que vuelve a la parte superior».
+ * principio, así que al cerrarla habías perdido dónde estabas. El criterio es este: * «al abrir las fichas en la vista mosaico se hace un autoscroll que vuelve a la parte superior».
  *
  * <b>LA REGLA: SE SUBE CUANDO CAMBIA LA PANTALLA, NO CUANDO CAMBIA SU ESTADO.</b> Y «pantalla» aquí
  * tiene una definición exacta y comprobable: la cadena de rutas que TIENEN COMPONENTE. La ficha del

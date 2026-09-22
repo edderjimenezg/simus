@@ -42,7 +42,7 @@ public static class ExternalOrganizationEndpoints
                 return Results.Unauthorized();
             }
 
-            // UN CORREO, UNA ORGANIZACION. Lo pidio el usuario: «una
+            // UN CORREO, UNA ORGANIZACION. El criterio es este: «una
             // organizacion puede tener muchos festivales, pero un correo de una organizacion no
             // puede tener muchas organizaciones». Hasta ese dia esta ruta existia justamente para lo
             // contrario: creaba la SEGUNDA organizacion de una cuenta, copiandole la persona
@@ -266,7 +266,7 @@ public static class ExternalOrganizationEndpoints
             //
             // Hasta esa fecha se congelaba en cuanto el Programa recibia algo de la organizacion: a
             // partir de ahi el campo se ignoraba EN SILENCIO y el panel lo pintaba como texto con un
-            // «escribeles si hay un error». La dirección de producto lo retiro: una errata en el NIT es
+            // «escribeles si hay un error». quedó descartado: una errata en el NIT es
             // justo lo que la organizacion tiene que poder arreglar sin escribir un correo, y el
             // circuito de revision no se sostiene sobre un campo bloqueado sino sobre la bitacora,
             // que registra quien lo cambio y cuando.

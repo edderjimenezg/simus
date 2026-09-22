@@ -107,7 +107,7 @@ function generalVacio(): FormularioGeneral {
  * le demos crear festival… la idea es que ese formulario lo seccionemos, por secciones con toda la
  * información».
  *
- * <b>LOS DOS BLOQUES, Y POR QUÉ.</b> El 29 de agosto de 2026 el usuario pidió lo que faltaba: «en
+ * <b>LOS DOS BLOQUES, Y POR QUÉ.</b> El 29 de agosto de 2026 Se define lo que faltaba: «en
  * todo el formulario debemos identificar la diferencia entre la información de la edición o
  * ediciones, y distinguir eso; para tener un orden lógico es importante que primero se pregunte
  * toda la información básica en los primeros módulos, y después, si se desea, se creen botones para
@@ -119,8 +119,7 @@ function generalVacio(): FormularioGeneral {
  * lo que hace que el bloque del Festival se rellene una vez y el de la edición se repita. La ficha
  * de lectura lo dice con el número: «Este Festival tiene N ediciones registradas».
  *
- * <b>LEER Y EDITAR SON LA MISMA PANTALLA.</b> Lo pidió el usuario:
- * «quiero que mantengamos la misma vista para editar la edición del festival y para la ficha; si le
+ * <b>LEER Y EDITAR SON LA MISMA PANTALLA.</b> El criterio es este: * «quiero que mantengamos la misma vista para editar la edición del festival y para la ficha; si le
  * doy editar, me habilita los campos del festival… cuando se crea un festival también mantengamos
  * esta estructura, así homogenizamos». Con eso se fue el formulario de doce pantallas con «Atrás» y
  * «Siguiente»: las mismas dos pestañas y las mismas doce secciones sirven para los tres casos.
@@ -331,7 +330,7 @@ export class FichaFestivalComponent implements OnInit, OnDestroy {
   /**
    * Los pasos desplegados. Puede haber varios, ninguno o todos.
    *
-   * <b>NACE VACÍO.</b> «El estado natural son todos cerrados», textual del usuario el 29 de agosto
+   * <b>NACE VACÍO.</b> «El estado natural son todos cerrados», del criterio el 29 de agosto
    * de 2026. La ficha abre enseñando los nueve encabezados —número, título y una línea de ayuda— y
    * nada más: con todo desplegado medía cuatro pantallas de desplazamiento en la ventana de
    * 1280×639 donde él la revisa.
@@ -413,7 +412,7 @@ export class FichaFestivalComponent implements OnInit, OnDestroy {
    * SIN ESTO, LA RUEDA DEL RATON DESPLAZA LO QUE HAY DEBAJO. El dialogo es `fixed inset-0` con su
    * propio `overflow-y-auto`, asi que al llegar al final de su contenido —o al pasar el cursor por
    * el fondo oscuro— la rueda seguia moviendo el panel de la organizacion: se cerraba la ficha y la
-   * pagina estaba en otro sitio. Lo señalo el usuario: «se debe mejorar la
+   * pagina estaba en otro sitio. Lo señalo criterio: «se debe mejorar la
    * navegacion de ese pop-up porque al hacer scroll se desplaza la pagina de atras».
    */
   private readonly documento = inject(DOCUMENT);

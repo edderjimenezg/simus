@@ -60,7 +60,7 @@ const leerTarjeta = (punto) =>
     const tarjeta = document.querySelector('[role="dialog"][data-lado]');
     const rect = tarjeta ? tarjeta.getBoundingClientRect() : null;
 
-    // Un velo a pantalla completa por encima del mapa: lo que habia antes.
+    // Un velo a pantalla completa por encima del mapa: el comportamiento anterior.
     const velos = [...document.querySelectorAll('body *')]
       .filter((el) => {
         const s = getComputedStyle(el);

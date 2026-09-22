@@ -61,7 +61,7 @@ public sealed class AutorizacionPorDefectoTests : IClassFixture<TestWebApplicati
     /// <remarks>
     /// SUBIO A 40 EL 25 DE AGOSTO DE 2026, y aqui queda por que. La nueva es
     /// <c>GET /api/v1/escenarios</c>, el directorio publico del sexto proceso del ecosistema
-    /// (bloque B8). Es anonima por la misma razon que las otras cuatro de su grupo —festivales,
+    /// (). Es anonima por la misma razon que las otras cuatro de su grupo —festivales,
     /// escuelas de musica, mercados musicales, redes de documentacion y luteria—: son el
     /// directorio que el sitio abierto y el geovisor consultan sin cuenta, y cerrarla dejaria una
     /// pagina publica en blanco sin proteger nada de nadie.

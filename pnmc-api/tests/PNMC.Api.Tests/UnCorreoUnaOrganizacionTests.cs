@@ -10,7 +10,7 @@ namespace PNMC.Api.Tests;
 /// </summary>
 /// <remarks>
 /// <para>
-/// LA REGLA, con las palabras del usuario: «una organizacion puede tener
+/// LA REGLA: «una organizacion puede tener
 /// muchos festivales, pero un correo de una organizacion no puede tener muchas organizaciones, es
 /// decir un correo debe estar atado a una sola organizacion».
 /// </para>

@@ -47,7 +47,7 @@ export interface AccionDeRegistro {
  *
  * <b>POR QUÉ EXISTE.</b> Las listas de gestión —agenda, noticias, catálogo editorial, ediciones—
  * pintaban entre tres y siete botoncitos por fila, todos del mismo tamaño y del mismo color, en una
- * celda que se desbordaba en cuanto la pantalla se estrechaba. El usuario lo pidió: «botones con lista desplegable de acciones o algo así, que mejore la
+ * celda que se desbordaba en cuanto la pantalla se estrechaba. El criterio es este: «botones con lista desplegable de acciones o algo así, que mejore la
  * experiencia». Con un solo control por fila, la tabla vuelve a leerse y la acción que de verdad
  * importa —publicar, editar— queda destacada en vez de perdida entre seis iguales.
  *

@@ -426,8 +426,7 @@ export class AdminOrganizacionesPanelComponent implements OnInit {
 
   // ─────────────────────── Las acciones de cada fila ───────────────────────
   //
-  // POR QUE ESTAN AQUI Y NO SOLO DENTRO DE LA FICHA. El usuario lo dijo:
-  // «aún no entiendo cómo editar el estado de las organizaciones […] aparece en la última columna
+  // POR QUE ESTAN AQUI Y NO SOLO DENTRO DE LA FICHA. El criterio es este: // «aún no entiendo cómo editar el estado de las organizaciones […] aparece en la última columna
   // pero no sé cómo cambiarles los estados». Tenía razón: para cambiarlo había que adivinar que la
   // fila se abre al pulsarla, encontrar el botón «Estado y vigencia» dentro de la ficha y pulsarlo.
   // Una acción que hay que descubrir por ensayo y error no existe. Ahora la columna del estado tiene

@@ -264,7 +264,7 @@ public sealed class PermisosPorCuentaTests
     /// El buzón de la campanita enseña lo mismo que la barra izquierda deja abrir.
     /// </summary>
     /// <remarks>
-    /// Lo pidió la dirección de producto: «es importante que el apartado
+    /// El criterio es este: «es importante que el apartado
     /// de notificaciones por supuesto también corresponda con los módulos que tienen activados en
     /// cada caso». Un aviso de un módulo cerrado es un enlace a un 403.
     /// </remarks>

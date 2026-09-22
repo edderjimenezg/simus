@@ -37,7 +37,7 @@ import {
 
   LAS CINCO COSAS QUE NO PUEDEN FALLAR:
 
-  1) LOS RÓTULOS SON LOS DEL VOLCADO DE SIMUS. Es la corrección que el usuario pidió con nombre y
+  1) LOS RÓTULOS SON LOS DEL VOLCADO DE SIMUS. Es la corrección definida con nombre y
      apellido: «a los nombres de los campos no los cambies como vi que hiciste, en por ejemplo
      "fuente de financiamiento"; déjalo tal cual». Un rótulo traducido a gusto —«Fuente principal»
      por ID_FUENTE_FINANCIACION— no falla en ninguna prueba de comportamiento y hace que la pantalla
@@ -452,7 +452,7 @@ describe('FichaFestivalComponent · la misma vista para leer, editar y crear', (
 
 
   it('la ficha abre con todos los pasos cerrados, al leer y al editar', () => {
-    // «EL ESTADO NATURAL SON TODOS CERRADOS», textual del usuario, sin
+    // «EL ESTADO NATURAL SON TODOS CERRADOS», del criterio, sin
     // distinguir modo. Los encabezados plegados son el índice de la ficha: se ven los títulos de un
     // vistazo y se abre lo que interese.
     //
@@ -582,7 +582,7 @@ describe('FichaFestivalComponent · la misma vista para leer, editar y crear', (
   // ─────────────── La propuesta de cambios: la unificación ───────────────
   //
   // ANTES «PROPONER CAMBIOS» SOLO NAVEGABA AFUERA, a `/registro?modo=festival` -una pantalla
-  // entera distinta, sin relación visual con esta ficha-. El usuario lo señaló: «el botón Editar
+  // entera distinta, sin relación visual con esta ficha-. El criterio es este: «el botón Editar
   // Festival no debe abrir una ruta paralela, antigua o independiente». Ahora el mismo botón
   // inicia -o recupera- la propuesta de cambios y habilita los mismos campos que ya usa
   // Borrador/AjustesSolicitados, dentro de esta misma pantalla.

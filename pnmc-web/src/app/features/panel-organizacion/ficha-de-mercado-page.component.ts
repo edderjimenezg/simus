@@ -55,7 +55,7 @@ export const SECCIONES_DE_LA_FICHA_DE_MERCADO: readonly SeccionDeFichaDeMercado[
  * en manos del Programa, y decirlo es más útil que un botón apagado sin explicación. Publicado se
  * lee; los cambios sobre lo publicado son otra cosa y tendrán su propio recorrido.
  *
- * <b>Y SE RECORRE COMO LA DE UN FESTIVAL.</b> la dirección de producto lo
+ * <b>Y SE RECORRE COMO LA DE UN FESTIVAL.</b> se
  * pidió con esas palabras: «la navegación, edición, publicación, etc. de un mercado debe ser igual
  * en cuanto sea posible a la de un festival, todo está muy diferente». Era cierto: esto era una
  * página plana con un botón «Editar» que la convertía entera en formulario, mientras el festival

@@ -178,7 +178,7 @@ public sealed class AuditoriaLegibleTests : IClassFixture<TestWebApplicationFact
     [Fact]
     public async Task Una_Linea_Del_Catalogo_Editorial_Dice_El_Titulo_De_La_Ficha_Y_No_El_Nombre_De_La_Tabla()
     {
-        // EL CATALOGO EDITORIAL ESCRIBE BITACORA DESDE EL CORTE 05C y no estaba clasificado: sus
+        // EL CATALOGO EDITORIAL ESCRIBE BITACORA DESDE y no estaba clasificado: sus
         // lineas caian en «otros» y la consola enseñaba «PublicacionesEditoriales» —el nombre
         // crudo de la tabla— donde deberia ir el titulo de la ficha.
         long publicacionId;

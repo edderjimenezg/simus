@@ -270,7 +270,7 @@ test.describe('La devolución campo por campo', () => {
     ]);
     expect(segunda.status()).toBe(200);
 
-    // DE ÁMBAR A VERDE, sin recargar y en la misma región viva: es el momento que el usuario pidió
+    // DE ÁMBAR A VERDE, sin recargar y en la misma región viva: es el momento que se define
     // que se dijera. El texto cambia además del color, para quien no distingue esos dos tonos.
     await expect(recuento).toContainText('Todos los ajustes hechos: 2 de 2');
     await expect(recuento).toHaveClass(/bg-emerald-50/);

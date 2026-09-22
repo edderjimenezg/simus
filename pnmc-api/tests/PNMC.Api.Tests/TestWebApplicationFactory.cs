@@ -297,7 +297,7 @@ public sealed class TestWebApplicationFactory : WebApplicationFactory<Program>
                 FechaCreacion = DateTime.UtcNow,
             });
 
-            // LA ORGANIZACION INSTITUCIONAL (bloque B2, 25 ago 2026). Ningun festival esta sin
+            // LA ORGANIZACION INSTITUCIONAL (, 25 ago 2026). Ningun festival esta sin
             // nadie que responda por el: mientras ninguna organizacion de la comunidad lo
             // reclame, responde la institucion. La base real la crea seed/V20260519_03 y le pone
             // indice unico filtrado para que solo pueda haber una; aqui se siembra porque el

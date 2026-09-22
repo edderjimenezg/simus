@@ -81,7 +81,7 @@ public static class RevisionInstitucionalFestivalesEndpoints
         //
         // Y ADEMAS NO LA LLAMABA NADIE: ningun componente Angular pedia esta ruta. La bandeja
         // pintaba los cuatro campos de la LISTA —nombre, organizacion, cobertura y fecha— y sobre
-        // eso se publicaba o se rechazaba. Lo pidio el usuario: «que llegue
+        // eso se publicaba o se rechazaba. El criterio es este: «que llegue
         // con etiqueta de festival, todos los datos que se diligenciaron, las versiones anyos y
         // poder ver toda la info».
         institucional.MapGet("/{festivalId:int}", async (
@@ -315,7 +315,7 @@ public static class RevisionInstitucionalFestivalesEndpoints
         //
         // HASTA AHORA SOLO EXISTÍA EL RETIRO SOLICITADO: un Festival publicado solo se archivaba
         // si la ORGANIZACIÓN pedía su retiro y un funcionario aprobaba esa solicitud
-        // (`RecordGovernanceEndpoints.cs`, `festivales_retiro`). El usuario lo pidió: la consola necesita poder eliminar un registro del ecosistema
+        // (`RecordGovernanceEndpoints.cs`, `festivales_retiro`). El criterio es este: la consola necesita poder eliminar un registro del ecosistema
         // directamente -piénsese en un Festival duplicado, fraudulento o que incumple las bases,
         // donde no tiene sentido esperar a que quien lo publicó pida borrarlo primero-.
         //

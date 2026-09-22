@@ -11,7 +11,7 @@ import { MapaEcosistemicoPageComponent } from './mapa-ecosistemico-page.componen
  * de ellas son procesos cuyas tablas retiró `V20260904_01`. La Agenda sí tiene territorio y lectura
  * pública, y nunca se había llevado allí.
  *
- * <b>PERO NO COMO CAPA.</b> la dirección de producto lo corrigió: «tampoco
+ * <b>PERO NO COMO CAPA.</b> se corrigió: «tampoco
  * es necesario plantear un botón de agenda como el de festivales; la agenda es algo adicional que
  * aparece en la barra derecha y no un filtro». Y la distinción es justa: un Festival es un proceso
  * que se filtra y se dibuja; un evento es lo que ESTA PASANDO en el territorio que se acaba de

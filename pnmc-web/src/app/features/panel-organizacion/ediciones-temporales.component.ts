@@ -10,7 +10,7 @@ import { matizDelEstado, tonoDelEstado } from '../../shared/components/ui/indica
 /**
  * Las ediciones de un Festival, con su ciclo completo.
  *
- * <b>QUE CAMBIO EL 12 DE SEPTIEMBRE DE 2026.</b> El usuario lo dijo así: «tengo una edición en
+ * <b>QUE CAMBIO EL 12 DE SEPTIEMBRE DE 2026.</b> está definido así: «tengo una edición en
  * estado borrador y no existe una ruta clara para publicarla». Era cierto por partida doble:
  * «Publicar» era un enlace subrayado del mismo tamaño que los demás, perdido en la última columna,
  * y el formulario de la edición solo ofrecía «Guardar borrador», de modo que al terminar de

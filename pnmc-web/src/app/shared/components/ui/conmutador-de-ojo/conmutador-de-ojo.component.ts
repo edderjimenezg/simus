@@ -9,7 +9,7 @@ import { BotonComponent } from '../boton/boton.component';
  * control que se parecían demasiado: las posiciones EXCLUYENTES de una misma pregunta —Todos,
  * Institucionales, Externos— de las que solo una puede estar puesta, y los interruptores, que se
  * combinan con cualquiera de ellas. Con la misma forma, el interruptor se leía como una cuarta
- * opción del grupo. La dirección de producto lo pidió para la Agenda —«con
+ * opción del grupo. Quedó definido para la Agenda —«con
  * un icono de vista u ojo que cambie al cliquear, que se sienta diferente»— y lo extendió al resto
  * el mismo día: «lo del icono de ojo también a donde haya opción de ocultar algún estado, como
  * ocultar borradores en festivales».

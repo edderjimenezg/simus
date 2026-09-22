@@ -14,7 +14,7 @@ import { EditorialPageComponent } from './editorial-page.component';
  * <b>QUE FIJA ESTA PRUEBA, Y POR QUE NO EXISTIA.</b> La pantalla se portó del diseño aprobado sin
  * pruebas propias, y su defecto más visible vivía justo ahí: <b>nueve series del acervo tienen
  * varios volúmenes con el mismo título</b>, así que dos publicaciones llamadas «Acento» daban dos
- * tarjetas y dos filas idénticas. Lo señaló la dirección de producto: «Acento dice solo Acento, y es
+ * tarjetas y dos filas idénticas. El criterio es este: «Acento dice solo Acento, y es
  * Acento, arreglos para banda-escuela, volumen I». El subtítulo y el volumen son lo único que las
  * separa sin abrirlas, y tienen que verse <b>en las dos vistas</b>, no solo en el mosaico.
  */

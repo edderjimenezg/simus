@@ -1815,7 +1815,7 @@ public sealed record EscenarioDto(
     string SpecificLocation,
     decimal? Latitude,
     decimal? Longitude,
-    /// <summary>Contacto que el escenario publica a proposito. No es dato de una persona natural en el sentido del bloque B7.</summary>
+    /// <summary>Contacto que el escenario publica a proposito. No es dato de una persona natural en el sentido.</summary>
     string ContactEmail,
     string ContactPhone,
     string WebsiteUrl,

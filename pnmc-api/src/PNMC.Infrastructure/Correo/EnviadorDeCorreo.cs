@@ -29,7 +29,7 @@ public sealed record CorreoSaliente(
 /// </summary>
 /// <remarks>
 /// <para>
-/// <b>EXISTE PORQUE EL PROVEEDOR TODAVIA NO.</b> El 12 de septiembre de 2026 el usuario pidió dejar
+/// <b>EXISTE PORQUE EL PROVEEDOR TODAVIA NO.</b> El 12 de septiembre de 2026 Se define dejar
 /// montada la confirmación de correo «como si ya existiese el proveedor de correo, lo solucionaremos
 /// pronto». Así que el flujo está entero —testigo, expiración, reenvío, confirmación, reglas que
 /// bloquean la entrega al Programa— y lo único que falta es el transporte, que es esta interfaz.

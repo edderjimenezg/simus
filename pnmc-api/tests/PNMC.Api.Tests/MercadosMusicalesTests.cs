@@ -22,7 +22,7 @@ namespace PNMC.Api.Tests;
 /// solo existe cuando la aplica quien recibe la petición.
 /// </para>
 /// <para>
-/// <b>EL ESTADO DEL FESTIVAL NO EXCLUYE.</b> La dirección la dirección de producto lo dijo con esas palabras:
+/// <b>EL ESTADO DEL FESTIVAL NO EXCLUYE.</b> La dirección está definido con esas palabras:
 /// «podrá seleccionarse aunque se encuentre en estado borrador, en revisión o publicado. La
 /// condición fundamental es que exista como registro y pertenezca a la misma organización».
 /// </para>

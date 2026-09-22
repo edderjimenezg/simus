@@ -189,7 +189,7 @@ export class AdminAgendaPanelComponent {
    * <b>LA AGENDA NO PAGINABA, Y ESE ERA EL DEFECTO.</b> El servidor devuelve 12 eventos por página
    * y ordena «sin publicar primero»; con 471 eventos, de los cuales 436 están publicados, la
    * pantalla enseñaba la primera página —35 borradores y archivados— y los publicados vivían de la
-   * página cuatro en adelante, sin ningún control para llegar. La dirección de producto lo reportó
+   * página cuatro en adelante, sin ningún control para llegar. se detectó
    * como «en agenda no aparecen los eventos publicados»: aparecían, pero no había cómo verlos.
    * Comprobado: 471 en total, 40 páginas, 12 filas en pantalla.
    */
@@ -324,7 +324,7 @@ export class AdminAgendaPanelComponent {
    *
    * <b>ORDENAR EN MEMORIA ERA EL DEFECTO, no una simplificación.</b> La Agenda pinta doce filas de
    * cuarenta páginas; ordenar el array cargado reordenaba esas doce y dejaba el resto donde
-   * estaba. La dirección de producto lo reportó: «debe ser de todos, no
+   * estaba. se detectó: «debe ser de todos, no
    * solo de los de la página visible, por eso en la página 1 no me aparecía nunca ningún
    * publicado». Es el mismo criterio que ya seguían Festivales y Organizaciones.
    *

@@ -11,7 +11,7 @@
     POR QUE GENERICAS Y NO `RevisionesMercado`
     ------------------------------------------
     Porque la alternativa es un juego de tablas por proceso, y con seis procesos son seis copias de
-    la misma lógica que divergen en cuanto una cambie. La dirección de producto lo autorizó
+    la misma lógica que divergen en cuanto una cambie. quedó fijado
     de septiembre de 2026 pidiendo que Mercados funcione «como festivales […] todas las opciones
     posibles de festivales, replicado»: replicar el COMPORTAMIENTO, no el esquema.
 

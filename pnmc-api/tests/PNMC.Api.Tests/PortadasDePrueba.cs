@@ -164,7 +164,7 @@ public static class PortadasDePrueba
     /// <b>ESTA MAQUETA EXISTE PARA ROMPER UNA PRUEBA CIRCULAR.</b> El banco original solo fabricaba
     /// portadas de libro: título grande arriba, subtítulo debajo. Es decir, documentos hechos a la
     /// medida de la hipótesis que se quería comprobar —«el texto más grande es el título»—, así que
-    /// puntuaba 8 de 8 sin medir nada. La dirección de producto lo destapó probando con un artículo real,
+    /// puntuaba 8 de 8 sin medir nada. se detectó probando con un artículo real,
     /// donde el algoritmo tomó el encabezado de la revista por título y el nombre de la autora por
     /// subtítulo.
     /// </para>

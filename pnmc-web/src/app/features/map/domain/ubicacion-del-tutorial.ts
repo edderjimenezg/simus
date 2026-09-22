@@ -3,7 +3,7 @@
  *
  * <b>POR QUE HACIA FALTA.</b> La tarjeta vivía centrada abajo, siempre en el mismo sitio, y el
  * único vínculo entre lo que decía y lo que explicaba era el desenfoque del resto. Con la pantalla
- * llena —tres columnas y una decena de controles— eso no basta: la dirección de producto lo dijo así,
+ * llena —tres columnas y una decena de controles— eso no basta: está definido así,
  * «a veces no es tan claro qué es lo que está mostrando». Una tarjeta pegada al elemento, con una
  * flecha que lo señala, no deja lugar a duda.
  *

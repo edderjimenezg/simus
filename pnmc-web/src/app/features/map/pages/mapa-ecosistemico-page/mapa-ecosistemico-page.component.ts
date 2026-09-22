@@ -420,7 +420,7 @@ export class MapaEcosistemicoPageComponent implements OnInit, OnDestroy, AfterVi
   // datos: medido a 1280x639, su borde superior caia en y=1498, a mil pixeles del
   // pliegue. Nadie que no se propusiera buscarla la encontraba.
   //
-  // Pedido por el usuario: «este pasalo arriba como una pestana independiente, en
+  // Pedido por criterio: «este pasalo arriba como una pestana independiente, en
   // una pestana que solo quede el directorio aqui».
   // ---------------------------------------------------------------------------
 
@@ -618,7 +618,7 @@ export class MapaEcosistemicoPageComponent implements OnInit, OnDestroy, AfterVi
    * abría una tarjeta de 232 px con la lista de sus procesos, y «Ver detalle» abría ENCIMA el modal
    * grande del registro. El de abajo quedaba tapado, cerrar el de arriba no era evidente, y para
    * comparar dos procesos del mismo municipio había que abrir, leer, cerrar y volver a buscar en la
-   * lista de debajo. La dirección de producto lo pidió así: «es necesario que no haya una ficha dentro
+   * lista de debajo. Quedó definido así: «es necesario que no haya una ficha dentro
    * de una ficha; optimizar con una visualización tipo lista».
    *
    * Con esto, el panel tiene DOS NIVELES EN EL MISMO SITIO —la lista y el detalle— y se va y se
@@ -745,7 +745,7 @@ export class MapaEcosistemicoPageComponent implements OnInit, OnDestroy, AfterVi
   // salia un dialogo de 1280x639 —«Detalle de Redes de Documentacion»— y el mapa
   // desaparecia detras del velo.
   //
-  // Pedido por el usuario: «que se vaya al mapa y se ubique en el municipio, y se abra
+  // Pedido por criterio: «que se vaya al mapa y se ubique en el municipio, y se abra
   // la pestana que se usa dentro del mapa para ubicar, la idea es que sea un directorio
   // de navegacion que funciona como atajo en el mapa».
   //
@@ -942,7 +942,7 @@ export class MapaEcosistemicoPageComponent implements OnInit, OnDestroy, AfterVi
   /**
    * Abre el geovisor con una capa ya encendida, si la direccion la pide.
    *
-   * `/mapa?capa=Festivales` LLEGA DESDE LA CONSULTA PUBLICA, donde el usuario pidio el 30 de
+   * `/mapa?capa=Festivales` LLEGA DESDE LA CONSULTA PUBLICA, donde se define el 30 de
    * agosto de 2026 «un boton o seccion de llamado a ver festivales en el mapa ecosistemico (lo que
    * lleva con un clic al mapa con la capa de festivales activa)». Sin esto el enlace deja el mapa
    * en «General» y hay que volver a elegir la capa a mano, que son los dos clics que pidio evitar.
@@ -1488,7 +1488,7 @@ export class MapaEcosistemicoPageComponent implements OnInit, OnDestroy, AfterVi
    * <b>AHORA SIGUE LAS TRES PREGUNTAS DE LA PANTALLA</b>, en el orden en que se hacen: qué se está
    * mirando (capas), cómo se acota (filtros, lente), cómo se dibuja (modos, mapa, leyenda) y de qué
    * otras formas se puede leer (vistas, listado). Cada paso destaca UN apartado y desenfoca el
-   * resto, que es lo que la dirección de producto pidió: «recorriendo cada apartado del modelo actual,
+   * resto, que es lo que el criterio pide: «recorriendo cada apartado del modelo actual,
    * cada detalle, con el mismo efecto de desenfoque de lo que no es el elemento a mostrar».
    *
    * <b>LOS ICONOS Y EL ORDEN SON ESTRUCTURA Y SE QUEDAN AQUI</b>; el panel de textos dice cómo se
@@ -1516,7 +1516,7 @@ export class MapaEcosistemicoPageComponent implements OnInit, OnDestroy, AfterVi
 
     // ---- COMO SE DIBUJA: UN PASO POR MODO ------------------------------------------------
     //
-    // ERAN LOS TRES EN UN SOLO PASO, y la dirección de producto pidió lo contrario: «explicar las
+    // ERAN LOS TRES EN UN SOLO PASO, y el criterio pide lo contrario: «explicar las
     // diferentes herramientas, por ejemplo las diferentes vistas rápidamente, coropleta, símbolos
     // proporcionales, mapas de calor». Tiene razón y es la diferencia entre nombrar tres modos y
     // enseñarlos: cada paso PONE el suyo, así que se ve el mapa cambiar de naturaleza al pasar.
@@ -1608,7 +1608,7 @@ export class MapaEcosistemicoPageComponent implements OnInit, OnDestroy, AfterVi
   esCapaDeFestivales = computed(() => this.capaActiva() === 'Festivales');
   // ─────────────── La organización que responde por un proceso ───────────────
   //
-  // <b>SE CONSULTA DESDE EL PROCESO, NO COMO ENTIDAD DEL MAPA.</b> La dirección de producto lo pidió
+  // <b>SE CONSULTA DESDE EL PROCESO, NO COMO ENTIDAD DEL MAPA.</b> Quedó definido
   // así: «no vamos a incluir las organizaciones dentro del mapa; sin
   // embargo sí están dentro de la información de los eventos […] al hacer clic en la organización
   // debería darme una información básica, pero solo desde los procesos como tal y no de la
@@ -1692,7 +1692,7 @@ export class MapaEcosistemicoPageComponent implements OnInit, OnDestroy, AfterVi
   // ─────────────── El lente: con qué gafas se lee el mapa ───────────────
   //
   // <b>NO SON FILTROS, Y TRATARLOS COMO TALES ERA EL ERROR.</b> El 12 de septiembre de 2026 el
-  // dirección de producto lo formuló: «una cosa es cómo se representa el mapa, y otra las gafas que me
+  // está definido: «una cosa es cómo se representa el mapa, y otra las gafas que me
   // quiero poner para verlo; una lectura posible es a través de los territorios sonoros, otra a
   // través de las prácticas y géneros. Ponerlos como un filtro no tiene mucho sentido».
   //
@@ -1881,7 +1881,7 @@ export class MapaEcosistemicoPageComponent implements OnInit, OnDestroy, AfterVi
    * Los grupos del lente que caben sin empujar el resto de la columna fuera de la pantalla.
    *
    * <b>CATORCE FILAS SON CIENTO SESENTA PIXELES</b>, y sumadas a lo que hay encima empujaban la
-   * sección «Dibujo» fuera del alto visible. La dirección de producto lo señaló: «el tener que deslizar
+   * sección «Dibujo» fuera del alto visible. El criterio es este: «el tener que deslizar
    * en la barra de la izquierda hace que no sea tan claro que hay más información ahí». Un control
    * que sólo existe si alguien adivina que hay que deslizar es un control escondido.
    *
@@ -2292,7 +2292,7 @@ export class MapaEcosistemicoPageComponent implements OnInit, OnDestroy, AfterVi
 
   // ─────────────── La Agenda del territorio abierto ───────────────
   //
-  // <b>NO ES UNA CAPA: ES CONTEXTO.</b> la dirección de producto lo acotó:
+  // <b>NO ES UNA CAPA: ES CONTEXTO.</b> se acotó:
   // «al filtrar por territorio sonoro o práctica no tiene sentido tener los eventos; al hacer algo
   // más superficial, como cliquear dentro de un departamento, sí tendría sentido. Podemos habilitar
   // o deshabilitar esa sección según sea conveniente».
@@ -2411,7 +2411,7 @@ export class MapaEcosistemicoPageComponent implements OnInit, OnDestroy, AfterVi
       /*
        * AQUI SE FILTRABA POR TERRITORIO SONORO Y POR PRACTICA, Y TENIA DOS PROBLEMAS.
        *
-       * EL DE FONDO: no son filtros. La dirección de producto lo formuló
+       * EL DE FONDO: no son filtros. está definido
        * —«una cosa es cómo se representa el mapa, y otra las gafas que me quiero poner para
        * verlo»—. Son un LENTE: reagrupan lo que hay, no lo restan. Ver `lenteDeLectura`.
        *
@@ -3034,7 +3034,7 @@ export class MapaEcosistemicoPageComponent implements OnInit, OnDestroy, AfterVi
       porClave[item.key] = item.value;
     }
 
-    // LA AGENDA NO ES UNA CAPA, y la dirección de producto lo corrigió:
+    // LA AGENDA NO ES UNA CAPA, y se corrigió:
     // «tampoco es necesario plantear un botón de agenda como el de festivales; la agenda es algo
     // adicional que aparece en la barra derecha y no un filtro». Y tiene razón: un Festival es un
     // proceso que se filtra y se dibuja; un evento es lo que ESTA PASANDO en el territorio que se

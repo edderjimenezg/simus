@@ -66,7 +66,7 @@ public sealed record MensajeAOrganizacionDto(
 /// <b>POR QUE HACEN FALTA LAS DOS.</b> Hasta solo existía liberar, así
 /// que cerrar una organización obligaba a dejar sus festivales publicados en el portal a nombre del
 /// Programa aunque ya no fueran a ocurrir; retirarlos exigía salir del diálogo, ir a Festivales y
-/// eliminarlos uno a uno. La dirección de producto lo pidió así: «al eliminar una organización debe dar
+/// eliminarlos uno a uno. Quedó definido así: «al eliminar una organización debe dar
 /// la opción de también eliminar los procesos registrados o liberarlos».
 /// </para>
 /// <para>

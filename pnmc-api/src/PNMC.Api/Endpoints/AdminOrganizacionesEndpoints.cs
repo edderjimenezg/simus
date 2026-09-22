@@ -260,7 +260,7 @@ public static class AdminOrganizacionesEndpoints
         });
 
         /// <summary>
-        /// LA FICHA DE UNA ORGANIZACIÓN, no solo su fila. El usuario lo pidió el 2 de septiembre de
+        /// LA FICHA DE UNA ORGANIZACIÓN, no solo su fila. está definido el 2 de septiembre de
         /// 2026: «abrir ficha; consultar procesos administrados; revisar solicitudes; revisar
         /// vinculaciones; consultar historial». La fila de la tabla ya trae cuántos procesos
         /// administra -<see cref="OrganizacionProcesosDto"/>-; esta ruta trae CUÁLES, con nombre, más
@@ -354,7 +354,7 @@ public static class AdminOrganizacionesEndpoints
             }).ToList();
 
             // RECLAMACIONES: LA ORGANIZACIÓN COMO SOLICITANTE. Reclamar la administración de un
-            // Festival es justamente una de las «vinculaciones» que el usuario pidió poder revisar
+            // Festival es justamente una de las «vinculaciones» que se define poder revisar
             // desde la ficha.
             var reclamacionesCrudo = await dbContext.AdministrationClaims.AsNoTracking()
                 .Where(item => item.RequestingOrganizationId == id)

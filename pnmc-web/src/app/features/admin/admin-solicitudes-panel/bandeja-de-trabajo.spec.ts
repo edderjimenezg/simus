@@ -223,7 +223,7 @@ describe('AdminSolicitudesPanelComponent · la bandeja', () => {
 
   describe('«Visualizar»: la única acción para ver el detalle completo', () => {
     it('sobre un Festival en revisión, monta la ficha completa en vez del panel superpuesto genérico', () => {
-      // EL DEFECTO QUE ESTO CIERRA. El usuario pidió eliminar la
+      // EL DEFECTO QUE ESTO CIERRA. Se define eliminar la
       // duplicación entre «Previsualizar» y «Abrir ficha» y dejar una sola acción. Para un
       // Festival en revisión, esa acción no es el panel genérico de solo lectura: es
       // `<app-ficha-en-revision>`, la misma ficha que llenó la organización, con «Pedir cambio»
@@ -379,7 +379,7 @@ describe('AdminSolicitudesPanelComponent · la bandeja', () => {
 
       // MUTANTE QUE MATA: pedir motivo también para aprobar. Aprobar es el camino sin nada que
       // discutir -por eso es un atajo-; si pidiera texto igual que rechazar, dejaría de ahorrar
-      // el paso que el usuario pidió ahorrar.
+      // el paso que se define ahorrar.
       expect(componente.pideMotivo()).toBeFalse();
       expect(espia).toHaveBeenCalledWith({ moduleId: 'musicSchools', id: '77', status: 'aprobado', comment: '' });
       expect(componente.accionRapidaMensaje()).toContain('aprobado');
@@ -644,7 +644,7 @@ describe('AdminSolicitudesPanelComponent · la bandeja', () => {
  * La bandeja se ordena ENTERA por el criterio elegido, y viene con lo más antiguo primero.
  *
  * <b>EL DEFECTO QUE TRAJO ESTA PRUEBA.</b> La cola concatenaba ocho listas en el orden en que
- * llegaban del servidor y no había ningún criterio: la dirección de producto pidió el 15 de
+ * llegaban del servidor y no había ningún criterio: el criterio pide el 15 de
  * septiembre de 2026 «criterios de organización: por fecha, primera fecha de llegada, última fecha
  * de llegada, alfabéticamente». Y sobre los nombres: «no sé qué propuestas, qué es… no sé qué es
  * solicitudes versus reclamaciones».

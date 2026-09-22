@@ -16,10 +16,10 @@ import { EmptyStateComponent, ErrorStateComponent, LoadingStateComponent } from 
  * vacías hasta contar con sus flujos institucionales de publicación». Esos flujos ya existen: hay
  * panel de Noticias, panel de Agenda y dos rutas públicas, `/publico/noticias` y `/publico/agenda`,
  * que el propio sitio consume en sus páginas. Así que el texto de espera no describía el estado del
- * sistema, solo el de este bloque. La dirección de producto lo señaló: «conecta con noticias y agenda,
+ * sistema, solo el de este bloque. El criterio es este: «conecta con noticias y agenda,
  * esa es una previsualización de ambas cosas».
  *
- * <b>LA FORMA ES LA DE MAIN DEV</b> —la noticia destacada a lo ancho con su imagen a media caja,
+ * <b>LA FORMA ES LA DE EL DISEÑO APROBADO DEL PORTAL</b> —la noticia destacada a lo ancho con su imagen a media caja,
  * dos secundarias debajo, y la agenda como una columna desplazable con el pie que lleva al
  * calendario—, porque es el diseño aprobado del sitio. Lo que NO se copia es su manera de
  * pedir los datos: allí eran dos peticiones anidadas a un `BackendDataService` heredado con

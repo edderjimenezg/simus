@@ -1,7 +1,7 @@
 <!--
   LA FICHA DEL FESTIVAL: LA MISMA VISTA PARA LEER Y PARA EDITAR.
 
-  UNA SOLA MAQUETACIÓN. Lo pidió el usuario: «quiero que mantengamos la
+  UNA SOLA MAQUETACIÓN. El criterio es este: «quiero que mantengamos la
   misma vista para editar la edición del festival y para la ficha; si le doy editar, me habilita los
   campos del festival, y así se puede tener una mejor experiencia de usuario… mantengamos este como
   base para editar y ver ficha; cuando se crea un festival también mantengamos esta estructura, así
@@ -24,7 +24,7 @@
 
   EL RESTO DE LOS RÓTULOS SON LOS DEL VOLCADO, no traducciones libres. «Fuente de financiación» y
   no «Fuente principal», «Página web» y no «Sitio web», «Director» y no «Dirección del Festival»,
-  «URL del archivo» y no «Dirección». Lo pidió el usuario: «a los nombres
+  «URL del archivo» y no «Dirección». El criterio es este: «a los nombres
   de los campos no los cambies como vi que hiciste, en por ejemplo "fuente de financiamiento";
   déjalo tal cual».
 
@@ -122,7 +122,7 @@
       </div>
 
       <!--
-        LA X. La pidió el usuario: «recuerda ponerle una x para cerrar esa
+        LA X. El criterio es este: «recuerda ponerle una x para cerrar esa
         ventana». Es un `<button>` y no un aspa dibujada: sale en el recorrido de tabulación, se
         activa con Enter y con espacio, y lleva nombre accesible propio porque «×» no se lee.
       -->
@@ -159,7 +159,7 @@
       <ng-content select="[contexto-envio]"></ng-content>
 
       <!--
-        EL RECUENTO DE AJUSTES. Lo pidió el usuario: «me gustaría ver la
+        EL RECUENTO DE AJUSTES. El criterio es este: «me gustaría ver la
         cantidad de ajustes, y cuando tenga los ajustes totalmente concluidos, podemos decir todos
         los ajustes hechos, de naranja a verde, sugerir ya guardar cambios».
 
@@ -296,7 +296,7 @@
                       <!--
                         EL NÚMERO APARECE UNA SOLA VEZ EN EL TEXTO. Hasta iba dos: la
                         insignia con el dígito, oculta al lector de pantalla, y un `sr-only` que repetía «Paso N
-                        de M». El usuario lo señaló —«este 3 no es necesario… y está duplicado»—. Ahora la
+                        de M». está definido —«este 3 no es necesario… y está duplicado»—. Ahora la
                         insignia no se oculta y se lleva el contexto dentro: se ve «3» y se oye «Paso 3 de 6».
                       -->
                       @if (!seccionVisible) {
@@ -546,7 +546,7 @@
                       <!--
                         EL NÚMERO APARECE UNA SOLA VEZ EN EL TEXTO. Hasta iba dos: la
                         insignia con el dígito, oculta al lector de pantalla, y un `sr-only` que repetía «Paso N
-                        de M». El usuario lo señaló —«este 3 no es necesario… y está duplicado»—. Ahora la
+                        de M». está definido —«este 3 no es necesario… y está duplicado»—. Ahora la
                         insignia no se oculta y se lleva el contexto dentro: se ve «3» y se oye «Paso 3 de 6».
                       -->
                       @if (!seccionVisible) {
@@ -731,7 +731,7 @@
                       <!--
                         EL NÚMERO APARECE UNA SOLA VEZ EN EL TEXTO. Hasta iba dos: la
                         insignia con el dígito, oculta al lector de pantalla, y un `sr-only` que repetía «Paso N
-                        de M». El usuario lo señaló —«este 3 no es necesario… y está duplicado»—. Ahora la
+                        de M». está definido —«este 3 no es necesario… y está duplicado»—. Ahora la
                         insignia no se oculta y se lleva el contexto dentro: se ve «3» y se oye «Paso 3 de 6».
                       -->
                       @if (!seccionVisible) {

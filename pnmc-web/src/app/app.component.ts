@@ -71,7 +71,7 @@ export class AppComponent {
       // La pantalla de acceso NO es un hero foto de punta a punta como Inicio o Ecosistema:
       // es dos columnas desde el primer pixel, y la mitad derecha es clara. Un nav transparente
       // pintaba sus botones -y su propio logotipo- en blanco sobre esa mitad clara, ilegibles.
-      // Lo señaló la dirección de producto: «algunos botones de arriba
+      // El criterio es este: «algunos botones de arriba
       // de la barra de navegación no se ven».
       || page === PAGE_IDS.registro;
   });

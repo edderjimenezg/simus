@@ -8,7 +8,7 @@ import { AdminShellPageComponent } from './admin-shell-page.component';
 /**
  * El Resumen no repite números ni promete trabajo que no existe.
  *
- * <b>QUE HABIA ANTES.</b> Cuatro indicadores arriba —«1 registro pendiente de revisión», «0
+ * <b>EL MODELO.</b> Cuatro indicadores arriba —«1 registro pendiente de revisión», «0
  * solicitudes activas», «0 solicitudes de eliminación», «2 organizaciones registradas»— y, justo
  * debajo, una lista con tres filas que repetían TRES DE ESOS CUATRO NUMEROS con otras palabras:
  * «Revisión de registros y propuestas — 1 pendientes». Los seis controles llevaban además al

@@ -19,7 +19,7 @@ export type DireccionDeOrden = 'asc' | 'desc';
  * de las diez tablas de la consola, <b>solo dos ordenaban</b> —Festivales y Organizaciones—, y cada
  * una tenía su propia copia de `ordenarPor`, `flechaDe` y `ordenAriaDe`. Las otras ocho —Agenda,
  * Noticias, Categorías, Catálogo Editorial, Boletín, Usuarios, Auditoría y las dos de Salud del
- * sistema— pintaban cabeceras muertas. La dirección de producto lo reportó así: «continúan con las
+ * sistema— pintaban cabeceras muertas. se detectó así: «continúan con las
  * tablas sin la opción de cliquear en la columna y reorganizar».
  *
  * Copiar tres métodos ocho veces es exactamente lo que el encargo de reestructuración prohíbe, y

@@ -180,7 +180,7 @@ public static class NoticiasEndpoints
     /// <para>
     /// <b>ORDENA EL SERVIDOR PORQUE LA LISTA PAGINA.</b> Ordenar las filas que trae la página no
     /// reordena el listado: lo baraja dentro de su página, y afirma algo falso sobre el resto. El
-    /// dirección de producto lo fijó para toda la consola, a partir de lo
+    /// queda fijado para toda la consola, a partir de lo
     /// que encontró en la Agenda: «debe ser de todos, no solo de los de la página visible».
     /// </para>
     /// <para>

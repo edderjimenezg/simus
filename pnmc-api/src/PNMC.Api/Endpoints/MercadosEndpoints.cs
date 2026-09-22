@@ -274,7 +274,7 @@ public static class MercadosEndpoints
     /// Los festivales que ese mercado puede declarar como marco.
     /// </summary>
     /// <remarks>
-    /// <b>ACOTA LA PERTENENCIA, NO EL ESTADO.</b> La dirección la dirección de producto lo dijo con esas
+    /// <b>ACOTA LA PERTENENCIA, NO EL ESTADO.</b> La dirección está definido con esas
     /// palabras: «podrá seleccionarse aunque se encuentre en estado borrador, en revisión o
     /// publicado. La condición fundamental es que exista como registro y pertenezca a la misma
     /// organización». Un festival que todavía se está redactando es tan real como uno publicado

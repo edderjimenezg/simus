@@ -13,7 +13,7 @@
     `dbo.VersionesFestival` tiene CERO filas, y ninguna ruta del API las lee ni las escribe. El
     modelo estaba puesto y desconectado.
 
-    El 28 de agosto el usuario pidio traer «los campos y toda la informacion de ese script y las
+    El 28 de agosto se define traer «los campos y toda la informacion de ese script y las
     relaciones», y que esa sea «la forma de todos los datos que tiene un festival». Este guion
     aplica la mitad estructural de ese pedido; el contenido de los catalogos va en
     `seed/V20260828_01__catalogos_festival_seed.sql`, que es donde el proyecto siembra catalogos.

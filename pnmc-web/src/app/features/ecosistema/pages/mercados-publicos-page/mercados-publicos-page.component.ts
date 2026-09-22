@@ -28,7 +28,7 @@ const POR_PAGINA = 12;
  * <b>EL MISMO DIRECTORIO QUE EL DE FESTIVALES, Y ESO ES TODO EL PUNTO.</b> Nació el 15 de
  * septiembre de 2026 con una línea de conteo, un buscador suelto y una tabla de tres columnas,
  * mientras el de Festivales tenía columna de filtros, franja de cifras, conmutador de vista,
- * paginación y una fila que enseña de qué va cada registro. La dirección de producto lo pidió así:
+ * paginación y una fila que enseña de qué va cada registro. Quedó definido así:
  * «vistas públicas de mercados como en festivales hicimos».
  *
  * <b>Y SE ARMA CON LAS PIEZAS COMPARTIDAS QUE YA EXISTIAN</b> —`app-barra-exploracion-ecosistema`,

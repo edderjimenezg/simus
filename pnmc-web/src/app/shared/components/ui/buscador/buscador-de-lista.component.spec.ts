@@ -19,7 +19,7 @@ class Anfitrion {
 /**
  * El buscador del proyecto filtra mientras se escribe y se puede limpiar de un golpe.
  *
- * <b>LO QUE FIJAN ESTAS PRUEBAS.</b> La dirección de producto lo pidió para todo el proyecto el 15 de
+ * <b>LO QUE FIJAN ESTAS PRUEBAS.</b> Quedó definido para todo el proyecto el 15 de
  * septiembre de 2026: «que vayan filtrando a medida que vas escribiendo y no hasta darle enter,
  * poner la x para limpiar la barra de búsqueda y eliminar elementos o botones redundantes». Los
  * trece buscadores que había hacían tres cosas distintas y dos llevaban además un botón «Buscar».

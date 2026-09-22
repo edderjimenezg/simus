@@ -24,7 +24,7 @@ describe('SobreElPnmcPageComponent visual hierarchy', () => {
   });
 
   // ESTA PRUEBA SOSTENIA LO CONTRARIO. Fijaba la cifra traslúcida de 7 rem detrás del texto de cada
-  // objetivo; la dirección de producto pidió volver al diseño aprobado,
+  // objetivo; el criterio pide volver al diseño aprobado,
   // donde el objetivo abre con una chapa que lleva su icono. Se reescribe para vigilar eso.
   it('cada objetivo abre con la chapa de su icono, sin cifra de fondo', () => {
     const raiz = fixture.nativeElement as HTMLElement;

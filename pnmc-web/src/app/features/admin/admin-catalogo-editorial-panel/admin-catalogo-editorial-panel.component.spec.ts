@@ -387,7 +387,7 @@ describe('inicialDeTitulo', () => {
 describe('AdminCatalogoEditorialPanelComponent · el índice del acervo', () => {
   /**
    * LO QUE FIJAN ESTAS PRUEBAS. La consola listaba las fichas como una bandeja de trabajo —buscar
-   * por título y filtrar por estado—, y la dirección de producto pidió otra cosa: 171 publicaciones
+   * por título y filtrar por estado—, y el criterio pide otra cosa: 171 publicaciones
    * INDEPENDIENTES que hay que poder recorrer por ubicación, por autoría y por práctica musical,
    * «de manera completa, clara, gestionable».
    */

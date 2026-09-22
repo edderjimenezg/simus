@@ -33,7 +33,7 @@
  * como fechas, programación y dirección artística.
  *
  * <b>SOLO EL NOMBRE Y EL ALCANCE SON OBLIGATORIOS.</b> «Solo son obligatorios campos generales
- * para que el festival exista», textual del usuario.
+ * para que el festival exista», del criterio.
  */
 
 export interface SeccionDeLaFicha {

@@ -5,7 +5,7 @@ namespace PNMC.Api.Endpoints;
 /// </summary>
 /// <remarks>
 /// <para>
-/// <b>QUE ESTABA MAL PLANTEADO.</b> El usuario lo dijo: «no entiendo los
+/// <b>QUE ESTABA MAL PLANTEADO.</b> El criterio es este: «no entiendo los
 /// estados de organizaciones». Y había dos motivos.
 /// </para>
 /// <para>

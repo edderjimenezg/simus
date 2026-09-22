@@ -225,7 +225,7 @@ describe('NavigationComponent ecosystem navigation', () => {
     // sin ningún enlace que llevara a ella: era la página que abría aquel botón. La puerta se puso
     // entonces al final del desplegable, en una tarjeta llamada «Ver el ecosistema completo».
     //
-    // POR QUÉ CAMBIA DE FORMA. El usuario pidió que «Ecosistema» fuera
+    // POR QUÉ CAMBIA DE FORMA. Se define que «Ecosistema» fuera
     // cliqueable «para optimizar la navegación y limpiar el menú adyacente». Con el botón llevando
     // a la portada, aquella tarjeta era un segundo camino al mismo sitio dentro del mismo menú.
     // La regla que se protege es la misma —que la portada tenga puerta—; lo que cambia es cuál.
@@ -475,7 +475,7 @@ describe('NavigationComponent · panel de sesión externa', () => {
   /**
    * UN CLIC FUERA TAMBIEN LO CIERRA, no solo Escape o el tabulador.
    *
-   * El usuario lo señaló: el menú de «Ingresar / Crear cuenta» quedaba
+   * El criterio es este: el menú de «Ingresar / Crear cuenta» quedaba
    * abierto al hacer clic en cualquier zona sin foco propio -el fondo de la página, un párrafo-
    * porque `alSalirElFocoDelMenuDeCuenta` solo escucha `focusout`, y un clic ahí no mueve
    * `document.activeElement`. `onDocumentPointerDown` es el complemento para el ratón.

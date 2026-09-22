@@ -2,7 +2,7 @@
   SIMUS · Mercados Musicales: el proceso y sus ediciones
 
   QUE ES, Y POR QUE ES UN MODULO Y NO UNA FICHA. Un mercado musical es un proceso del Ecosistema al
-  mismo nivel que un Festival, no una sección suya. La dirección de producto lo fijó: «no se debe plantear como una sección secundaria de Festivales ni como una
+  mismo nivel que un Festival, no una sección suya. quedó fijado: «no se debe plantear como una sección secundaria de Festivales ni como una
   simple ficha de información». Por eso tiene su propia tabla, su propio ciclo de vida y su propio
   circuito de revisión, y reutiliza —sin duplicar— el territorio, la organización responsable y los
   vocabularios que ya existen.
@@ -328,7 +328,7 @@ END;
 /*
   LAS CUENTAS QUE YA EXISTEN CONSERVAN TODOS LOS MODULOS, y por eso un módulo nuevo hay que
   concedérselo explícitamente: la tabla guarda una fila por par, así que nacer no basta. El dueño
-  la dirección de producto lo pidió así: «con las cuentas que existen de momento deja activado todos los módulos
+  quedó definido así: «con las cuentas que existen de momento deja activado todos los módulos
   y simplemente se las desactivaremos manualmente después».
 */
 INSERT INTO dbo.ModulosPorCuenta (IdUsuario, CodigoModulo, FechaOtorgado)

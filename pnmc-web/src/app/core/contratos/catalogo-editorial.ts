@@ -106,7 +106,7 @@ export interface PublicacionEditorial {
   idioma: string | null;
   /** Lo que la fuente escribió cuando no pudo fijar la fecha. */
   notaFecha: string | null;
-  /** Descriptores de presentación. Texto libre: sus vocabularios siguen TBC (corte 05A). */
+  /** Descriptores de presentación. Texto libre: sus vocabularios siguen TBC (). */
   tipoPublicacion: string | null;
   /** La categoría temática administrable. Es lo que se guarda. */
   categoriaId: number | null;

@@ -9,7 +9,7 @@ type EstadoDelFormulario = 'reposo' | 'confirmando' | 'enviando' | 'listo';
 /**
  * El formulario del boletín de la portada, con su paso de autorización.
  *
- * QUÉ HABÍA ANTES: un campo de correo y un botón sin manejador. Se escribía el correo, se pulsaba
+ * EL MODELO: un campo de correo y un botón sin manejador. Se escribía el correo, se pulsaba
  * «Registrarme», y no pasaba nada: ni petición, ni aviso, ni error. Quien lo usara se quedaba
  * creyendo que se había suscrito. Lo reportó el usuario.
  *

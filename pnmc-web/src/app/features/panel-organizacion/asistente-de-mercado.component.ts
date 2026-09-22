@@ -126,7 +126,7 @@ export class AsistenteDeMercadoComponent implements OnInit {
    *
    * <b>SIN ESTO, TRES SITUACIONES DISTINTAS SE VEIAN IGUAL.</b> «Todavía no has registrado ningún
    * festival» se enseñaba también cuando la consulta había fallado y cuando aún no había terminado,
-   * porque el error se convertía en una lista vacía. La dirección de producto lo reportó el 15 de
+   * porque el error se convertía en una lista vacía. se detectó el 15 de
    * septiembre de 2026 sobre una organización que SI tenía festivales registrados: la pantalla le
    * afirmaba lo contrario. Una lista vacía por un fallo no es una respuesta, y decirlo como si lo
    * fuera manda a registrar de nuevo algo que ya existe.

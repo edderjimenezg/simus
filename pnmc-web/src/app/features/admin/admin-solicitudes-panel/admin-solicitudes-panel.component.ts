@@ -286,7 +286,7 @@ export class AdminSolicitudesPanelComponent implements OnDestroy {
    * promesas vacías. Ese argumento valía cuando «Calidad y coincidencias» seguía existiendo como
    * sección aparte y enseñaba sus cinco pestañas: había otro sitio donde ver que la capacidad
    * existe. Al unificar la bandeja, ocultarlas dejó SEIS capacidades invisibles —propuestas,
-   * vinculaciones, eliminaciones, reclamaciones, duplicados y alertas—, y la dirección de producto lo
+   * vinculaciones, eliminaciones, reclamaciones, duplicados y alertas—, y se
    * reportó como que habían desaparecido. Tenía razón: una capacidad que no se ve no existe.
    *
    * Un cero no es una promesa vacía si se dibuja como lo que es —nada pendiente de ese tipo—, que
@@ -533,7 +533,7 @@ export class AdminSolicitudesPanelComponent implements OnDestroy {
   }
 
   /**
-   * «VISUALIZAR»: LA ÚNICA ACCIÓN PARA VER TODO, SIN SALIR DE LA BANDEJA. El usuario lo pidió el 2
+   * «VISUALIZAR»: LA ÚNICA ACCIÓN PARA VER TODO, SIN SALIR DE LA BANDEJA. está definido el 2
    * de septiembre de 2026: eliminar la duplicación entre «Previsualizar» y «Abrir ficha» -que hasta
    * ese día navegaba a otra pantalla- y dejar una sola acción que abre un panel superpuesto y, al
    * cerrarlo, deja exactamente el mismo punto de la lista.
@@ -618,8 +618,7 @@ export class AdminSolicitudesPanelComponent implements OnDestroy {
   accionRapidaError = signal('');
 
   /**
-   * LAS ACCIONES RÁPIDAS DEL RESUMEN EXPANDIDO. El usuario las pidió:
-   * le gustó que la fila se expanda al cliquearla, y quiso poder aprobar, rechazar o pedir
+   * LAS ACCIONES RÁPIDAS DEL RESUMEN EXPANDIDO. El criterio es este: * le gustó que la fila se expanda al cliquearla, y quiso poder aprobar, rechazar o pedir
    * ajustes/aclaración desde ahí mismo, sin tener que abrir el detalle completo para lo que no lo
    * necesita.
    *

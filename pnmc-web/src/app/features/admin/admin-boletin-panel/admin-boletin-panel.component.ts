@@ -93,7 +93,7 @@ export class AdminBoletinPanelComponent implements OnInit {
    *
    * <b>ORDENABA LA PAGINA Y NO EL LISTADO, y este fichero lo decía.</b> Era una limitación asumida
    * —«no hay un criterio de orden en el contrato del API»— y el criterio se añadió el 15 de
-   * septiembre de 2026, cuando la dirección de producto lo pidió para todas las tablas de la consola:
+   * septiembre de 2026, cuando quedó definido para todas las tablas de la consola:
    * «debe ser de todos, no solo de los de la página visible».
    */
   ordenarPor(columna: string): void {

@@ -643,7 +643,7 @@ export class AdminRecordsPanelComponent implements OnChanges {
   }
 
   /**
-   * ELIMINAR UN REGISTRO DEL ECOSISTEMA, DIRECTO DESDE LA CONSOLA. El usuario lo pidió: hasta ahora un Festival publicado solo se archivaba si la propia
+   * ELIMINAR UN REGISTRO DEL ECOSISTEMA, DIRECTO DESDE LA CONSOLA. El criterio es este: hasta ahora un Festival publicado solo se archivaba si la propia
    * organización pedía su retiro y un funcionario aprobaba esa solicitud. Esto no espera esa
    * solicitud -piénsese en un Festival duplicado o que incumple las bases-.
    *
@@ -669,7 +669,7 @@ export class AdminRecordsPanelComponent implements OnChanges {
   cancelarEliminacion(): void { this.eliminacionPedida.set(null); this.errorDeLaEliminacion.set(''); }
 
   /**
-   * ELIMINAR UN REGISTRO DEL ECOSISTEMA, DIRECTO DESDE LA CONSOLA. El usuario lo pidió: hasta ahora un Festival publicado solo se archivaba si la propia
+   * ELIMINAR UN REGISTRO DEL ECOSISTEMA, DIRECTO DESDE LA CONSOLA. El criterio es este: hasta ahora un Festival publicado solo se archivaba si la propia
    * organización pedía su retiro y un funcionario aprobaba esa solicitud. Esto no espera esa
    * solicitud -piénsese en un Festival duplicado o que incumple las bases-.
    *

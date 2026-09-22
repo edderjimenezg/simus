@@ -61,8 +61,7 @@ export const routes: Routes = [
       el componente cuando se navega DENTRO de la misma definición de ruta, y lo DESTRUYE Y VUELVE A
       CREAR cuando se pasa de una a otra. Medido con el catálogo real:
       abrir una ficha volvía a pedir el acervo entero al API y a descargar VEINTIUNA portadas, y lo
-      mismo al abrir la siguiente. En pantalla eso se ve como lo describió la dirección de producto:
-      «cada vez que abro algún elemento se queda como sincronizando archivos y se recarga
+      mismo al abrir la siguiente. En pantalla eso se ve como lo describió criterio: «cada vez que abro algún elemento se queda como sincronizando archivos y se recarga
       completamente».
 
       COMO HIJA SIN COMPONENTE, la página no se desmonta: solo cambia el parámetro. La dirección es

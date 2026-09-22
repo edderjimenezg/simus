@@ -11,7 +11,7 @@ namespace PNMC.Api.Endpoints;
 /// <c>espacio</c>, <c>lutier</c>, <c>colectivo</c>, <c>individuo</c>— porque en esta base cada
 /// proceso tiene su tabla y su circuito, y un tipo que nombra un proceso en la tabla de actores es
 /// la puerta por la que vuelve el modelo generico. <c>V20260912_04</c> retiro el que quedaba,
-/// <c>agrupacion</c>, por decision del usuario: «no va a existir
+/// <c>agrupacion</c>, por Criterio de producto: «no va a existir
 /// agrupacion».
 /// </para>
 /// <para>

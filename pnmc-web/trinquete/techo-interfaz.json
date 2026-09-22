@@ -299,7 +299,7 @@
     {
       "fecha": "2026-09-11T20:45:07.429370Z",
       "via": "edicion a mano, justificada",
-      "motivo": "Los tres frentes publicos —Catalogo Editorial, Agenda y Noticias— se reemplazaron por el DISENO APROBADO que vive en «Main Dev», portado tal cual por decision de direccion. Cuatro metricas aflojan y ninguna es un descuido:",
+      "motivo": "Los tres frentes publicos —Catalogo Editorial, Agenda y Noticias— se reemplazaron por el DISENO APROBADO que vive en el diseño aprobado del portal, portado tal cual por decision de direccion. Cuatro metricas aflojan y ninguna es un descuido:",
       "colores_literales": "911 -> 1169. El diseno aprobado escribe #291242 y #00DA5E literales, que es como se entrego. Sustituirlos por los tokens del @theme renderiza IDENTICO —el token ES ese valor—, pero el propio bloque de styles.css que declaro los tokens dejo escrito que migrar los ~800 usos literales «es una ola aparte, revisable, no algo que se hace de madrugada sin nadie mirando». Hacerla a escondidas dentro de un port de diseno es exactamente eso. Queda PROPUESTA y pendiente de aprobacion.",
       "enlaces_de_router": "41 -> 37. El suelo se sello contra la implementacion propia que estos tres frentes tenian antes, que navegaba con routerLink. El diseno aprobado navega con manejadores de clic y un dialogo, no con enlaces. Es una caracteristica del diseno, no una regresion introducida: convertirlos en enlaces cambiaria su comportamiento, que es justo lo que no se toca sin aprobacion. Queda ANOTADO como sugerencia.",
       "dialogos_con_rol": "11 -> 10. Mismo motivo: la implementacion propia retirada aportaba un dialogo mas.",

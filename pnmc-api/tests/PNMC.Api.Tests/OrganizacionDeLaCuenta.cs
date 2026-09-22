@@ -12,7 +12,7 @@ namespace PNMC.Api.Tests;
 /// POR QUE EXISTE. Hasta, veinticinco pruebas armaban su escenario asi:
 /// registraban una cuenta —que nace CON su organizacion— y despues llamaban a
 /// <c>POST /api/v1/externo/organizaciones/</c> para crear una SEGUNDA, que era la que usaban. Ese
-/// dia el usuario pidio la regla contraria: «un correo de una organizacion no puede tener muchas
+/// dia se define la regla contraria: «un correo de una organizacion no puede tener muchas
 /// organizaciones, es decir un correo debe estar atado a una sola organizacion». Con la regla
 /// puesta, esas veinticinco pruebas se caian en su tercera linea, antes de medir nada.
 /// </para>

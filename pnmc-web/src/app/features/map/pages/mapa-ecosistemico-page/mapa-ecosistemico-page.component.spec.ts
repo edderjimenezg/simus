@@ -34,7 +34,7 @@ import { MapaEcosistemicoPageComponent } from './mapa-ecosistemico-page.componen
  * `git log -S` sobre cada uno devolvia cero commits.
  *
  * `territoryPopupPosition` YA NO ESTA EN ESA LISTA. Se construyo
- * porque el usuario pidio exactamente lo que aquella prueba describia: que la ventana
+ * porque se define exactamente lo que aquella prueba describia: que la ventana
  * emergente del municipio dejara de tapar el mapa y saliera pequena al lado del punto. La
  * prueba se encendio antes de escribir el metodo y se leyo en rojo —«territoryPopupPosition
  * is not a function»—, que es el orden que pide la nota de abajo.
@@ -218,7 +218,7 @@ describe('MapaEcosistemicoPageComponent (PNMC-036)', () => {
   // });
 
   // ENCENDIDA EL 29 DE AGOSTO DE 2026. Es la primera de las catorce que vuelve.
-  // El usuario pidio que la lista de procesos dejara de tapar el mapa y saliera pequena
+  // Se define que la lista de procesos dejara de tapar el mapa y saliera pequena
   // al lado del punto pulsado. Esta prueba ya describia eso, palabra por palabra, desde
   // el trabajo aparcado. Se enciende ANTES de escribir el metodo: en rojo decia
   // «component.territoryPopupPosition is not a function».

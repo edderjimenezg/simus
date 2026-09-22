@@ -24,7 +24,7 @@ namespace PNMC.Api.Tests;
 /// <para>
 /// Y NO LA LLAMABA NADIE: ningún componente Angular pedía esta ruta. La bandeja pintaba los cuatro
 /// campos de la LISTA —nombre, organización, cobertura y fecha— y sobre eso se publicaba o se
-/// rechazaba. Lo pidió el usuario: «todos los datos que se diligenciaron,
+/// rechazaba. El criterio es este: «todos los datos que se diligenciaron,
 /// las versiones años y poder ver toda la info».
 /// </para>
 /// <para>

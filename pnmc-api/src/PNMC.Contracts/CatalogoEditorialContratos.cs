@@ -143,7 +143,7 @@ public sealed record PublicacionEditorialDto(
     string? Idioma,
     /// <summary>Lo que la fuente escribió cuando no pudo fijar la fecha.</summary>
     string? NotaFecha,
-    // Descriptores de presentación. Texto libre: sus vocabularios siguen TBC (corte 05A).
+    // Descriptores de presentación. Texto libre: sus vocabularios siguen TBC ().
     string? TipoPublicacion,
     int? CategoriaId,
     string? Categoria,
@@ -506,8 +506,7 @@ public sealed record PaginaPublicacionesEditorialesDto(
 // LO QUE SE PUBLICA, QUE NO ES LO MISMO QUE LO QUE SE GUARDA
 // ═══════════════════════════════════════════════════════════════════════════════════════════════
 //
-// EL CRITERIO ES EL DE UN CATALOGO DE BIBLIOTECA. Lo fijó la dirección de producto el 13 de septiembre
-// de 2026: «revisa todos los datos que conviene dejar públicos como se suele publicar en
+// EL CRITERIO ES EL DE UN CATALOGO DE BIBLIOTECA. Lo fijó la dirección de producto // de 2026: «revisa todos los datos que conviene dejar públicos como se suele publicar en
 // bibliotecas, páginas de venta de libros, hemerotecas». Un OPAC, una librería y una hemeroteca
 // publican exactamente lo que sirve para IDENTIFICAR, ENCONTRAR y CONSEGUIR una obra —quién la
 // hizo, cómo se llama, de qué está hecha, cuánto mide, qué identificadores tiene, de qué trata,

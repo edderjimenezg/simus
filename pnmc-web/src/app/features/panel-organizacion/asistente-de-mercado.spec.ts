@@ -13,7 +13,7 @@ import { PanelOrganizacionStore } from './panel-organizacion.store';
  * que responder que no borre el festival elegido, que decir que sí sin elegir no se guarde, y que
  * cuando la organización no tiene ningún festival la pantalla lo diga en vez de dejar un selector
  * vacío. Es la regla que la estructura heredada no tenía —guardaba el festival como clave ajena y
- * como texto, sin nada que obligara a que coincidieran— y la que la dirección de producto pidió
+ * como texto, sin nada que obligara a que coincidieran— y la que el criterio pide
  * explícitamente.
  */
 describe('el asistente de alta de un mercado', () => {
@@ -94,7 +94,7 @@ describe('el asistente de alta de un mercado', () => {
   });
 
   it('si la consulta falla NO dice que no tengas festivales', () => {
-    // EL DEFECTO QUE TRAJO ESTA PRUEBA. La dirección de producto lo reportó el 15 de septiembre de
+    // EL DEFECTO QUE TRAJO ESTA PRUEBA. se detectó el 15 de septiembre de
     // 2026: una organización con festivales registrados leía «Todavía no tienes ningún festival
     // registrado en SIMUS». El error de la consulta se convertía en una lista vacía, y una lista
     // vacía se enseñaba como una afirmación sobre sus datos. Ahora son dos cosas distintas.

@@ -13,8 +13,7 @@ import {
 /*
   QUÉ SE INSTRUMENTA AQUÍ.
 
-  El pie de la revisión: los dos botones que separan «lo tengo a medias» de «devuélveselo». Lo pidió
-  el usuario: «ir guardando el borrador, y luego poder enviar la solicitud de
+  El pie de la revisión: los dos botones que separan «lo tengo a medias» de «devuélveselo». El criterio es este: «ir guardando el borrador, y luego poder enviar la solicitud de
   cambios y que al devolverlo le llegue al usuario para hacer esos cambios sobre el festival».
 
   LAS TRES COSAS QUE NO PUEDEN FALLAR:

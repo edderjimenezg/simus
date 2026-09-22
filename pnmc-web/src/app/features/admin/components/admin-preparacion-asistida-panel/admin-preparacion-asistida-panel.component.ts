@@ -117,7 +117,7 @@ export class AdminPreparacionAsistidaPanelComponent implements OnInit {
   @Input() divipola: any = {};
 
   /**
-   * EL MÓDULO YA VIENE DECIDIDO POR EL CONTEXTO. El usuario pidió mover
+   * EL MÓDULO YA VIENE DECIDIDO POR EL CONTEXTO. Se define mover
    * «Importaciones» de un ítem de navegación aparte a una acción dentro de cada módulo -«Ecosistema
    * → Festivales → Importar Festivales»-: quien llega aquí ya eligió el módulo al pulsar ese botón,
    * así que no hace falta volver a preguntarlo. Sin este input -uso suelto, si alguna vez lo hay- el

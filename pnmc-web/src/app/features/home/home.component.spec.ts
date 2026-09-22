@@ -137,7 +137,7 @@ function restaurarMarco(): void {
   if (marco) marco.style.width = '';
 }
 
-/** La caja del boton «Registrarme», que es contra lo que el usuario pidio medir «al lado». */
+/** La caja del boton «Registrarme», que es contra lo que se define medir «al lado». */
 function cajaDelBoton(raiz: HTMLElement): DOMRect {
   const boton = raiz.querySelector<HTMLElement>('[data-testid="boletin-enviar"]');
   expect(boton).withContext('no se pinto el boton del boletin').not.toBeNull();
@@ -258,7 +258,7 @@ describe('HomeComponent', () => {
   });
 
   it('la banda no llega al borde: el relleno crece por tramos y es el unico margen que hay', () => {
-    // LO SEGUNDO QUE PIDIO EL USUARIO: «que no quede al limite de la pantalla, que tenga margen».
+    // LO SEGUNDO QUE PIDIO CRITERIO: «que no quede al limite de la pantalla, que tenga margen».
     //
     // La segunda mitad de cada vuelta demuestra POR QUE el relleno es la unica palanca: mientras el
     // ancho de pantalla no llega a 1600 px, `max-w-[100rem]` no recorta nada y el riel mide

@@ -92,7 +92,7 @@ internal static class AdministracionDeOrganizacion
     /// <para>
     /// <b>DEVUELVE EL RESULTADO YA HECHO, o <c>null</c> si se puede seguir.</b> Cada ruta que la use
     /// escribe una linea; escribir el 409 en cada sitio es como se llega a que una de ellas explique
-    /// el motivo y las otras cinco digan «no tiene permisos», que es justo lo que el usuario pidio
+    /// el motivo y las otras cinco digan «no tiene permisos», que es justo lo que se define
     /// evitar.
     /// </para>
     /// <para>

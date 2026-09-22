@@ -13,7 +13,7 @@ import { MercadosPublicosPageComponent } from './mercados-publicos-page.componen
  *
  * <b>LO QUE ESTAS PRUEBAS IMPIDEN.</b> Que vuelva a ser una tabla de tres columnas con un buscador
  * suelto. El directorio de Festivales tiene columna de filtros, cifras que responden a la consulta,
- * conmutador de vista y paginación, y la dirección de producto pidió el de Mercados igual. Lo que se
+ * conmutador de vista y paginación, y el criterio pide el de Mercados igual. Lo que se
  * pinza es lo que de verdad distingue un directorio de una lista: que los filtros ACOTEN, que las
  * cifras hablen de lo filtrado y no del total, que solo se ofrezcan territorios que existen, y que
  * un enlace de una ficha llegue con su filtro puesto.

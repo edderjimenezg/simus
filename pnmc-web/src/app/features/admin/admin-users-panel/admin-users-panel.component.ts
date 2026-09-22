@@ -198,7 +198,7 @@ export class AdminUsersPanelComponent {
    *
    * <b>SON DOS POBLACIONES QUE NO SE GESTIONAN IGUAL</b>, y verlas mezcladas en una lista de
    * veintiuna cuentas hacía que las tres internas se perdieran entre dieciocho externas. Lo pidió
-   * la dirección de producto: «deberían haber pestañas para externo y
+   * criterio: «deberían haber pestañas para externo y
    * para administrativos».
    *
    * El corte es el mismo que ya decide qué pantalla se abre al iniciar sesión —`ROLES_INTERNOS`,
@@ -421,8 +421,7 @@ export class AdminUsersPanelComponent {
    * de cada apartado.
    *
    * <b>ERA UNA LISTA PLANA DE DIECISEIS CASILLAS</b> al pie de una tarjeta, sin decir qué abre cada
-   * una ni a qué familia pertenece. La dirección de producto lo pidió:
-   * «el módulo de activar o desactivar apartados… debe ser más visual y estructurado desde un
+   * una ni a qué familia pertenece. El criterio es este: * «el módulo de activar o desactivar apartados… debe ser más visual y estructurado desde un
    * apartado de gestión claro». La estructura ya existe —es la de la navegación— y se reutiliza;
    * escribirla aquí otra vez sería una segunda lista esperando a divergir.
    */

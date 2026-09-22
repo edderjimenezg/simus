@@ -108,7 +108,7 @@ export class HomeMediaBannerComponent implements OnInit, OnDestroy {
   /**
    * Cada botón del banner navega a su destino, y nada más.
    *
-   * LO QUE HABÍA ANTES, Y POR QUÉ SE FUE. «Ser parte del ecosistema» llevaba al mapa y luego,
+   * LO EL MODELOY POR QUÉ SE FUE. «Ser parte del ecosistema» llevaba al mapa y luego,
    * medio segundo después, buscaba en el documento un botón con
    * `[data-open-participation="true"]` y lo pulsaba por su cuenta. Tres cosas mal en una: el
    * destino no era el que anuncia el rótulo; si el mapa tardaba más de 500 ms en pintar, el

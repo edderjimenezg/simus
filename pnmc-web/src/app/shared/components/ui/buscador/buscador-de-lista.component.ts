@@ -4,7 +4,7 @@ import { LucideSearch, LucideX } from '@lucide/angular';
 /**
  * El buscador de una lista del proyecto.
  *
- * <b>FILTRA MIENTRAS SE ESCRIBE.</b> La dirección de producto lo fijó para
+ * <b>FILTRA MIENTRAS SE ESCRIBE.</b> quedó fijado para
  * todo el proyecto, no para una pantalla: «quiero que los buscadores de todo el proyecto sean
  * automáticos, que vayan filtrando a medida que vas escribiendo y no hasta darle enter, poner la x
  * para limpiar la barra de búsqueda y eliminar elementos o botones redundantes». Los trece

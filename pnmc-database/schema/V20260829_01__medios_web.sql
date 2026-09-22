@@ -2,7 +2,7 @@
    LAS IMAGENES ADMINISTRABLES DEL SITIO
    =================================================================================================
 
-   QUE HABIA ANTES: NADA. Cada imagen del sitio publico esta escrita a mano, y no solo en las
+   EL MODELO: NADA. Cada imagen del sitio publico esta escrita a mano, y no solo en las
    plantillas: nueve de las dieciseis viven en ficheros de configuracion de TypeScript. Medido con
    grep sobre pnmc-web/src/app:
 

@@ -282,7 +282,7 @@ import { RevisionDeCamposStore } from './revision-de-campos.store';
       Esto era un panel flotante morado oscuro con acentos verde esmeralda, texto blanco a 12 px y
       un botón verde relleno: cuatro decisiones de color que no existen en ninguna otra parte de la
       consola, un quinto lenguaje de botón, y un z-[100] con min(23rem, 100vw - 3rem) para
-      esquivar los bordes. la dirección de producto lo señaló: «la manera
+      esquivar los bordes. quedó definido: «la manera
       en como se dejan los comentarios […] no está tan bien depurada».
 
       Ahora el editor se abre DEBAJO del campo, en el flujo y sobre la misma superficie. Sin capas,

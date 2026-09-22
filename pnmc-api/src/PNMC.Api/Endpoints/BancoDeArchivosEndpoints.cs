@@ -185,8 +185,7 @@ public static class BancoDeArchivosEndpoints
 
         if (await db.EntityProfiles.AsNoTracking().AnyAsync(x => x.ArchivoFotoId == archivoId, ct))
         {
-            // LA FOTO DE PERFIL ES PUBLICA POR DECISION de la dirección de producto el 13 de septiembre
-            // de 2026: acompaña a la organización en el portal.
+            // LA FOTO DE PERFIL ES PUBLICA POR DECISION de la dirección de producto // de 2026: acompaña a la organización en el portal.
             vinculos.Add(new VinculoDeArchivo("organizacion", "Foto de perfil de una organización", true));
         }
 

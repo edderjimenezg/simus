@@ -7,7 +7,7 @@ import { test, expect, Page } from '@playwright/test';
  * doble del API: allí «guardar» es una llamada a un método que devuelve un objeto preparado. Aquí se
  * escribe en el formulario de verdad, sale una petición de verdad, y la fila queda en SQL Server. Lo
  * que se comprueba es la costura entera —formulario, contrato, servidor y base— y el recorrido
- * completo que pidió el usuario: «creando 3 festivales, uno con 3 ediciones
+ * completo que pidió criterio: «creando 3 festivales, uno con 3 ediciones
  * otro con dos y uno sin ediciones».
  *
  * <b>DOS COSAS QUE ESTE RECORRIDO DESTAPÓ</b>, y que estaban mal antes de escribirlo:

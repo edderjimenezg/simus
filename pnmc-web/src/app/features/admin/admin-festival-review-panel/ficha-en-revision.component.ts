@@ -52,7 +52,7 @@ import { ConfirmacionComponent } from '../../../shared/components/ui/confirmacio
       La ficha traía su propia navegación: una columna flotada de 12 rem a la izquierda, pegada al
       borde y con los rótulos a 12,5 px, que dentro del panel de Solicitudes dejaba el contenido
       arrinconado y competía con el índice de trámites que ya hay a la izquierda de todo. El dueño
-      la dirección de producto lo pidió: «que las secciones aparezcan como ahora
+      quedó definido: «que las secciones aparezcan como ahora
       están apareciendo lo de resumen de trámite y ficha completa».
 
       Cada pestaña lleva cuántos ajustes hay señalados en esa sección: con tres secciones y una
@@ -200,7 +200,7 @@ import { ConfirmacionComponent } from '../../../shared/components/ui/confirmacio
 
             Ahora es un bloque con nombre: qué se ha señalado, en qué campos —cada uno lleva a su
             campo—, y la observación general debajo. Mejorado a petición
-            de la dirección de producto: «revisa todo el tema de la observación general, de las
+            de criterio: «revisa todo el tema de la observación general, de las
             observaciones específicas».
           -->
           <section class="devolucion" aria-label="Lo que se devuelve a la organización">
@@ -485,7 +485,7 @@ export class FichaEnRevisionComponent implements OnInit, OnDestroy {
   /**
    * Vivir DENTRO de una columna en vez de flotar como diálogo.
    *
-   * Añadido para el panel de Solicitudes: la dirección de producto pidió
+   * Añadido para el panel de Solicitudes: el criterio pide
    * «un mejor y más ampliado uso del panel derecho que aparece al cliquear en cualquier solicitud,
    * se puede trasladar a allí la revisión completa directamente, es más óptimo». Un diálogo encima
    * del panel tapaba la lista y obligaba a cerrarlo para pasar al siguiente trámite.

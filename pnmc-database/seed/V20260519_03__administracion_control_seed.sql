@@ -172,7 +172,7 @@ BEGIN
 END;
 
 /*
-    LA ORGANIZACION INSTITUCIONAL (bloque B2, 25 ago 2026).
+    LA ORGANIZACION INSTITUCIONAL (, 25 ago 2026).
 
     Quien responde por un festival mientras ninguna organizacion de la comunidad lo reclame.
     No es un relleno: es la respuesta a la pregunta que la ficha publica tiene que poder

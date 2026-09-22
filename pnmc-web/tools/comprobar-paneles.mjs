@@ -2,8 +2,7 @@
 /**
  * Comprueba las dos columnas laterales del geovisor: la de controles y la de lectura.
  *
- * QUÉ SE PIDIÓ EL 29 DE AGOSTO DE 2026, con las palabras del usuario:
- *
+ * QUÉ SE PIDIÓ EL 29 DE AGOSTO DE 2026: *
  *   «elimina esto, solo deja los filtros»  — sobre la columna izquierda.
  *   «este pásalo arriba como una pestaña independiente, en una pestaña que solo quede
  *    el directorio aquí»  — sobre la llamada «Ser parte del ecosistema».

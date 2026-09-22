@@ -61,7 +61,7 @@ DECLARE @IdCategoriaNoticias int = (SELECT TOP (1) IdCategoria FROM dbo.Categori
 DECLARE @IdCategoriaGaleria int = (SELECT TOP (1) IdCategoria FROM dbo.Categorias WHERE CodigoModulo = N'galeria' ORDER BY OrdenVisualizacion);
 
 /*
-    LA ORGANIZACION RESPONSABLE POR DEFECTO (bloque B2, 25 ago 2026). Ningun festival puede
+    LA ORGANIZACION RESPONSABLE POR DEFECTO (, 25 ago 2026). Ningun festival puede
     quedarse sin alguien que responda por el: mientras ninguna organizacion de la comunidad lo
     reclame, responde la institucion. La crea seed/V20260519_03, que corre antes que este
     fichero, y se resuelve por su marca `EsInstitucional` y no por su identificador.

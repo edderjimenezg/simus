@@ -213,7 +213,7 @@ export class SeccionFestivalesComponent {
 
   /**
    * «Continuar registro», «Atender ajustes»: cada rótulo nombra la acción concreta, no un
-   * genérico «Editar» -el usuario pidió que la persona no tenga que
+   * genérico «Editar» -Se define que la persona no tenga que
    * adivinar qué va a pasar al pulsar-.
    */
   rotuloEditarFestival(festival: FestivalDeLaOrganizacion): string {

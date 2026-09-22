@@ -30,15 +30,15 @@
 
     y se cuentan las líneas de diagnóstico por identificador de regla.
 
-    Remedición del corte 01 (2026-09-10, SDK 10.0.301): 272 avisos.
+    Medición con SDK 10.0.301: 272 avisos.
       CA1305 140 · CA1848 43 · CA1859 17 · CA1861 17 · CA1873 16
       CA1304 10 · CA1311 10 · CA1862 8 · CA1822 5 · CA1001 1
       CA1310 1 · CA1847 1 · CA1865 1 · CA1866 1 · CA2249 1
 
-    Remedición del corte 02 (2026-09-10, SDK 10.0.301): 206 avisos en compilación limpia.
+    Medición con SDK 10.0.301: 206 avisos en compilación limpia.
       El escalón 3 quedó en cero y sus siete reglas pasaron al trinquete.
 
-    Remedición del corte 03 (2026-09-10, SDK 10.0.301): 189 avisos.
+    Medición con SDK 10.0.301: 189 avisos.
       CA1305 140 · CA1848 43 · CA1304 2 · CA1311 2 · CA1001 1 · CA1865 1.
       CA1861 quedó en cero y pasó al trinquete.
 
@@ -79,7 +79,7 @@
     <!--
       Seguridad al máximo: es la única familia donde preferimos ruido a
       silencio. Los avisos CA2100 y CA5394 que destapó quedaron saldados y
-      convertidos en errores durante el corte 01.
+      convertidos en errores.
     -->
     <AnalysisModeSecurity>All</AnalysisModeSecurity>
 
@@ -144,7 +144,7 @@
     En cada escalón se arreglan primero las violaciones y sólo después se mueve
     la regla a <WarningsAsErrors>. Nunca al revés.
 
-    Escalón 2 · COMPLETADO EN EL CORTE 01
+    Escalón 2 · completado
       CA5394: las referencias públicas usan RandomNumberGenerator.
       CA2100: las tres escrituras con datos usan parámetros. Los cuatro ejecutores
         de guiones internos conservan SQL dinámico porque reciben exclusivamente
@@ -152,13 +152,13 @@
       También quedaron en error las obsolescencias de proxy, los diagnósticos de
         nulabilidad encontrados y las dos reglas xUnit corregidas en el corte.
 
-    Escalón 3 · COMPLETADO EN EL CORTE 02 (49 ubicaciones): CA1859 17 · CA1873 16 ·
+    Escalón 3 · completado (49 ubicaciones): CA1859 17 · CA1873 16 ·
       CA1862 8 · CA1822 5 · CA2249 1 · CA1866 1 · CA1847 1.
       Las siete reglas quedaron en cero y subieron a WarningsAsErrors. La
       compilación completa pasó de 272 a 206 avisos; la diferencia es mayor
       que 49 porque algunas ubicaciones se emitían desde más de un proyecto.
 
-    Escalón 4 · COMPLETADO EN EL CORTE 03: CA1861 (17 avisos)
+    Escalón 4 · completado: CA1861 (17 avisos)
       Los arrays constantes usados como argumentos repetidos pasaron a campos
       `static readonly`; la regla quedó en cero y subió a WarningsAsErrors.
 

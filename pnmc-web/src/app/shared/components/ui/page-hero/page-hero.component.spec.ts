@@ -4,7 +4,7 @@ import { PageHeroComponent } from './page-hero.component';
 /**
  * EL ENCABEZADO COMPACTO NO PUEDE APLASTAR SU PROPIO CONTENIDO.
  *
- * la dirección de producto lo describió mirando /ecosistema: «se ve muy
+ * está definido mirando /ecosistema: «se ve muy
  * pegado todo, se siente muy pegado». Medido ese día a 1280×639 con el navegador:
  *
  * | ruta        | caja útil | contenido | desborde |

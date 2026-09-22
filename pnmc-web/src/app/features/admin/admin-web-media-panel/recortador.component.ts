@@ -242,7 +242,7 @@ export class RecortadorComponent {
     if (natural.w === 0) { return null; }
 
     if (!alcanzaParaElMarco(natural, this.marco())) {
-      // BLOQUEA, no avisa. Fue la decisión del usuario, y el caso que la motivó llevaba meses en
+      // BLOQUEA, no avisa. Fue la decisión de producto, y el caso que la motivó llevaba meses en
       // el árbol sin que nada lo dijera.
       return `Esta imagen mide ${natural.w}×${natural.h} y el hueco necesita al menos `
         + `${this.marco().w}×${this.marco().h}. Se vería ampliada y borrosa. Use una más grande.`;

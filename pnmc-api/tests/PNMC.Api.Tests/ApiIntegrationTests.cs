@@ -97,7 +97,7 @@ public sealed class ApiIntegrationTests : IClassFixture<TestWebApplicationFactor
     /// <remarks>
     /// <para>
     /// ANTES CREABA UNA SEGUNDA. El cuerpo iba a <c>POST /api/v1/externo/organizaciones/</c>, que
-    /// existia para eso. El 28 de agosto de 2026 el usuario pidio la regla contraria: «un correo de
+    /// existia para eso. El 28 de agosto de 2026 Se define la regla contraria: «un correo de
     /// una organizacion no puede tener muchas organizaciones, es decir un correo debe estar atado a
     /// una sola organizacion». Con la regla puesta, once pruebas de este fichero se caian antes de
     /// medir nada, porque su tercera linea creaba la segunda organizacion de la cuenta.
@@ -986,7 +986,7 @@ public sealed class ApiIntegrationTests : IClassFixture<TestWebApplicationFactor
         {
             var db = scope.ServiceProvider.GetRequiredService<PnmcDbContext>();
 
-            // DESDE EL BLOQUE B2, «elegible» ya no es «no tiene organizacion responsable» sino
+            // DESDE, «elegible» ya no es «no tiene organizacion responsable» sino
             // «hoy lo tiene la institucion»: ningun festival se queda sin nadie que responda por
             // el, y reclamarlo es un traspaso. Por eso los historicos se siembran a nombre de la
             // entidad institucional en vez de dejarlos en NULL.

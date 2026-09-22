@@ -8,7 +8,7 @@
     base de datos en la pestaña de comunicaciones en el cms donde salga Mailins, o CRM de lead
     interesados en informacion del plan».
 
-    QUE HABIA ANTES: NADA. El campo de correo de la portada no estaba conectado a ninguna parte. El
+    EL MODELO: NADA. El campo de correo de la portada no estaba conectado a ninguna parte. El
     boton no tenia manejador: se escribia el correo, se pulsaba, y no pasaba absolutamente nada. Ni
     peticion, ni error, ni aviso. Quien lo usara se quedaba creyendo que se habia suscrito.
 

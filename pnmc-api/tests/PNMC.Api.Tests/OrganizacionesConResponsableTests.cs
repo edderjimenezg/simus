@@ -645,7 +645,7 @@ public sealed class OrganizacionesConResponsableTests : IClassFixture<TestWebApp
     /// <summary>
     /// La ficha de una organización trae CUÁLES procesos administra -no solo cuántos-, y las
     /// solicitudes y reclamaciones que la involucran, con el nombre real del Festival y no solo su
-    /// identificador. El usuario lo pidió: «consultar procesos
+    /// identificador. El criterio es este: «consultar procesos
     /// administrados; revisar solicitudes; revisar vinculaciones».
     /// </summary>
     [Fact]

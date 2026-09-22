@@ -11,7 +11,7 @@
     ----------------------------------
     Porque son dos procesos distintos, decidido el 25 ago 2026. `Lutieres` llevaba ademas el nombre
     tecnico que le corresponde a este —el tipo de dominio se llamaba `SpaceInfrastructureRow`— y esa
-    confusion se deshizo en el bloque B0. Un taller de luteria y una sala de conciertos no comparten
+    confusion se deshizo. Un taller de luteria y una sala de conciertos no comparten
     ni los datos ni las preguntas: lo que distingue a un escenario es cuanta gente cabe, si es
     accesible y con que esta dotado.
 
@@ -20,7 +20,7 @@
     1. `OrganizacionResponsableId` NACE CON EL PROCESO. `Lutieres`, `EscuelasMusica`,
        `MercadosMusicales` y `RedesDocumentacion` no tienen dueno: sus unicas foraneas son a
        `Divipola` y a `EstadosContenido`. Solo `Festivales` lo tiene, y hubo que anadirselo despues
-       (bloque B2, con backfill, indice que soltar y rehacer, y tres semillas que corregir).
+       (, con backfill, indice que soltar y rehacer, y tres semillas que corregir).
        Escenarios se crea ya con el, para no repetir esa deuda una quinta vez.
 
        Nace ANULABLE y no `NOT NULL`: la tabla arranca vacia, asi que la obligatoriedad no cuesta

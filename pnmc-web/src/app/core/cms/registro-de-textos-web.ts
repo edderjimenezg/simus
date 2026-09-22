@@ -319,7 +319,7 @@ export const WEB_TEXT_GROUPS: DefinicionDeGrupoDeTexto[] = [
   {
     id: 'map_tutorial', label: 'Tutorial del geovisor', section: 'Mapa Ecosistémico', fields: [
       // LOS DIECIOCHO PASOS RECORREN LA PANTALLA QUE HAY, herramienta por herramienta. Eran seis y
-      // describían un geovisor retirado; pasaron a nueve y la dirección de producto pidió más detalle:
+      // describían un geovisor retirado; pasaron a nueve y el criterio pide más detalle:
       // «explicar las diferentes herramientas, por ejemplo las diferentes vistas rápidamente,
       // coropleta, símbolos proporcionales, mapas de calor… en el gráfico registros por barras por
       // áreas, lo más declarado… la vista de tablas, los filtros territoriales, el directorio, la

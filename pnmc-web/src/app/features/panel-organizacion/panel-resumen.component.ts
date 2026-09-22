@@ -67,7 +67,7 @@ export class PanelResumenComponent {
   /**
    * Los seis contadores de la franja de indicadores, separados uno por uno.
    *
-   * ANTES «PENDIENTES» JUNTABA EnRevision Y AjustesSolicitados en un solo número. El usuario pidió
+   * ANTES «PENDIENTES» JUNTABA EnRevision Y AjustesSolicitados en un solo número. Se define
    * distinguirlos: «en revisión» es lo que espera una decisión del PNMC
    * -la organización ya no tiene nada que hacer-; «requiere tu atención» es lo que el PNMC devolvió
    * con ajustes -la organización sí tiene algo que hacer-. Confundir los dos le decía a la persona

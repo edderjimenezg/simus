@@ -536,7 +536,7 @@ export class AdminMercadosPanelComponent {
    * Lo que se puede hacer con esta fila, en el orden en que se espera hacerlo.
    *
    * <b>UN SOLO CONTROL POR FILA, COMO EN FESTIVALES.</b> Mercados nació con dos botones sueltos y
-   * la dirección de producto lo señaló: «festivales tiene un botón
+   * quedó definido: «festivales tiene un botón
    * particular en acciones y en mercados ahora se montan dos botones». La acción que se espera
    * —«Revisar» sobre lo que está en revisión— sale como principal; lo que no aplica al estado no se
    * pinta, en vez de pintarse apagado.

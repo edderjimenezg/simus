@@ -85,7 +85,7 @@ module.exports = defineConfig([
       // como unica red: no lo hagas sin mirarlo.
       "@typescript-eslint/no-explicit-any": "warn",
 
-      // --- Convenciones Angular saldadas en el corte 01. ---
+      // --- Convenciones Angular saldadas. ---
       "@angular-eslint/prefer-inject": "error",
       "@angular-eslint/no-output-on-prefix": "error",
 

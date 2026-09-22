@@ -8,7 +8,7 @@ import { ADMIN_MODULES } from '../domain/admin-config';
 /**
  * ELIMINAR UN FESTIVAL PUBLICADO DEL ECOSISTEMA, DIRECTO DESDE LA CONSOLA.
  *
- * <b>El defecto que esto cierra.</b> El usuario lo pidió: hasta
+ * <b>El defecto que esto cierra.</b> El criterio es este: hasta
  * entonces un Festival publicado solo se archivaba si la propia organización pedía su retiro y un
  * funcionario aprobaba esa solicitud -pensando en un Festival duplicado o que incumple las bases,
  * donde no tiene sentido esperar a que quien lo publicó pida borrarlo primero-.

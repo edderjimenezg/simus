@@ -169,7 +169,7 @@ public static class LecturaDelDocumento
         // UN TITULO LARGO OCUPA VARIAS LINEAS, y partirlo es lo que hacía la versión anterior: de
         // «Aproximación al concepto de gobernanza en Colombia / y algunos apuntes sobre su
         // importancia / en el derecho ambiental» —tres líneas a 26 pt en un artículo real— tomaba la
-        // primera por título y la segunda por subtítulo. Lo reportó la dirección de producto: «parte el
+        // primera por título y la segunda por subtítulo. Lo reportó criterio: «parte el
         // nombre en dos como si fuera título y subtítulo».
         //
         // SE UNEN POR CUERPO Y POR CERCANIA: mismo tamaño de letra y un hueco vertical que no pase de

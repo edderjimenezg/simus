@@ -255,7 +255,7 @@ public static class FestivalesExternosEndpoints
                 .FirstOrDefaultAsync(cancellationToken);
             if (organizacion is null) return Results.NotFound();
 
-            // QUE SIGNIFICA «ELEGIBLE» DESDE EL BLOQUE B2 (25 ago 2026). Antes era «no tiene
+            // QUE SIGNIFICA «ELEGIBLE» DESDE (25 ago 2026). Antes era «no tiene
             // organizacion responsable», y sobre ese NULL vivia esta funcionalidad entera.
             // Ahora ningun festival esta sin nadie que responda por el: mientras ninguna
             // organizacion de la comunidad lo reclame, responde la institucion. Asi que

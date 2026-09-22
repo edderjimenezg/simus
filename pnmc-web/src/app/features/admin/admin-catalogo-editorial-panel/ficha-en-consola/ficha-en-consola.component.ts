@@ -12,7 +12,7 @@ import { FECHA_Y_HORA_ADMINISTRATIVA } from '../../domain/formatos-de-fecha';
 /**
  * La ficha del Catálogo Editorial **en la consola**: la misma que ve el portal, y encima el trabajo.
  *
- * <b>POR QUE DOS VERSIONES Y NO UNA.</b> Lo pidió la dirección de producto: «una versión visible de
+ * <b>POR QUE DOS VERSIONES Y NO UNA.</b> El criterio es este: «una versión visible de
  * este catálogo, y una versión un poco más avanzada con los comentarios, revisiones, anotaciones,
  * de cara al panel de gestión administrativa». Son dos lecturas distintas del mismo registro:
  * quien consulta quiere la obra; quien cataloga quiere además saber en qué estado está, quién la

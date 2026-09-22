@@ -1,7 +1,7 @@
 /*
   SIMUS · El nombre partido y el recorrido de primer ingreso de una cuenta administrativa
 
-  COMO NACE UNA CUENTA ADMINISTRATIVA, decidido por la dirección de producto el 15 de septiembre de
+  COMO NACE UNA CUENTA ADMINISTRATIVA, decidido por decisión de producto de
   2026: «ellos no tienen una interfaz como tal para registrarse; a ellos se les registra simplemente
   un correo y una contraseña por defecto. En su primer inicio de sesión les debe pedir cambiar la
   contraseña; una vez cambien la contraseña se les pide completar esos datos básicos —nombre, cédula,
@@ -13,7 +13,7 @@
   llenar sus datos NO tiene que volver a cambiarla. Con una sola marca habría que repetir el primer
   paso o dar por bueno el segundo.
 
-  EL NOMBRE, PARTIDO EN CUATRO, IGUAL QUE EN EL ALTA EXTERNA. La dirección de producto lo pidió
+  EL NOMBRE, PARTIDO EN CUATRO, IGUAL QUE EN EL ALTA EXTERNA. Quedó definido
   explícitamente: «es importante dejar todos los formularios de nombre con la misma estructura».
   `NombreCompleto` NO se retira: se conserva y se compone a partir de las cuatro partes, porque lo
   leen la bitácora, las fichas y media consola, y porque las cuentas que ya existen solo tienen eso.

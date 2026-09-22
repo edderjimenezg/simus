@@ -51,7 +51,7 @@ export const ENLACES_DEL_PANEL: readonly EnlacePanel[] = [
  * <b>REDISEÑO DEL 1 DE SEPTIEMBRE DE 2026.</b> Hasta entonces esta clase tenía casi 800 líneas: la
  * navegación por pestañas, la carga del perfil, la lista de Festivales, las notificaciones, el
  * diálogo de la ficha y el álgebra de sus reglas de bloqueo, todo junto porque todo vivía detrás
- * de una sola pestaña o de otra. La dirección de producto lo señaló: «mezcla contexto de sesión,
+ * de una sola pestaña o de otra. El criterio es este: «mezcla contexto de sesión,
  * edición de organización, avisos, procesos, formularios y ficha de Festival en una misma
  * jerarquía visual» — la sensación de «cajas dentro de cajas».
  *
@@ -60,7 +60,7 @@ export const ENLACES_DEL_PANEL: readonly EnlacePanel[] = [
  * secciones. Los Festivales, la ficha y sus reglas de bloqueo se mudaron a
  * `SeccionEcosistemaComponent`, que es la única que los usa.
  *
- * <b>Por qué el panel va sobre fondo claro.</b> Lo pidió el usuario: la
+ * <b>Por qué el panel va sobre fondo claro.</b> El criterio es este: la
  * barra de navegación es `fixed` y solo se pinta sólida en las páginas que lo declaran en
  * `app.component.ts`. La página tiene identificador propio —`PAGE_IDS.miPanel`— y el contenido
  * arranca a `pt-20`, igual que Editorial y Agenda.
@@ -113,7 +113,7 @@ export class PanelOrganizacionPageComponent implements OnInit {
   /**
    * La campana abre un panel propio, no navega a Solicitudes.
    *
-   * <b>SON DOS COSAS DISTINTAS.</b> El usuario lo señaló: «el botón de
+   * <b>SON DOS COSAS DISTINTAS.</b> El criterio es este: «el botón de
    * avisos debería permitir consultar directamente las notificaciones, mientras que las
    * solicitudes deberían mantenerse como un módulo independiente». Solicitudes es lo que la
    * organización envió y en qué punto está -un cajón de trabajo propio-; los avisos son lo que el

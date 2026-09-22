@@ -238,7 +238,7 @@ public sealed class Pnmc059VocabularioEstadosTests : IClassFixture<TestWebApplic
         // EL FILTRO LLEVA LA TABLA, Y NO ES ADORNO. Hasta el 25 ago 2026 filtraba solo por
         // RecordId, y eso solo funcionaba mientras el identificador del festival no coincidiera
         // con el de OTRO registro auditado. Coincidio en cuanto la siembra gano una entidad mas
-        // —la organizacion institucional del bloque B2 tomo IdEntidad 1 y corrio las demas—: la
+        // —la organizacion institucional tomo IdEntidad 1 y corrio las demas—: la
         // organizacion de esta prueba paso a tener el mismo numero que el festival, y sus dos
         // filas de `Entidades`, que llevan ValoresNuevos nulo, entraron en la lista y reventaron
         // el `Single` con una NullReferenceException.

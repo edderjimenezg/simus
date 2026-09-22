@@ -28,7 +28,7 @@ describe('IndicadorDeEstadoComponent', () => {
     const indicador = raiz().querySelector('[data-indicador-de-estado]')!;
 
     // LA PILDORA ERA EL RECUADRO REDONDEADO DE COLOR con el estado escrito dentro. Es justo lo que
-    // el usuario pidió retirar de todo el diseño.
+    // Se define retirar de todo el diseño.
     expect(indicador.className).not.toContain('rounded-full');
     expect(indicador.querySelector('svg')).not.toBeNull();
   });

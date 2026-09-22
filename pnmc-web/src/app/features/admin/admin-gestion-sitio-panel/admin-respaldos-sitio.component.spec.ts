@@ -3,7 +3,7 @@ import { AdminRespaldosSitioComponent } from './admin-respaldos-sitio.component'
 import { ContenidoWebApiService } from '../../../core/services/contenido-web-api.service';
 
 /**
- * El área «Respaldos» de Gestión del sitio (corte 05B).
+ * El área «Respaldos» de Gestión del sitio ().
  *
  * <b>De dónde viene.</b> Hasta esta versión, exportar e importar vivían dentro del editor de
  * textos, que era la única puerta al CMS. Al darle a Gestión del sitio sus seis áreas, dejar

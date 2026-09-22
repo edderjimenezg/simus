@@ -191,7 +191,7 @@ export class NavigationComponent {
    *
    * <b>Y ANTES TAMBIEN DECLARABA SUS PROPIAS DIRECCIONES.</b> Ninguna de las cinco que no son
    * Festivales existía en el enrutador: `ecosistema/mercados-musicales`, `escuelas`, `escenarios`,
-   * `redes-documentacion` y `luteria` caían en «no encontrado». La dirección de producto lo encontró
+   * `redes-documentacion` y `luteria` caían en «no encontrado». se detectó
    * entrando por la de mercados, que además SÍ tiene directorio desde
    * —el enrutador la había registrado con el nombre corto, `ecosistema/mercados`—. Un menú con su
    * propia lista de destinos es una segunda copia que diverge en cuanto una ruta cambia de nombre.
@@ -257,7 +257,7 @@ export class NavigationComponent {
    *
    * En estado solido el borde inferior era `border-white/5` —blanco al 5 % sobre morado—: contra un
    * fondo claro como el del panel de la organizacion no se distingue de la propia barra, y la
-   * pantalla parecia empezar sin borde. Lo señalo el usuario: «persiste la
+   * pantalla parecia empezar sin borde. Lo señalo criterio: «persiste la
    * falta de delimitacion entre la web y la barra de navegacion».
    *
    * SE RESUELVE CON EL VERDE DE LA MARCA Y NO CON UN GRIS: una linea gris sobre morado se lee como
@@ -333,7 +333,7 @@ export class NavigationComponent {
    *
    * Pulsarlo abría y cerraba el panel y no llevaba a ninguna parte: para entrar a la portada de la
    * sección había que abrir el menú y bajar hasta una tarjeta final llamada «Ver el ecosistema
-   * completo». El usuario lo pidió: «debe ser cliqueable para optimizar la
+   * completo». El criterio es este: «debe ser cliqueable para optimizar la
    * navegación y limpiar el menú adyacente». Son la misma frase: el botón se lleva el destino y esa
    * tarjeta sobra.
    *

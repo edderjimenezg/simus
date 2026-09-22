@@ -68,7 +68,7 @@ import {
  * en texto libre— para un modelo que guarda más de treinta, además de cuatro listas que son lo que
  * distingue una ficha catalográfica de un formulario cualquiera: los créditos con su papel, los
  * identificadores con su cualificador, las vías de consulta y las cuatro facetas de tipología. Lo
- * dijo la dirección de producto: «toda la experiencia de usuario para crear una nueva publicación no se
+ * dijo criterio: «toda la experiencia de usuario para crear una nueva publicación no se
  * acerca para nada al detalle que tienen realmente este tipo de registros».
  *
  * <b>Y LO QUE TIENE LISTA SE ELIGE, NO SE ESCRIBE.</b> Idioma, tipo de publicación, ámbito, formato,
@@ -403,7 +403,7 @@ export class AdminCatalogoEditorialPanelComponent {
   // módulo donde lo que importa es qué falta aprobar, eso basta. Aquí no: son 171 publicaciones
   // INDEPENDIENTES, y quien las gestiona no pregunta «¿qué está en borrador?» sino «¿qué hay de
   // Banda?», «¿qué publicó el Programa Nacional de Estímulos?», «¿cuántas cartillas de 2011 hay?».
-  // Lo dijo la dirección de producto: hay que poder navegar por categorías, autores, títulos y
+  // El criterio es este: hay que poder navegar por categorías, autores, títulos y
   // registros, «de manera completa, clara, gestionable».
   //
   // EL ESTADO NO DESAPARECE: deja de ser el eje. Sigue siendo una faceta más, porque publicar y
@@ -880,7 +880,7 @@ export class AdminCatalogoEditorialPanelComponent {
   /**
    * Explorar desde UN TRAMO de la ruta de una fila, al nivel de ese tramo.
    *
-   * <b>ESTE ERA UN DEFECTO DE VERDAD, y la dirección de producto lo describió exacto</b>: «al
+   * <b>ESTE ERA UN DEFECTO DE VERDAD, y está definido exacto</b>: «al
    * seleccionar una categoría general como Repertorio, el sistema termina activando "Dentro de:
    * Orquesta"». La ruta se pintaba partida en tramos para que la jerarquía se viera —bien— pero
    * los tres botones llamaban al mismo sitio con la ruta ENTERA, así que pulsar «Repertorio»
@@ -951,7 +951,7 @@ export class AdminCatalogoEditorialPanelComponent {
       // Decía `set(this.facetaUbicacion())`, y como el efecto que escribe la dirección dispara una
       // navegación, cualquier cambio de cualquier filtro volvía a pasar por aquí: quitar una
       // faceta cualquiera dejaba `ubicacion` vacío un instante y el árbol entero se plegaba solo.
-      // Lo reportó la dirección de producto: «una vez des-selecciono cualquier filtro se compacta
+      // Lo reportó criterio: «una vez des-selecciono cualquier filtro se compacta
       // automáticamente todas las subcategorías, no tiene sentido ese comportamiento».
       //
       // Abrir sí: llegar con `?ubicacion=Repertorio` tiene que enseñar sus rutas. Cerrar es un
@@ -1317,7 +1317,7 @@ export class AdminCatalogoEditorialPanelComponent {
    * Los idiomas de la obra: el principal y, si hace falta, los demás.
    *
    * <b>SIETE CASILLAS NO ERAN LA RESPUESTA.</b> La primera versión pintaba una casilla por idioma
-   * del vocabulario, y la dirección de producto lo paró: para 171 fichas de las que 164 son solo en
+   * del vocabulario, y quedó descartado: para 171 fichas de las que 164 son solo en
    * español, obligar a puntear una lista es pedirle a todo el mundo que resuelva el caso raro. Un
    * idioma se ELIGE; un segundo idioma se AÑADE, que es una acción y no una pregunta.
    */
@@ -1374,7 +1374,7 @@ export class AdminCatalogoEditorialPanelComponent {
   /**
    * ¿Tiene sentido pedir tamaño y número de páginas?
    *
-   * SOLO SI HAY OBJETO FISICO. Lo señaló la dirección de producto: «la descripción física solamente
+   * SOLO SI HAY OBJETO FISICO. El criterio es este: «la descripción física solamente
    * aplica cuando el formato es físico, o mixto, no cuando es digital». Comprobado contra el acervo:
    * de las 17 digitales, las cuatro que traen tamaño son tres plegables IMPRESOS y la versión
    * digital de un libro de 500 páginas —es decir, casos mal clasificados o mixtos—.

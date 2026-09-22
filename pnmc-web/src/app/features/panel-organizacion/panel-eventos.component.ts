@@ -242,7 +242,7 @@ export class PanelEventosComponent implements OnInit {
    * <b>«REVISA LOS CAMPOS» SOBRE UNOS CAMPOS QUE ESTABAN BIEN.</b> Esto se tragaba la respuesta
    * entera: el servidor decía exactamente qué pasaba —un proceso que no es tuyo, una hora de fin
    * sin hora de inicio, un municipio sin departamento— y la pantalla lo cambiaba por una frase que
-   * manda a buscar un error donde no lo hay. La dirección de producto lo reportó el 15 de septiembre
+   * manda a buscar un error donde no lo hay. se detectó el 15 de septiembre
    * de 2026 sobre un evento que fallaba por una columna que este canal no escribía.
    *
    * El respaldo genérico se queda para lo que de verdad no trae motivo —una red caída—, y dice que

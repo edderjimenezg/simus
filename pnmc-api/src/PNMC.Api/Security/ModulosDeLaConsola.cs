@@ -5,7 +5,7 @@ namespace PNMC.Api.Security;
 /// </summary>
 /// <remarks>
 /// <para>
-/// <b>POR CUENTA Y NO POR ROL, y esa fue la decisión.</b> La dirección de producto la tomó el 15 de
+/// <b>POR CUENTA Y NO POR ROL, y esa fue la decisión.</b> quedó fijado el 15 de
 /// septiembre de 2026: «los permisos por gestor se definen por cuenta, es decir, debería haber algún
 /// apartado donde yo pueda seleccionar cuál de los módulos que actualmente aparece en la izquierda
 /// se le activan». Un permiso por rol obliga a inventar un rol nuevo cada vez que una persona

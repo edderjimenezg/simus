@@ -121,7 +121,7 @@ public sealed class PerfilDeLaOrganizacionTests : IClassFixture<TestWebApplicati
         //
         // ERA `contacto@organizacion.test` PARA TODAS. Cada prueba de este fichero registra su
         // propia cuenta —con su propia organizacion— y despues le guardaba el perfil con ese correo:
-        // siete organizaciones distintas compartiendo buzon. El 28 de agosto de 2026 el usuario pidio
+        // siete organizaciones distintas compartiendo buzon. El 28 de agosto de 2026 Se define
         // que «un correo debe estar atado a una sola organizacion», y con la regla puesta la segunda
         // en guardar recibia un 400 legitimo. Lo que estaba mal era el andamio, no la regla.
         ["correoContacto"] = $"contacto.{Ranura(nombre)}@organizacion.test",

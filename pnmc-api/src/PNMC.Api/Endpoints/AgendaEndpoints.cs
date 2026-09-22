@@ -124,7 +124,7 @@ public static class AgendaEndpoints
     /// <param name="procedencia">
     /// De quién es el evento: <c>institucional</c> —todo lo que no entró desde el espacio de una
     /// organización— o <c>externo</c>. Es la misma separación que ya usa el Banco de archivos, y
-    /// la pidió la dirección de producto: «el apartado de agenda debería
+    /// la pidió criterio: «el apartado de agenda debería
     /// tener dos pestañas, la institucional o administrativa y la de externos».
     ///
     /// SE FILTRA AQUI Y NO EN EL NAVEGADOR porque la lista pagina de doce en doce: separar la
@@ -137,7 +137,7 @@ public static class AgendaEndpoints
     ///
     /// ORDENA EL SERVIDOR Y NO EL NAVEGADOR, y esa es la razón de que exista este parámetro. La
     /// consola pinta doce filas de cuarenta páginas: ordenar las doce que se tienen delante no
-    /// reordena la lista, la baraja dentro de su página. La dirección de producto lo reportó el 15 de
+    /// reordena la lista, la baraja dentro de su página. se detectó el 15 de
     /// septiembre de 2026: «al cliquear en el nombre de la columna debe ser de todos, no solo de
     /// los de la página visible, por eso en la página 1 no me aparecía nunca ningún publicado».
     /// </param>

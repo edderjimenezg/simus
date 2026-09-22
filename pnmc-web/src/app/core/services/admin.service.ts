@@ -1306,7 +1306,7 @@ export class AdminService {
   }
 
   /**
-   * ELIMINAR UN FESTIVAL PUBLICADO DEL ECOSISTEMA, DIRECTO. El usuario lo pidió: hasta ahora solo existía el retiro que la propia organización solicitaba;
+   * ELIMINAR UN FESTIVAL PUBLICADO DEL ECOSISTEMA, DIRECTO. El criterio es este: hasta ahora solo existía el retiro que la propia organización solicitaba;
    * esto lo hace la administración sin esperar esa solicitud -piénsese en un Festival duplicado o
    * fraudulento-. Es un archivado, no un borrado real: el registro conserva su historial.
    */

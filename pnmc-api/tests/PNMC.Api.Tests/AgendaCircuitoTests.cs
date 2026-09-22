@@ -505,7 +505,7 @@ public sealed class AgendaCircuitoTests
     {
         // EL DEFECTO QUE TRAJO ESTA PRUEBA. La tabla ordenaba en el navegador las doce filas que
         // traía la página. Con cuarenta páginas, pulsar «Estado» no subía ningún publicado a la
-        // primera página: seguían en la treinta. La dirección de producto lo reportó el 15 de
+        // primera página: seguían en la treinta. se detectó el 15 de
         // septiembre de 2026: «debe ser de todos, no solo de los de la página visible, por eso en
         // la página 1 no me aparecía nunca ningún publicado».
         await using var factory = new TestWebApplicationFactory();

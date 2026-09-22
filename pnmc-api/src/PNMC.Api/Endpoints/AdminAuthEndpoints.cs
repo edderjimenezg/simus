@@ -324,7 +324,7 @@ public static class AdminAuthEndpoints
 
         // EL PRIMER INGRESO, EN DOS PASOS Y EN ESTE ORDEN. Una cuenta administrativa se entrega con
         // correo y contraseña por omisión; mientras no la cambie, esa credencial la conocen dos
-        // personas. Después dice quién es. Lo decidió la dirección de producto el 15 de septiembre de
+        // personas. Después dice quién es. Lo decidió la dirección de producto de
         // 2026 y describe una creación deliberadamente controlada: los módulos se deciden ANTES de
         // entregar la cuenta.
         auth.MapPost("/mi-contrasena", async (

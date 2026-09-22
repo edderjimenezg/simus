@@ -1,7 +1,7 @@
 /*
     SIMUS · El ciclo de vida de una organización, en un solo eje
 
-    QUE PROBLEMA CIERRA. El usuario lo dijo: «no entiendo los estados de
+    QUE PROBLEMA CIERRA. El criterio es este: «no entiendo los estados de
     organizaciones». Y tenía razón por dos motivos a la vez.
 
     1. EL VOCABULARIO NO ERA EL SUYO. Los estados se llamaban `registrada`, `verificada`,
@@ -27,7 +27,7 @@
     puedan discrepar, y eso lo impone `CK_Entidades_VigenciaCoherente` en la propia base. Ningún
     camino de código puede desincronizarlas, ni siquiera uno escrito mañana.
 
-    LA CONFIRMACION DE CORREO SE MONTA ENTERA AUNQUE FALTE EL PROVEEDOR. Decisión del usuario, mismo
+    LA CONFIRMACION DE CORREO SE MONTA ENTERA AUNQUE FALTE EL PROVEEDOR. decisión de producto, mismo
     día: «deja montado la funcionalidad como si ya existiese el proveedor de correo». Se añaden las
     dos columnas de la cuenta y la tabla de los enlaces de confirmación. Lo único que no existe es el
     transporte, que vive aislado en `IEnviadorDeCorreo`: el mensaje saliente se registra en

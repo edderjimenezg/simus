@@ -36,7 +36,7 @@ export type TonoDeEstado =
 /**
  * El indicador de estado de un registro: un icono, y el texto como alternativa.
  *
- * <b>POR QUE EXISTE.</b> El usuario lo pidió, y para todo el proyecto:
+ * <b>POR QUE EXISTE.</b> está definido, y para todo el proyecto:
  * «No me gustan este tipo de píldoras en general en todo el diseño, reemplazarlas por iconografía y
  * un texto alternativo al ponerse encima o algo así». Las píldoras —recuadro redondeado de color con
  * el nombre del estado dentro— se habían vuelto el recurso por omisión en festivales, ediciones,

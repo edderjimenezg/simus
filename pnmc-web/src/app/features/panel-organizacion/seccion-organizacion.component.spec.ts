@@ -23,7 +23,7 @@ import {
   QUÉ SE INSTRUMENTA AQUÍ.
 
   El defecto reportado: `/ecosistema/mi-panel?pestana=organizacion` abría
-  directamente en el formulario con los campos rellenos. Textual del usuario: «el default es
+  directamente en el formulario con los campos rellenos. Criterio: «el default es
   sin edición los datos que actualmente tiene». Se invirtió: por omisión se leen los datos y el
   formulario aparece al pulsar «Editar», ya relleno con lo que hay guardado.
 

@@ -69,7 +69,7 @@ describe('el perfil de una cuenta administrativa', () => {
   });
 
   it('el alta no pide quién es la persona: eso lo dice ella en su primer ingreso', () => {
-    // UNA CUENTA ADMINISTRATIVA SE ENTREGA, NO SE RELLENA POR OTRO. La dirección de producto lo fijó
+    // UNA CUENTA ADMINISTRATIVA SE ENTREGA, NO SE RELLENA POR OTRO. quedó fijado
     //: «a ellos se les registra simplemente un correo y una contraseña
     // por defecto… una vez cambien la contraseña se les pide completar esos datos básicos». Pedir
     // aquí la cédula obliga a quien crea la cuenta a ir a buscarla, y deja un dato de identidad

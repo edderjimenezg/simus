@@ -99,7 +99,7 @@ public static class GuardasDelCms
     /// <b>No guarda</b>, por el mismo motivo que <see cref="RecordHistoryAsync"/>: entra en el
     /// mismo <c>SaveChanges</c> que el cambio que describe.
     /// <para>
-    /// <b>NO GUARDA EL ARCHIVO.</b> Decisión del usuario: «si se remplaza
+    /// <b>NO GUARDA EL ARCHIVO.</b> Criterio de producto: «si se remplaza
     /// la imagen, desaparece, no se guarda». Se registra quién, cuándo, qué acción y las señas de
     /// lo que estuvo ahí —tipo, peso, medidas, huella—, que es lo que hace legible el registro sin
     /// conservar megabytes. La consecuencia es que no hay «restaurar».

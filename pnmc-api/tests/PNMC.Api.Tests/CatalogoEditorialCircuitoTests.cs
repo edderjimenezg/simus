@@ -496,7 +496,7 @@ public sealed class CatalogoEditorialCircuitoTests
     /// </summary>
     /// <remarks>
     /// <para>
-    /// EL CRITERIO ES EL DE UNA BIBLIOTECA, y lo fijó la dirección de producto el 13 de septiembre de
+    /// EL CRITERIO ES EL DE UNA BIBLIOTECA, y lo fijó la dirección de producto de
     /// 2026: se publica lo que sirve para identificar, encontrar y conseguir una obra, y nada del
     /// trabajo de catalogarla. Esta prueba existe porque la frontera se había abierto sin que nadie
     /// lo decidiera: las dos rutas públicas devolvían el DTO de la consola con un interruptor que

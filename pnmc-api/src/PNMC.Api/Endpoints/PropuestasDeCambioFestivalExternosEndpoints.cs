@@ -309,7 +309,7 @@ public static class PropuestasDeCambioFestivalExternosEndpoints
             CorreoContacto = festival.ContactEmail,
             // La version inicial de un festival historico hereda el contacto que la cabecera tenia
             // en ese momento. A partir de aqui manda la version: la cabecera puede cambiar sin que
-            // la ficha publicada se mueva, que es todo el punto del bloque B6.
+            // la ficha publicada se mueva, que es todo el punto.
             TelefonoContacto = festival.ContactPhone,
             Instagram = festival.InstagramUrl,
             Facebook = festival.FacebookUrl,
