@@ -1,0 +1,123 @@
+<!--
+  LA CONVERSACION, LA EVIDENCIA Y EL ALCANCE. Cada respuesta de datos trae su tabla con la fuente,
+  y encima de ella se dice sobre QUE se calculó: una cifra de toda la operación presentada dentro de
+  la ficha de un Festival parece una cifra de ese Festival, y eso es peor que no responder.
+-->
+<div class="flex min-h-0 flex-1 flex-col overflow-hidden">
+  <header class="border-b border-slate-200 px-5 py-4">
+    <div class="flex flex-wrap items-center justify-between gap-3">
+      @if (conTitulo) {
+        <div>
+          <p class="workspace-kicker">Consulta guiada</p>
+          <h2 class="mt-1 font-alternate text-xl font-bold text-slate-800">Asistente de consulta</h2>
+        </div>
+      } @else {
+        <p class="font-alternate text-xs font-bold uppercase tracking-widest text-slate-400">Reglas y fuentes declaradas</p>
+      }
+      @if (cargandoEstado()) {
+        <span class="text-xs text-slate-500">Verificando…</span>
+      } @else if (estado(); as estadoActual) {
+        <!--
+          ERA UNA PILDORA VERDE, y el proyecto no usa píldoras: un estado se dice con icono y
+          texto. El punto de color se queda como señal, pero suelto y no dentro de una cápsula con
+          fondo, que compite con el título que tiene al lado.
+        -->
+        <span data-modo-del-asistente class="inline-flex items-center gap-1.5 text-dato font-bold text-verde-texto">
+          <svg lucideCircleCheck [size]="13" aria-hidden="true"></svg>{{ estadoActual.modeloLocalDisponible ? 'Modelo local' : 'Reglas verificadas' }}
+        </span>
+      }
+    </div>
+    @if (errorEstado()) {
+      <p role="alert" class="mt-3 text-xs text-red-700">{{ errorEstado() }}
+        <button type="button" (click)="cargarEstado()" class="font-bold underline">Reintentar</button></p>
+    } @else if (estado(); as estadoActual) {
+      <p class="mt-2 text-xs leading-relaxed text-slate-500">{{ estadoActual.mensaje }}</p>
+    }
+  </header>
+
+  <div aria-live="polite" [attr.aria-busy]="consultando()"
+       class="flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto bg-slate-50/60 p-5">
+    @for (turno of turnos(); track $index) {
+      <article [class.justify-end]="turno.papel === 'usuario'" class="flex">
+        <div [class]="turno.papel === 'usuario'
+              ? 'max-w-[88%] rounded-2xl rounded-br-sm bg-morado px-4 py-3 text-sm leading-relaxed text-white'
+              : 'max-w-[96%] rounded-2xl rounded-bl-sm border border-slate-200 bg-white px-4 py-3 text-sm leading-relaxed text-slate-700'">
+          <p [class.text-red-700]="turno.esError" class="whitespace-pre-wrap">{{ turno.texto }}</p>
+
+          @if (turno.contexto) {
+            <p data-alcance-de-la-respuesta class="mt-3 text-dato font-semibold text-slate-500">
+              Calculado sobre: {{ turno.contexto }}
+            </p>
+          }
+
+          @if (turno.consulta; as consulta) {
+            <div class="mt-3 overflow-hidden rounded-lg border border-slate-200">
+              <div class="bg-slate-50 px-3 py-2.5">
+                <h3 class="text-xs font-bold text-slate-800">{{ consulta.titulo }}</h3>
+                <p class="mt-1 text-dato leading-relaxed text-slate-500"><b>Alcance:</b> {{ consulta.alcance }}</p>
+              </div>
+              <div class="overflow-x-auto">
+                <table class="w-full min-w-[20rem] text-left text-xs">
+                  <!--
+                    EL TITULO VA TAMBIEN DENTRO DE LA TABLA, y oculto a la vista. Quien navega con
+                    lector de pantalla salta de tabla en tabla y las oye por su nombre; sin `caption`
+                    todas se anuncian igual —«tabla, dos columnas»— y el rótulo que sí está en
+                    pantalla, en el `h3` de arriba, queda fuera de ese recorrido. No es repetición
+                    visual: no se ve.
+                  -->
+                  <caption class="sr-only">{{ consulta.titulo }}. {{ consulta.alcance }}</caption>
+                  <thead class="border-y border-slate-200 bg-white text-dato uppercase tracking-wide text-slate-500">
+                    <tr>@for (columna of consulta.columnas; track columna) { <th scope="col" class="px-3 py-2 font-bold">{{ columna }}</th> }</tr>
+                  </thead>
+                  <tbody class="divide-y divide-slate-100">
+                    @for (fila of consulta.filas; track $index) {
+                      <tr>@for (celda of fila; track $index) { <td class="px-3 py-2 text-slate-600">{{ celda }}</td> }</tr>
+                    } @empty {
+                      <tr><td [attr.colspan]="consulta.columnas.length" class="px-3 py-3 text-slate-500">No hay filas para esta consulta.</td></tr>
+                    }
+                  </tbody>
+                </table>
+              </div>
+              <p class="border-t border-slate-200 bg-slate-50 px-3 py-2 text-dato leading-relaxed text-slate-500"><b>Fuente:</b> {{ consulta.fuente }}</p>
+            </div>
+          }
+
+          @if (turno.generadoEn) {
+            <p class="mt-2 text-dato text-slate-400">{{ etiquetaDelDecisor(turno.resueltoPor) }} · {{ fecha(turno.generadoEn) }}</p>
+          }
+        </div>
+      </article>
+    }
+    @if (consultando()) { <p role="status" class="text-xs text-slate-500">Consultando los datos…</p> }
+  </div>
+
+  <footer class="border-t border-slate-200 p-4">
+    @if (estado()?.sugerencias; as sugerencias) {
+      <!--
+        LAS SUGERENCIAS SON PREGUNTAS QUE EL INTERPRETE RESUELVE, comprobado en
+        `Cada_sugerencia_la_resuelve_el_interprete`. Una que devolviera «no encontré una consulta»
+        haría concluir -con razón- que el asistente no sabe responder ni sus propios ejemplos.
+      -->
+      <div class="mb-3 flex gap-2 overflow-x-auto pb-1" aria-label="Preguntas sugeridas">
+        @for (sugerencia of sugerencias; track sugerencia) {
+          <!-- Cápsulas también: el mismo criterio. Aquí basta el contorno tranquilo del proyecto. -->
+          <button type="button" (click)="usarSugerencia(sugerencia)" [disabled]="!puedePreguntar()" data-sugerencia
+            class="shrink-0 rounded-lg border border-filete px-3 py-1.5 text-dato font-semibold text-prosa hover:border-morado-claro hover:text-morado disabled:opacity-50">{{ sugerencia }}</button>
+        }
+      </div>
+    }
+    <div class="flex items-end gap-2">
+      <label class="min-w-0 flex-1">
+        <span class="sr-only">Pregunta para el asistente</span>
+        <textarea #campoDePregunta rows="2" maxlength="1000" data-pregunta
+          [ngModel]="borrador()" (ngModelChange)="borrador.set($event)" (keydown)="alPulsarTecla($event)"
+          [disabled]="!puedePreguntar()"
+          placeholder="Escribe tu pregunta…"
+          class="block w-full resize-none rounded-xl border border-slate-300 px-3 py-2.5 text-sm text-slate-700 outline-none focus:border-morado-claro focus:ring-2 focus:ring-morado-claro/20 disabled:bg-slate-100"></textarea>
+      </label>
+      <button type="button" (click)="preguntar()" [disabled]="!borrador().trim() || !puedePreguntar()" data-preguntar
+        class="min-h-11 rounded-xl bg-morado px-4 text-xs font-bold text-white hover:bg-morado-claro disabled:cursor-not-allowed disabled:opacity-40">Preguntar</button>
+    </div>
+    <p class="mt-2 text-dato leading-relaxed text-slate-400">{{ limite }}</p>
+  </footer>
+</div>

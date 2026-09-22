@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <title>PNMC — Plan Nacional de Música para la Convivencia</title>
+  <base href="/">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <!-- SEO -->
+  <meta name="description" content="Plan Nacional de Música para la Convivencia (PNMC) 2025–2035: un pacto colectivo que reconoce la música como derecho cultural y bien común en todo el territorio nacional. Ecosistema musical, ejes, editorial y noticias.">
+  <meta name="theme-color" content="#291242">
+  <link rel="canonical" href="https://pnmc.mincultura.gov.co/">
+
+  <!-- Open Graph -->
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="PNMC — Plan Nacional de Música para la Convivencia">
+  <meta property="og:title" content="PNMC — Plan Nacional de Música para la Convivencia">
+  <meta property="og:description" content="Un pacto colectivo que reconoce la música como un derecho cultural y un bien común en todo el territorio nacional.">
+  <meta property="og:locale" content="es_CO">
+  <meta property="og:url" content="https://pnmc.mincultura.gov.co/">
+  <meta property="og:image" content="/assets/branding/pnmc-blanco.png">
+
+  <!-- Twitter / X -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="PNMC — Plan Nacional de Música para la Convivencia">
+  <meta name="twitter:description" content="Un pacto colectivo que reconoce la música como un derecho cultural y un bien común en todo el territorio nacional.">
+  <meta name="twitter:image" content="/assets/branding/pnmc-blanco.png">
+
+  <!-- Icons -->
+  <!--
+    LA MARCA DEL PNMC, NO LA DE ANGULAR. Hasta este `favicon.ico` era
+    el que deja `ng new`: el logotipo de Angular en rosa y morado. No es un descuido de este
+    desarrollo —el de el diseño aprobado del portal y el de un desarrollo anterior llevan el mismo— pero es lo primero que se ve de
+    un sitio, en la pestaña y en los marcadores.
+
+    LOS DOS FICHEROS SE GENERAN, NO SE DIBUJAN A MANO: `tools/genera-favicon.py` los saca de
+    `public/Icono PNMC Negro.png`, la marca de 2000x2000 que ya estaba en el proyecto, teñida con
+    el morado del tema. El script explica por qué engrosa las crestas antes de reducir; en corto:
+    la tinta cubre el 15 % del lienzo y a 16 px el promedio se la come.
+
+    Si cambia la marca, se sustituye ese PNG y se vuelve a ejecutar el script.
+  -->
+  <!--
+    EL PNG VA PRIMERO Y EL `.ICO` QUEDA DE RESPALDO, y el orden importa por una razón concreta: un
+    navegador guarda el icono POR SU URL y lo conserva con muchísima insistencia. Cambiar el
+    contenido de `/favicon.ico` deja a quien ya visitó el sitio viendo el anterior durante días;
+    estas direcciones son nuevas, así que entran a la primera. Los navegadores modernos además
+    prefieren el PNG declarado con su medida.
+  -->
+  <link rel="icon" type="image/png" sizes="32x32" href="/icono-pnmc-32.png">
+  <link rel="icon" type="image/png" sizes="192x192" href="/icono-pnmc-192.png">
+  <link rel="icon" type="image/x-icon" href="/favicon.ico">
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+
+  <!-- Fuentes: preconnect + carga no bloqueante -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preload" as="style"
+    href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@300;400;600;700&family=Oswald:wght@400;600;700&family=Outfit:wght@400;600;800;900&family=Plus+Jakarta+Sans:wght@400;600;800&display=swap"
+    onload="this.onload=null;this.rel='stylesheet'">
+  <noscript>
+    <link rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@300;400;600;700&family=Oswald:wght@400;600;700&family=Outfit:wght@400;600;800;900&family=Plus+Jakarta+Sans:wght@400;600;800&display=swap">
+  </noscript>
+</head>
+<body>
+  <app-root></app-root>
+</body>
+</html>

@@ -1,0 +1,111 @@
+<!--
+  OCUPA LA PANTALLA A PROPOSITO. No hay nada más que hacer hasta terminar el recorrido, y un diálogo
+  sobre una consola que no se puede usar solo invitaría a buscar la forma de cerrarlo.
+-->
+<section class="grid min-h-screen place-items-center bg-morado px-4 py-10">
+  <div class="dialogo dialogo--hoja w-full max-w-lg">
+    <p class="dialogo__contexto">Espacio de Gestión Administrativa</p>
+    <h1 class="dialogo__titulo">
+      {{ paso() === 'contrasena' ? 'Cambia tu contraseña' : 'Dinos quién eres' }}
+    </h1>
+
+    @if (paso() === 'contrasena') {
+      <p class="mt-3 text-cuerpo leading-relaxed text-prosa">
+        Tu cuenta se creó con una contraseña que eligió otra persona.
+        <b>Mientras no la cambies, esa contraseña la conocen dos.</b>
+        @if (correo()) { <span class="block mt-1">Estás entrando como <b class="break-all">{{ correo() }}</b>.</span> }
+      </p>
+
+      <div class="mt-5 grid gap-4">
+        <label class="campo">
+          <span class="campo__rotulo">Contraseña actual</span>
+          <input type="password" name="actual" autocomplete="current-password" data-actual
+            [ngModel]="actual()" (ngModelChange)="actual.set($event); error.set(null)" />
+        </label>
+        <label class="campo">
+          <span class="campo__rotulo">Contraseña nueva</span>
+          <input type="password" name="nueva" autocomplete="new-password" minlength="10" data-nueva
+            [ngModel]="nueva()" (ngModelChange)="nueva.set($event); error.set(null)" />
+          <small class="campo__ayuda">Al menos diez caracteres, y distinta de la que te entregaron.</small>
+        </label>
+        <label class="campo">
+          <span class="campo__rotulo">Repite la contraseña nueva</span>
+          <input type="password" name="repetida" autocomplete="new-password" data-repetida
+            [ngModel]="repetida()" (ngModelChange)="repetida.set($event); error.set(null)" />
+        </label>
+      </div>
+    } @else {
+      <p class="mt-3 text-cuerpo leading-relaxed text-prosa">
+        Ya está tu contraseña. Falta lo último: <b>quién eres</b>, para que cada cosa que hagas en la
+        consola quede a tu nombre y no al de un correo.
+      </p>
+
+      <div class="mt-5 grid gap-4 sm:grid-cols-2">
+        <label class="campo">
+          <span class="campo__rotulo">Primer nombre *</span>
+          <input type="text" name="primerNombre" autocomplete="given-name" data-primer-nombre
+            [ngModel]="perfil().primerNombre" (ngModelChange)="campoDelPerfil('primerNombre', $event)" />
+        </label>
+        <label class="campo">
+          <span class="campo__rotulo">Segundo nombre</span>
+          <input type="text" name="segundoNombre" data-segundo-nombre
+            [ngModel]="perfil().segundoNombre" (ngModelChange)="campoDelPerfil('segundoNombre', $event)" />
+        </label>
+        <label class="campo">
+          <span class="campo__rotulo">Primer apellido *</span>
+          <input type="text" name="primerApellido" autocomplete="family-name" data-primer-apellido
+            [ngModel]="perfil().primerApellido" (ngModelChange)="campoDelPerfil('primerApellido', $event)" />
+        </label>
+        <label class="campo">
+          <span class="campo__rotulo">Segundo apellido</span>
+          <input type="text" name="segundoApellido" data-segundo-apellido
+            [ngModel]="perfil().segundoApellido" (ngModelChange)="campoDelPerfil('segundoApellido', $event)" />
+        </label>
+        <label class="campo">
+          <span class="campo__rotulo">Tipo de documento *</span>
+          <select name="tipoDocumento" data-tipo-documento
+            [ngModel]="perfil().tipoDocumento" (ngModelChange)="campoDelPerfil('tipoDocumento', $event)">
+            <option value="">Elige uno</option>
+            @for (tipo of tiposDeDocumento(); track tipo.codigo) {
+              <option [value]="tipo.codigo">{{ tipo.etiqueta }}</option>
+            }
+          </select>
+        </label>
+        <label class="campo">
+          <span class="campo__rotulo">Número de documento *</span>
+          <input type="text" name="identificacion" inputmode="numeric" data-identificacion
+            [ngModel]="perfil().identificacion" (ngModelChange)="campoDelPerfil('identificacion', $event)" />
+        </label>
+        <label class="campo sm:col-span-2">
+          <span class="campo__rotulo">Teléfono de contacto</span>
+          <input type="tel" name="telefono" autocomplete="tel" data-telefono
+            [ngModel]="perfil().telefono" (ngModelChange)="campoDelPerfil('telefono', $event)" />
+        </label>
+      </div>
+    }
+
+    @if (error()) {
+      <p class="mt-4 text-cuerpo font-semibold text-amber-800" role="alert" data-error>{{ error() }}</p>
+    }
+
+    <!--
+      UNA SOLA ACCION Y NINGUNA SALIDA. No hay «más tarde»: el servidor responde 403 en todos los
+      módulos hasta que el recorrido termina, así que un botón de posponer solo llevaría a una
+      consola que no funciona.
+    -->
+    <div class="dialogo__acciones">
+      @if (paso() === 'contrasena') {
+        <app-boton importancia="principal" [ocupado]="trabajando()" identificador="guardar-contrasena"
+          (accion)="cambiarLaContrasena()">Cambiar la contraseña</app-boton>
+      } @else {
+        <app-boton importancia="principal" [ocupado]="trabajando()" identificador="guardar-perfil"
+          (accion)="guardarElPerfil()">Entrar a la consola</app-boton>
+      }
+    </div>
+
+    <!-- DOS PASOS, Y SE VE EN CUAL SE ESTA. -->
+    <p class="mt-4 text-dato text-rotulo" role="status">
+      Paso {{ paso() === 'contrasena' ? '1' : '2' }} de 2
+    </p>
+  </div>
+</section>

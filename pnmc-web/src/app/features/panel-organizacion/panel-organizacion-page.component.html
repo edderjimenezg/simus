@@ -1,0 +1,65 @@
+<section class="min-h-[100dvh] overflow-x-clip bg-[#f7f8f6] pb-16 pt-24 font-nunito text-slate-700">
+  @if (comprobandoSesion()) { <p role="status" class="py-16 text-center text-sm text-slate-500">Comprobando la sesión…</p> }
+  @else if (sesion()) {
+    <div class="mx-auto max-w-[96rem] px-4 sm:px-6 lg:px-8">
+      <header class="pb-6"><h1 class="sr-only">Gestión de organizaciones</h1>
+        <div class="flex items-center justify-between gap-4">
+          <p class="font-alternate text-xs font-bold uppercase tracking-[0.2em] text-verde-texto">Espacio de gestión</p>
+          <div class="ml-auto flex items-center">
+            <div class="relative" data-panel-avisos>
+              <button type="button" data-testid="campana-avisos" (click)="alternarAvisos()" [attr.aria-expanded]="avisosAbiertos()" aria-haspopup="menu" [attr.aria-label]="avisosSinLeer() === 0 ? 'Notificaciones: no tienes avisos sin leer' : (avisosSinLeer() === 1 ? 'Notificaciones: 1 aviso sin leer' : 'Notificaciones: ' + avisosSinLeer() + ' avisos sin leer')" class="relative grid h-10 w-10 place-items-center rounded-full text-slate-600 transition hover:bg-white hover:text-morado">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true" class="h-5 w-5"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg>
+                @if (avisosSinLeer()) { <span data-testid="campana-contador" class="absolute right-0 top-0 grid h-4 min-w-4 place-items-center rounded-full bg-verde-texto px-1 text-dato font-bold text-white">{{ avisosSinLeer() }}</span> }
+              </button>
+              @if (avisosAbiertos()) {
+                <div role="menu" data-testid="panel-avisos" class="absolute right-0 top-full z-[70] mt-2 w-[min(24rem,calc(100vw-2rem))] overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-xl">
+                  <div class="flex items-center justify-between gap-3 border-b border-slate-100 px-4 py-3"><div><p class="font-alternate text-xs font-bold uppercase tracking-widest text-morado">Avisos</p><p class="mt-0.5 text-xs text-slate-500">{{ avisosSinLeer() ? avisosSinLeer() + ' pendientes de lectura' : 'Estás al día' }}</p></div><div class="flex shrink-0 items-center gap-3">@if (avisosLeidos()) { <button type="button" data-testid="limpiar-avisos-leidos" (click)="limpiarAvisosLeidos()" class="text-xs font-bold text-slate-600 hover:text-morado hover:underline">Limpiar leídos</button> } @if (avisosSinLeer()) { <button type="button" (click)="marcarTodasLeidas()" class="text-xs font-bold text-verde-texto hover:underline">Marcar todos</button> }</div></div>
+                  @if (!notificaciones().length) { <p class="p-5 text-sm text-slate-500">No tienes avisos por revisar.</p> }
+                  @else { <ul class="max-h-[22rem] divide-y divide-slate-100 overflow-y-auto">@for (aviso of notificaciones(); track aviso.id) { <li class="px-4 py-3" [class.bg-emerald-50/50]="!aviso.readAt"><div class="flex gap-3"><span class="mt-1.5 h-2 w-2 shrink-0 rounded-full" [class.bg-verde-texto]="!aviso.readAt" [class.bg-slate-300]="aviso.readAt"></span><div class="min-w-0 flex-1">@if (rutaDelAviso(aviso); as ruta) { <a [routerLink]="ruta" [queryParams]="parametrosDelAviso(aviso)" (click)="abrirAviso(aviso)" class="group block rounded-md no-underline outline-none focus-visible:ring-2 focus-visible:ring-morado focus-visible:ring-offset-2"><p class="text-sm font-bold text-slate-900 group-hover:text-morado">{{ aviso.title }}</p><p class="mt-0.5 text-xs text-slate-600">{{ aviso.body }}</p><span class="mt-2 inline-block text-xs font-bold text-verde-texto group-hover:underline">{{ accionDelAviso(aviso) }}</span></a> } @else { <p class="text-sm font-bold text-slate-900">{{ aviso.title }}</p><p class="mt-0.5 text-xs text-slate-600">{{ aviso.body }}</p> }<div class="mt-2 flex items-center justify-between gap-2 text-dato text-slate-400"><span>{{ aviso.createdAt | date: 'd MMM, HH:mm' }}</span>@if (!aviso.readAt) { <button type="button" (click)="marcarLeida(aviso)" class="font-bold text-verde-texto hover:underline">Marcar como leída</button> }</div></div></div></li> }</ul> }
+                </div>
+              }
+            </div>
+          </div>
+        </div>
+        <div class="mt-6 flex flex-col justify-between gap-5 lg:flex-row lg:items-end">
+          <div class="flex min-w-0 items-center gap-4 sm:gap-5"><div aria-hidden="true" class="grid h-16 w-16 shrink-0 place-items-center rounded-2xl bg-gradient-to-br from-morado to-violet-700 text-xl font-black text-white shadow-sm">{{ inicialesOrganizacion() }}</div><div class="min-w-0">@if (ubicacionOrganizacion(); as ubicacion) { <p class="mb-1 text-sm text-slate-500">{{ ubicacion }}</p> }<h1 class="max-w-3xl font-alternate text-2xl font-bold uppercase leading-tight tracking-wide text-morado sm:text-3xl">{{ perfil()?.nombre || store.organizacionElegida()?.name || 'Organización' }}</h1>@if (perfil()?.fechaActualizacion) { <p class="mt-2 text-sm text-slate-500">Última actualización: {{ perfil()?.fechaActualizacion | date: 'd MMM y' }}</p> }</div></div>
+        </div>
+        @if (hayVariasOrganizaciones()) {
+          <label for="selector-organizacion" class="mt-5 block max-w-md campo__rotulo">Cambiar organización
+            <select id="selector-organizacion" [value]="organizacionId()" (change)="seleccionarOrganizacion($any($event.target).value)" class="mt-2 w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm font-normal normal-case tracking-normal text-slate-900">
+              @for (organizacion of organizaciones(); track organizacion.id) { <option [value]="organizacion.id">{{ organizacion.name }}</option> }
+            </select>
+          </label>
+        }
+      </header>
+      @if (errorPerfil()) { <p role="alert" class="mt-5 rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-800">{{ errorPerfil() }}</p> }
+      @if (!gestionandoFestival()) {
+      <nav aria-label="Secciones del panel de la organización" class="mt-7 border-b border-slate-200">
+        <div class="flex flex-wrap gap-x-1 gap-y-0">
+          @for (enlace of enlaces; track enlace.ruta) {
+            <a [routerLink]="enlace.ruta" routerLinkActive="border-morado text-morado" [routerLinkActiveOptions]="{ exact: enlace.ruta !== 'procesos' }" #activo="routerLinkActive"
+               class="-mb-px inline-flex items-center border-b-2 px-3 py-3 font-alternate text-xs font-bold uppercase tracking-widest no-underline transition focus-visible:relative focus-visible:z-10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-morado"
+               [class]="activo.isActive ? '' : 'border-transparent text-slate-500 hover:border-slate-300 hover:text-morado'">{{ enlace.etiqueta }}</a>
+          }
+        </div>
+      </nav>
+      @if (contextoDeSeccion(); as contexto) { <p class="mt-4 max-w-3xl text-sm leading-relaxed text-slate-500">{{ contexto.descripcion }}</p> }
+      }
+      <main [class]="gestionandoFestival() ? 'mt-5 min-w-0 max-w-none' : 'mt-6 min-w-0 max-w-none'"><router-outlet></router-outlet></main>
+
+      <!--
+        LA MISMA CAPACIDAD, DEL OTRO LADO DE LA PUERTA. Una organización tiene exactamente las
+        mismas preguntas que el Programa -«¿qué me falta?», «¿qué espera algo de mí?»- y hasta el 12
+        de septiembre de 2026 las respondía recorriendo cuatro pantallas y contando a ojo. El ámbito
+        lo decide el servidor por la ruta: aquí solo se ven los registros de esta organización.
+      -->
+      @if (organizacionId(); as id) {
+        <app-cajon-de-consulta-guiada
+          [base]="'/api/v1/externo/organizaciones/' + id + '/consulta-guiada'"
+          [contexto]="{ organizacionId: +id }"
+          saludo="Puedo decirte qué necesita tu atención, qué información les falta a tus Festivales, cómo van tus procesos y dónde están registrados."
+          limite="Solo lectura, y solo sobre los registros de tu organización. No puede crear, enviar, aprobar ni publicar nada por ti." />
+      }
+    </div>
+  } @else { <p role="status" class="py-16 text-center text-sm text-slate-500">Necesitas iniciar sesión para ver tu panel.</p> }
+</section>

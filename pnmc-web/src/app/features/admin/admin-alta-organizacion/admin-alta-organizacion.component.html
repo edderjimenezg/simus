@@ -1,0 +1,182 @@
+<!--
+  LOS PASOS SON SUYOS, EL ARMAZON ES EL DEL PROYECTO. Una organización no es un proceso del
+  Ecosistema: es el actor que responde por ellos, así que no se le pregunta en el orden de §5 bis
+  —qué es, cada cuánto, dónde— sino por su identidad, su sede y quién responde. Lo que sí comparte
+  es el recorrido: cabecera, indicador, error, pie y lo que falta dicho en la revisión.
+-->
+<app-asistente-de-alta
+  antetitulo="Ecosistema musical"
+  titulo="Nueva organización"
+  proposito="Se registra desde el Programa. No se pide contraseña: la organización todavía no tiene cuenta, y su administración llega cuando ella misma la reclame."
+  [pasos]="pasos"
+  [(paso)]="paso"
+  [error]="error()"
+  [loQueFalta]="loQueFalta()"
+  [guardando]="guardando()"
+  verbo="Registrar organización"
+  identificador="registrar-organizacion"
+  (registrar)="registrar()"
+  (cancelar)="cancelado.emit()">
+
+  @if (paso() === 1) {
+    <label class="block">
+      <span class="campo__rotulo">Nombre de la organización</span>
+      <input type="text" name="nombre" [ngModel]="formulario().nombre" (ngModelChange)="campo('nombre', $event)"
+        placeholder="Fundación Cantoalegre"
+        class="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2 text-sm outline-none focus:border-morado" />
+      @for (mensaje of erroresDe('name'); track mensaje) {
+        <small class="mt-1 block text-dato text-amber-700" role="alert">{{ mensaje }}</small>
+      }
+    </label>
+
+    <div class="grid gap-4 sm:grid-cols-2">
+      <label class="block">
+        <span class="campo__rotulo">NIT o identificación <span class="font-normal normal-case tracking-normal text-slate-400">(opcional)</span></span>
+        <input type="text" name="identificacion" [ngModel]="formulario().identificacion" (ngModelChange)="campo('identificacion', $event)"
+          class="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2 font-mono text-sm outline-none focus:border-morado" />
+        @for (mensaje of erroresDe('identificationNumber'); track mensaje) {
+          <small class="mt-1 block text-dato text-amber-700" role="alert">{{ mensaje }}</small>
+        }
+      </label>
+      <label class="block">
+        <span class="campo__rotulo">Correo de la organización</span>
+        <input type="email" name="correoContacto" [ngModel]="formulario().correoContacto" (ngModelChange)="campo('correoContacto', $event)"
+          class="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2 text-sm outline-none focus:border-morado" />
+        @for (mensaje of erroresDe('correoContacto'); track mensaje) {
+          <small class="mt-1 block text-dato text-amber-700" role="alert">{{ mensaje }}</small>
+        }
+      </label>
+    </div>
+
+    @if (coincidencias().length > 0) {
+      <!--
+        SE OFRECEN, NO BLOQUEAN. Dos fundaciones pueden llamarse parecido; bloquear por nombre
+        produciría organizaciones imposibles de registrar. Quien registra decide.
+      -->
+      <div class="rounded-xl border border-amber-200 bg-amber-50 p-4" role="status">
+        <p class="text-xs font-bold text-amber-900">Ya hay organizaciones parecidas registradas</p>
+        <ul class="mt-2 space-y-1">
+          @for (parecida of coincidencias(); track parecida.id) {
+            <li class="text-dato text-amber-900">
+              {{ parecida.nombre }}
+              <span class="text-amber-700">· {{ etiquetaDeEstado(parecida.estado) }}</span>
+            </li>
+          }
+        </ul>
+        <p class="mt-2 text-dato leading-relaxed text-amber-800">
+          Revisa si alguna es la misma antes de crear una nueva. Si no lo es, continúa.
+        </p>
+      </div>
+    }
+  }
+
+  @if (paso() === 2) {
+    <!--
+      LA SEDE SE ELIGE, NO SE TECLEA. El territorio sale de DIVIPOLA, que es la fuente
+      confirmada del proyecto; un nombre escrito a mano hace imposible agrupar por departamento.
+    -->
+    <div class="grid gap-4 sm:grid-cols-2">
+      <label class="block">
+        <span class="campo__rotulo">Departamento de la sede</span>
+        <select name="departamento" [ngModel]="formulario().codigoDepartamentoSede" (ngModelChange)="cambiarDepartamento($event)"
+          class="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2 text-sm outline-none focus:border-morado">
+          <option value="">Sin especificar</option>
+          @for (territorio of territorios(); track territorio.codigo) {
+            <option [value]="territorio.codigo">{{ territorio.nombre | nombrePropio }}</option>
+          }
+        </select>
+        @for (mensaje of erroresDe('headquartersDepartmentCode'); track mensaje) {
+          <small class="mt-1 block text-dato text-amber-700" role="alert">{{ mensaje }}</small>
+        }
+      </label>
+      <label class="block">
+        <span class="campo__rotulo">Municipio de la sede</span>
+        <select name="municipio" [ngModel]="formulario().codigoMunicipioSede" (ngModelChange)="campo('codigoMunicipioSede', $event)"
+          [disabled]="municipiosDeLaSede().length === 0"
+          class="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2 text-sm outline-none focus:border-morado disabled:bg-slate-50 disabled:text-slate-400">
+          <option value="">Sin especificar</option>
+          @for (m of municipiosDeLaSede(); track m.codigo) {
+            <option [value]="m.codigo">{{ m.nombre }}</option>
+          }
+        </select>
+        @for (mensaje of erroresDe('headquartersMunicipalityCode'); track mensaje) {
+          <small class="mt-1 block text-dato text-amber-700" role="alert">{{ mensaje }}</small>
+        }
+      </label>
+    </div>
+  }
+
+  @if (paso() === 3) {
+    <label class="block">
+      <span class="campo__rotulo">Quién responde por la organización</span>
+      <input type="text" name="responsableNombre" [ngModel]="formulario().responsableNombre" (ngModelChange)="campo('responsableNombre', $event)"
+        placeholder="Ana Restrepo"
+        class="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2 text-sm outline-none focus:border-morado" />
+      @for (mensaje of erroresDe('responsableNombre'); track mensaje) {
+        <small class="mt-1 block text-dato text-amber-700" role="alert">{{ mensaje }}</small>
+      }
+    </label>
+
+    <div class="grid gap-4 sm:grid-cols-2">
+      <label class="block">
+        <span class="campo__rotulo">Tipo de documento</span>
+        <select name="tipoDocumento" [ngModel]="formulario().responsableTipoDocumento" (ngModelChange)="campo('responsableTipoDocumento', $event)"
+          class="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2 text-sm outline-none focus:border-morado">
+          @for (tipo of tiposDeDocumento; track tipo.codigo) {
+            <option [value]="tipo.codigo">{{ tipo.etiqueta }}</option>
+          }
+        </select>
+      </label>
+      <label class="block">
+        <span class="campo__rotulo">Número de documento</span>
+        <input type="text" name="numeroDocumento" [ngModel]="formulario().responsableNumeroDocumento" (ngModelChange)="campo('responsableNumeroDocumento', $event)"
+          class="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2 font-mono text-sm outline-none focus:border-morado" />
+      </label>
+      <label class="block">
+        <span class="campo__rotulo">Correo del responsable</span>
+        <input type="email" name="responsableCorreo" [ngModel]="formulario().responsableCorreo" (ngModelChange)="campo('responsableCorreo', $event)"
+          class="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2 text-sm outline-none focus:border-morado" />
+        <small class="mt-1 block text-dato text-slate-400">Es el suyo, no el de quien registra.</small>
+      </label>
+      <label class="block">
+        <span class="campo__rotulo">Teléfono</span>
+        <input type="tel" name="responsableTelefono" [ngModel]="formulario().responsableTelefono" (ngModelChange)="campo('responsableTelefono', $event)"
+          class="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2 text-sm outline-none focus:border-morado" />
+      </label>
+    </div>
+
+    <!--
+      LEY 1581 DE 2012: la autorización del titular se guarda, no se presume. Que el dato lo
+      teclee un funcionario no cambia que sea un dato personal de otra persona.
+    -->
+    <label class="flex items-start gap-2 rounded-xl border border-slate-200 p-3">
+      <input type="checkbox" name="autorizacion" class="mt-0.5 accent-morado"
+        [ngModel]="formulario().responsableAutorizacionDatos" (ngModelChange)="campo('responsableAutorizacionDatos', $event)" />
+      <span class="text-dato leading-relaxed text-slate-600">
+        La persona responsable autorizó el tratamiento de sus datos personales (Ley 1581 de 2012).
+        Si no consta, déjalo sin marcar: la ficha lo dirá.
+      </span>
+    </label>
+  }
+
+  @if (paso() === 4) {
+    <dl class="grid gap-3 rounded-xl border border-slate-200 p-4 text-xs">
+      <div class="flex flex-wrap gap-2">
+        <dt class="w-36 shrink-0 campo__rotulo">Organización</dt>
+        <dd class="flex-1 text-slate-800">{{ formulario().nombre || '—' }}</dd>
+      </div>
+      <div class="flex flex-wrap gap-2">
+        <dt class="w-36 shrink-0 campo__rotulo">Correo</dt>
+        <dd class="flex-1 text-slate-800">{{ formulario().correoContacto || '—' }}</dd>
+      </div>
+      <div class="flex flex-wrap gap-2">
+        <dt class="w-36 shrink-0 campo__rotulo">Responsable</dt>
+        <dd class="flex-1 text-slate-800">{{ formulario().responsableNombre || '—' }}</dd>
+      </div>
+      <div class="flex flex-wrap gap-2">
+        <dt class="w-36 shrink-0 campo__rotulo">Procedencia</dt>
+        <dd class="flex-1 text-slate-800">Plan Nacional de Música para la Convivencia</dd>
+      </div>
+    </dl>
+  }
+</app-asistente-de-alta>

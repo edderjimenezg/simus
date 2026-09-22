@@ -1,0 +1,195 @@
+<!--
+  La ruta «Persona responsable», en /ecosistema/mi-panel/responsable. Separada de
+  `SeccionOrganizacionComponent` -ver el comentario de ese componente-.
+
+  TODO CAMPO LLEVA SU `<label for>` Y SU `id`. No hay `placeholder` haciendo de rótulo: el
+  marcador de posición desaparece al escribir y no lo anuncia ningún lector de pantalla.
+-->
+<section class="max-w-7xl space-y-6" aria-labelledby="responsable-titulo">
+  <!--
+    EDITAR ES UNA OPCION Y VA JUNTO AL TITULO DE LO QUE CORRIGE. Antes era un botón verde relleno
+    en versalitas, al final del apartado: el elemento de más peso de una pantalla que existe para
+    leer. Se ofrece solo cuando hay fila que corregir y no mientras el formulario está abierto,
+    exactamente igual que antes.
+  -->
+  <header class="flex flex-wrap items-start justify-between gap-x-8 gap-y-3">
+    <div class="min-w-0 space-y-1">
+      <h2 id="responsable-titulo" class="font-alternate text-titulo font-bold uppercase tracking-wide text-morado">Persona responsable</h2>
+      <p class="max-w-2xl text-cuerpo leading-relaxed text-prosa">
+        Estos datos identifican a una persona y se tratan según la Ley 1581 de 2012. No aparecen en
+        ninguna ficha pública del sitio.
+      </p>
+    </div>
+    @if (!editandoResponsable() && responsable()) {
+      <app-boton
+        importancia="secundaria" tamano="normal"
+        identificador="responsable-editar"
+        etiqueta="Editar la persona responsable"
+        (accion)="editarResponsable()">
+        <svg lucidePencilLine [size]="16" aria-hidden="true"></svg>
+        Editar
+      </app-boton>
+    }
+  </header>
+
+  @if (errorResponsable()) {
+    <p role="alert" class="rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-800">{{ errorResponsable() }}</p>
+  }
+  <!-- La región viva no se crea al vuelo: un `role="status"` insertado junto con su contenido se
+       pierde a menudo en NVDA/JAWS. -->
+  <p role="status" [class.hidden]="!mensajeResponsable()"
+     class="rounded-xl border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-800">{{ mensajeResponsable() }}</p>
+
+  <!--
+    404 NO ES UN FALLO: hay 2 filas de responsable frente a 19 entidades. Se dice, en vez de
+    pintar cuatro campos vacíos que harían pensar que los datos existían y se perdieron.
+  -->
+  @if (sinResponsable()) {
+    <p class="rounded-xl border border-amber-200 bg-amber-50 p-3 text-sm text-amber-900">
+      Esta organización no tiene una persona responsable registrada. Se dio de alta antes de que el
+      registro pidiera este dato. Escríbele al equipo del PNMC para que la asigne.
+    </p>
+  } @else if (editandoResponsable()) {
+    <form class="space-y-4" novalidate (submit)="$event.preventDefault(); guardarResponsable()">
+      <label for="responsable-nombre" class="block text-sm font-bold text-slate-900">
+        Nombre completo <span class="text-verde-texto">*</span>
+        <input id="responsable-nombre" name="responsableNombre" type="text" required maxlength="240" autocomplete="name"
+               [(ngModel)]="formularioResponsable.responsableNombre"
+               [attr.aria-invalid]="erroresResponsable()['responsableNombre'] ? 'true' : null"
+               [attr.aria-describedby]="erroresResponsable()['responsableNombre'] ? 'responsable-nombre-error' : null"
+               class="mt-1 w-full rounded-lg border border-slate-300 bg-white p-3 font-normal text-slate-900 focus:border-verde-medio focus:outline-none focus-visible:ring-2 focus-visible:ring-verde-medio">
+        @if (erroresResponsable()['responsableNombre']) { <span id="responsable-nombre-error" class="mt-1 block text-xs font-normal text-red-700">{{ erroresResponsable()['responsableNombre'] }}</span> }
+      </label>
+
+      <div class="grid gap-4 sm:grid-cols-2">
+        <label for="responsable-tipo-documento" class="block text-sm font-bold text-slate-900">
+          Tipo de documento <span class="text-verde-texto">*</span>
+          <select id="responsable-tipo-documento" name="responsableTipoDocumento" required
+                  [(ngModel)]="formularioResponsable.responsableTipoDocumento"
+                  [attr.aria-invalid]="erroresResponsable()['responsableTipoDocumento'] ? 'true' : null"
+                  class="mt-1 w-full rounded-lg border border-slate-300 bg-white p-3 font-normal text-slate-900 focus:border-verde-medio focus:outline-none focus-visible:ring-2 focus-visible:ring-verde-medio">
+            <option value="" class="text-slate-900">Elige un tipo</option>
+            @for (tipo of tiposDocumento(); track tipo.codigo) {
+              <option [value]="tipo.codigo" class="text-slate-900">{{ tipo.nombre }}</option>
+            }
+          </select>
+          @if (erroresResponsable()['responsableTipoDocumento']) { <span class="mt-1 block text-xs font-normal text-red-700">{{ erroresResponsable()['responsableTipoDocumento'] }}</span> }
+        </label>
+
+        <label for="responsable-numero-documento" class="block text-sm font-bold text-slate-900">
+          Número de documento <span class="text-verde-texto">*</span>
+          <input id="responsable-numero-documento" name="responsableNumeroDocumento" type="text" required inputmode="numeric" maxlength="40"
+                 [(ngModel)]="formularioResponsable.responsableNumeroDocumento"
+                 [attr.aria-invalid]="erroresResponsable()['responsableNumeroDocumento'] ? 'true' : null"
+                 [attr.aria-describedby]="erroresResponsable()['responsableNumeroDocumento'] ? 'responsable-documento-error' : null"
+                 class="mt-1 w-full rounded-lg border border-slate-300 bg-white p-3 font-normal text-slate-900 focus:border-verde-medio focus:outline-none focus-visible:ring-2 focus-visible:ring-verde-medio">
+          @if (erroresResponsable()['responsableNumeroDocumento']) { <span id="responsable-documento-error" class="mt-1 block text-xs font-normal text-red-700">{{ erroresResponsable()['responsableNumeroDocumento'] }}</span> }
+        </label>
+      </div>
+
+      <label for="responsable-telefono" class="block text-sm font-bold text-slate-900">
+        Teléfono
+        <input id="responsable-telefono" name="responsableTelefono" type="tel" maxlength="80" autocomplete="tel"
+               [(ngModel)]="formularioResponsable.responsableTelefono"
+               class="mt-1 w-full rounded-lg border border-slate-300 bg-white p-3 font-normal text-slate-900 focus:border-verde-medio focus:outline-none focus-visible:ring-2 focus-visible:ring-verde-medio">
+      </label>
+
+      <div class="flex flex-wrap gap-3">
+        <button type="submit" [disabled]="guardandoResponsable()"
+                class="rounded-lg bg-verde-texto px-6 py-3 font-alternate text-sm font-bold uppercase tracking-widest text-white transition hover:bg-morado focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-morado disabled:opacity-50">
+          {{ guardandoResponsable() ? 'Guardando…' : 'Guardar persona responsable' }}
+        </button>
+        <button type="button" data-testid="responsable-cancelar" [disabled]="guardandoResponsable()" (click)="cancelarResponsable()"
+                aria-label="Cancelar la edición de la persona responsable"
+                class="rounded-lg border border-slate-300 bg-white px-6 py-3 font-alternate text-sm font-bold uppercase tracking-widest text-slate-700 transition hover:border-morado hover:text-morado focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-morado disabled:opacity-50">
+          Cancelar
+        </button>
+      </div>
+    </form>
+
+    <!-- Los tres datos de la persona que el API no deja escribir, con el motivo de cada uno. -->
+    <section class="space-y-3 rounded-xl border border-slate-200 bg-white p-4" aria-labelledby="responsable-solo-lectura">
+      <h3 id="responsable-solo-lectura" class="font-alternate text-sm font-bold uppercase tracking-wide text-morado">Datos que no se editan desde aquí</h3>
+      <dl class="space-y-3 text-sm">
+        <div>
+          <dt class="font-bold text-slate-900">Correo de la persona responsable</dt>
+          <dd class="text-slate-700">{{ responsable()?.responsableCorreo || 'Sin registrar' }}</dd>
+          <dd class="text-xs text-slate-500">Es el correo con el que se inicia sesión. Para cambiarlo, escríbele al equipo del PNMC.</dd>
+        </div>
+        <div>
+          <dt class="font-bold text-slate-900">Responsable desde</dt>
+          <dd class="text-slate-700">{{ responsable()?.responsableDesde ? (responsable()!.responsableDesde | date: 'd MMMM y') : 'Sin registrar' }}</dd>
+          <dd class="text-xs text-slate-500">Fecha desde la que esta persona quedó registrada como responsable.</dd>
+        </div>
+        <div>
+          <dt class="font-bold text-slate-900">Autorización de tratamiento de datos</dt>
+          <dd class="text-slate-700">{{ responsable()?.responsableAutorizacionDatos ? 'Otorgada' : 'Sin otorgar' }}</dd>
+          <dd class="text-xs text-slate-500">Para retirarla, escríbele al equipo del PNMC.</dd>
+        </div>
+      </dl>
+    </section>
+  } @else {
+    <!--
+      LA VISTA POR OMISIÓN de la persona. Los seis datos en una sola lista: los cuatro que el
+      formulario escribe y los tres que no —correo, fecha y autorización— con el motivo de cada
+      uno, que es el mismo texto que se lee al lado del formulario cuando está abierto.
+    -->
+    <div data-testid="responsable-lectura" class="space-y-5">
+      @if (responsable(); as r) {
+        <!--
+          DOS GRUPOS Y NO SEIS FILAS SEGUIDAS: lo que identifica a la persona y lo que rige su
+          relación con el Programa. Los tres datos que no se corrigen desde aquí —correo, fecha y
+          autorización— llevan su motivo escrito debajo, en el gris de los rótulos.
+        -->
+        <section class="space-y-4">
+          <h3 class="border-t border-filete pt-4 font-alternate text-dato font-bold uppercase tracking-[0.18em] text-seccion">Quién responde</h3>
+          <dl class="grid gap-x-10 gap-y-6 sm:grid-cols-2 lg:grid-cols-3">
+            <div class="flex flex-col">
+               <app-dato-en-lectura rotulo="Nombre completo" [valor]="r.responsableNombre"></app-dato-en-lectura>
+            </div>
+            <!--
+              VA LA ETIQUETA DEL TIPO, NO EL CÓDIGO: «Cédula de ciudadanía», no «cc». El código solo
+              aparece si el API mandó la etiqueta vacía, y aun así se lee mejor que un hueco.
+            -->
+            <div class="flex flex-col">
+               <app-dato-en-lectura rotulo="Documento"
+                 [valor]="r.responsableNumeroDocumento ? ((r.responsableTipoDocumentoEtiqueta || r.responsableTipoDocumento) + ' ' + r.responsableNumeroDocumento) : ''"></app-dato-en-lectura>
+            </div>
+            <div class="flex flex-col">
+               <app-dato-en-lectura rotulo="Teléfono" [valor]="r.responsableTelefono"></app-dato-en-lectura>
+            </div>
+          </dl>
+        </section>
+
+        <section class="space-y-4">
+          <h3 class="border-t border-filete pt-4 font-alternate text-dato font-bold uppercase tracking-[0.18em] text-seccion">Su relación con el Programa</h3>
+          <dl class="grid gap-x-10 gap-y-6 sm:grid-cols-2 lg:grid-cols-3">
+            <div class="flex flex-col">
+               <app-dato-en-lectura rotulo="Correo de la persona responsable"
+                 [valor]="r.responsableCorreo"
+                 nota="Es el correo con el que se inicia sesión. Para cambiarlo, escríbele al equipo del PNMC."></app-dato-en-lectura>
+            </div>
+            <div class="flex flex-col">
+               <app-dato-en-lectura rotulo="Responsable desde"
+                 [valor]="r.responsableDesde ? (r.responsableDesde | date: 'd MMMM y') : ''"
+                 nota="Fecha desde la que esta persona quedó registrada como responsable."></app-dato-en-lectura>
+            </div>
+            <div class="flex flex-col">
+               <app-dato-en-lectura rotulo="Autorización de tratamiento de datos"
+                 [valor]="r.responsableAutorizacionDatos ? 'Otorgada' : 'Sin otorgar'"
+                 nota="Para retirarla, escríbele al equipo del PNMC."></app-dato-en-lectura>
+            </div>
+          </dl>
+        </section>
+      } @else {
+        <!--
+          NO ES EL CASO DEL 404: eso lo dice el aviso ámbar de arriba. Aquí la petición todavía no
+          ha vuelto, y no se ofrece «Editar» sobre una fila que aún no se conoce.
+        -->
+        <p class="rounded-xl border border-slate-200 bg-white p-3 text-sm text-slate-600">
+          Los datos de la persona responsable todavía no han llegado.
+        </p>
+      }
+    </div>
+  }
+</section>

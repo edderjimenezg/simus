@@ -1,0 +1,306 @@
+<section aria-labelledby="categorias-consola-titulo">
+  <!-- SIN ENCABEZADO PROPIO: la cabecera de página ya dice qué sección es y qué se hace aquí. -->
+  <h2 id="categorias-consola-titulo" class="sr-only">Categorías y proyectos</h2>
+
+  <!--
+    DOS PESTAÑAS Y NO DOS SECCIONES. Categorías y proyectos son la misma clase de cosa —listas
+    controladas que alimentan los formularios de contenido—, así que separarlas en dos entradas de
+    navegación obligaría a recordar en cuál está cada una. Pero son dos pestañas y no una sola
+    lista, porque responden preguntas distintas: la categoría dice DE QUE TRATA un contenido, el
+    proyecto A QUE INICIATIVA pertenece.
+  -->
+  <app-selector-segmentado
+    [opciones]="pestanas()"
+    [elegida]="vista()"
+    etiquetaDelGrupo="Vocabularios de contenido"
+    (elegir)="$event === 'proyectos' ? verProyectos() : verCategorias()"></app-selector-segmentado>
+
+  @if (error()) { <p class="mt-5 text-cuerpo font-semibold text-amber-800" role="alert">{{ error() }}</p> }
+  @if (aviso()) { <p class="mt-5 text-cuerpo font-semibold text-verde-texto" role="status">{{ aviso() }}</p> }
+
+  @if (cargando()) {
+    <p class="mt-6 text-xs text-slate-500">Consultando categorías…</p>
+  }
+
+  @if (vista() === 'categorias') {
+  <!--
+    UNA SOLA TABLA CON DIVISIONES, Y NO CUATRO BLOQUES EN REJILLA.
+
+    Eran cuatro `article` en dos columnas, cada uno con su lista: el mismo dato —nombre, código,
+    cuánto se usa, orden, acciones— dibujado en cuatro sitios, con las columnas sin alinearse entre
+    grupos y el vocabulario partido en cuatro lecturas. Lo pidió la dirección de producto el 15 de
+    septiembre de 2026: «podría ser una sola tabla con divisiones horizontales o algo así».
+
+    El grupo pasa a ser una FILA DIVISORIA con su nombre y su botón de añadir. Así el vocabulario se
+    lee de arriba abajo de una vez, las cifras de uso quedan en la misma columna —que es lo que
+    permite comparar entre grupos, que era justo el motivo de enseñarlas— y la tabla es la misma que
+    el resto de la consola.
+  -->
+  <div class="mt-6 overflow-x-auto">
+    <table class="tabla-administrativa tabla-de-categorias">
+      <colgroup>
+        <col class="tabla-de-categorias__categoria" />
+        <col class="tabla-de-categorias__uso" />
+        <col class="tabla-de-categorias__orden" />
+        <col class="tabla-de-categorias__acciones" />
+      </colgroup>
+      <thead class="tabla-administrativa__cabecera">
+        <tr>
+          <th scope="col">Categoría</th>
+          <th scope="col">Uso</th>
+          <th scope="col">Orden</th>
+          <th scope="col" class="text-right">Acciones</th>
+        </tr>
+      </thead>
+
+      @for (grupo of grupos(); track grupo.codigo) {
+        <tbody class="tabla-de-categorias__grupo">
+          <tr class="tabla-de-categorias__division">
+            <th scope="colgroup" colspan="3">
+              {{ grupo.etiqueta }}
+              @if (grupo.codigo === 'comun') {
+                <span class="tabla-de-categorias__nota">
+                  Aparecen en los tres formularios. Úsalas cuando el mismo tema cruce noticias,
+                  eventos y publicaciones, en vez de repetirlo en cada módulo.
+                </span>
+              }
+            </th>
+            <td class="text-right">
+              <app-boton importancia="secundaria" tamano="menudo" (accion)="nueva(grupo.codigo)">Añadir</app-boton>
+            </td>
+          </tr>
+
+          @for (categoria of grupo.categorias; track categoria.id; let primera = $first; let ultima = $last) {
+            <tr class="tabla-administrativa__fila">
+              <td>
+                <span class="tabla-administrativa__principal">{{ categoria.nombreCategoria }}</span>
+                <span class="tabla-administrativa__secundaria font-mono">{{ categoria.slug }}</span>
+                @if (categoria.descripcion) {
+                  <span class="tabla-administrativa__secundaria">{{ categoria.descripcion }}</span>
+                }
+              </td>
+              <!--
+                CUANTO LA USAN. Sin esta cifra, elegir entre categorías propias de cada módulo y
+                categorías comunes es una discusión sin datos: con ella se ve cuál se está usando en
+                dos sitios y merece compartirse, y cuál está vacía y sobra.
+              -->
+              <td>
+                @if (categoria.contenidosQueLaUsan === 0) {
+                  <span class="text-rotulo">Sin uso</span>
+                } @else {
+                  <span class="tabla-administrativa__cifra">{{ categoria.contenidosQueLaUsan }}</span>
+                  <span class="tabla-administrativa__secundaria">{{ categoria.contenidosQueLaUsan === 1 ? 'contenido' : 'contenidos' }}</span>
+                }
+              </td>
+              <!--
+                LAS FLECHAS NO ENTRAN EN EL MENU. Mover una categoría tres puestos son tres
+                pulsaciones; dentro de un desplegable serían seis. Y tienen columna propia porque
+                reordenar y actuar son dos cosas distintas.
+              -->
+              <td>
+                <span class="flex items-center gap-1">
+                  <app-boton importancia="terciaria" tamano="menudo" [deshabilitado]="primera || guardando()" etiqueta="Mover arriba" (accion)="mover(categoria, -1)"><svg lucideArrowUp [size]="14" aria-hidden="true"></svg></app-boton>
+                  <app-boton importancia="terciaria" tamano="menudo" [deshabilitado]="ultima || guardando()" etiqueta="Mover abajo" (accion)="mover(categoria, 1)"><svg lucideArrowDown [size]="14" aria-hidden="true"></svg></app-boton>
+                </span>
+              </td>
+              <td class="tabla-administrativa__acciones">
+                @if (confirmandoBorrado() === categoria.id) {
+                  <!--
+                    MIENTRAS SE CONFIRMA, LA FILA NO OFRECE NADA MAS. La pregunta se responde antes
+                    de seguir: dejar el menú al lado invita a irse por otro camino con el borrado a
+                    medio confirmar.
+                  -->
+                  <span class="flex flex-wrap items-center justify-end gap-2">
+                    <span class="text-dato font-bold text-red-700">¿Retirar?</span>
+                    <app-boton importancia="destructiva" tamano="menudo" [ocupado]="guardando()" (accion)="eliminar(categoria)">{{ guardando() ? 'Retirando…' : 'Sí' }}</app-boton>
+                    <app-boton importancia="terciaria" tamano="menudo" (accion)="cancelarBorrado()">No</app-boton>
+                  </span>
+                } @else {
+                  <app-menu-de-acciones
+                    [acciones]="accionesDe(categoria)"
+                    [descripcion]="categoria.nombreCategoria"
+                    (elegida)="ejecutarAccion(categoria, $event)"></app-menu-de-acciones>
+                }
+              </td>
+            </tr>
+          } @empty {
+            <tr class="tabla-administrativa__fila">
+              <td colspan="4"><app-estado-de-lista denso
+                titulo="Todavía no hay categorías en este grupo"
+                detalle="Las categorías de este grupo se crean aquí y aparecen después como opción en Agenda y Noticias." /></td>
+            </tr>
+          }
+        </tbody>
+      }
+    </table>
+  </div>
+  }
+
+  @if (vista() === 'proyectos') {
+    <!--
+      LA MISMA TABLA QUE LAS CATEGORIAS. Son dos vocabularios distintos —la categoría dice de qué
+      trata un contenido, el proyecto a qué iniciativa pertenece— pero se gestionan igual, y
+      dibujarlos de dos maneras obligaba a aprender dos pantallas para el mismo trabajo.
+    -->
+    <app-barra-de-lista>
+      <p class="barra-de-lista__resumen">
+        Iniciativas del Programa que atraviesan varios módulos. Un evento puede ser de «Encuentros»
+        y además de Celebra la Música.
+      </p>
+      <ng-container extremo>
+        <app-boton importancia="principal" (accion)="nuevoProyecto()">Añadir proyecto</app-boton>
+      </ng-container>
+    </app-barra-de-lista>
+
+    @if (proyectos().length === 0 && !cargando()) {
+      <app-estado-de-lista
+        titulo="Todavía no hay proyectos transversales"
+        detalle="Un proyecto agrupa contenidos de Agenda y Noticias bajo una misma iniciativa, sin cambiar de qué tratan." />
+    } @else {
+      <div class="overflow-x-auto">
+        <table class="tabla-administrativa tabla-de-proyectos">
+          <colgroup>
+            <col class="tabla-de-proyectos__proyecto" />
+            <col class="tabla-de-proyectos__estado" />
+            <col class="tabla-de-proyectos__uso" />
+            <col class="tabla-de-proyectos__acciones" />
+          </colgroup>
+          <thead class="tabla-administrativa__cabecera">
+            <tr>
+              <th scope="col">Proyecto</th>
+              <th scope="col">Estado</th>
+              <th scope="col">Contenidos enlazados</th>
+              <th scope="col" class="text-right">Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (proyecto of proyectos(); track proyecto.id) {
+              <tr class="tabla-administrativa__fila">
+                <td>
+                  <span class="tabla-administrativa__principal">{{ proyecto.nombre }}</span>
+                  <span class="tabla-administrativa__secundaria font-mono">{{ proyecto.codigo }}</span>
+                  @if (proyecto.descripcion) {
+                    <span class="tabla-administrativa__secundaria">{{ proyecto.descripcion }}</span>
+                  }
+                </td>
+                <td>
+                  <!-- UN PROYECTO QUE TERMINA SE DESACTIVA, NO SE BORRA: deja de ofrecerse en los
+                       formularios y sigue explicando el contenido que ya se publicó bajo él. -->
+                  <app-indicador-de-estado
+                    [etiqueta]="proyecto.activo ? 'Abierto' : 'Cerrado'"
+                    [tono]="proyecto.activo ? 'logrado' : 'cerrado'"
+                    [conTexto]="true"></app-indicador-de-estado>
+                </td>
+                <td>
+                  @if (proyecto.contenidosEnlazados === 0) {
+                    <span class="text-rotulo">Sin contenido enlazado</span>
+                  } @else {
+                    <span class="tabla-administrativa__cifra">{{ proyecto.contenidosEnlazados }}</span>
+                    <span class="tabla-administrativa__secundaria">{{ proyecto.contenidosEnlazados === 1 ? 'contenido' : 'contenidos' }}</span>
+                  }
+                </td>
+                <td class="tabla-administrativa__acciones">
+                  <app-boton importancia="secundaria" tamano="menudo" (accion)="editarProyecto(proyecto)">Editar</app-boton>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  }
+
+  @if (formulario(); as f) {
+    <app-dialogo-de-formulario
+      [titulo]="f.id === null ? 'Nueva categoría' : 'Editar categoría'"
+      [guardando]="guardando()"
+      [error]="error()"
+      identificador="guardar-categoria"
+      (guardar)="guardar()"
+      (cerrar)="cerrarFormulario()">
+      <label class="mt-5 block campo__rotulo" for="categoria-modulo">Dónde se ofrece</label>
+      <select id="categoria-modulo" name="codigoModulo" [ngModel]="f.codigoModulo" (ngModelChange)="campo('codigoModulo', $event)"
+        class="campo__control">
+        @for (modulo of modulos; track modulo) {
+          <option [value]="modulo">{{ etiquetasDeModulo[modulo] }}</option>
+        }
+      </select>
+      <p class="mt-1.5 text-dato leading-relaxed text-slate-500">
+        «Común a los tres» la deja disponible en Agenda, Noticias y Catálogo Editorial a la vez.
+      </p>
+
+      <label class="mt-4 block campo__rotulo" for="categoria-nombre">Nombre</label>
+      <input id="categoria-nombre" name="nombreCategoria" [ngModel]="f.nombreCategoria" (ngModelChange)="campo('nombreCategoria', $event)"
+        placeholder="Convocatorias"
+        class="campo__control" />
+
+      <label class="mt-4 block campo__rotulo" for="categoria-descripcion">Cuándo usarla <span class="font-normal normal-case tracking-normal text-slate-400">(opcional)</span></label>
+      <textarea id="categoria-descripcion" name="descripcion" rows="3" [ngModel]="f.descripcion" (ngModelChange)="campo('descripcion', $event)"
+        placeholder="Ayuda a quien publica a elegir bien entre categorías parecidas."
+        class="campo__control"></textarea>
+    </app-dialogo-de-formulario>
+  }
+
+  <!--
+    ES LO QUE HACE REVERSIBLE LA DECISION entre categorías propias y comunes. Hasta ahora una
+    categoría en uso no se podía retirar, y renombrarla no sirve cuando el problema es que hay dos
+    que significan lo mismo.
+  -->
+  @if (fusionando(); as origen) {
+    <app-dialogo-de-formulario
+      [titulo]="'Fusionar «' + origen.nombreCategoria + '»'"
+      [proposito]="'Su contenido pasará entero a la categoría que elijas y «' + origen.nombreCategoria + '» se retirará. Puedes elegir una de otro módulo: así es como una categoría propia se convierte en común sin perder lo ya publicado.'"
+      verbo="Fusionar"
+      [guardando]="guardando()"
+      [puedeGuardar]="destinoDeFusion() !== null"
+      [error]="error()"
+      identificador="fusionar-categoria"
+      (guardar)="fusionar()"
+      (cerrar)="cancelarFusion()">
+      <label class="mt-5 block campo__rotulo" for="destino-de-fusion">Pasa su contenido a</label>
+      <select id="destino-de-fusion" name="destinoDeFusion"
+        [ngModel]="destinoDeFusion()" (ngModelChange)="destinoDeFusion.set($event === null || $event === '' ? null : +$event)"
+        class="campo__control">
+        <option [ngValue]="null">Elige una categoría</option>
+        @for (destino of destinosPosibles(); track destino.id) {
+          <option [ngValue]="destino.id">{{ etiquetasDeModulo[destino.codigoModulo] }} · {{ destino.nombreCategoria }}</option>
+        }
+      </select>
+    </app-dialogo-de-formulario>
+  }
+
+  @if (formularioDeProyecto(); as p) {
+    <app-dialogo-de-formulario
+      [titulo]="p.id === null ? 'Nuevo proyecto del Programa' : 'Editar proyecto'"
+      [guardando]="guardando()"
+      [error]="error()"
+      identificador="guardar-proyecto"
+      (guardar)="guardarProyecto()"
+      (cerrar)="cerrarFormularioDeProyecto()">
+      <label class="mt-5 block campo__rotulo" for="proyecto-nombre">Nombre</label>
+      <input id="proyecto-nombre" name="nombreProyecto" [ngModel]="p.nombre" (ngModelChange)="campoDeProyecto('nombre', $event)"
+        placeholder="Celebra la Música"
+        class="campo__control" />
+      @if (p.id !== null) {
+        <!-- EL CODIGO NO CAMBIA AL RENOMBRAR: es la dirección con la que el portal filtra, y
+             cambiarla rompería los enlaces del sitio de la iniciativa sin avisar a nadie. -->
+        <small class="mt-1 block text-dato text-slate-400">Su dirección no cambia al renombrarlo.</small>
+      }
+
+      <label class="mt-4 block campo__rotulo" for="proyecto-descripcion">De qué se trata <span class="font-normal normal-case tracking-normal text-slate-400">(opcional)</span></label>
+      <textarea id="proyecto-descripcion" name="descripcionProyecto" rows="3" [ngModel]="p.descripcion" (ngModelChange)="campoDeProyecto('descripcion', $event)"
+        class="campo__control"></textarea>
+
+      @if (p.id !== null) {
+        <label class="mt-4 flex items-start gap-2 rounded-xl border border-slate-200 p-3">
+          <input type="checkbox" name="activoProyecto" class="mt-0.5 accent-morado"
+            [ngModel]="p.activo" (ngModelChange)="campoDeProyecto('activo', $event)" />
+          <span class="text-dato leading-relaxed text-slate-600">
+            Sigue abierto. Si se desmarca, deja de ofrecerse en los formularios y el contenido que
+            ya se publicó bajo él lo conserva.
+          </span>
+        </label>
+      }
+    </app-dialogo-de-formulario>
+  }
+</section>

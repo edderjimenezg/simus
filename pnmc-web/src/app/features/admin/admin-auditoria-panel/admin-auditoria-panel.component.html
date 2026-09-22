@@ -1,0 +1,170 @@
+<div data-testid="auditoria-panel" class="space-y-5">
+  <!--
+    SIN ENCABEZADO PROPIO. Aquí había un segundo título —«AUDITORÍA ADMINISTRATIVA»— con su propia
+    descripción, justo debajo del que ya pone la consola: «Auditoría y trazabilidad · Trazabilidad
+    legal paginada de todas las actuaciones administrativas». Dos títulos y dos descripciones para
+    la misma pantalla, y la segunda no añadía nada que la primera no dijera.
+  -->
+  <h2 id="auditoria-titulo" class="sr-only">Auditoría administrativa</h2>
+
+  <!--
+    LA BARRA DE TODA LA CONSOLA: buscador, filtros, y el extremo. Hasta el 15 de septiembre de
+    2026 el buscador filtraba por el CODIGO EXACTO del verbo —«iniciar_sesion»—, que nadie escribe
+    y que es un vocabulario controlado pedido como texto libre. Ahora el verbo es una lista con su
+    recuento, el periodo otra, y el buscador busca lo que se busca en una bitácora: a la persona.
+  -->
+  <app-barra-de-lista>
+    <app-buscador-de-lista identificador="auditoria-buscar" etiqueta="Buscar por responsable"
+      marcador="Buscar por nombre, correo o identificador de registro…" [valor]="q()" (cambiar)="buscar($event)" />
+    <app-filtro-desplegable identificador="auditoria-accion" etiqueta="Filtrar por acción"
+      [opciones]="accionesDeLaBitacora()" [elegida]="accion() || 'todas'" (cambiar)="elegirAccion($event)" />
+    <app-filtro-desplegable identificador="auditoria-periodo" etiqueta="Filtrar por periodo"
+      [opciones]="OPCIONES_DE_PERIODO" [elegida]="periodo()" (cambiar)="elegirPeriodo($event)" />
+    <ng-container extremo>
+      @if (respuesta(); as datos) {
+        <p class="barra-de-lista__resumen">{{ datos.total }} {{ datos.total === 1 ? 'actuación' : 'actuaciones' }}</p>
+      }
+      <app-boton importancia="terciaria" etiqueta="Actualizar la bitácora" [ocupado]="cargando()" (accion)="consultar()">
+        <svg lucideRefreshCw [size]="15" aria-hidden="true"></svg>
+      </app-boton>
+    </ng-container>
+  </app-barra-de-lista>
+
+  <!--
+    LOS GRUPOS, DEBAJO DE LA BARRA Y FUERA DE ELLA, que es donde van las pestañas de partición en
+    toda la consola. Eran ocho píldoras; son las ocho posiciones de un mismo selector.
+  -->
+  <app-selector-segmentado
+    [opciones]="gruposDeLaBitacora()"
+    [elegida]="grupo()"
+    etiquetaDelGrupo="Filtrar la bitácora por grupo de actuaciones"
+    (elegir)="elegirGrupo($event)" />
+
+  @if (error()) {
+    <app-estado-de-lista tipo="error" titulo="No fue posible consultar la auditoría" [detalle]="error()" />
+  } @else if (cargando() && !respuesta()) {
+    <app-estado-de-lista tipo="cargando" titulo="Consultando la bitácora…" />
+  } @else if ((respuesta()?.items || []).length === 0) {
+    <app-lista-sin-filas entidad="actuaciones" [hayFiltros]="hayFiltrosPuestos()"
+      comoLlegan="La bitácora se escribe sola: cada decisión, publicación o cambio del Programa deja aquí su rastro."
+      (limpiar)="limpiarFiltros()" />
+  } @else {
+    <div class="overflow-x-auto">
+      <table class="tabla-administrativa tabla-de-la-bitacora">
+        <!-- Los anchos se declaran: la fecha y la actuación no deben moverse al cambiar de página. -->
+        <colgroup>
+          <col class="tabla-de-la-bitacora__fecha" />
+          <col class="tabla-de-la-bitacora__actuacion" />
+          <col class="tabla-de-la-bitacora__registro" />
+          <col class="tabla-de-la-bitacora__responsable" />
+          <col class="tabla-de-la-bitacora__acciones" />
+        </colgroup>
+        <thead class="tabla-administrativa__cabecera">
+          <!-- EL ORDEN LO RESUELVE EL SERVIDOR: la bitácora pagina sobre miles de actuaciones. -->
+          <tr><app-cabecera-de-tabla [columnas]="COLUMNAS" [orden]="orden" (ordenarPor)="ordenarPor($event)" /></tr>
+        </thead>
+        <tbody>
+          @for (item of filasVisibles(); track item.id) {
+            <tr class="tabla-administrativa__fila">
+              <td class="whitespace-nowrap tabular-nums text-rotulo">{{ fecha(item.fecha) }}</td>
+              <!--
+                EL VERBO EN PALABRAS, no «iniciar_sesion». Lo traduce el servidor desde la lista
+                blanca de la base; el crudo sigue viajando porque es el que filtra la lista de
+                arriba. Y si algún día llega un verbo que el servidor no sepa traducir, el respaldo
+                compartido lo escribe legible en vez de soltar el código en pantalla.
+              -->
+              <td>
+                <span class="tabla-administrativa__principal">{{ item.accionEtiqueta || etiquetaDeEstado(item.accion) }}</span>
+                <span class="tabla-administrativa__secundaria">{{ item.grupoEtiqueta || etiquetaDeEstado(item.grupo) }}</span>
+              </td>
+              <td>
+                <span class="tabla-administrativa__principal">{{ item.nombreRegistro || 'Registro ' + item.registroId }}</span>
+                <span class="tabla-administrativa__secundaria">{{ etiquetaDeEstado(item.tabla) }} · {{ item.registroId }}</span>
+              </td>
+              <td>
+                <span class="tabla-administrativa__principal">{{ item.autor?.nombre || 'Sistema' }}</span>
+                <span class="tabla-administrativa__secundaria">{{ item.autor?.correo || 'Sin usuario registrado' }}</span>
+              </td>
+              <!--
+                UNA ACTUACION NO SE EDITA: se abre. El menú de acciones de toda la consola con la
+                única que aplica —ver qué cambió— y no un enlace suelto que haga de botón.
+              -->
+              <td class="tabla-administrativa__acciones">
+                <app-menu-de-acciones
+                  [acciones]="ACCIONES_DE_FILA"
+                  [descripcion]="item.accionEtiqueta + ' · ' + (item.nombreRegistro || 'Registro ' + item.registroId)"
+                  (elegida)="abrirDetalle(item)" />
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+
+      @if (respuesta(); as datos) {
+        <div class="tabla-administrativa__pie">
+          <p class="barra-de-lista__resumen">
+            Página {{ datos.pagina }} de {{ totalDePaginas() }} · {{ datos.total }} {{ datos.total === 1 ? 'actuación' : 'actuaciones' }}
+          </p>
+          <div class="flex flex-wrap items-center gap-2">
+            <app-boton importancia="secundaria" tamano="menudo" [deshabilitado]="datos.pagina <= 1" (accion)="paginaAnterior()">Anterior</app-boton>
+            <app-boton importancia="secundaria" tamano="menudo" [deshabilitado]="datos.pagina >= totalDePaginas()" (accion)="paginaSiguiente()">Siguiente</app-boton>
+          </div>
+        </div>
+      }
+    </div>
+  }
+
+  @if (errorDelDetalle()) {
+    <p class="text-cuerpo font-semibold text-amber-800" role="alert">{{ errorDelDetalle() }}</p>
+  }
+
+  <!--
+    LA ACTUACION ENTERA, EN EL CAJON LATERAL DE TODA LA CONSOLA. La lista dice quién hizo qué y
+    sobre qué; el cajón dice además QUE CAMBIO, campo a campo, que la bitácora guarda desde el
+    primer día y hasta no se podía ver desde ninguna pantalla.
+  -->
+  @if (detalleAbierto(); as detalle) {
+    <app-panel-lateral
+      [titulo]="detalle.actuacion.accionEtiqueta + ' · ' + (detalle.actuacion.nombreRegistro || 'Registro ' + detalle.actuacion.registroId)"
+      contexto="Actuación de la bitácora"
+      (cerrar)="cerrarDetalle()">
+      <dl class="grid gap-4 sm:grid-cols-2" data-datos-de-la-actuacion>
+        <div class="flex flex-col"><app-dato-en-lectura rotulo="Cuándo" [valor]="fecha(detalle.actuacion.fecha)" /></div>
+        <div class="flex flex-col"><app-dato-en-lectura rotulo="Responsable" [valor]="detalle.actuacion.autor?.nombre || 'Sistema'" /></div>
+        <div class="flex flex-col"><app-dato-en-lectura rotulo="Correo" [valor]="detalle.actuacion.autor?.correo || 'Sin usuario registrado'" /></div>
+        <div class="flex flex-col"><app-dato-en-lectura rotulo="Registro" [valor]="etiquetaDeEstado(detalle.actuacion.tabla) + ' · ' + detalle.actuacion.registroId" /></div>
+      </dl>
+
+      <h3 class="titulo-de-apartado">Qué cambió</h3>
+      @if (cambios().length) {
+        <table class="tabla-administrativa tabla-administrativa--densa tabla-de-cambios" data-cambios>
+          <colgroup>
+            <col class="tabla-de-cambios__campo" />
+            <col class="tabla-de-cambios__antes" />
+            <col class="tabla-de-cambios__despues" />
+          </colgroup>
+          <thead class="tabla-administrativa__cabecera">
+            <tr>
+              <th scope="col">Campo</th>
+              <th scope="col">Antes</th>
+              <th scope="col">Después</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (cambio of cambios(); track cambio.campo) {
+              <tr class="tabla-administrativa__fila" [class.cambia]="cambio.cambia">
+                <td><span class="tabla-administrativa__principal">{{ cambio.campo }}</span></td>
+                <td class="text-prosa">{{ cambio.antes ?? '—' }}</td>
+                <td class="text-prosa">{{ cambio.despues ?? '—' }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      } @else {
+        <app-estado-de-lista
+          titulo="Esta actuación no guardó valores"
+          detalle="La bitácora registró quién, qué y cuándo; el circuito que la escribió no adjuntó los datos de antes y después." />
+      }
+    </app-panel-lateral>
+  }
+</div>

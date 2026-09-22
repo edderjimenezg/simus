@@ -1,0 +1,66 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <InvariantGlobalization>false</InvariantGlobalization>
+    <!--
+      PNMC-013: la auditoria de NuGet deja de ser un aviso decorativo.
+      NU1903 salia en cada compilacion y nadie lo miraba. Escalado a error, la
+      restauracion RECHAZA el paquete vulnerable en vez de anunciarlo.
+      Solo ALTA (NU1903) y CRITICA (NU1904) rompen la compilacion. BAJA (NU1901)
+      y MEDIA (NU1902) siguen saliendo como aviso: se ven, pero un aviso menor
+      nuevo en cualquiera de los 106 paquetes del grafo no tumba la compilacion
+      de madrugada. NU1900 queda FUERA a proposito: significa "no pude leer el
+      origen de auditoria" (red caida) y no debe romper una compilacion sin conexion.
+    -->
+    <NuGetAudit>true</NuGetAudit>
+    <NuGetAuditMode>all</NuGetAuditMode>
+    <NuGetAuditLevel>low</NuGetAuditLevel>
+    <WarningsAsErrors>$(WarningsAsErrors);NU1903;NU1904</WarningsAsErrors>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="7.2.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../PNMC.Contracts/PNMC.Contracts.csproj" />
+    <ProjectReference Include="../PNMC.Infrastructure/PNMC.Infrastructure.csproj" />
+  </ItemGroup>
+
+  <!--
+    LOS AJUSTES LOCALES NO VIAJAN AL PAQUETE.
+
+    `appsettings.Local.json` no esta en git —lo ignora .gitignore— pero SI se copia a bin/ como
+    cualquier otro appsettings, y con el la cadena `User Id=sa;Password=...` de la base de
+    desarrollo. Cualquier `dotnet publish` hecho desde un arbol de trabajo se llevaba ese fichero
+    dentro del artefacto que se sube al servidor.
+
+    No lo leeria nadie alli —solo se carga cuando el entorno se llama "Local"—, y por eso el
+    defecto es tranquilo: no rompe nada, solo publica una credencial. El ejemplo se excluye
+    tambien: son marcadores de posicion, pero un fichero que nadie va a leer no tiene por que
+    estar en el paquete.
+
+    CopyToOutputDirectory se deja como esta: en desarrollo el fichero TIENE que llegar a bin/.
+  -->
+  <ItemGroup>
+    <Content Update="appsettings.Local.json" CopyToPublishDirectory="Never" />
+    <Content Update="appsettings.Local.example.json" CopyToPublishDirectory="Never" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Update="Assets/geo/Departamentos-Municipos-COL.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+    <Content Include="Assets/geo/Departamentos-COL.simplified.topojson">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+    <Content Include="Assets/geo/municipalities/*.topojson">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+  </ItemGroup>
+</Project>

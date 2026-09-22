@@ -1,0 +1,119 @@
+<section class="space-y-6" aria-labelledby="ediciones-temporales-titulo">
+  <header class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+    <div>
+      <h2 id="ediciones-temporales-titulo" class="font-alternate text-titulo font-bold uppercase tracking-wide text-morado">Ediciones del Festival</h2>
+      <p class="mt-2 max-w-2xl text-cuerpo leading-relaxed text-prosa">Consulta cada realización y registra una nueva sin repetir la información permanente del Festival.</p>
+    </div>
+    @if (!edicionAbierta()) {
+      <button type="button" class="shrink-0 rounded-lg bg-morado px-4 py-2 text-sm font-bold text-white transition hover:bg-morado/90" (click)="nueva()">Registrar edición</button>
+    }
+  </header>
+
+  @if (error()) { <p role="alert" class="border-l-4 border-red-500 bg-red-50 p-3 text-sm text-red-800">{{ error() }}</p> }
+  @if (mensaje()) { <p role="status" class="border-l-4 border-emerald-500 bg-emerald-50 p-3 text-sm text-emerald-800">{{ mensaje() }}</p> }
+  @if (!festivalPublicado) {
+    <p class="border-l-4 border-amber-400 bg-amber-50 px-4 py-3 text-sm leading-relaxed text-amber-950">Las Ediciones pueden prepararse como borrador. Su publicación estará disponible cuando el Festival se encuentre publicado.</p>
+  }
+
+  @if (edicionAbierta(); as abierta) {
+    <app-ficha-edicion-festival
+      [festivalId]="festivalId"
+      [edicionId]="abierta === 'nueva' ? null : abierta"
+      [festivalPublicado]="festivalPublicado"
+      [soloLectura]="consultando()"
+      (guardado)="alGuardar()"
+      (publicado)="alPublicarDesdeElFormulario()"
+      (cancelar)="edicionAbierta.set(null); consultando.set(false)"></app-ficha-edicion-festival>
+  } @else if (cargando()) {
+    <p role="status" class="py-5 text-sm text-slate-500">Consultando Ediciones…</p>
+  } @else if (!ediciones().length) {
+    <div class="bg-slate-50 px-5 py-6">
+      <h3 class="text-lectura font-semibold text-valor">Aún no hay Ediciones registradas.</h3>
+      <p class="mt-2 max-w-2xl text-cuerpo leading-relaxed text-prosa">Una Edición identifica una realización concreta por su nombre, número, año o fechas.</p>
+    </div>
+  } @else {
+    <div class="overflow-x-auto">
+      <div class="min-w-[46rem]">
+        <div class="grid grid-cols-[minmax(14rem,1.4fr)_minmax(10rem,.8fr)_minmax(10rem,.8fr)_auto] gap-5 border-b border-slate-300 px-3 pb-2 text-dato font-bold uppercase tracking-widest text-slate-500" aria-hidden="true">
+          <span>Edición</span><span>Realización</span><span>Estado</span><span>Acciones</span>
+        </div>
+        <ol class="divide-y divide-slate-200 border-b border-slate-200">
+          @for (edicion of ediciones(); track edicion.id) {
+            <li class="grid grid-cols-[minmax(14rem,1.4fr)_minmax(10rem,.8fr)_minmax(10rem,.8fr)_auto] gap-5 px-3 py-5">
+              <div class="min-w-0">
+                <h3 class="font-semibold text-slate-900">{{ nombreDe(edicion) }}</h3>
+                <p class="mt-2 text-cuerpo leading-relaxed text-prosa">{{ edicion.descripcion || 'Sin descripción registrada.' }}</p>
+              </div>
+              <div class="text-sm text-slate-700">
+                <p>{{ fechasDe(edicion) }}</p>
+                <p class="mt-1 text-xs text-slate-500">{{ edicion.director ? 'Dirección: ' + edicion.director : 'Dirección por definir' }}</p>
+              </div>
+              <div class="text-sm">
+                <!--
+                  EL ESTADO DE VISIBILIDAD PRIMERO Y CON COLOR: es el que decide qué se puede hacer
+                  con la fila. El de realización —en preparación, programada, realizada— describe el
+                  evento y va debajo, en gris: son dos cosas distintas y confundirlas hacía creer que
+                  una edición «programada» ya estaba publicada.
+                -->
+                <span data-visibilidad-edicion>
+                  <app-indicador-de-estado
+                    [etiqueta]="edicion.estadoVisibilidadEtiqueta"
+                    [tono]="tonoDelEstado(edicion.estadoVisibilidad)"
+                    [matiz]="matizDelEstado(edicion.estadoVisibilidad)"
+                    [conTexto]="true"></app-indicador-de-estado>
+                </span>
+                <p class="mt-1.5 text-xs text-slate-500">{{ edicion.estadoEtiqueta }}</p>
+              </div>
+              <div class="flex justify-end">
+                <!--
+                  UN SOLO CONTROL, Y LAS ACCIONES SALEN DEL ESTADO. «Publicar» era un enlace
+                  subrayado igual que los demás, perdido en esta columna: ahora es la acción
+                  principal de un borrador y sale fuera del menú.
+                -->
+                <app-menu-de-acciones
+                  [acciones]="accionesDe(edicion)"
+                  [descripcion]="nombreDe(edicion)"
+                  (elegida)="ejecutarAccion(edicion, $event)"></app-menu-de-acciones>
+              </div>
+            </li>
+          }
+        </ol>
+      </div>
+    </div>
+  }
+
+  @if (ajustes(); as revision) {
+    <section class="border-l-4 border-amber-400 bg-amber-50 px-5 py-4" aria-live="polite" aria-labelledby="observaciones-edicion-titulo">
+      <div class="flex items-start justify-between gap-3">
+        <div><h3 id="observaciones-edicion-titulo" class="font-semibold text-amber-950">Observaciones sobre la Edición</h3><p class="mt-2 text-cuerpo leading-relaxed text-prosa">Supervisión institucional posterior a su registro o publicación.</p></div>
+        <button type="button" class="text-sm font-semibold text-amber-900 underline underline-offset-4" (click)="ajustes.set(null)">Cerrar</button>
+      </div>
+      @if (revision.observacionGeneral) { <p class="mt-4 text-sm text-amber-950">{{ revision.observacionGeneral }}</p> }
+      <!--
+        NO HAY RAMA «no hay observaciones»: este recuadro solo se abre desde una acción que existe
+        cuando las hay. El placeholder que había aquí era la mitad visible del defecto.
+      -->
+      <ul class="mt-4 divide-y divide-amber-200 border-y border-amber-200">
+        @for (nota of revision.observaciones; track nota.id) {
+          <li class="py-4">
+            <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+              <div><p class="text-sm font-semibold text-slate-900">{{ nota.campoEtiqueta }}</p><p class="mt-1 text-sm text-slate-700">{{ nota.nota }}</p></div>
+              <button type="button" class="shrink-0 text-sm font-semibold text-morado underline underline-offset-4" (click)="atender(nota.id, nota.estado !== 'atendida')">{{ nota.estado === 'atendida' ? 'Marcar pendiente' : 'Marcar atendido' }}</button>
+            </div>
+          </li>
+        }
+      </ul>
+    </section>
+  }
+
+  <!-- La única acción de esta lista que no se deshace: archivar conserva, despublicar devuelve a borrador. -->
+  @if (edicionPorEliminar(); as edicion) {
+    <app-confirmacion
+      titulo="Eliminar la edición"
+      [detalle]="'Se borra ' + comoSeLlama(edicion) + ' con sus localizaciones, entidades aliadas y materiales, y no se puede deshacer. Si lo que quieres es retirarla de la vista pública conservando el registro, archívala.'"
+      accion="Eliminar la edición"
+      identificador="confirmar-eliminar-edicion"
+      (confirmar)="confirmarLaEliminacion()"
+      (cancelar)="cerrarLaConfirmacion()" />
+  }
+</section>

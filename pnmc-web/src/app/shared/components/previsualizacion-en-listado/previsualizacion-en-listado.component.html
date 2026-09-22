@@ -1,0 +1,45 @@
+<!--
+  EL AVISO VA FUERA DEL MARCO. Dentro, el registro se ve exactamente como se verá, y eso incluye no
+  parecer un borrador; decirlo dentro falsearía justamente lo que se viene a comprobar.
+-->
+<div #panel class="flex min-h-0 w-full flex-col gap-3 overflow-y-auto" data-previsualizacion-en-listado>
+  <div class="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3">
+    <p class="text-xs font-bold text-amber-900">
+      @if (yaEsPublico) {
+        Así se ve hoy en su listado.
+      } @else {
+        Así se verá en su listado. Todavía no es público.
+      }
+    </p>
+    <p class="mt-1 text-[0.7rem] leading-relaxed text-amber-800">
+      Busca <b>{{ nombre }}</b>@if (estadoEtiqueta) { · {{ estadoEtiqueta }} }
+      entre los demás registros. El listado lo ordena con sus propias reglas —por fecha, por título—,
+      así que su posición aquí es la que tendrá en el portal, no una posición de cortesía.
+    </p>
+    <a [href]="direccion()" target="_blank" rel="noopener" data-abrir-previsualizacion-aparte
+      class="mt-2 inline-flex items-center gap-1.5 text-[0.7rem] font-bold text-morado hover:underline">
+      <svg lucideExternalLink [size]="12" aria-hidden="true"></svg>
+      Abrir en una pestaña
+    </a>
+  </div>
+
+  <!--
+    MARCO DE 1440 ENCOGIDO AL HUECO, el mismo criterio que la previsualización del CMS: un listado
+    se mira en un PC de escritorio, y reducir el ancho lógico cambiaría la retícula que se quiere ver.
+  -->
+  <!--
+    LA ALTURA VA EXPLICITA Y NO POR `flex-1`. Con `flex-1` el alto lo reparte el contenedor, y el
+    contenedor se mide por su contenido: el resultado era un marco de cero píxeles dentro de un
+    diálogo que solo enseñaba el aviso. Aquí el alto lo decide la escala, que es lo único que lo sabe.
+  -->
+  <div class="relative overflow-hidden rounded-xl border border-slate-300 bg-white shadow-inner"
+       [style.height.px]="altoPintado()">
+    <iframe
+      title="Previsualización del listado público"
+      [src]="direccionSegura"
+      class="absolute left-0 top-0 origin-top-left border-0"
+      [style.width.px]="ANCHO_LOGICO"
+      [style.height.px]="ALTO_LOGICO"
+      [style.transform]="'scale(' + escala() + ')'"></iframe>
+  </div>
+</div>

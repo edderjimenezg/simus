@@ -1,0 +1,131 @@
+<!--
+  BARRA DE PROGRESO DE LECTURA, del diseño aprobado. Se dibuja siempre que haya noticia abierta y
+  se escala con `transform`, que es lo que el navegador puede animar sin recalcular el diseño.
+-->
+@if (noticia()) {
+  <div class="fixed inset-x-0 top-0 z-[3300] h-1.5 origin-left bg-verde transition-transform duration-100 ease-out"
+    [style.transform]="'scaleX(' + (progresoDeLectura() / 100) + ')'"
+    role="progressbar" aria-label="Progreso de lectura"
+    [attr.aria-valuenow]="progresoDeLectura().toFixed(0)" aria-valuemin="0" aria-valuemax="100"></div>
+}
+
+<main class="min-h-[70dvh] bg-white px-4 pb-20 pt-28 sm:px-6 lg:px-8">
+  <div class="mx-auto max-w-6xl">
+    @if (cargando()) {
+      <p class="font-alternate text-xs font-bold uppercase tracking-wider text-slate-400" role="status">Consultando…</p>
+    } @else if (noEncontrada()) {
+      <section class="rounded-2xl border border-slate-200 bg-slate-50 p-6 sm:p-8" aria-labelledby="noticia-ausente">
+        <p class="text-xs font-bold uppercase tracking-widest text-slate-500">No disponible</p>
+        <h1 id="noticia-ausente" class="mt-3 font-alternate text-3xl font-bold uppercase tracking-wide text-morado">Esta noticia no está publicada</h1>
+        <p class="mt-3 text-sm leading-relaxed text-slate-600">Puede que la dirección haya cambiado o que la publicación se haya retirado.</p>
+        <a routerLink="/noticias" class="mt-6 inline-block rounded-xl bg-morado px-4 py-2.5 font-alternate text-xs font-black uppercase tracking-wider text-white transition hover:bg-morado-claro">Ver todas las noticias</a>
+      </section>
+    } @else if (noticia(); as item) {
+      <nav class="mb-8" aria-label="Volver">
+        <a routerLink="/noticias" class="font-alternate text-xs font-bold uppercase tracking-wider text-verde-texto hover:underline">← Noticias</a>
+      </nav>
+
+      <div class="grid grid-cols-1 gap-12 lg:grid-cols-12 lg:gap-16">
+        <article class="lg:col-span-8">
+          <header class="border-b border-slate-100 pb-8">
+            <div class="flex flex-wrap items-center gap-x-4 gap-y-2 font-alternate text-xs font-bold uppercase tracking-widest text-slate-400">
+              @if (item.categoria) {
+                <span class="text-verde-texto">{{ item.categoria }}</span>
+                <span class="h-1.5 w-1.5 rounded-full bg-slate-300"></span>
+              }
+              @if (item.fechaPublicacion) {
+                <time [attr.datetime]="item.fechaPublicacion">{{ item.fechaPublicacion | date: 'd MMMM y':'':'es-CO' }}</time>
+                <span class="h-1.5 w-1.5 rounded-full bg-slate-300"></span>
+              }
+              <span class="text-morado">{{ minutosDeLectura(item) }} min de lectura</span>
+            </div>
+
+            <h1 class="mt-4 max-w-4xl font-gregor text-4xl uppercase leading-[1.05] tracking-tight text-morado sm:text-5xl lg:text-6xl">{{ item.titulo }}</h1>
+            <p class="mt-5 max-w-3xl text-lg font-light leading-relaxed text-slate-600">{{ item.resumen }}</p>
+
+            @if (item.autoriaNombre) {
+              <p class="mt-5 font-alternate text-xs font-bold uppercase tracking-wider text-slate-400">{{ item.autoriaNombre }}</p>
+            }
+          </header>
+
+          @if (item.imagenRuta) {
+            <!-- El original y no la miniatura: aquí se mira una sola imagen y con atención. -->
+            <figure class="my-10">
+              <img [src]="item.imagenRuta" [alt]="item.imagenAlternativa || ''"
+                width="960" height="540" class="max-h-[31rem] w-full rounded-3xl border border-slate-100 object-cover shadow-lg" />
+              @if (item.imagenAlternativa) {
+                <figcaption class="mt-3 block text-center text-xs italic text-slate-400">{{ item.imagenAlternativa }}</figcaption>
+              }
+            </figure>
+          }
+
+          @if (parrafos(item.cuerpo).length > 0) {
+            <!--
+              LETRA CAPITULAR EN EL PRIMER PARRAFO, como en el diseño aprobado. La pone el CSS y no
+              una marca en el contenido: el cuerpo lo escribe una persona y no tiene por qué saber
+              de tipografía.
+            -->
+            <div class="max-w-3xl space-y-6 font-nunito text-[1.08rem] font-light leading-relaxed text-morado
+                        [&>p:first-of-type]:first-letter:float-left [&>p:first-of-type]:first-letter:mr-3
+                        [&>p:first-of-type]:first-letter:mt-1 [&>p:first-of-type]:first-letter:font-alternate
+                        [&>p:first-of-type]:first-letter:text-6xl [&>p:first-of-type]:first-letter:font-bold
+                        [&>p:first-of-type]:first-letter:text-morado">
+              @for (parrafo of parrafos(item.cuerpo); track $index) {
+                <p>{{ parrafo }}</p>
+              }
+            </div>
+          }
+
+          <footer class="mt-12 flex flex-wrap items-center justify-between gap-4 border-t border-slate-100 pt-8">
+            <a routerLink="/noticias" class="rounded-xl border border-slate-200 px-4 py-2.5 font-alternate text-xs font-bold uppercase tracking-wider text-slate-600 transition hover:border-morado-claro">← Todas las noticias</a>
+            <button type="button" (click)="copiarEnlace()"
+              class="rounded-xl bg-morado px-4 py-2.5 font-alternate text-xs font-black uppercase tracking-wider text-white transition hover:bg-morado-claro">
+              {{ enlaceCopiado() ? 'Enlace copiado' : 'Copiar enlace' }}
+            </button>
+          </footer>
+
+          @if (item.etiquetas.length > 0) {
+            <div class="mt-8 flex flex-wrap items-center gap-2">
+              <span class="font-alternate text-[0.62rem] font-bold uppercase tracking-wider text-slate-400">Etiquetas</span>
+              @for (termino of item.etiquetas; track termino) {
+                <span class="rounded-full bg-slate-100 px-3 py-1 text-[0.68rem] font-bold text-slate-600">{{ termino }}</span>
+              }
+            </div>
+          }
+        </article>
+
+        <!--
+          COLUMNA DE RELACIONADAS. Se piden de la misma categoría cuando la hay, y se excluye la
+          que se está leyendo: ofrecer el artículo abierto delata que la columna no mira la pantalla.
+        -->
+        @if (relacionadas().length > 0) {
+          <aside class="lg:col-span-4" aria-labelledby="relacionadas-titulo">
+            <div class="sticky top-28">
+              <h2 id="relacionadas-titulo" class="border-b border-slate-200 pb-3 font-alternate text-sm font-bold uppercase tracking-wider text-morado">Seguir leyendo</h2>
+              <ul class="divide-y divide-slate-100">
+                @for (otra of relacionadas(); track otra.id) {
+                  <li>
+                    <a [routerLink]="['/noticias', otra.slug]" class="group grid gap-3 py-5 sm:grid-cols-[5rem_minmax(0,1fr)]">
+                      @if (otra.imagenRuta) {
+                        <span class="block aspect-square w-full overflow-hidden rounded-xl bg-slate-100">
+                          <img [src]="miniatura(otra.imagenRuta)" [alt]="otra.imagenAlternativa || ''"
+                            width="160" height="160" loading="lazy" class="h-full w-full object-cover" />
+                        </span>
+                      }
+                      <span class="min-w-0">
+                        @if (otra.fechaPublicacion) {
+                          <span class="block font-alternate text-[0.58rem] font-bold uppercase tracking-wider text-slate-400">{{ otra.fechaPublicacion | date: 'd MMM y':'':'es-CO' }}</span>
+                        }
+                        <span class="mt-1 line-clamp-3 block font-alternate text-sm font-bold leading-snug text-morado transition-colors group-hover:text-morado-vivo">{{ otra.titulo }}</span>
+                      </span>
+                    </a>
+                  </li>
+                }
+              </ul>
+            </div>
+          </aside>
+        }
+      </div>
+    }
+  </div>
+</main>

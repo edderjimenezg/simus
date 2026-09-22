@@ -1,0 +1,216 @@
+<section data-testid="imagenes-del-bloque" class="space-y-3">
+
+  <div class="space-y-1">
+    <div class="flex items-center gap-2">
+      <svg lucideImage class="h-3.5 w-3.5 text-slate-400"></svg>
+      <h4 class="text-dato font-black uppercase tracking-wider text-slate-500">Imágenes de este bloque</h4>
+      @if (cargando()) {
+        <span class="text-dato text-slate-400">cargando…</span>
+      }
+      <span class="ml-auto text-dato text-slate-400">{{ ranuras().length }}</span>
+    </div>
+    <!--
+      Se dice qué guarda cada botón. «Guardar y publicar» queda justo encima de estas filas y
+      solo guarda los textos; sin esta línea se lee como el botón de todo el bloque.
+    -->
+    <p class="text-dato leading-relaxed text-slate-400">
+      Cada imagen se cambia y se despliega por su cuenta. Los botones de guardar de arriba son
+      solo para los textos.
+    </p>
+  </div>
+
+  @if (aviso(); as a) {
+    <p
+      data-testid="aviso-de-imagenes"
+      class="rounded-lg px-3 py-2 text-dato leading-relaxed"
+      [ngClass]="a.tipo === 'ok' ? 'bg-emerald-50 text-emerald-800'
+                : a.tipo === 'info' ? 'bg-blue-50 text-blue-800'
+                : 'bg-rose-50 text-rose-800'"
+    >{{ a.texto }}</p>
+  }
+
+  <!--
+    UNA FILA POR RANURA, con la miniatura a tamaño FIJO.
+
+    Antes era una rejilla de tarjetas con la imagen al ancho de la tarjeta. Comprobado el 30 de
+    agosto de 2026 sobre una pantalla de 1440: a 100 % de zoom cada tarjeta medía 237 px, y al
+    llegar a 120 % la rejilla se apilaba y la misma tarjeta saltaba a 878 px de ancho por 656 de
+    alto. Ocho de esas —las de «Rutas»— convertían el bloque en una galería por la que había que
+    desplazarse un minuto para llegar al siguiente campo de texto.
+
+    La miniatura mide ahora 96 px de ancho SIEMPRE, y su alto sale de la relación del marco: la
+    del banner es 96×26 y la del Ecosistema 96×49. Es tamaño de reconocer, no de juzgar; para
+    juzgar está el recortador, que se abre a todo el ancho, y la previsualización de al lado.
+  -->
+  <ul class="space-y-2">
+    @for (imagen of ranuras(); track imagen.key) {
+      <li
+        [attr.data-testid]="'ranura-' + imagen.key"
+        class="rounded-xl border bg-white p-2.5 shadow-sm transition-colors"
+        [ngClass]="ajustando()?.clave === imagen.key
+          ? 'border-morado/30 ring-1 ring-morado/10'
+          : 'border-slate-200'"
+      >
+        @if (ajustando()?.clave === imagen.key) {
+          <!--
+            EL AJUSTE VIVE DENTRO DE LA FILA, no en un diálogo encima. Un diálogo taparía la
+            previsualización de la derecha, que es justamente contra lo que se está ajustando.
+          -->
+          <p class="mb-2 text-dato font-black text-slate-800">{{ imagen.label }}</p>
+          <app-recortador
+            [archivo]="ajustando()!.archivo"
+            [marco]="marcoDe(imagen.key)"
+            [clase]="presentacion(imagen.key).clase"
+            [filtro]="presentacion(imagen.key).filtro"
+            [opacidad]="presentacion(imagen.key).opacidad"
+            [fondo]="presentacion(imagen.key).fondo"
+            [relacionPlegada]="presentacion(imagen.key).relacionPlegada ?? null"
+            [zonaDeTexto]="presentacion(imagen.key).zonaDeTexto ?? null"
+            (listo)="usarRecorte(imagen, $event)"
+            (cancelado)="cancelarAjuste()"
+          ></app-recortador>
+        } @else {
+          <div class="flex items-start gap-2.5">
+
+            <!-- Las miniaturas: la que se ve hoy y, si la hay, la que espera -->
+            <div class="flex shrink-0 gap-1.5">
+              <figure class="w-24">
+                <div class="overflow-hidden rounded-md" [style.background]="presentacion(imagen.key).fondo">
+                  <img
+                    [src]="urlEnElSitio(imagen)"
+                    [alt]="'Lo que el sitio muestra hoy en «' + imagen.label + '»'"
+                    loading="lazy"
+                    decoding="async"
+                    class="block w-full object-cover"
+                    [style.aspect-ratio]="marcoDe(imagen.key).w + ' / ' + marcoDe(imagen.key).h"
+                    [style.filter]="presentacion(imagen.key).filtro"
+                    [style.opacity]="presentacion(imagen.key).opacidad"
+                  />
+                </div>
+                <!--
+                  «Lo que se ve hoy» y no «en el sitio»: cuando la ranura no tiene nada
+                  publicado, esta miniatura es la imagen COMPILADA, y poner «en el sitio» junto
+                  a una pastilla que dice «sin publicar» son dos frases que se contradicen en la
+                  misma fila.
+                -->
+                <figcaption class="mt-1 text-dato font-bold uppercase tracking-wider text-slate-400">Hoy</figcaption>
+              </figure>
+
+              @if (urlSinPublicar(imagen); as pendiente) {
+                <figure data-testid="mitad-sin-publicar" class="w-24">
+                  <div class="overflow-hidden rounded-md ring-2 ring-amber-300" [style.background]="presentacion(imagen.key).fondo">
+                    <img
+                      [src]="pendiente"
+                      [alt]="'Imagen sin publicar de «' + imagen.label + '»'"
+                      loading="lazy"
+                      decoding="async"
+                      class="block w-full object-cover"
+                      [style.aspect-ratio]="marcoDe(imagen.key).w + ' / ' + marcoDe(imagen.key).h"
+                      [style.filter]="presentacion(imagen.key).filtro"
+                      [style.opacity]="presentacion(imagen.key).opacidad"
+                    />
+                  </div>
+                  <figcaption class="mt-1 text-dato font-bold uppercase tracking-wider text-amber-600">Sin publicar</figcaption>
+                </figure>
+              }
+            </div>
+
+            <div class="min-w-0 flex-1">
+              <div class="flex items-start justify-between gap-2">
+                <p [title]="imagen.label" class="truncate text-dato font-black text-slate-800">{{ imagen.label }}</p>
+                <!-- EL ESTADO DE LA IMAGEN CON SU INDICADOR: ninguna píldora en el diseño. -->
+                <span class="shrink-0">
+                  <app-indicador-de-estado
+                    [etiqueta]="estado(imagen.state)"
+                    [tono]="tonoDelEstado(imagen.state)"
+                    [matiz]="matizDelEstado(imagen.state)"
+                    [conTexto]="true"></app-indicador-de-estado>
+                </span>
+              </div>
+              <p class="mt-0.5 font-mono text-dato text-slate-400">
+                marco {{ marcoDe(imagen.key).w }}×{{ marcoDe(imagen.key).h }}@if (imagen.published) {<span> · {{ peso(imagen.published.bytes) }}</span>}
+              </p>
+
+              <div class="mt-2 flex flex-wrap items-center gap-1.5">
+                @if (imagen.editable && enabled()) {
+                  <label
+                    [attr.data-testid]="'cambiar-' + imagen.key"
+                    title="Reemplaza el archivo de esta ranura. El anterior no se guarda: desde V20260829_03 el historial conserva las señas, no los bytes."
+                    class="inline-flex cursor-pointer items-center gap-1 rounded-lg bg-morado px-2 py-1 text-dato font-black uppercase tracking-wider text-white transition hover:bg-[#3b1b59]"
+                    [ngClass]="claveOcupada() === imagen.key ? 'pointer-events-none opacity-60' : ''"
+                  >
+                    <svg lucideUpload class="h-2.5 w-2.5"></svg>
+                    {{ claveOcupada() === imagen.key ? 'Subiendo…' : 'Cambiar' }}
+                    <input
+                      type="file"
+                      class="sr-only"
+                      [accept]="tiposAceptados()"
+                      (change)="elegirArchivo(imagen, $event)"
+                    />
+                  </label>
+                } @else if (!imagen.editable) {
+                  <span class="text-dato text-slate-400">Marca institucional: no se reemplaza desde aquí.</span>
+                }
+
+                @if (hayBorradorSinPublicar(imagen) && puedePublicar()) {
+                  <button
+                    type="button"
+                    [attr.data-testid]="'desplegar-' + imagen.key"
+                    [disabled]="claveOcupada() === imagen.key"
+                    (click)="desplegar(imagen)"
+                    class="cursor-pointer rounded-lg bg-verde px-2 py-1 text-dato font-black uppercase tracking-wider text-slate-950 transition hover:bg-[#00c454] disabled:opacity-50"
+                  >Desplegar</button>
+                }
+
+                @if (imagen.state === 'publicado' && puedePublicar()) {
+                  <button
+                    type="button"
+                    [attr.data-testid]="'retirar-' + imagen.key"
+                    [disabled]="claveOcupada() === imagen.key"
+                    (click)="retirar(imagen)"
+                    class="cursor-pointer rounded-lg border border-slate-200 px-2 py-1 text-dato font-black uppercase tracking-wider text-slate-500 transition hover:text-morado disabled:opacity-50"
+                  >Retirar</button>
+                }
+
+                <button
+                  type="button"
+                  [attr.data-testid]="'historial-' + imagen.key"
+                  (click)="verHistorial(imagen)"
+                  class="ml-auto inline-flex cursor-pointer items-center gap-1 rounded-lg px-1 py-1 text-dato font-bold text-slate-400 transition hover:text-morado"
+                >
+                  <svg lucideHistory class="h-2.5 w-2.5"></svg>
+                  Historial
+                </button>
+              </div>
+
+              @if (historialDe() === imagen.key) {
+                <div [attr.data-testid]="'lista-historial-' + imagen.key" class="mt-2 max-h-36 space-y-1 overflow-y-auto border-t border-slate-100 pt-2">
+                  @for (entrada of historial(); track entrada.id) {
+                    <p class="flex flex-wrap items-baseline gap-x-2 text-dato text-slate-500">
+                      <span class="font-bold text-slate-700">{{ entrada.user }}</span>
+                      <span>{{ entrada.at | date:'d MMM y, HH:mm' }}</span>
+                      <span class="rounded bg-slate-100 px-1.5 font-black uppercase">{{ entrada.action }}</span>
+                      @if (entrada.width) { <span class="font-mono">{{ entrada.width }}×{{ entrada.height }} · {{ peso(entrada.bytes) }}</span> }
+                    </p>
+                  } @empty {
+                    <p class="text-dato text-slate-400">Sin cambios registrados.</p>
+                  }
+                  <p class="pt-1 text-dato leading-relaxed text-slate-400">
+                    El historial guarda quién, cuándo y las señas del archivo. No guarda el
+                    archivo: reemplazar una imagen borra la anterior.
+                  </p>
+                </div>
+              }
+            </div>
+          </div>
+        }
+      </li>
+    } @empty {
+      @if (!cargando()) {
+        <li class="rounded-lg border border-dashed border-slate-200 px-3 py-4 text-center text-dato text-slate-400">
+          Este bloque no tiene imágenes administrables.
+        </li>
+      }
+    }
+  </ul>
+</section>

@@ -1,0 +1,161 @@
+<!--
+  LA FICHA DEL MERCADO, EN EL MISMO CAJON LATERAL QUE LA DEL FESTIVAL, con las mismas piezas: los
+  datos se leen con `app-dato-en-lectura` en grupos con un filete cada uno, el estado con el
+  indicador compartido y las acciones con `app-boton`. No es una pantalla nueva: es la misma, con
+  los datos que un mercado sí tiene.
+-->
+<app-panel-lateral contexto="Ecosistema musical · Mercado musical" [titulo]="ficha()?.nombre ?? 'Mercado musical'" idDelTitulo="ficha-mercado-titulo" (cerrar)="cerrar.emit()">
+  <ng-container bajo-titulo>
+    @if (ficha(); as m) {
+      <app-indicador-de-estado
+        [etiqueta]="etiquetaDeEstado(m.estado)"
+        [tono]="tonoDelEstado(m.estado)"
+        [matiz]="matizDelEstado(m.estado)"
+        [conTexto]="true"></app-indicador-de-estado>
+      <span class="text-cuerpo text-prosa">Cobertura {{ m.nivelCobertura }}</span>
+    }
+  </ng-container>
+
+  @if (cargando()) {
+    <app-estado-de-lista tipo="cargando" titulo="Abriendo la ficha…" />
+  } @else if (error() && !ficha()) {
+    <app-estado-de-lista tipo="error" titulo="No fue posible abrir la ficha" [detalle]="error()" />
+  } @else if (ficha(); as m) {
+    @if (avisoDePublicacion()) {
+      <p class="mb-4 text-cuerpo font-semibold text-verde-texto" role="status">{{ avisoDePublicacion() }}</p>
+    }
+    @if (error()) {
+      <p class="mb-4 text-cuerpo font-semibold text-amber-800" role="alert">{{ error() }}</p>
+    }
+
+    @if (puedePublicar) {
+      <div class="mb-6 flex flex-wrap gap-2">
+        @if (m.estado !== 'publicado') {
+          <app-boton importancia="confirmar" [ocupado]="publicando()" (accion)="cambiarPublicacion('publicado')">Publicar</app-boton>
+        } @else {
+          <app-boton importancia="secundaria" [ocupado]="publicando()" (accion)="cambiarPublicacion('borrador')">Despublicar</app-boton>
+          <app-boton importancia="secundaria" [ocupado]="publicando()" (accion)="cambiarPublicacion('archivado')">Archivar</app-boton>
+        }
+        @if (m.estado !== 'publicado') {
+          <app-boton importancia="secundaria" identificador="previsualizar-mercado" (accion)="previsualizando.set(true)">Previsualizar</app-boton>
+        } @else {
+          <a [href]="'/ecosistema/mercados-musicales/' + m.id" target="_blank" rel="noopener"
+             class="inline-flex min-h-control items-center gap-2 rounded-xl border border-slate-200 px-4 py-2.5 text-dato font-bold text-slate-600 transition hover:border-morado hover:text-morado">Ver en el portal</a>
+        }
+      </div>
+      @if (previsualizando()) {
+        <app-dialogo-de-previsualizacion
+          modulo="mercados"
+          [id]="m.id"
+          [nombre]="m.nombre"
+          [estadoEtiqueta]="etiquetaDeEstado(m.estado)"
+          (cerrar)="previsualizando.set(false)" />
+      }
+    }
+
+    <section class="space-y-4">
+      <h3 class="border-t border-filete pt-4 font-alternate text-dato font-bold uppercase tracking-[0.18em] text-seccion">Quién responde y de dónde vino</h3>
+      <dl class="grid gap-x-8 gap-y-5 sm:grid-cols-2">
+        <div class="flex flex-col">
+          @if (m.organizacionResponsableId !== null) {
+            <dt class="order-2 mt-1 text-dato text-rotulo">Organización responsable</dt>
+            <dd class="order-1 text-lectura font-semibold text-valor">
+              <button type="button" class="text-left text-morado underline-offset-2 hover:underline" (click)="verOrganizacion.emit(m.organizacionResponsableId!)">{{ m.organizacionResponsableNombre }}</button>
+            </dd>
+          } @else {
+            <app-dato-en-lectura rotulo="Organización responsable" valor=""></app-dato-en-lectura>
+            <dd class="order-3 mt-1 text-dato text-rotulo">Todavía no hay ninguna que responda por él.</dd>
+          }
+        </div>
+        <div class="flex flex-col">
+          <dt class="order-2 mt-1 text-dato text-rotulo">Procedencia</dt>
+          <dd class="order-1"><app-sello-de-procedencia [procedencia]="m.procedencia" [detallado]="true"></app-sello-de-procedencia></dd>
+        </div>
+      </dl>
+      <!--
+        EL HISTORIAL VA AQUI Y NO EN LA BARRA DE ACCIONES: el sello dice de dónde vino y el
+        historial dice qué le ha pasado desde entonces. Es una lectura, así que no depende de
+        `puedePublicar`.
+      -->
+      <app-boton importancia="secundaria" tamano="menudo" identificador="abrir-historial-mercado" (accion)="historialAbierto.set(true)">Ver historial</app-boton>
+      @if (historialAbierto()) {
+        <app-historial-de-registro
+          [titulo]="m.nombre"
+          [registro]="{ tabla: tablaDeAuditoria, id: m.id }"
+          [procedencia]="m.procedencia"
+          (cerrar)="historialAbierto.set(false)"></app-historial-de-registro>
+      }
+    </section>
+
+    <section class="mt-8 space-y-4">
+      <h3 class="border-t border-filete pt-4 font-alternate text-dato font-bold uppercase tracking-[0.18em] text-seccion">Datos permanentes</h3>
+      <dl class="grid gap-x-8 gap-y-5 sm:grid-cols-2">
+        <!-- EL MUNICIPIO SOLO NO UBICA: hay municipios con el mismo nombre en departamentos distintos. -->
+        <div class="flex flex-col">
+          <app-dato-en-lectura rotulo="Territorio"
+            [valor]="m.municipio && m.departamento ? ((m.municipio | nombrePropio) + ' (' + (m.departamento | nombrePropio) + ')') : ((m.municipio || m.departamento || 'Cobertura nacional') | nombrePropio)"></app-dato-en-lectura>
+        </div>
+        <div class="flex flex-col"><app-dato-en-lectura rotulo="Lugar específico" [valor]="m.lugarEspecifico"></app-dato-en-lectura></div>
+        <div class="flex flex-col"><app-dato-en-lectura rotulo="Alcance" [valor]="m.alcance"></app-dato-en-lectura></div>
+        <div class="flex flex-col"><app-dato-en-lectura rotulo="Modalidad" [valor]="m.modalidad"></app-dato-en-lectura></div>
+        <div class="flex flex-col"><app-dato-en-lectura rotulo="Periodicidad" [valor]="etiquetaDePeriodicidad(m.periodicidad)"></app-dato-en-lectura></div>
+        <!-- EL NOMBRE DEL FESTIVAL SE LEE DE LA RELACION, no de un texto paralelo que pueda decir otra cosa. -->
+        <div class="flex flex-col">
+          <app-dato-en-lectura rotulo="En el marco de"
+            [valor]="m.seRealizaEnElMarcoDeUnFestival && m.festivalNombre ? m.festivalNombre : 'Proceso independiente'"></app-dato-en-lectura>
+        </div>
+        <div class="flex flex-col"><app-dato-en-lectura rotulo="Correo de contacto" [valor]="m.correoContacto"></app-dato-en-lectura></div>
+        <div class="flex flex-col"><app-dato-en-lectura rotulo="Teléfono" [valor]="m.telefono"></app-dato-en-lectura></div>
+        <div class="flex flex-col sm:col-span-2"><app-dato-en-lectura rotulo="Descripción" [valor]="m.descripcion" [prosa]="true"></app-dato-en-lectura></div>
+      </dl>
+      @if (m.practicasMusicales.length > 0 || m.territoriosSonoros.length > 0) {
+        <dl class="grid gap-x-8 gap-y-5 sm:grid-cols-2">
+          @if (m.practicasMusicales.length > 0) {
+            <div class="flex flex-col"><app-dato-en-lectura rotulo="Prácticas musicales" [valor]="nombresDe(m.practicasMusicales)"></app-dato-en-lectura></div>
+          }
+          @if (m.territoriosSonoros.length > 0) {
+            <div class="flex flex-col"><app-dato-en-lectura rotulo="Territorios sonoros" [valor]="nombresDe(m.territoriosSonoros)"></app-dato-en-lectura></div>
+          }
+        </dl>
+      }
+    </section>
+
+    <!--
+      LAS EDICIONES VAN DENTRO DEL MERCADO, no en una sección propia. Son su historial de
+      realizaciones, igual que las de un festival.
+    -->
+    <section class="mt-8 space-y-4">
+      <h3 class="border-t border-filete pt-4 font-alternate text-dato font-bold uppercase tracking-[0.18em] text-seccion">Ediciones · {{ m.ediciones.length }}</h3>
+      @if (m.ediciones.length === 0) {
+        <p class="text-cuerpo leading-relaxed text-prosa">
+          Este mercado todavía no tiene ediciones registradas. Las registra la organización
+          responsable desde su espacio, una vez el mercado está publicado.
+        </p>
+      } @else {
+        <ul class="divide-y divide-filete">
+          @for (edicion of m.ediciones; track edicion.id) {
+            <li class="flex flex-wrap items-start justify-between gap-3 py-3">
+              <div class="min-w-0">
+                <p class="text-lectura font-semibold text-valor">{{ nombreDeLaEdicion(edicion) }}</p>
+                <p class="mt-0.5 text-dato text-rotulo">
+                  @if (edicion.numeroEdicion) { N.º {{ edicion.numeroEdicion }} · }
+                  {{ edicion.anio }}
+                  @if (edicion.fechaInicio) { · {{ edicion.fechaInicio | date: 'd MMM y':'':'es-CO' }} }
+                  · {{ rotuloDeRealizacion(edicion.estado) }}
+                </p>
+                <span class="mt-1 block"><app-sello-de-procedencia [procedencia]="edicion.procedencia"></app-sello-de-procedencia></span>
+              </div>
+              <span class="shrink-0">
+                <app-indicador-de-estado
+                  [etiqueta]="rotuloDeVisibilidad(edicion.estadoVisibilidad)"
+                  [tono]="tonoDelEstado(edicion.estadoVisibilidad)"
+                  [matiz]="matizDelEstado(edicion.estadoVisibilidad)"
+                  [conTexto]="true"></app-indicador-de-estado>
+              </span>
+            </li>
+          }
+        </ul>
+      }
+    </section>
+  }
+</app-panel-lateral>

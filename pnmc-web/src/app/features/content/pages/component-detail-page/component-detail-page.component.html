@@ -1,0 +1,194 @@
+@if (match(); as item) {
+  <app-compact-hero
+    backLabel="Ejes"
+    [current]="item.component.name"
+    [title]="item.component.name"
+    [subtitle]="item.eje.title"
+    maxWidthClass="max-w-5xl"
+    (regresoSolicitado)="navigation.navigate(pageId)"
+  ></app-compact-hero>
+  <section class="py-20">
+    <div class="mx-auto grid max-w-6xl gap-12 px-6 lg:grid-cols-[minmax(0,1fr)_20rem]">
+      <article>
+        @for (paragraph of item.component.fullText; track paragraph) {
+          <p class="mb-7 font-nunito text-lg leading-8 text-slate-600">{{ paragraph }}</p>
+        }
+        <div class="mt-12 rounded-3xl border border-[#00DA5E]/30 bg-[#00DA5E]/5 p-8">
+          <h2 class="font-alternate text-2xl font-black uppercase text-[#291242]">Conoce el eje completo</h2>
+          <p class="mt-3 text-slate-600">{{ item.eje.purpose }}</p>
+          <button type="button" (click)="navigation.navigate(pageId)" class="mt-6 rounded-full bg-[#291242] px-6 py-3 text-xs font-black uppercase tracking-wider text-white">Explorar todos los componentes</button>
+        </div>
+      </article>
+
+      <aside class="lg:sticky lg:top-28 lg:self-start space-y-6" aria-label="Contenido relacionado con el componente">
+        <div class="rounded-3xl border border-slate-200 bg-slate-50/60 px-4 py-5">
+          <div class="flex items-center gap-2 text-[#291242]">
+            <svg lucideBookOpen [size]="16"></svg>
+            <h2 class="font-alternate text-sm font-black uppercase tracking-widest">{{ texto('component_products_title') }}</h2>
+          </div>
+          <p class="mt-1 text-[0.7rem] leading-relaxed text-slate-500">{{ texto('component_products_desc') }}</p>
+
+          @if (editorialLoading()) {
+            <div class="mt-5 space-y-3">
+              @for (i of [1,2,3]; track i) {
+                <div class="h-16 animate-pulse rounded-2xl bg-slate-200/70"></div>
+              }
+            </div>
+          } @else if (relatedResources().length > 0) {
+            <ul class="mt-4 divide-y divide-slate-200/70">
+              @for (resource of relatedResources(); track resource.id) {
+                <li>
+                  <button
+                    type="button"
+                    (click)="openEditorialResource(resource)"
+                    class="group flex w-full items-center gap-3 rounded-xl px-1.5 py-2.5 text-left transition-colors hover:bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00DA5E] focus-visible:ring-offset-2 cursor-pointer"
+                  >
+                    @if (resource.thumbnail) {
+                      <img
+                        [src]="resource.thumbnail"
+                        [alt]="resource.title || 'Producto editorial'"
+                        loading="lazy"
+                        decoding="async"
+                        class="h-14 w-11 shrink-0 rounded-lg object-cover"
+                      />
+                    } @else {
+                      <span class="flex h-14 w-11 shrink-0 items-center justify-center rounded-lg bg-[#291242]/5 text-[#291242]/50">
+                        <svg lucideBookOpen [size]="16"></svg>
+                      </span>
+                    }
+                    <span class="min-w-0 flex-1">
+                      <span class="line-clamp-2 text-xs font-bold leading-snug text-[#291242] group-hover:text-[#00A849]">{{ resource.title || 'Sin título' }}</span>
+                      <span class="mt-1 flex items-center gap-1.5 text-[0.65rem] font-semibold uppercase tracking-wide text-slate-400">
+                        <span class="truncate">{{ resource.section || 'Editorial' }}</span>
+                        @if (resource.year) { <span aria-hidden="true">·</span><span>{{ resource.year }}</span> }
+                      </span>
+                    </span>
+                    <svg lucideArrowUpRight [size]="15" class="shrink-0 text-slate-300 transition-colors group-hover:text-[#00DA5E]"></svg>
+                  </button>
+                </li>
+              }
+            </ul>
+            <button
+              type="button"
+              (click)="goToEditorial()"
+              class="mt-5 w-full rounded-full border border-[#291242]/15 px-4 py-2.5 text-[0.68rem] font-black uppercase tracking-widest text-[#291242] transition-colors hover:bg-[#291242] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00DA5E] focus-visible:ring-offset-2 cursor-pointer"
+            >
+              Ver todo el acervo editorial
+            </button>
+          } @else {
+            <div class="mt-5 rounded-2xl border border-dashed border-slate-300 bg-white/60 p-5 text-center">
+              <p class="text-xs leading-relaxed text-slate-500">
+                {{ editorialError() ? 'No fue posible cargar el acervo editorial en este momento.' : 'Aún no hay productos editoriales vinculados a este componente.' }}
+              </p>
+              <button
+                type="button"
+                (click)="goToEditorial()"
+                class="mt-4 text-[0.68rem] font-black uppercase tracking-widest text-[#00A849] hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00DA5E] focus-visible:ring-offset-2 rounded-sm cursor-pointer"
+              >
+                Explorar editorial →
+              </button>
+            </div>
+          }
+        </div>
+
+        <div class="rounded-3xl border border-slate-200 bg-slate-50/60 px-4 py-5">
+          <div class="flex items-center gap-2 text-[#291242]">
+            <svg lucideCalendar [size]="16"></svg>
+            <h2 class="font-alternate text-sm font-black uppercase tracking-widest">{{ texto('component_agenda_title') }}</h2>
+          </div>
+          <p class="mt-1 text-[0.7rem] leading-relaxed text-slate-500">{{ texto('component_agenda_desc') }}</p>
+
+          @if (agendaLoading()) {
+            <div class="mt-5 space-y-3">
+              @for (i of [1,2]; track i) {
+                <div class="h-16 animate-pulse rounded-2xl bg-slate-200/70"></div>
+              }
+            </div>
+          } @else if (relatedAgenda().length > 0) {
+            <ul class="mt-4 divide-y divide-slate-200/70">
+              @for (event of relatedAgenda(); track event.id) {
+                <li>
+                  <button
+                    type="button"
+                    (click)="openAgendaEvent(event)"
+                    class="group flex w-full items-start gap-3 rounded-xl px-1.5 py-2.5 text-left transition-colors hover:bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00DA5E] focus-visible:ring-offset-2 cursor-pointer"
+                  >
+                    <span class="flex h-14 w-11 shrink-0 flex-col items-center justify-center rounded-lg bg-[#291242] text-white">
+                      <svg lucideCalendar [size]="15"></svg>
+                    </span>
+                    <span class="min-w-0 flex-1">
+                      <span class="line-clamp-2 text-xs font-bold leading-snug text-[#291242] group-hover:text-[#00A849]">{{ event.title || 'Evento de agenda' }}</span>
+                      <span class="mt-1 flex flex-wrap items-center gap-x-1.5 gap-y-0.5 text-[0.65rem] font-semibold uppercase tracking-wide text-slate-400">
+                        @if (event.date) { <span>{{ event.date }}</span> }
+                        @if (event.municipality || event.department) {
+                          <span aria-hidden="true">·</span>
+                          <span class="inline-flex items-center gap-1"><svg lucideMapPin [size]="11"></svg>{{ event.municipality || event.department | nombrePropio }}</span>
+                        }
+                      </span>
+                    </span>
+                    <svg lucideArrowUpRight [size]="15" class="mt-0.5 shrink-0 text-slate-300 transition-colors group-hover:text-[#00DA5E]"></svg>
+                  </button>
+                </li>
+              }
+            </ul>
+            <button
+              type="button"
+              (click)="goToAgenda()"
+              class="mt-5 w-full rounded-full border border-[#291242]/15 px-4 py-2.5 text-[0.68rem] font-black uppercase tracking-widest text-[#291242] transition-colors hover:bg-[#291242] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00DA5E] focus-visible:ring-offset-2 cursor-pointer"
+            >
+              Ver toda la agenda
+            </button>
+          } @else {
+            <div class="mt-5 rounded-2xl border border-dashed border-slate-300 bg-white/60 p-5 text-center">
+              <p class="text-xs leading-relaxed text-slate-500">
+                {{ agendaError() ? 'No fue posible cargar la agenda en este momento.' : 'Aún no hay eventos de agenda vinculados a este componente.' }}
+              </p>
+              <button
+                type="button"
+                (click)="goToAgenda()"
+                class="mt-4 text-[0.68rem] font-black uppercase tracking-widest text-[#00A849] hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00DA5E] focus-visible:ring-offset-2 rounded-sm cursor-pointer"
+              >
+                Explorar agenda →
+              </button>
+            </div>
+          }
+        </div>
+
+        @if (relatedStrategies().length > 0) {
+          <div class="space-y-4">
+            @for (strategy of relatedStrategies(); track strategy.id) {
+              <button
+                type="button"
+                (click)="onStrategyNavigate(strategy.navigatePath)"
+                class="group relative flex min-h-[13rem] w-full flex-col justify-end overflow-hidden rounded-3xl border border-slate-200 bg-[#291242] text-left shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00DA5E] focus-visible:ring-offset-2 cursor-pointer"
+              >
+                <img
+                  [src]="strategy.img"
+                  alt=""
+                  loading="lazy"
+                  decoding="async"
+                  (error)="$any($event.target).style.display = 'none'"
+                  class="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
+                />
+                <div class="absolute inset-0 bg-gradient-to-t from-[#291242]/96 via-[#291242]/45 to-transparent transition-all duration-500 group-hover:from-[#291242]/98"></div>
+                <div class="absolute left-4 top-4 z-10">
+                  <app-tag [text]="strategy.tag" className="bg-[#291242]/90 border border-white/10 text-white text-[8px] py-0.5 px-2.5 backdrop-blur-sm"></app-tag>
+                </div>
+                <div class="relative z-10 p-5">
+                  <h3 class="font-gregor text-xl md:text-2xl leading-none tracking-tight text-white uppercase">{{ strategy.title }}</h3>
+                  <span class="mt-3 inline-flex items-center gap-1.5 font-alternate text-[0.62rem] font-bold uppercase tracking-widest text-[#00DA5E] transition-colors group-hover:text-[#8BF784]">
+                    Explorar estrategia <svg lucideArrowUpRight [size]="13" class="transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5"></svg>
+                  </span>
+                </div>
+              </button>
+            }
+          </div>
+        }
+      </aside>
+    </div>
+  </section>
+} @else {
+  <section class="flex min-h-screen items-center justify-center bg-slate-50 px-6 pt-28 text-center">
+    <div><h1 class="text-3xl font-black text-[#291242]">{{ texto('component_missing_title') }}</h1><button type="button" (click)="navigation.navigate(pageId)" class="mt-6 text-[#00A849]">Volver a los ejes</button></div>
+  </section>
+}

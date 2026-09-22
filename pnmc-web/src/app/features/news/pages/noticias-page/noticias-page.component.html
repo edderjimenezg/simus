@@ -1,0 +1,698 @@
+<!-- VISTA 1: Lector de Artículos Ultra-Premium (Detalle de Noticia) -->
+@if (localSelectedArticle()) {
+  <div class="bg-white min-h-screen text-left relative">
+    
+    <!-- Barra de progreso de lectura -->
+    <div
+      class="fixed top-0 left-0 right-0 h-1.5 bg-[#00DA5E] z-[3300] origin-left transition-transform duration-100 ease-out"
+      [style.transform]="'scaleX(' + (readingProgress() / 100) + ')'"
+    ></div>
+
+    <app-page-hero
+      [tag]="localSelectedArticle()!.category"
+      [title]="selectedArticleHeroCopy().title"
+      [titleAccent]="selectedArticleHeroCopy().titleAccent"
+      [description]="localSelectedArticle()!.desc"
+      [bgImage]="localSelectedArticle()!.img"
+      backLabel="Noticias"
+      (onBack)="handleSelectArticle(null)"
+      [compactNews]="true"
+      [backOnly]="true"
+    ></app-page-hero>
+
+    <div class="max-w-[96rem] mx-auto px-6 lg:px-12 py-16">
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-16">
+        
+        <!-- Lector Principal Editorial -->
+        <div class="col-span-12 lg:col-span-8 space-y-10">
+          <div class="space-y-4 pb-8 border-b border-slate-100">
+            <div class="flex flex-wrap items-center gap-x-4 gap-y-2 text-slate-400 font-alternate text-xs font-bold uppercase tracking-widest">
+              <span class="text-[#00DA5E]">{{ localSelectedArticle()!.category }}</span>
+              <span class="h-1.5 w-1.5 rounded-full bg-slate-300"></span>
+              <span>Publicado: {{ localSelectedArticle()!.date }} 2026</span>
+              <span class="h-1.5 w-1.5 rounded-full bg-slate-300"></span>
+              <span class="flex items-center gap-1.5 text-[#291242]">
+                <svg lucideClock [size]="13"></svg>
+                {{ calculateReadingTime(localSelectedArticle()!.content || localSelectedArticle()!.desc) }} min de lectura
+              </span>
+            </div>
+            <h1 class="font-gregor text-4xl sm:text-5xl lg:text-7xl leading-[1.02] uppercase tracking-tighter max-w-5xl text-[#291242]">
+              {{ selectedArticleHeroCopy().title }}
+              @if (selectedArticleHeroCopy().titleAccent) {
+                <span class="text-[#00DA5E] italic"> {{ selectedArticleHeroCopy().titleAccent }}</span>
+              }
+            </h1>
+            <p class="text-xl sm:text-2xl text-[#291242] font-semibold leading-relaxed max-w-4xl pt-2">
+              {{ localSelectedArticle()!.desc }}
+            </p>
+          </div>
+
+          <!-- Contenido Editorial con Drop Cap -->
+          <div class="max-w-4xl">
+            <div class="prose prose-slate max-w-none text-[#291242] font-nunito text-[1.12rem] font-light leading-relaxed space-y-6 first-letter:text-6xl first-letter:font-bold first-letter:text-[#291242] first-letter:float-left first-letter:mr-3 first-letter:mt-1 first-letter:font-alternate">
+              @if (localSelectedArticle()!.content) {
+                <div [innerHTML]="selectedArticleSafeContent()"></div>
+              } @else {
+                <p>
+                  A lo largo de los territorios colombianos, el sonido de los vientos, cuerdas y percusiones dibuja
+                  historias profundas que van más allá del arte sonoro. El Programa Nacional de Música para la Convivencia
+                  (PNMC) ha impulsado en este ciclo una serie de transformaciones estructurales con el fin de robustecer
+                  a las comunidades musicales. Esta crónica documenta la vibración social que acontece en las regiones,
+                  donde las escuelas, lutieres y festivales tejen una red indestructible de paz y resistencia artística.
+                </p>
+                <p>
+                  La descentralización cultural permite que procesos locales antes invisibilizados escalen hacia escenarios
+                  de impacto nacional. El acceso a recursos y la consolidación de redes de apoyo mutuo actúan como
+                  catalizadores que redefinen las prácticas musicales heredadas, aportando técnicas contemporáneas sin
+                  comprometer la memoria e identidad tradicional que late en el origen de cada acorde.
+                </p>
+                <div class="py-6 my-4">
+                  <img width="640" height="360" loading="lazy" decoding="async"
+                    [src]="localSelectedArticle()!.img"
+                    class="w-full max-h-[500px] object-cover rounded-[2.5rem] shadow-lg border border-slate-100"
+                    alt=""
+                  />
+                  <span class="text-xs text-slate-400 italic mt-3 block text-center">
+                    Fotografía Editorial — Archivo de Memoria del PNMC 2026
+                  </span>
+                </div>
+                <blockquote class="border-l-4 border-[#00DA5E] pl-8 py-6 my-8 italic text-xl sm:text-2xl text-[#291242] bg-slate-50 rounded-r-[2.5rem] leading-snug font-medium">
+                  "La música no solo es expresión estética, es un vehículo indestructible de memoria histórica y
+                  reparación social en los rincones más lejanos de nuestra geografía."
+                </blockquote>
+                <p>
+                  A medida que avanzamos en la consolidación del mapa ecosistémico, se hace evidente que cada escuela y
+                  festival se constituye en un faro pedagógico. La lutería de tradición y la documentación rigurosa
+                  salvaguardan técnicas ancestrales de afinación y construcción de instrumentos, preservando un saber
+                  organológico invaluable para las siguientes generaciones de músicos colombianos.
+                </p>
+              }
+            </div>
+          </div>
+
+          <!-- Botón de retorno y compartir -->
+          <div class="pt-10 border-t border-slate-100 flex flex-col sm:flex-row justify-between items-center gap-6">
+            <button type="button"
+              (click)="handleSelectArticle(null)"
+              class="flex items-center gap-2.5 text-xs font-bold text-[#291242] uppercase font-alternate tracking-[0.2em] hover:gap-4 transition-all cursor-pointer border-0 bg-transparent"
+            >
+              <svg lucideArrowLeft [size]="16" class="text-[#00DA5E]"></svg>
+              Volver a noticias
+            </button>
+            <div class="flex items-center gap-4">
+              <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Compartir artículo:</span>
+              <button type="button" class="w-11 h-11 rounded-full border border-slate-200 flex items-center justify-center text-slate-500 hover:bg-[#291242] hover:text-white transition-all shadow-sm hover:scale-105 active:scale-95 cursor-pointer">
+                <svg lucideShare2 [size]="16"></svg>
+              </button>
+              <button type="button" class="w-11 h-11 rounded-full border border-slate-200 flex items-center justify-center text-slate-500 hover:bg-[#291242] hover:text-white transition-all shadow-sm hover:scale-105 active:scale-95 cursor-pointer">
+                <svg lucideBookmark [size]="16"></svg>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Sidebar Lateral de Noticias Relacionadas -->
+        <aside class="col-span-12 lg:col-span-4">
+          <div class="sticky top-28 rounded-[2.5rem] border border-slate-100 bg-slate-50/80 p-8 space-y-8 backdrop-blur-md">
+            <div class="space-y-2 pb-5 border-b border-slate-200/80">
+              <span class="inline-flex items-center rounded-full bg-white px-3 py-1 text-[8px] font-extrabold uppercase tracking-widest text-slate-400 border border-slate-150">
+                LECTURAS RECOMENDADAS
+              </span>
+              <h4 class="font-alternate text-lg text-[#291242] uppercase tracking-wider font-bold">Historias Relacionadas</h4>
+              <p class="text-xs text-slate-500 font-nunito leading-relaxed">
+                Crónicas y crónicas complementarias elegidas para expandir tu navegación editorial.
+              </p>
+            </div>
+            
+            <div class="space-y-6">
+              @for (item of newsData() | slice:0:5; track item.id) {
+                @if (item.id !== localSelectedArticle()!.id) {
+                  <article
+                    (click)="handleSelectArticle(item)"
+                    class="group cursor-pointer flex gap-4 items-center transition-all duration-300 hover:-translate-y-0.5"
+                  
+                  role="button"
+                  tabindex="0"
+                  (keydown.enter)="handleSelectArticle(item)"
+                  (keydown.space)="handleSelectArticle(item)">
+                    <div class="w-20 h-16 rounded-2xl overflow-hidden bg-slate-100 shrink-0 shadow-sm relative">
+                      @if (item.img) {
+                        <img width="640" height="360" loading="lazy" decoding="async" [src]="item.img" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" alt="" />
+                      }
+                      <div class="absolute inset-0 bg-[#291242]/0 transition-all duration-500 group-hover:bg-[#291242]/20"></div>
+                    </div>
+                    <div class="min-w-0 space-y-1">
+                      <span class="block text-[8px] font-bold text-[#00DA5E] uppercase tracking-widest">
+                        {{ item.category }} · {{ item.date }}
+                      </span>
+                      <h5 class="font-alternate text-xs text-[#291242] uppercase font-bold leading-tight group-hover:text-[#6100D7] transition-colors line-clamp-2">
+                        {{ item.title }}
+                      </h5>
+                    </div>
+                  </article>
+                }
+              }
+            </div>
+            
+            <div class="pt-4 border-t border-slate-200/80">
+              <button
+                type="button"
+                (click)="handleSelectArticle(null)"
+                class="w-full py-3.5 text-[9px] font-bold uppercase tracking-widest rounded-2xl bg-transparent border border-[#291242] text-[#291242] hover:bg-[#291242] hover:text-white transition-colors cursor-pointer"
+              >
+                Explorar todo el archivo
+              </button>
+            </div>
+          </div>
+        </aside>
+        
+      </div>
+    </div>
+  </div>
+} @else {
+  <!-- VISTA 2: Portal de Noticias Premium (Mosaico & Buscador) -->
+  <div class="bg-slate-50 min-h-screen text-left overflow-x-hidden relative pt-20">
+    <div class="max-w-[96rem] mx-auto px-6 lg:px-12 py-10 space-y-12">
+      
+      <!-- Cargadores de Estado -->
+      @if (isLoading || isRefreshing) {
+        <div class="py-20 bg-white rounded-[3rem] border border-slate-100 shadow-sm">
+          <app-loading-state
+            title="Sincronizando actualidad del PNMC..."
+            description="Conectando con la biblioteca editorial del Programa Nacional de Música para la Convivencia."
+          ></app-loading-state>
+        </div>
+      } @else if (isError) {
+        <div class="py-20 bg-white rounded-[3rem] border border-slate-100 shadow-sm">
+          <app-error-state
+            title="No logramos cargar el portal de noticias"
+            [description]="error?.message || 'Revisa tu conexión o vuelve a intentar en unos instantes.'"
+            (retry)="retry()"
+          ></app-error-state>
+        </div>
+      } @else if (newsData().length === 0) {
+        <div class="py-20 bg-white rounded-[3rem] border border-slate-100 shadow-sm">
+          <app-empty-state
+            title="Archivo de actualidad vacío"
+            description="Vuelve pronto para consultar las nuevas crónicas del PNMC."
+          ></app-empty-state>
+        </div>
+      } @else {
+        <!-- SECCIÓN 1: Parrilla Asimétrica Premium de Destacadas & Boletín Integrado -->
+        <section class="space-y-6 text-left">
+          <div class="border-b border-slate-200 pb-4">
+            <span class="text-[#00DA5E] font-bold text-[10px] tracking-widest uppercase font-alternate">
+              Foco Informativo
+            </span>
+            <h2 class="font-gregor text-4xl lg:text-5xl font-extrabold uppercase leading-none tracking-tight text-[#291242] mt-1">
+              Narrativas Destacadas
+            </h2>
+          </div>
+
+          <div class="grid grid-cols-1 lg:grid-cols-12 gap-5 items-stretch">
+            
+            <!-- Noticia Principal Destacada (Izquierda - 5 cols) -->
+            @if (featuredPrimary()) {
+              <div class="lg:col-span-5 h-full">
+                <article
+                  (click)="handleSelectArticle(featuredPrimary())"
+                  class="group relative flex flex-col justify-end h-full min-h-[400px] rounded-[1.75rem] overflow-hidden shadow-xl bg-[#291242] cursor-pointer transition-all duration-500 hover:shadow-2xl"
+                
+                  role="button"
+                  tabindex="0"
+                  (keydown.enter)="handleSelectArticle(featuredPrimary())"
+                  (keydown.space)="handleSelectArticle(featuredPrimary())">
+                  @if (featuredPrimary().img) {
+                  <img width="640" height="360" loading="lazy" decoding="async"
+                    [src]="featuredPrimary().img"
+                    class="absolute inset-0 w-full h-full object-cover grayscale-[40%] brightness-95 opacity-80 group-hover:grayscale-0 group-hover:brightness-100 group-hover:opacity-100 group-hover:scale-105 transition-all duration-[1000ms] ease-out"
+                    alt=""
+                  />
+                  }
+                  <div class="absolute inset-0 bg-[#291242]/20 group-hover:opacity-0 transition-opacity duration-1000"></div>
+                  <div class="absolute inset-0 bg-gradient-to-t from-[#291242] via-[#291242]/35 to-transparent"></div>
+                  <div class="relative z-10 p-6 lg:p-8 space-y-4">
+                    <div class="flex items-center gap-3">
+                      <span class="inline-flex items-center rounded-full bg-[#00DA5E] px-2.5 py-0.5 text-[8px] font-extrabold uppercase tracking-widest text-[#291242]">
+                        {{ featuredPrimary().category }}
+                      </span>
+                      <span class="text-white/70 font-semibold text-[9px] tracking-widest uppercase font-alternate">
+                        {{ featuredPrimary().date }}
+                      </span>
+                      <span class="flex items-center gap-1 text-white/70 font-semibold text-[9px] tracking-widest uppercase font-alternate">
+                        <svg lucideClock [size]="10"></svg>
+                        {{ calculateReadingTime(featuredPrimary().content || featuredPrimary().desc) }} MIN
+                      </span>
+                    </div>
+                    <h3 class="font-gregor text-xl sm:text-2xl lg:text-3xl text-white font-extrabold uppercase leading-tight tracking-tight max-w-2xl">
+                      {{ featuredPrimary().title }}
+                    </h3>
+                    <p class="font-nunito text-slate-200 text-xs font-light leading-relaxed max-w-xl line-clamp-2">
+                      {{ featuredPrimary().desc }}
+                    </p>
+                    <div class="pt-2">
+                      <span class="inline-flex items-center gap-1.5 text-[#00DA5E] font-bold uppercase tracking-[0.2em] text-[10px] hover:gap-3 transition-all">
+                        Leer historia completa
+                        <svg lucideArrowRight [size]="13" class="group-hover:translate-x-1 transition-transform"></svg>
+                      </span>
+                    </div>
+                  </div>
+                </article>
+              </div>
+            }
+
+            <!-- Noticias Secundarias Destacadas (Centro - 4 cols) -->
+            <div class="lg:col-span-4 flex flex-col gap-5 h-full justify-between">
+              @for (item of featuredSecondary(); track item.id) {
+                <article
+                  (click)="handleSelectArticle(item)"
+                  class="group relative flex-1 flex flex-col justify-between bg-white rounded-[1.75rem] p-5 border border-slate-100 shadow-sm hover:shadow-md transition-all duration-300 cursor-pointer overflow-hidden min-h-[190px]"
+                
+                  role="button"
+                  tabindex="0"
+                  (keydown.enter)="handleSelectArticle(item)"
+                  (keydown.space)="handleSelectArticle(item)">
+                  <div class="space-y-3">
+                    <div class="flex justify-between items-center">
+                      @if (categoriaFiltrable(item.category)) {
+                        <button type="button" data-filtrar-categoria
+                          (click)="filtrarPorCategoria(item.category, $event)"
+                          [attr.aria-pressed]="categoriaActiva(item.category)"
+                          [attr.aria-label]="rotuloDeCategoria(item.category)"
+                          [class]="'text-[9px] font-extrabold uppercase tracking-widest transition ' + (categoriaActiva(item.category) ? 'text-morado underline decoration-verde decoration-2 underline-offset-2' : 'text-verde hover:text-morado hover:underline')"
+                        >{{ item.category }}</button>
+                      } @else {
+                        <span class="text-[9px] font-extrabold text-verde uppercase tracking-widest">{{ item.category }}</span>
+                      }
+                      <span class="font-bold text-[8px] tracking-widest text-slate-400">{{ item.date }}</span>
+                    </div>
+                    <h4 class="font-alternate text-sm lg:text-base text-[#291242] uppercase font-bold leading-snug tracking-wide group-hover:text-[#6100D7] transition-colors line-clamp-2">
+                      {{ item.title }}
+                    </h4>
+                    <p class="font-nunito text-slate-500 text-xs font-light leading-relaxed line-clamp-2">
+                      {{ item.desc }}
+                    </p>
+                  </div>
+                  <div class="flex justify-between items-center pt-3 mt-3 border-t border-slate-50">
+                    <span class="flex items-center gap-1 text-slate-400 font-semibold text-[8px] tracking-widest uppercase">
+                      <svg lucideClock [size]="10"></svg>
+                      {{ calculateReadingTime(item.content || item.desc) }} MIN
+                    </span>
+                    <div class="w-8 h-8 rounded-xl bg-slate-50 flex items-center justify-center text-slate-400 group-hover:bg-[#291242] group-hover:text-white transition-all">
+                      <svg lucideArrowUpRight [size]="14" class="group-hover:rotate-45 transition-transform"></svg>
+                    </div>
+                  </div>
+                </article>
+              }
+            </div>
+
+            <!-- Boletín Informativo Ecosistémico (Derecha - 3 cols) -->
+            <div class="lg:col-span-3 h-full">
+              <div class="rounded-[1.75rem] bg-gradient-to-br from-[#291242] via-[#361757] to-[#4c227a] p-6 text-white h-full flex flex-col justify-between relative overflow-hidden shadow-xl border border-white/5 min-h-[350px]">
+                <div class="absolute top-0 right-0 w-48 h-48 bg-white/5 rounded-full blur-2xl pointer-events-none"></div>
+                <div class="absolute bottom-0 left-0 w-48 h-48 bg-[#00DA5E]/5 rounded-full blur-2xl pointer-events-none"></div>
+                
+                <div class="relative z-10 space-y-4 flex-1 flex flex-col justify-between h-full">
+                  <div class="space-y-3">
+                    <div class="flex items-center justify-between">
+                      <span class="inline-flex items-center rounded-full bg-white/10 px-2.5 py-0.5 text-[8px] font-extrabold uppercase tracking-widest text-[#00DA5E] border border-white/5 font-alternate">
+                        Boletín
+                      </span>
+                      <svg lucideMail [size]="14" class="text-[#00DA5E]"></svg>
+                    </div>
+                    <h3 class="font-gregor text-xl lg:text-2xl font-extrabold uppercase leading-none tracking-tight">
+                      Únete al Ecosistema
+                    </h3>
+                    <p class="font-nunito text-white/70 text-xs leading-relaxed">
+                      Recibe convocatorias, crónicas exclusivas y las últimas novedades del PNMC en los territorios.
+                    </p>
+                  </div>
+                  
+                  <div class="space-y-4 pt-4 border-t border-white/10 mt-auto">
+                    @if (isSubscribed) {
+                      <div class="text-center space-y-2 py-2 animate-in fade-in zoom-in-95 duration-500">
+                        <div class="inline-flex items-center justify-center w-10 h-10 rounded-full bg-[#00DA5E] text-[#291242] mx-auto shadow-md">
+                          <svg lucideCheckCircle2 [size]="18"></svg>
+                        </div>
+                        <h4 class="font-alternate text-xs font-bold uppercase tracking-wider text-white">
+                          ¡Suscrito!
+                        </h4>
+                        <p class="font-nunito text-white/60 text-[10px] leading-relaxed max-w-[180px] mx-auto">
+                          Pronto recibirás nuestras novedades sonoras.
+                        </p>
+                      </div>
+                    } @else {
+                      <form (submit)="handleSubscribeSubmit($event)" class="space-y-3 text-left">
+                        <div class="space-y-2">
+                          <input
+                            type="email"
+                            aria-label="Tu correo para suscribirte al boletín"
+                            required
+                            [value]="subscriberEmail"
+                            (input)="onEmailChange($event)"
+                            placeholder="Tu correo..."
+                            class="w-full bg-white/5 border border-white/15 rounded-xl py-2.5 px-3.5 text-xs font-nunito text-white placeholder-white/40 outline-none transition-all focus:border-[#00DA5E] focus:bg-white/10"
+                          />
+                          <button
+                            type="submit"
+                            class="w-full bg-[#00DA5E] hover:bg-[#8BF784] text-[#291242] font-alternate text-[9px] font-extrabold uppercase tracking-widest rounded-xl py-3 shadow-md active:scale-95 transition-all cursor-pointer border-0"
+                          >
+                            Registrarme
+                          </button>
+                        </div>
+                        @if (subscriptionError) {
+                          <p class="text-[#ff5555] text-[10px] font-semibold pl-1">
+                            {{ subscriptionError }}
+                          </p>
+                        }
+                        <p class="font-nunito text-white/30 text-[8px] leading-relaxed text-center">
+                          * No compartiremos tu dirección con terceros.
+                        </p>
+                      </form>
+                    }
+
+                    <!-- Redes Sociales del Plan Nacional de Música -->
+                    <div class="pt-3 border-t border-white/10 space-y-2">
+                      <span class="block text-[8px] font-extrabold uppercase tracking-widest text-[#00DA5E] text-center font-alternate">
+                        Sigue nuestras redes
+                      </span>
+                      <div class="flex items-center justify-center gap-3">
+                        <a
+                          href="https://www.instagram.com/minculturascol"
+                          target="_blank"
+                          rel="noreferrer"
+                          class="w-8 h-8 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-white hover:bg-[#00DA5E] hover:text-[#291242] hover:scale-105 active:scale-95 transition-all shadow-sm"
+                          title="Instagram"
+                        >
+                          <svg class="w-[13px] h-[13px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <rect width="20" height="20" x="2" y="2" rx="5" ry="5"/>
+                            <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/>
+                            <line x1="17.5" x2="17.51" y1="6.5" y2="6.5"/>
+                          </svg>
+                        </a>
+                        <a
+                          href="https://www.facebook.com/MinCulturasCol"
+                          target="_blank"
+                          rel="noreferrer"
+                          class="w-8 h-8 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-white hover:bg-[#00DA5E] hover:text-[#291242] hover:scale-105 active:scale-95 transition-all shadow-sm"
+                          title="Facebook"
+                        >
+                          <svg class="w-[13px] h-[13px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/>
+                          </svg>
+                        </a>
+                        <a
+                          href="https://www.youtube.com/@MinCulturasCol"
+                          target="_blank"
+                          rel="noreferrer"
+                          class="w-8 h-8 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-white hover:bg-[#00DA5E] hover:text-[#291242] hover:scale-105 active:scale-95 transition-all shadow-sm"
+                          title="YouTube"
+                        >
+                          <svg class="w-[13px] h-[13px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M2.5 17a24.12 24.12 0 0 1 0-10 2 2 0 0 1 1.4-1.4 49.56 49.56 0 0 1 16.2 0A2 2 0 0 1 21.5 7a24.12 24.12 0 0 1 0 10 2 2 0 0 1-1.4 1.4 49.55 49.55 0 0 1-16.2 0A2 2 0 0 1 2.5 17z"/>
+                            <polygon points="10 15 15 12 10 9"/>
+                          </svg>
+                        </a>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </section>
+
+        <!-- Única Barra de control: categorías, buscador, ordenación y diseño -->
+        <div id="news-feed-section" class="flex flex-col xl:flex-row items-start xl:items-center justify-between border-b border-slate-200/60 pb-6 mb-10 gap-6 w-full scroll-mt-28">
+          
+          <!-- Lado Izquierdo: Categorías -->
+          <div class="flex items-center gap-1.5 overflow-x-auto scrollbar-none pl-1 pr-1 w-full xl:w-auto">
+            <button type="button"
+              (click)="setCategoryFilter('all')"
+              [class]="'flex-shrink-0 flex items-center gap-2 rounded-full px-4 py-2 text-[0.65rem] font-extrabold uppercase tracking-widest transition-all active:scale-95 cursor-pointer ' + (newsCategoryFilter() === 'all' ? 'bg-[#291242] text-white shadow-md' : 'bg-transparent text-slate-500 hover:bg-slate-100 hover:text-[#291242]')"
+            >
+              <span>Todas las noticias</span>
+              <span [class]="'inline-flex items-center justify-center h-4.5 min-w-[1.125rem] px-1.5 rounded-full text-[8px] font-bold ' + (newsCategoryFilter() === 'all' ? 'bg-[#00DA5E] text-[#291242]' : 'bg-slate-100 text-slate-400')">
+                {{ newsListPool().length }}
+              </span>
+            </button>
+            
+            @for (cat of newsCategoryOptions(); track cat) {
+              <button type="button"
+                (click)="setCategoryFilter(cat)"
+                [class]="'flex-shrink-0 flex items-center gap-2 rounded-full px-4 py-2 text-[0.65rem] font-extrabold uppercase tracking-widest transition-all active:scale-95 cursor-pointer ' + (newsCategoryFilter() === cat ? 'bg-[#291242] text-white shadow-md' : 'bg-transparent text-slate-500 hover:bg-slate-100 hover:text-[#291242]')"
+              >
+                <span>{{ cat }}</span>
+                <span [class]="'inline-flex items-center justify-center h-4.5 min-w-[1.125rem] px-1.5 rounded-full text-[8px] font-bold ' + (newsCategoryFilter() === cat ? 'bg-[#00DA5E] text-[#291242]' : 'bg-slate-100 text-slate-400')">
+                  {{ getCategoryCount(cat) }}
+                </span>
+              </button>
+            }
+          </div>
+
+          <!-- Lado Derecho: Buscador, Ordenar por y Conmutador de Diseño -->
+          <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between xl:justify-end gap-5 shrink-0 w-full xl:w-auto pt-4 xl:pt-0 border-t border-slate-100 xl:border-none">
+            
+            <!-- Pequeño Buscador -->
+            <div class="relative w-full sm:w-56 shrink-0 shadow-sm rounded-2xl border border-slate-200 bg-white overflow-hidden focus-within:border-[#00DA5E] focus-within:ring-2 focus-within:ring-[#00DA5E]/20 transition-all">
+              <svg lucideSearch class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" [size]="14"></svg>
+              <input
+                type="text"
+                aria-label="Buscar noticias por título o tema"
+                [value]="newsSearchTerm()"
+                (input)="onSearchChange($event)"
+                placeholder="Buscar por título o tema..."
+                class="w-full bg-transparent pl-10 pr-10 py-2.5 text-[0.75rem] font-nunito text-[#291242] outline-none placeholder:text-slate-400"
+              />
+              @if (newsSearchTerm()) {
+                <button type="button"
+                  (click)="clearSearch()"
+                  class="absolute right-4 top-1/2 -translate-y-1/2 text-[10px] text-slate-400 hover:text-slate-600 font-bold border-0 bg-transparent cursor-pointer"
+                >
+                  Limpiar
+                </button>
+              }
+            </div>
+
+            <div class="hidden sm:block w-px h-5 bg-slate-200 shrink-0"></div>
+
+            <div class="flex items-center gap-2">
+              <span class="text-[0.55rem] font-bold uppercase tracking-[0.15em] text-slate-400">Ordenar por</span>
+              <div class="flex items-center hover:bg-slate-50 rounded-lg px-2.5 py-1.5 transition-colors cursor-pointer group relative">
+                <select
+                  aria-label="Ordenar las noticias"
+                  [value]="newsSortOrder()"
+                  (change)="setSortOrder($any($event.target).value)"
+                  class="bg-transparent text-[0.65rem] font-bold uppercase tracking-[0.1em] text-[#291242] outline-none pr-6 cursor-pointer border-none appearance-none z-10 font-alternate"
+                >
+                  <option value="newest">Recientes</option>
+                  <option value="oldest">Antiguas</option>
+                </select>
+                <svg lucideChevronDown [size]="14" class="text-slate-400 absolute right-2.5 pointer-events-none group-hover:text-[#291242]"></svg>
+              </div>
+            </div>
+
+            <div class="w-px h-6 bg-slate-200"></div>
+
+            <div class="flex gap-1 bg-slate-50 p-1 rounded-xl">
+              <button type="button"
+                (click)="setViewLayout('grid')"
+                [class]="'w-9 h-8 flex items-center justify-center rounded-lg transition-all border-0 cursor-pointer ' + (viewLayout() === 'grid' ? 'bg-[#291242] text-white shadow-sm' : 'text-slate-400 hover:text-[#291242] hover:bg-white')"
+                aria-label="Vista cuadrícula"
+              >
+                <svg lucideLayoutGrid [size]="15"></svg>
+              </button>
+              <button type="button"
+                (click)="setViewLayout('list')"
+                [class]="'w-9 h-8 flex items-center justify-center rounded-lg transition-all border-0 cursor-pointer ' + (viewLayout() === 'list' ? 'bg-[#291242] text-white shadow-sm' : 'text-slate-400 hover:text-[#291242] hover:bg-white')"
+                aria-label="Vista lista"
+              >
+                <svg lucideList [size]="15"></svg>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- SECCIÓN 4: Rejilla o Lista de Muro de Noticias (Feed) -->
+        <section class="space-y-12">
+          @if (filteredListNews().length === 0) {
+            <div class="py-20 bg-white rounded-[2.5rem] border border-slate-100 p-10 text-center shadow-sm max-w-lg mx-auto">
+              <div class="inline-flex items-center justify-center w-12 h-12 rounded-full bg-slate-50 text-slate-400 mb-4 border border-slate-100">
+                <svg lucideSearch [size]="20"></svg>
+              </div>
+              <p class="font-alternate text-[#291242] font-bold uppercase tracking-wider text-xs">
+                Ninguna noticia coincide con tus filtros
+              </p>
+              <p class="font-nunito text-slate-500 text-xs mt-1.5 leading-relaxed">
+                Prueba a buscar otro término o limpia los filtros seleccionados para continuar explorando el archivo.
+              </p>
+              <button type="button"
+                (click)="resetAllFilters()"
+                class="mt-5 inline-flex items-center rounded-xl bg-slate-100 px-4 py-2 text-xs font-bold uppercase tracking-wider text-slate-600 hover:bg-[#291242] hover:text-white transition-all cursor-pointer border-0"
+              >
+                Restablecer filtros
+              </button>
+            </div>
+          } @else if (viewLayout() === 'grid') {
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              @for (item of paginatedNews(); track item.id) {
+                <article
+                  (click)="handleSelectArticle(item)"
+                  class="group bg-transparent overflow-hidden hover:-translate-y-2 transition-transform duration-500 cursor-pointer flex flex-col justify-between"
+                
+                  role="button"
+                  tabindex="0"
+                  (keydown.enter)="handleSelectArticle(item)"
+                  (keydown.space)="handleSelectArticle(item)">
+                  <div class="space-y-4">
+                    <div class="h-56 overflow-hidden bg-slate-100 relative rounded-3xl shadow-sm group-hover:shadow-lg transition-shadow duration-500">
+                      @if (item.img) {
+                      <img width="640" height="360" loading="lazy" decoding="async"
+                        [src]="item.img"
+                        class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                        alt=""
+                      />
+                      }
+                      <div class="absolute inset-0 bg-[#291242]/0 transition-all duration-500 group-hover:bg-[#291242]/20"></div>
+                    </div>
+                    <div class="px-6 space-y-3">
+                      <div class="flex items-center justify-between gap-3 text-[10px] font-bold uppercase tracking-widest font-alternate text-slate-400">
+                        @if (categoriaFiltrable(item.category)) {
+                          <button type="button" data-filtrar-categoria
+                            (click)="filtrarPorCategoria(item.category, $event)"
+                            [attr.aria-pressed]="categoriaActiva(item.category)"
+                            [attr.aria-label]="rotuloDeCategoria(item.category)"
+                            [class]="'uppercase tracking-widest transition ' + (categoriaActiva(item.category) ? 'text-morado underline decoration-verde decoration-2 underline-offset-2' : 'text-verde hover:text-morado hover:underline')"
+                          >{{ item.category }}</button>
+                        } @else {
+                          <span class="text-verde">{{ item.category }}</span>
+                        }
+                        <span class="text-slate-400">{{ item.date }}</span>
+                      </div>
+                      <h4 class="font-alternate text-base lg:text-lg text-[#291242] uppercase font-bold leading-snug group-hover:text-[#6100D7] transition-colors line-clamp-2">
+                        {{ item.title }}
+                      </h4>
+                      <p class="font-nunito text-[0.8rem] text-slate-500 leading-relaxed font-light line-clamp-3">
+                        {{ item.desc }}
+                      </p>
+                    </div>
+                  </div>
+                  <div class="px-6 pb-2 pt-4 flex justify-between items-center mt-4 border-t border-slate-200/50">
+                    <span class="flex items-center gap-1.5 text-slate-400 font-semibold text-[9px] tracking-widest uppercase">
+                      <svg lucideClock [size]="11"></svg>
+                      {{ calculateReadingTime(item.content || item.desc) }} min de lectura
+                    </span>
+                    <span class="text-[10px] font-extrabold text-[#291242] uppercase tracking-wider group-hover:-translate-y-0.5 group-hover:translate-x-0.5 transition-transform inline-flex items-center gap-1">
+                      Leer más
+                      <svg lucideArrowUpRight [size]="14" class="text-[#00DA5E]"></svg>
+                    </span>
+                  </div>
+                </article>
+              }
+            </div>
+          } @else {
+            <div class="flex flex-col gap-6">
+              @for (item of paginatedNews(); track item.id) {
+                <article
+                  (click)="handleSelectArticle(item)"
+                  class="group bg-transparent overflow-hidden hover:-translate-y-1 transition-transform duration-500 cursor-pointer flex flex-col md:flex-row items-stretch gap-8"
+                
+                  role="button"
+                  tabindex="0"
+                  (keydown.enter)="handleSelectArticle(item)"
+                  (keydown.space)="handleSelectArticle(item)">
+                  <div class="md:w-1/3 min-h-[200px] md:min-h-auto relative overflow-hidden bg-slate-100 shrink-0 rounded-3xl shadow-sm group-hover:shadow-lg transition-shadow duration-500">
+                    @if (item.img) {
+                    <img width="640" height="360" loading="lazy" decoding="async"
+                      [src]="item.img"
+                      class="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                      alt=""
+                    />
+                    }
+                    <div class="absolute inset-0 bg-[#291242]/0 transition-all duration-500 group-hover:bg-[#291242]/20"></div>
+                  </div>
+                  <div class="flex-1 p-8 flex flex-col justify-between space-y-4">
+                    <div class="space-y-3">
+                      <div class="flex items-center gap-3 text-[10px] font-bold uppercase tracking-widest font-alternate text-slate-400">
+                        @if (categoriaFiltrable(item.category)) {
+                          <button type="button" data-filtrar-categoria
+                            (click)="filtrarPorCategoria(item.category, $event)"
+                            [attr.aria-pressed]="categoriaActiva(item.category)"
+                            [attr.aria-label]="rotuloDeCategoria(item.category)"
+                            [class]="'uppercase tracking-widest transition ' + (categoriaActiva(item.category) ? 'text-morado underline decoration-verde decoration-2 underline-offset-2' : 'text-verde hover:text-morado hover:underline')"
+                          >{{ item.category }}</button>
+                        } @else {
+                          <span class="text-verde">{{ item.category }}</span>
+                        }
+                        <span class="h-1 w-1 rounded-full bg-slate-300"></span>
+                        <span class="text-slate-400">{{ item.date }}</span>
+                        <span class="h-1 w-1 rounded-full bg-slate-300"></span>
+                        <span class="flex items-center gap-1">
+                          <svg lucideClock [size]="11"></svg>
+                          {{ calculateReadingTime(item.content || item.desc) }} min de lectura
+                        </span>
+                      </div>
+                      <h4 class="font-alternate text-xl text-[#291242] uppercase font-bold leading-snug group-hover:text-[#6100D7] transition-colors line-clamp-2">
+                        {{ item.title }}
+                      </h4>
+                      <p class="font-nunito text-xs text-slate-500 leading-relaxed font-light line-clamp-3">
+                        {{ item.desc }}
+                      </p>
+                    </div>
+                    <div class="pt-2 flex justify-between items-center border-t border-slate-200/50">
+                      <span class="text-[10px] font-extrabold text-[#291242] uppercase tracking-wider group-hover:-translate-y-0.5 group-hover:translate-x-0.5 transition-transform inline-flex items-center gap-1.5">
+                        Leer historia completa
+                        <svg lucideArrowUpRight [size]="14" class="text-[#00DA5E]"></svg>
+                      </span>
+                    </div>
+                  </div>
+                </article>
+              }
+            </div>
+          }
+        </section>
+
+        <!-- SECCIÓN 5: Barra de Paginación Numérica Premium -->
+        @if (filteredListNews().length > ITEMS_PER_PAGE) {
+          <div class="pt-6 flex flex-col sm:flex-row items-center justify-between gap-4 border-t border-slate-200/60 mt-12">
+            <span class="font-nunito text-xs text-slate-400 font-medium">
+              Mostrando {{ (currentPage() - 1) * ITEMS_PER_PAGE + 1 }}-
+              {{ Math.min(filteredListNews().length, currentPage() * ITEMS_PER_PAGE) }} de {{ filteredListNews().length }} crónicas
+            </span>
+            <div class="flex items-center gap-2">
+              <button
+                type="button"
+                [disabled]="currentPage() === 1"
+                (click)="prevPage()"
+                [class]="'flex items-center justify-center px-4 py-2.5 rounded-xl text-[10px] font-extrabold uppercase tracking-widest transition-all active:scale-95 border cursor-pointer ' + (currentPage() === 1 ? 'border-slate-200 text-slate-300 bg-slate-100/50 cursor-not-allowed' : 'border-slate-200 text-slate-600 bg-white hover:border-[#291242] hover:text-[#291242]')"
+              >
+                Anterior
+              </button>
+              
+              @for (pageNumber of [].constructor(totalPages()); track $index) {
+                <button
+                  type="button"
+                  (click)="setCurrentPage($index + 1)"
+                  [class]="'w-10 h-10 rounded-xl flex items-center justify-center text-xs font-extrabold transition-all active:scale-95 cursor-pointer ' + (currentPage() === ($index + 1) ? 'bg-[#291242] text-white shadow-md border-0' : 'bg-white border border-slate-200 text-slate-500 hover:border-[#291242] hover:text-[#291242]')"
+                >
+                  {{ $index + 1 }}
+                </button>
+              }
+              
+              <button
+                type="button"
+                [disabled]="currentPage() === totalPages()"
+                (click)="nextPage()"
+                [class]="'flex items-center justify-center px-4 py-2.5 rounded-xl text-[10px] font-extrabold uppercase tracking-widest transition-all active:scale-95 border cursor-pointer ' + (currentPage() === totalPages() ? 'border-slate-200 text-slate-300 bg-slate-100/50 cursor-not-allowed' : 'border-slate-200 text-slate-600 bg-white hover:border-[#291242] hover:text-[#291242]')"
+              >
+                Siguiente
+              </button>
+            </div>
+          </div>
+        }
+
+      }
+    </div>
+  </div>
+}

@@ -1,0 +1,235 @@
+<section class="space-y-6 pb-8" aria-labelledby="eventos-titulo">
+  <header class="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
+    <div class="max-w-2xl">
+      <h2 id="eventos-titulo" class="font-alternate text-titulo font-bold uppercase tracking-wide text-morado">Eventos de tus procesos</h2>
+      <p class="mt-2 text-cuerpo leading-relaxed text-prosa">
+        Anuncia en la agenda del Programa los eventos de tus procesos: conciertos, talleres,
+        convocatorias. Cada evento se enmarca en uno de ellos.
+      </p>
+    </div>
+    @if (puedeAnunciar()) {
+      <button type="button" (click)="nuevo()"
+        class="shrink-0 self-start rounded-lg bg-morado px-4 py-2.5 text-sm font-bold text-white transition hover:bg-violet-800 sm:self-auto">Anunciar evento</button>
+    }
+  </header>
+
+  @if (error()) {
+    <p role="alert" class="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-800">{{ error() }}</p>
+  }
+  @if (aviso()) {
+    <p role="status" class="rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-900">{{ aviso() }}</p>
+  }
+
+  @if (cargando()) {
+    <p role="status" class="py-8 text-sm text-slate-500">Consultando tus eventos…</p>
+  } @else if (!puedeAnunciar()) {
+    <!--
+      NINGUN EVENTO SIN PROCESO. La pantalla no ofrece el formulario y explica por qué: dejar
+      escribir un evento entero para rechazarlo al guardar, por algo que se sabía desde el
+      principio, es la peor forma de contarlo.
+    -->
+    <div class="rounded-2xl border border-slate-200 bg-slate-50 p-6">
+      <h3 class="text-lectura font-semibold text-valor">Todavía no puedes anunciar eventos</h3>
+      <p class="mt-2 max-w-2xl text-cuerpo leading-relaxed text-prosa">
+        Un evento se anuncia siempre <b>dentro de un proceso tuyo</b>: un festival, un mercado. Para
+        poder publicar aquí necesitas al menos un proceso registrado y <b>publicado</b> en el
+        ecosistema. Si ya registraste uno y sigue en revisión, aparecerá en cuanto el Programa lo
+        publique.
+      </p>
+      <a routerLink="/gestion/procesos"
+        class="mt-4 inline-flex rounded-lg border border-morado px-4 py-2.5 text-sm font-bold text-morado no-underline transition hover:bg-violet-50">Ir a mis procesos</a>
+    </div>
+  } @else if (eventos().length === 0) {
+    <p class="rounded-2xl border border-slate-200 p-6 text-sm text-slate-600">
+      Todavía no has anunciado ningún evento. El primero que envíes quedará en revisión hasta que el
+      Programa lo publique.
+    </p>
+  } @else {
+    <div class="overflow-x-auto">
+      <table class="w-full min-w-[44rem] text-left text-sm">
+        <thead>
+          <tr class="border-b border-slate-200 bg-slate-50 text-dato uppercase tracking-wider text-slate-500">
+            <th class="px-4 py-3">Evento</th>
+            <th class="px-4 py-3">Cuándo</th>
+            <th class="px-4 py-3">Proceso</th>
+            <th class="px-4 py-3">Estado</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-slate-100">
+          @for (evento of eventos(); track evento.id) {
+            <tr>
+              <td class="px-4 py-3">
+                <b class="block text-slate-800">{{ evento.titulo }}</b>
+                @if (evento.lugar) { <small class="text-xs text-slate-500">{{ evento.lugar }}</small> }
+              </td>
+              <td class="whitespace-nowrap px-4 py-3 tabular-nums text-slate-600">
+                {{ evento.fechaInicio | date: 'd MMM y':'':'es-CO' }}
+                @if (evento.fechaFin && evento.fechaFin !== evento.fechaInicio) {
+                  <span class="block text-xs text-slate-400">hasta {{ evento.fechaFin | date: 'd MMM y':'':'es-CO' }}</span>
+                }
+              </td>
+              <td class="px-4 py-3 text-slate-600">{{ evento.procesoNombre || '—' }}</td>
+              <td class="px-4 py-3">
+                <app-indicador-de-estado
+                  [etiqueta]="evento.estadoEtiqueta"
+                  [tono]="tonoDelEstado(evento.estado)"
+                  [matiz]="matizDelEstado(evento.estado)"
+                  [conTexto]="true"></app-indicador-de-estado>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+
+  @if (formulario(); as f) {
+    <app-dialogo-de-formulario
+      titulo="Anunciar un evento"
+      proposito="Tu evento quedará en revisión: aparecerá en la agenda pública cuando el Programa lo apruebe."
+      verbo="Enviar a revisión"
+      tono="confirmar"
+      [guardando]="guardando()"
+      [puedeGuardar]="loQueFalta().length === 0 && problemasDeFecha().length === 0"
+      identificador="anunciar-evento"
+      (guardar)="anunciar()"
+      (cerrar)="cerrar()">
+    <div class="grid gap-4">
+      <label class="block">
+        <span class="campo__rotulo">Proceso en el que se enmarca</span>
+        <select name="proceso" [ngModel]="f.procesoId" (ngModelChange)="campo('procesoId', $event)"
+          class="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2 text-sm outline-none focus:border-morado">
+          <option value="">Elige uno de tus procesos</option>
+          @for (proceso of procesos(); track proceso.id) {
+            <option [value]="proceso.id">
+              {{ proceso.tipoEtiqueta }} · {{ proceso.nombre }}@if (proceso.territorio) { ({{ proceso.territorio }}) }
+            </option>
+          }
+        </select>
+        <small class="campo__ayuda">Es obligatorio: un evento se anuncia siempre dentro de un proceso tuyo.</small>
+      </label>
+
+      <label class="block">
+        <span class="campo__rotulo">Título</span>
+        <input type="text" name="titulo" [ngModel]="f.titulo" (ngModelChange)="campo('titulo', $event)"
+          class="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2 text-sm outline-none focus:border-morado" />
+      </label>
+
+      <label class="block">
+        <span class="campo__rotulo">Descripción</span>
+        <textarea rows="3" name="descripcion" [ngModel]="f.descripcion" (ngModelChange)="campo('descripcion', $event)"
+          class="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2 text-sm outline-none focus:border-morado"></textarea>
+      </label>
+
+      @if (problemasDeFecha().length > 0) {
+        <ul class="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-xs text-amber-900" role="alert">
+          @for (problema of problemasDeFecha(); track problema) { <li>{{ problema }}</li> }
+        </ul>
+      }
+
+      <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <label class="block">
+          <span class="campo__rotulo">Empieza</span>
+          <input type="date" name="fechaInicio" [ngModel]="f.fechaInicio" (ngModelChange)="campo('fechaInicio', $event)"
+            class="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2 text-sm outline-none focus:border-morado" />
+        </label>
+        <label class="block">
+          <span class="campo__rotulo">Termina</span>
+          <input type="date" name="fechaFin" [ngModel]="f.fechaFin" (ngModelChange)="campo('fechaFin', $event)"
+            class="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2 text-sm outline-none focus:border-morado" />
+          <small class="campo__ayuda">Déjalo vacío si acaba el mismo día.</small>
+        </label>
+        <div>
+          <!-- «AGREGAR HORA», NO «¿TIENE HORA?»: una acción describe lo que va a pasar. -->
+          <label class="flex items-center gap-2">
+            <input type="checkbox" name="conHoraInicio" [ngModel]="f.conHoraInicio" (ngModelChange)="cambiarHoraDeInicio($event)" />
+            <span class="campo__rotulo">Agregar hora de inicio</span>
+          </label>
+          @if (f.conHoraInicio) {
+            <label class="mt-2 block">
+              <span class="sr-only">Hora de inicio</span>
+              <input type="time" name="horaInicio" [ngModel]="f.horaInicio" (ngModelChange)="campo('horaInicio', $event)"
+                class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm outline-none focus:border-morado" />
+            </label>
+          }
+        </div>
+        <div>
+          <!-- La hora de fin no se ofrece antes que la de inicio: una sin la otra no significa nada. -->
+          @if (f.conHoraInicio) {
+            <label class="flex items-center gap-2">
+              <input type="checkbox" name="conHoraFin" [ngModel]="f.conHoraFin" (ngModelChange)="campo('conHoraFin', $event)" />
+              <span class="campo__rotulo">Agregar hora de fin</span>
+            </label>
+            @if (f.conHoraFin) {
+              <label class="mt-2 block">
+                <span class="sr-only">Hora de fin</span>
+                <input type="time" name="horaFin" [ngModel]="f.horaFin" (ngModelChange)="campo('horaFin', $event)"
+                  class="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm outline-none focus:border-morado" />
+              </label>
+            }
+          } @else {
+            <p class="text-dato leading-relaxed text-slate-400">La hora de fin se puede agregar en cuanto haya hora de inicio.</p>
+          }
+        </div>
+      </div>
+
+      <label class="block">
+        <span class="campo__rotulo">Modalidad</span>
+        <select name="modalidad" [ngModel]="f.modalidad" (ngModelChange)="campo('modalidad', $event)"
+          class="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2 text-sm outline-none focus:border-morado">
+          <option value="presencial">Presencial</option>
+          <option value="virtual">Virtual</option>
+          <option value="mixta">Mixta</option>
+        </select>
+      </label>
+
+      @if (f.modalidad === 'presencial' || f.modalidad === 'mixta') {
+        <div class="grid gap-4 sm:grid-cols-2">
+          <label class="block">
+            <span class="campo__rotulo">Lugar</span>
+            <input type="text" name="lugar" [ngModel]="f.lugar" (ngModelChange)="campo('lugar', $event)"
+              class="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2 text-sm outline-none focus:border-morado" />
+          </label>
+          <div class="grid grid-cols-2 gap-3">
+            <label class="block">
+              <span class="campo__rotulo">Departamento</span>
+              <select name="departamento" [ngModel]="f.codigoDepartamento" (ngModelChange)="cambiarDepartamento($event)"
+                class="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2 text-xs outline-none focus:border-morado">
+                <option value="">Sin especificar</option>
+                @for (territorio of territorios(); track territorio.codigo) {
+                  <option [value]="territorio.codigo">{{ territorio.nombre | nombrePropio }}</option>
+                }
+              </select>
+            </label>
+            <label class="block">
+              <span class="campo__rotulo">Municipio</span>
+              <select name="municipio" [ngModel]="f.codigoMunicipio" (ngModelChange)="campo('codigoMunicipio', $event)"
+                [disabled]="municipiosDelDepartamento().length === 0"
+                class="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2 text-xs outline-none focus:border-morado disabled:bg-slate-50 disabled:text-slate-400">
+                <option value="">Todo el departamento</option>
+                @for (m of municipiosDelDepartamento(); track m.codigo) {
+                  <option [value]="m.codigo">{{ m.nombre }}</option>
+                }
+              </select>
+            </label>
+          </div>
+        </div>
+      }
+
+      @if (f.modalidad === 'virtual' || f.modalidad === 'mixta') {
+        <label class="block">
+          <span class="campo__rotulo">Enlace</span>
+          <input type="url" name="url" [ngModel]="f.url" (ngModelChange)="campo('url', $event)"
+            class="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2 text-sm outline-none focus:border-morado" />
+        </label>
+      }
+    </div>
+
+      @if (loQueFalta().length > 0) {
+        <p class="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-dato text-amber-900" role="status">
+          Falta {{ loQueFalta().join(', ') }}.
+        </p>
+      }
+    </app-dialogo-de-formulario>
+  }
+</section>

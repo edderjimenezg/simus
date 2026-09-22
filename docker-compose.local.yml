@@ -1,0 +1,33 @@
+name: simus-desarrollo-local
+
+services:
+  sqlserver:
+    image: mcr.microsoft.com/azure-sql-edge:latest
+    container_name: simus-desarrollo-sqlserver
+    environment:
+      ACCEPT_EULA: "Y"
+      # La contrasena local no tiene valor por defecto: incluso en desarrollo debe
+      # definirse fuera del repositorio, en el entorno o en el archivo .env ignorado.
+      MSSQL_SA_PASSWORD: "${PNMC_LOCAL_SA_PASSWORD:?Defina PNMC_LOCAL_SA_PASSWORD en el entorno o en .env}"
+    ports:
+      # Publicar sin IP expone el puerto en TODAS las interfaces (0.0.0.0 y [::]):
+      # cualquier equipo de la red local alcanzaba la base con la contrasena "sa" que
+      # esta unas lineas mas arriba. El API y el frontend ya viven en bucle local.
+      - "127.0.0.1:${PNMC_LOCAL_SQL_PORT:-14344}:1433"
+    volumes:
+      - simus_desarrollo_sqlserver_data:/var/opt/mssql
+    healthcheck:
+      # Esta imagen no trae sqlcmd en todas sus variantes; una sonda SQL interna quedaba
+      # permanentemente en rojo aunque la base aceptara conexiones reales. Esta prueba
+      # verifica que el motor escucha. La disponibilidad autentica (SELECT 1 con la clave
+      # local) la comprueba siempre scripts/local-db-up.sh antes de permitir cualquier uso.
+      test:
+        - "CMD-SHELL"
+        - "/bin/bash -c 'echo > /dev/tcp/127.0.0.1/1433'"
+      interval: 10s
+      timeout: 5s
+      retries: 18
+      start_period: 25s
+
+volumes:
+  simus_desarrollo_sqlserver_data:

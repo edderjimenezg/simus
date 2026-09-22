@@ -1,0 +1,89 @@
+<div class="space-y-4 rounded-2xl border border-slate-200 bg-white p-5">
+  <div class="flex items-start gap-3">
+    <svg lucideSparkles size="20" class="mt-0.5 shrink-0 text-morado" aria-hidden="true"></svg>
+    <div class="min-w-0">
+      <h3 class="font-alternate text-[0.78rem] font-black uppercase tracking-wide text-morado">Leer desde un documento</h3>
+      <p class="mt-1 text-dato leading-relaxed text-slate-500">
+        Sube el PDF y el sistema lee lo que el documento dice de sí mismo, lo que enseña su portada y
+        lo que ya reconoce del catálogo. <b>No crea nada</b>: propone, y tú decides.
+      </p>
+    </div>
+  </div>
+
+  @if (!resultado()) {
+    <label class="block">
+      <span class="sr-only">Elegir el documento</span>
+      <input type="file" accept="application/pdf" (change)="elegir($event)" [disabled]="leyendo()"
+        class="block w-full text-xs text-slate-600 file:mr-3 file:rounded-xl file:border-0 file:bg-morado file:px-4 file:py-2 file:text-xs file:font-bold file:text-white" />
+      <small class="mt-1 block text-dato text-slate-400">PDF, hasta 20 MB.</small>
+    </label>
+  }
+
+  @if (leyendo()) {
+    <p role="status" class="flex items-center gap-2 text-xs text-slate-500">
+      <svg lucideFileText size="14" aria-hidden="true"></svg>
+      <span>Leyendo «{{ nombreDelArchivo() }}»…</span>
+    </p>
+  }
+
+  @if (error()) {
+    <p role="alert" class="rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-xs text-rose-800">{{ error() }}</p>
+  }
+
+  @if (resultado(); as leido) {
+    <div class="space-y-3 rounded-xl bg-slate-50 p-4">
+      <p class="text-xs font-bold text-slate-800">Se leyó «{{ nombreDelArchivo() }}»</p>
+
+      <!--
+        QUE SE PUDO LEER, DICHO EN VOZ ALTA. Sin esto, una propuesta pobre parece un documento pobre:
+        quien lo sube no sabe si el sistema no encontró nada o si ni siquiera pudo abrirlo.
+      -->
+      @if (leido.loQueSePudoLeer.length > 0) {
+        <ul class="flex flex-wrap gap-1.5">
+          @for (cosa of leido.loQueSePudoLeer; track cosa) {
+            <li class="rounded-lg bg-white px-2 py-1 text-dato font-bold text-verde-texto">{{ cosa }}</li>
+          }
+        </ul>
+      } @else {
+        <p class="text-dato text-slate-500">No se pudo leer nada de este documento.</p>
+      }
+
+      @if (leido.leidoConReconocimientoOptico) {
+        <!--
+          DE DONDE SALIERON ESTOS DATOS. La primera página no tenía texto y se leyó mirándola. Acierta
+          mucho, pero no siempre, y presentar esto igual que un dato extraído del propio PDF sería
+          esconder una diferencia que cambia cuánta atención merece la revisión.
+        -->
+        <p class="flex items-start gap-2 rounded-lg border border-morado/20 bg-morado/5 px-3 py-2 text-dato leading-relaxed text-morado">
+          <svg lucideScanText size="14" class="mt-0.5 shrink-0" aria-hidden="true"></svg>
+          <span>
+            Esta portada no tenía texto, así que se leyó con <strong>reconocimiento óptico</strong>.
+            Revise con atención lo propuesto: los acentos y los nombres propios son donde más se
+            equivoca.
+          </span>
+        </p>
+      }
+
+      @if (leido.requiereOcr) {
+        <!--
+          EL CASO QUE HAY QUE DECIR. Ni capa de texto ni reconocimiento óptico pudieron con esta
+          página, y callarlo haría parecer que el documento no tiene título.
+        -->
+        <p class="flex items-start gap-2 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-dato leading-relaxed text-amber-900">
+          <svg lucideTriangleAlert size="14" class="mt-0.5 shrink-0" aria-hidden="true"></svg>
+          <span>
+            No se pudo leer texto de la primera página, ni extrayéndolo ni con reconocimiento óptico.
+            La portada sí se recuperó. Habrá que escribir los datos a mano.
+          </span>
+        </p>
+      }
+
+      <div class="flex flex-wrap gap-2 pt-1">
+        <button type="button" (click)="descartar()"
+          class="min-h-11 rounded-xl border border-slate-200 px-4 text-dato font-bold text-slate-600 hover:border-morado hover:text-morado">
+          Leer otro documento
+        </button>
+      </div>
+    </div>
+  }
+</div>

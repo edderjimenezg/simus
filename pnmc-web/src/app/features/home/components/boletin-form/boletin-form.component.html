@@ -1,0 +1,155 @@
+<div class="flex w-full flex-col gap-2 lg:w-auto">
+  <form
+    data-testid="boletin-form"
+    class="flex w-full flex-col flex-wrap items-stretch gap-3 sm:flex-row sm:items-center"
+    (ngSubmit)="abrirAutorizacion()"
+  >
+    <label class="sr-only" for="boletin-correo">Correo electrónico para recibir el boletín</label>
+    <input
+      id="boletin-correo"
+      data-testid="boletin-correo"
+      type="email"
+      name="correo"
+      autocomplete="email"
+      [placeholder]="placeholder"
+      [ngModel]="correo()"
+      (ngModelChange)="correo.set($event)"
+      [attr.aria-invalid]="mensajeDeError().length > 0 ? 'true' : null"
+      aria-describedby="boletin-aviso"
+      class="min-w-0 w-[min(280px,100%)] shrink-0 rounded-xl border border-white/15 bg-white/5 px-5 py-3 font-nunito text-xs text-white outline-none transition-all placeholder:text-white/30 focus:border-[#00DA5E] focus:bg-white/10 sm:min-w-[280px] sm:max-w-[280px]"
+    />
+    <button
+      type="submit"
+      data-testid="boletin-enviar"
+      class="max-w-full cursor-pointer break-words whitespace-normal rounded-xl border-0 bg-[#00DA5E] px-8 py-3 font-alternate text-xs font-bold uppercase tracking-widest text-[#291242] shadow-md transition-all hover:bg-[#8BF784]"
+    >
+      {{ textoDelBoton }}
+    </button>
+  </form>
+
+  <!--
+    UN SOLO SITIO PARA LOS AVISOS, y con `aria-live`: quien navega con lector de pantalla no ve
+    aparecer el texto, así que si el aviso no se anuncia solo, para esa persona sigue sin pasar
+    nada al pulsar el botón — que era justo el defecto que se está arreglando.
+  -->
+  <p
+    id="boletin-aviso"
+    data-testid="boletin-aviso"
+    role="status"
+    aria-live="polite"
+    class="min-h-[1rem] font-nunito text-[0.68rem] leading-relaxed"
+  >
+    @if (mensajeDeExito()) {
+      <span data-testid="boletin-exito" class="text-[#8BF784]">{{ mensajeDeExito() }}</span>
+    } @else if (mensajeDeError() && estado() === 'reposo') {
+      <span data-testid="boletin-error" class="text-red-300">{{ mensajeDeError() }}</span>
+    }
+  </p>
+</div>
+
+@if (estado() === 'confirmando' || estado() === 'enviando') {
+  <!--
+    EL VELO NO ES UN CONTROL. Pulsarlo cierra por comodidad del ratón; con teclado se cierra con
+    Escape, que atiende `appDialogo` desde el propio diálogo, donde está el foco.
+  -->
+  <!-- eslint-disable-next-line @angular-eslint/template/click-events-have-key-events -->
+  <div
+    data-testid="boletin-modal-fondo"
+    tabindex="-1"
+    class="fixed inset-0 z-[100] flex items-center justify-center bg-black/70 p-4 backdrop-blur-sm"
+    (click)="cerrarAlPulsarFondo($event)"
+  >
+    <div
+      appDialogo
+      (cerrar)="cerrarAutorizacion()"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="boletin-modal-titulo"
+      data-testid="boletin-modal"
+      class="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-2xl border border-white/10 bg-[#291242] p-6 text-left shadow-2xl md:p-8"
+    >
+      <h2
+        id="boletin-modal-titulo"
+        class="font-alternate text-lg font-bold uppercase leading-tight tracking-wide text-white md:text-xl"
+      >
+        Autorización de tratamiento de datos
+      </h2>
+
+      <p class="mt-2 font-nunito text-[0.72rem] leading-relaxed text-white/60">
+        Vas a registrar <span data-testid="boletin-modal-correo" class="font-bold text-white">{{ correo().trim() }}</span> en el boletín del PNMC.
+      </p>
+
+      @if (cargandoPolitica()) {
+        <p data-testid="boletin-politica-cargando" class="mt-5 font-nunito text-xs text-white/50">
+          Cargando la política de tratamiento de datos…
+        </p>
+      } @else if (politica()) {
+        <div class="mt-5 rounded-xl border border-white/10 bg-white/5 p-4">
+          <p data-testid="boletin-politica-texto" class="font-nunito text-[0.72rem] leading-relaxed text-white/80">
+            {{ politica()!.texto }}
+          </p>
+          <p data-testid="boletin-politica-version" class="mt-3 font-alternate text-[0.58rem] uppercase tracking-[0.18em] text-white/35">
+            Versión {{ politica()!.version }}
+          </p>
+        </div>
+
+        <!--
+          LA CASILLA NACE DESMARCADA Y NO SE PUEDE PREMARCAR. Una casilla ya marcada al abrir
+          convierte la autorización en algo que ocurre por omisión, y la Ley 1581 de 2012 pide un
+          acto propio de la persona.
+        -->
+        <label class="mt-5 flex cursor-pointer items-start gap-3">
+          <input
+            type="checkbox"
+            data-testid="boletin-casilla"
+            [checked]="autoriza()"
+            (change)="alternarAutorizacion($any($event.target).checked)"
+            class="mt-0.5 h-4 w-4 shrink-0 cursor-pointer accent-[#00DA5E]"
+          />
+          <span class="font-nunito text-[0.72rem] leading-relaxed text-white/80">
+            He leído y autorizo el tratamiento de mi correo electrónico en los términos anteriores.
+          </span>
+        </label>
+      } @else {
+        <p data-testid="boletin-politica-fallo" class="mt-5 font-nunito text-xs text-red-300">
+          {{ mensajeDeError() }}
+        </p>
+        <button
+          type="button"
+          data-testid="boletin-politica-reintentar"
+          (click)="cargarPolitica()"
+          class="mt-3 cursor-pointer rounded-lg border border-white/20 bg-transparent px-4 py-2 font-alternate text-[0.62rem] font-bold uppercase tracking-widest text-white transition-all hover:border-[#8BF784] hover:bg-white/10"
+        >
+          Reintentar
+        </button>
+      }
+
+      @if (mensajeDeError() && politica()) {
+        <p data-testid="boletin-modal-error" role="alert" class="mt-4 font-nunito text-[0.72rem] leading-relaxed text-red-300">
+          {{ mensajeDeError() }}
+        </p>
+      }
+
+      <div class="mt-7 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
+        <button
+          type="button"
+          data-testid="boletin-cancelar"
+          (click)="cerrarAutorizacion()"
+          [disabled]="estado() === 'enviando'"
+          class="cursor-pointer rounded-xl border border-white/20 bg-transparent px-6 py-3 font-alternate text-[0.65rem] font-bold uppercase tracking-widest text-white transition-all hover:border-white/40 hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-40"
+        >
+          Cancelar
+        </button>
+        <button
+          type="button"
+          data-testid="boletin-confirmar"
+          (click)="confirmar()"
+          [disabled]="!puedeConfirmar()"
+          class="cursor-pointer rounded-xl border-0 bg-[#00DA5E] px-6 py-3 font-alternate text-[0.65rem] font-bold uppercase tracking-widest text-[#291242] shadow-md transition-all hover:bg-[#8BF784] disabled:cursor-not-allowed disabled:bg-white/20 disabled:text-white/40 disabled:shadow-none"
+        >
+          {{ estado() === 'enviando' ? 'Registrando…' : 'Acepto y me registro' }}
+        </button>
+      </div>
+    </div>
+  </div>
+}

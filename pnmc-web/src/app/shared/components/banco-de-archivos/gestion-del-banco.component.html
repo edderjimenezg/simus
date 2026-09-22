@@ -1,0 +1,160 @@
+<section class="space-y-5" aria-labelledby="banco-titulo">
+  <!--
+    EL ENCABEZADO SOLO DONDE HACE FALTA. En la consola, la cabecera de página ya dice «Banco de
+    archivos» y qué contiene; repetirlo aquí era el segundo título de la pantalla. En el espacio de
+    la organización esta pieza vive dentro de una pestaña sin cabecera propia, así que allí sí lo
+    pone. Para un lector de pantalla el título existe siempre.
+  -->
+  <h3 id="banco-titulo" [class]="canal === 'externo' ? 'font-alternate text-titulo font-bold uppercase tracking-wide text-morado' : 'sr-only'">Banco de archivos</h3>
+  @if (canal === 'externo') {
+    <p class="max-w-2xl text-cuerpo leading-relaxed text-prosa">
+      Las imágenes que has subido a tus procesos. Un archivo se puede retirar cuando ya no lo usa ninguna ficha.
+    </p>
+  }
+
+  @if (error()) { <p role="alert" class="text-cuerpo font-semibold text-amber-800">{{ error() }}</p> }
+  <p role="status" [class.hidden]="!aviso()" class="text-cuerpo font-semibold text-verde-texto">{{ aviso() }}</p>
+
+  @if (pagina(); as p) {
+    <!--
+      AQUI NO VA UNA BARRA DE ESPACIO USADO, y es una decisión de la dirección de producto del 13 de
+      septiembre de 2026: «no es conveniente tener una barra de espacio usado dentro de la gestión
+      externa; simplemente pueden subir la imagen de perfil y un elemento en cada festival».
+
+      TIENE RAZON Y LA CUENTA LO DICE: una organización sube su foto de perfil y un material por
+      Edición. Con el tope por archivo en dos megas, llenar los cincuenta que tiene asignados pide
+      veinticinco archivos; nadie con ese uso se acerca. Una barra que siempre marca cero no informa
+      de nada y convierte una pantalla de trabajo en un panel de sistema.
+
+      EL TOPE SIGUE EN EL SERVIDOR. Se deja de enseñar, no de aplicar: los bytes viven en la base
+      compartida y una cuenta que empujara sin medida haría más lento todo lo demás. Si alguien lo
+      alcanza, lo que corresponde es hablarlo, y el mensaje que recibe ya lo dice.
+    -->
+
+    <app-barra-de-lista>
+      <!-- «Sin usar» NO es una posición del grupo de abajo: se combina con cualquiera de las tres. -->
+      <app-boton importancia="terciaria" tamano="menudo" [pulsado]="soloHuerfanos()" (accion)="alternarHuerfanos()">Sin usar en esta página: {{ huerfanos() }}</app-boton>
+      <ng-container extremo>
+        <p class="barra-de-lista__resumen">{{ p.total }} {{ p.total === 1 ? 'archivo' : 'archivos' }}</p>
+        <app-boton importancia="terciaria" etiqueta="Actualizar el banco" (accion)="cargar()"><svg lucideRefreshCw [size]="15" aria-hidden="true"></svg></app-boton>
+      </ng-container>
+    </app-barra-de-lista>
+
+    <!--
+      LA PROCEDENCIA, DEBAJO DE LA BARRA Y FUERA DE ELLA. Es el orden estandarizado de la consola:
+      buscador, luego lo que acota la lista, la acción a la derecha, y las pestañas debajo. Estaba
+      dentro, en la misma fila, así que se leía como un control más de la barra en vez de como la
+      partición de la lista que es.
+
+      TRES OPCIONES EXCLUYENTES SON UN CONTROL, NO TRES BOTONES: el proyecto no usa píldoras y el
+      selector segmentado es la forma que ya tiene la consola para elegir entre pocas opciones.
+    -->
+    @if (canal === 'institucional') {
+      <app-selector-segmentado
+        [opciones]="PROCEDENCIAS"
+        [elegida]="procedencia()"
+        etiquetaDelGrupo="Filtrar por procedencia del archivo"
+        (elegir)="filtrarPor($event)" />
+    }
+
+    @if (cargando()) {
+      <app-estado-de-lista tipo="cargando" titulo="Consultando el banco…" />
+    } @else if (archivos().length === 0) {
+      <app-estado-de-lista
+        [titulo]="soloHuerfanos() ? 'No hay archivos sin usar' : 'Todavía no hay archivos en el banco'"
+        [detalle]="soloHuerfanos() ? 'Todo lo que hay está vinculado a alguna ficha.' : 'Las imágenes entran al banco al adjuntarlas desde una ficha.'" />
+    } @else {
+      <ul class="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+        @for (archivo of archivos(); track archivo.id) {
+          <!--
+            `min-w-0` EN LA TARJETA, Y NO SOLO DENTRO. Un elemento de rejilla nace con
+            `min-width: auto`, así que NO encoge por debajo de su contenido por mucho `min-w-0` que
+            lleven sus hijos: medido a 390 px, la tarjeta se quedaba en 526 px dentro de una columna
+            de 352 y la pantalla se iba 155 px a la derecha.
+          -->
+          <li class="flex min-w-0 gap-3 border-t border-filete py-3">
+            <!--
+              LA MINIATURA ES EL DATO: reconocer una imagen por su nombre de fichero —«foto.png»—
+              no la reconoce nadie. Se ve entera y no recortada, por lo mismo que en el catálogo.
+            -->
+            <div class="grid h-20 w-20 shrink-0 place-items-center overflow-hidden rounded-lg bg-slate-100">
+              @if (seVe(archivo.id)) {
+                <img [src]="archivo.url" [alt]="archivo.alt || archivo.nombre"
+                     width="80" height="80" loading="lazy" decoding="async"
+                     class="h-full w-full object-contain"
+                     (error)="noSeVe(archivo.id)">
+              } @else {
+                <!--
+                  UNA IMAGEN ROTA NO DICE NADA, y en el banco hay archivos que no se pueden pintar:
+                  uno de cero bytes que se quedó de una prueba vieja, o uno cuyo tipo no es una
+                  imagen. Aquí se dice qué pasa, que además es justo lo que hay que retirar.
+                -->
+                <span class="px-1 text-center text-dato font-bold uppercase leading-tight tracking-wider text-slate-400">Sin vista previa</span>
+              }
+            </div>
+
+            <div class="min-w-0 flex-1">
+              <p class="truncate text-xs font-bold text-slate-900" [title]="archivo.nombre">{{ archivo.nombre }}</p>
+              <p class="mt-0.5 truncate text-dato leading-relaxed text-slate-500" [title]="archivo.alt || ''">{{ archivo.alt || 'Sin texto alternativo' }}</p>
+              <p class="mt-1 text-dato tabular-nums text-slate-400">
+                {{ peso(archivo.bytes) }}@if (archivo.ancho && archivo.alto) {<span> · {{ archivo.ancho }}×{{ archivo.alto }}</span>}
+                · {{ archivo.fechaCarga | date: formatoDeFecha:'':'es-CO' }}
+              </p>
+
+              <div class="mt-1.5 flex flex-wrap items-center gap-x-2 gap-y-1">
+                @if (canal === 'institucional') {
+                  <span class="text-dato font-bold uppercase tracking-widest"
+                        [class]="archivo.procedencia === 'institucional' ? 'text-morado' : 'text-verde-texto'">
+                    {{ archivo.procedencia === 'institucional' ? 'PNMC' : (archivo.organizacionNombre || 'Organización') }}
+                  </span>
+                }
+                @if (archivo.huerfano) {
+                  <span class="text-dato font-bold uppercase tracking-widest text-amber-700">Sin usar</span>
+                } @else {
+                  <span class="text-dato text-slate-400" [title]="archivo.usos[0].descripcion">{{ archivo.usos[0].descripcion }}</span>
+                }
+                <!--
+                  DECIR SI SE VE DESDE FUERA, y no darlo por hecho. Desde el 13 de septiembre de
+                  2026 un archivo solo se sirve a cualquiera si está usado en algo ya publicado;
+                  quien administra tiene que poder saber de un vistazo cuál es cuál.
+                -->
+                @if (archivo.visiblePublicamente) {
+                  <span class="text-dato uppercase tracking-widest text-slate-400">público</span>
+                } @else {
+                  <span class="text-dato uppercase tracking-widest text-slate-400">privado</span>
+                }
+              </div>
+            </div>
+
+            <div class="shrink-0 self-start">
+              <app-menu-de-acciones
+                [acciones]="accionesDe(archivo)"
+                [descripcion]="archivo.nombre"
+                alineacion="derecha"
+                (elegida)="ejecutarAccion(archivo, $event)"></app-menu-de-acciones>
+            </div>
+          </li>
+        }
+      </ul>
+
+      @if (p.totalPaginas > 1) {
+        <div class="flex items-center justify-center gap-3 pt-4">
+          <app-boton importancia="secundaria" tamano="menudo" [deshabilitado]="p.pagina <= 1" (accion)="irAPagina(p.pagina - 1)">← Anterior</app-boton>
+          <span class="text-dato tabular-nums text-rotulo">Página {{ p.pagina }} de {{ p.totalPaginas }}</span>
+          <app-boton importancia="secundaria" tamano="menudo" [deshabilitado]="p.pagina >= p.totalPaginas" (accion)="irAPagina(p.pagina + 1)">Siguiente →</app-boton>
+        </div>
+      }
+    }
+  }
+
+  <!-- Retirar del banco no se deshace, y solo se ofrece cuando nada lo está usando. -->
+  @if (archivoPorRetirar(); as archivo) {
+    <app-confirmacion
+      titulo="Retirar del banco"
+      [detalle]="'Se borra ' + comoSeLlama(archivo) + ' del banco y no se puede deshacer. Ahora mismo no lo está usando ningún registro.'"
+      accion="Retirar del banco"
+      identificador="confirmar-retirar-del-banco"
+      (confirmar)="confirmarElRetiro()"
+      (cancelar)="cerrarLaConfirmacion()" />
+  }
+</section>

@@ -1,0 +1,474 @@
+<div class="bg-white min-h-screen text-left"> 
+  <app-page-hero 
+    [tag]="getWebText('about_hero_tag')"
+    [title]="getWebText('about_hero_title')"
+    [titleAccent]="getWebText('about_hero_accent')"
+    [description]="getWebText('about_description')"
+    [bgImage]="imagen('hero_sobre_pnmc')" 
+    (regresoSolicitado)="onBackToHome()"
+  ></app-page-hero>
+  
+  <!-- PRESENTACIÓN -->
+  <app-content-wrapper className="bg-slate-50/50" id="pnmc-presentacion"> 
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-14 items-start">
+      <div class="lg:col-span-7 space-y-8">
+        <app-section-header [backgroundText]="getWebText('about_presentation_bg')" [foregroundText]="getWebText('about_presentation_title')" [compact]="true"></app-section-header>
+        <div class="max-w-3xl space-y-5 text-base lg:text-[1.05rem] text-slate-700 leading-relaxed font-nunito">
+          <div class="space-y-5">
+            <p>{{ getWebText('about_presentation_intro_1') }}</p>
+            <p>{{ getWebText('about_presentation_intro_2') }}</p>
+          </div>
+        </div>
+      </div>
+      
+      <div class="lg:col-span-5 flex items-start justify-center">
+        <div class="w-full max-w-md rounded-[3rem] bg-[#f9f8fa] p-10 lg:p-12 text-left relative overflow-hidden border border-[#291242]/5 group hover:border-[#00DA5E]/30 hover:shadow-lg transition-all duration-500">
+          <!-- Quote background decoration -->
+          <div class="absolute -top-6 -left-2 text-[12rem] font-gregor leading-none text-[#291242]/[0.03] select-none pointer-events-none">
+            "
+          </div>
+          
+          <div class="relative z-10 flex flex-col h-full justify-between space-y-8">
+            <div class="flex flex-col space-y-6">
+              <span class="inline-flex w-fit items-center rounded-full bg-[#291242] px-4 py-1.5 text-[0.55rem] font-bold uppercase tracking-[0.25em] text-white font-alternate shadow-sm">
+                {{ getWebText('about_base_tag') }}
+              </span>
+              
+              <p class="font-nunito text-[1.15rem] lg:text-[1.25rem] text-[#291242] font-semibold leading-relaxed italic relative z-10">
+                {{ getWebText('about_base_quote') }}
+              </p>
+            </div>
+            
+            <div class="flex items-center justify-between border-t border-slate-200/60 pt-6">
+              <div>
+                <!-- Accesibilidad (WCAG 2.2 AA): sobre fondo claro el verde de marca #00DA5E no llega al contraste mínimo (1,88:1 sobre blanco), así que el TEXTO usa el verde oscuro #087B3E (5,4:1). Sobre fondo oscuro (#291242 / slate-900) el verde de marca sí cumple y se conserva. -->
+                <h3 class="font-alternate text-sm font-bold uppercase tracking-[0.2em] text-verde-texto">{{ getWebText('about_base_objective_label') }}</h3>
+                <span class="text-slate-400 text-[0.65rem] uppercase tracking-widest font-alternate mt-1.5 block font-semibold">{{ getWebText('about_base_plan_label') }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="lg:col-span-12 lg:-mt-4">
+        <div class="rounded-[2.5rem] border border-slate-100 bg-white shadow-sm w-full overflow-hidden">
+          <div class="px-8 py-4 lg:px-10 lg:py-5 border-b border-slate-100">
+            <span class="inline-flex w-fit items-center rounded-full bg-[#291242] px-4 py-1.5 font-alternate text-[0.55rem] font-bold uppercase tracking-[0.24em] text-white">
+              {{ getWebText('about_collective_tag') }}
+            </span>
+          </div>
+          <div class="relative overflow-hidden bg-[linear-gradient(180deg,rgba(0,218,94,0.06),rgba(255,255,255,0)_72%)] px-8 py-8 lg:px-10 lg:py-10">
+            <div class="absolute left-0 top-0 h-full w-1.5 bg-[#00DA5E]"></div>
+            <div class="flex gap-4 lg:gap-6">
+              <span class="font-alternate text-[3rem] leading-[0.75] text-[#00DA5E]/45">"</span>
+              <p class="font-nunito text-[1.02rem] lg:text-[1.18rem] leading-relaxed text-[#291242] max-w-4xl">
+                {{ getWebText('about_collective_text') }}
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </app-content-wrapper>
+
+  <!--
+    OBJETIVOS Y ENFOQUES, COMO EN EL DISEÑO APROBADO.
+
+    Las tarjetas de objetivo llevaban una cifra «01/02/03» de 7 rem en verde al 25 % detrás del
+    texto, y las de enfoque un icono de 168 px asomando por la esquina inferior derecha al 80 % de
+    opacidad. En el diseño aprobado del portal ninguna de las dos cosas existe: el objetivo abre con una chapa de 48 px
+    que lleva su icono, y el enfoque con el mismo icono a 32 px sobre el título. El dueño del
+    proyecto lo señaló: «tienen unos iconos de fondo que no deberían
+    estar ahí».
+
+    Con la marca de agua se van el `overflow-hidden`, el `isolate` y los `relative z-10` que
+    existían solo para que el texto quedara por encima de ella.
+
+    La banda de enfoques recupera además su fondo plano: tenía cuatro capas —dos degradados
+    radiales y una cuadrícula de 44x44— sobre el mismo morado.
+  -->
+  <!-- OBJETIVOS -->
+  <app-content-wrapper id="pnmc-objetivos">
+    <app-section-header [backgroundText]="getWebText('about_objectives_bg')" [foregroundText]="getWebText('about_objectives_title')"></app-section-header>
+    
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <!-- Eje 1 -->
+      <div class="group p-10 rounded-[3rem] bg-white border border-slate-100 hover:border-[#8BF784] hover:shadow-2xl transition-all duration-500 relative flex flex-col">
+        <span data-testid="objective-icon" aria-hidden="true" class="mb-8 flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-50 text-[#291242] transition-all group-hover:bg-[#8BF784]">
+          <svg lucideZap [size]="24"></svg>
+        </span>
+        <span class="text-[0.5rem] font-bold text-slate-400 uppercase tracking-[0.2em] mb-4 block leading-tight border-l border-slate-200 pl-4">
+          {{ getWebText('about_objective_1_axis') }}
+        </span>
+        <h4 class="font-alternate text-2xl text-[#291242] uppercase font-bold mb-4">{{ getWebText('about_objective_1_title') }}</h4>
+        <p class="text-sm text-slate-500 font-nunito leading-relaxed font-light flex-grow">
+          {{ getWebText('about_objective_1_desc') }}
+        </p>
+        <div class="mt-8 pt-6 border-t border-slate-50">
+          <button 
+            type="button"
+            (click)="navigateToSection('ejes', 'musica-para-la-vida')" 
+            class="flex items-center gap-2 text-[0.6rem] font-bold text-verde-texto uppercase tracking-widest hover:gap-4 transition-all border-0 bg-transparent cursor-pointer"
+          >
+            {{ getWebText('about_objective_1_button') }} <svg lucideArrowRight size="12"></svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Eje 2 -->
+      <div class="group p-10 rounded-[3rem] bg-white border border-slate-100 hover:border-[#8BF784] hover:shadow-2xl transition-all duration-500 relative flex flex-col">
+        <span data-testid="objective-icon" aria-hidden="true" class="mb-8 flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-50 text-[#291242] transition-all group-hover:bg-[#8BF784]">
+          <svg lucideBoxes [size]="24"></svg>
+        </span>
+        <span class="text-[0.5rem] font-bold text-slate-400 uppercase tracking-[0.2em] mb-4 block leading-tight border-l border-slate-200 pl-4">
+          {{ getWebText('about_objective_2_axis') }}
+        </span>
+        <h4 class="font-alternate text-2xl text-[#291242] uppercase font-bold mb-4">{{ getWebText('about_objective_2_title') }}</h4>
+        <p class="text-sm text-slate-500 font-nunito leading-relaxed font-light flex-grow">
+          {{ getWebText('about_objective_2_desc') }}
+        </p>
+        <div class="mt-8 pt-6 border-t border-slate-50">
+          <button 
+            type="button"
+            (click)="navigateToSection('ejes', 'oficios-y-practicas')" 
+            class="flex items-center gap-2 text-[0.6rem] font-bold text-verde-texto uppercase tracking-widest hover:gap-4 transition-all border-0 bg-transparent cursor-pointer"
+          >
+            {{ getWebText('about_objective_2_button') }} <svg lucideArrowRight size="12"></svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Eje 3 -->
+      <div class="group p-10 rounded-[3rem] bg-white border border-slate-100 hover:border-[#8BF784] hover:shadow-2xl transition-all duration-500 relative flex flex-col">
+        <span data-testid="objective-icon" aria-hidden="true" class="mb-8 flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-50 text-[#291242] transition-all group-hover:bg-[#8BF784]">
+          <svg lucideLandmark [size]="24"></svg>
+        </span>
+        <span class="text-[0.5rem] font-bold text-slate-400 uppercase tracking-[0.2em] mb-4 block leading-tight border-l border-slate-200 pl-4">
+          {{ getWebText('about_objective_3_axis') }}
+        </span>
+        <h4 class="font-alternate text-2xl text-[#291242] uppercase font-bold mb-4">{{ getWebText('about_objective_3_title') }}</h4>
+        <p class="text-sm text-slate-500 font-nunito leading-relaxed font-light flex-grow">
+          {{ getWebText('about_objective_3_desc') }}
+        </p>
+        <div class="mt-8 pt-6 border-t border-slate-50">
+          <button 
+            type="button"
+            (click)="navigateToSection('ejes', 'gobernanza')" 
+            class="flex items-center gap-2 text-[0.6rem] font-bold text-verde-texto uppercase tracking-widest hover:gap-4 transition-all border-0 bg-transparent cursor-pointer"
+          >
+            {{ getWebText('about_objective_3_button') }} <svg lucideArrowRight size="12"></svg>
+          </button>
+        </div>
+      </div>
+    </div>
+  </app-content-wrapper>
+
+  <!-- ENFOQUES TRANSVERSALES -->
+  <app-content-wrapper
+    data-testid="approaches-banner"
+    className="bg-[#291242] text-white"
+  >
+    <div class="flex flex-col lg:flex-row gap-12 lg:gap-20 items-center">
+      <div class="lg:w-1/3">
+        <app-tag [text]="getWebText('about_approaches_tag')" className="bg-white/10 text-[#00DA5E] mb-6"></app-tag>
+        <h2 data-testid="approaches-title" class="font-alternate text-3xl md:text-4xl font-bold uppercase leading-tight tracking-wide text-white mb-6">{{ getWebText('about_approaches_title') }}</h2>
+        <p class="text-slate-400 font-nunito font-light text-sm leading-relaxed">{{ getWebText('about_approaches_desc') }}</p>
+      </div>
+      
+      <div class="lg:w-2/3 grid grid-cols-1 md:grid-cols-3 gap-6">
+        <!-- Biocultural -->
+        <div class="bg-[#533075]/70 p-8 rounded-[2.5rem] border border-white/10 hover:bg-[#533075] transition-all shadow-md">
+          <svg data-testid="approach-icon" lucideGlobe [size]="32" aria-hidden="true" class="mb-4 text-[#8BF784]"></svg>
+          <h4 class="font-alternate text-lg font-bold uppercase mb-2 text-white">{{ getWebText('about_approach_1_title') }}</h4>
+          <p class="text-[0.7rem] text-white/95 font-nunito leading-relaxed">{{ getWebText('about_approach_1_desc') }}</p>
+        </div>
+        
+        <!-- Poblacional -->
+        <div class="bg-[#533075]/70 p-8 rounded-[2.5rem] border border-white/10 hover:bg-[#533075] transition-all shadow-md">
+          <svg data-testid="approach-icon" lucideUsers2 [size]="32" aria-hidden="true" class="mb-4 text-[#8BF784]"></svg>
+          <h4 class="font-alternate text-lg font-bold uppercase mb-2 text-white">{{ getWebText('about_approach_2_title') }}</h4>
+          <p class="text-[0.7rem] text-white/95 font-nunito leading-relaxed">{{ getWebText('about_approach_2_desc') }}</p>
+        </div>
+        
+        <!-- Territorial -->
+        <div class="bg-[#533075]/70 p-8 rounded-[2.5rem] border border-white/10 hover:bg-[#533075] transition-all shadow-md">
+          <svg data-testid="approach-icon" lucideMap [size]="32" aria-hidden="true" class="mb-4 text-[#8BF784]"></svg>
+          <h4 class="font-alternate text-lg font-bold uppercase mb-2 text-white">{{ getWebText('about_approach_3_title') }}</h4>
+          <p class="text-[0.7rem] text-white/95 font-nunito leading-relaxed">{{ getWebText('about_approach_3_desc') }}</p>
+        </div>
+      </div>
+    </div>
+  </app-content-wrapper>
+
+  <!-- ACTORES -->
+  <app-content-wrapper id="pnmc-actores">
+    <app-section-header [backgroundText]="getWebText('about_actors_bg')" [foregroundText]="getWebText('about_actors_title')" [compact]="true"></app-section-header>
+    
+    <div class="rounded-[3rem] border border-slate-100 bg-white overflow-hidden shadow-sm">
+      <div class="grid grid-cols-1 xl:grid-cols-[0.9fr_2.1fr]">
+        <div class="bg-slate-50/70 p-8 md:p-10 border-b xl:border-b-0 xl:border-r border-slate-100">
+          <div class="sticky top-28 space-y-5">
+            <span class="inline-flex items-center rounded-full bg-[#291242] px-4 py-2 font-alternate text-[0.58rem] font-bold uppercase tracking-[0.28em] text-[#8BF784]">
+              {{ getWebText('about_actors_tag') }}
+            </span>
+            <h3 class="font-gregor text-4xl lg:text-5xl text-[#291242] font-bold uppercase leading-[1.1] text-balance tracking-tight">
+              {{ getWebText('about_actors_heading') }}
+            </h3>
+            <p class="font-nunito text-sm text-slate-500 leading-relaxed">
+              {{ getWebText('about_actors_desc') }}
+            </p>
+          </div>
+        </div>
+        
+        <div class="grid grid-cols-1 lg:grid-cols-3">
+          <!-- Agentes Sectoriales -->
+          <div class="group p-8 md:p-10 border-b lg:border-b-0 lg:border-r border-slate-100">
+            <div class="flex items-center gap-4 mb-8">
+              <div class="w-14 h-14 rounded-[1.75rem] bg-slate-50 border border-slate-100 flex items-center justify-center text-[#291242] group-hover:bg-[#8BF784] transition-colors duration-500">
+                <svg lucideMusic2 size="26" strokeWidth="1.5"></svg>
+              </div>
+              <div>
+                <h4 class="font-alternate text-lg text-[#291242] font-bold uppercase leading-tight">{{ getWebText('about_actors_sector_title') }}</h4>
+                <div class="w-10 h-1 bg-[#8BF784] rounded-full mt-3 opacity-50"></div>
+              </div>
+            </div>
+            <ul class="relative flex flex-col before:absolute before:left-[11px] before:top-2 before:bottom-2 before:w-[2px] before:bg-gradient-to-b before:from-transparent before:via-slate-200/70 before:to-transparent space-y-2">
+              @for (li of sectorActors(); track $index) {
+                <li class="relative flex items-center gap-4 text-[0.75rem] font-bold text-slate-500 py-1.5 px-1 hover:text-[#291242] transition-all cursor-pointer group">
+                  <div class="relative w-6 h-6 flex items-center justify-center shrink-0">
+                     <div class="absolute w-2 h-2 rounded-full border-[1.5px] border-slate-300 bg-white group-hover:border-[#00DA5E] group-hover:bg-[#00DA5E] transition-colors duration-300 z-10"></div>
+                     <div class="absolute inset-0 rounded-full bg-[#00DA5E]/15 scale-0 group-hover:scale-100 transition-transform duration-500 ease-out z-0"></div>
+                  </div>
+                  <span class="flex-1 group-hover:translate-x-1.5 transition-transform duration-300 ease-out">{{ li }}</span>
+                </li>
+              }
+            </ul>
+          </div>
+
+          <!-- Agentes Institucionales -->
+          <div class="group p-8 md:p-10 border-b lg:border-b-0 lg:border-r border-slate-100">
+            <div class="flex items-center gap-4 mb-8">
+              <div class="w-14 h-14 rounded-[1.75rem] bg-slate-50 border border-slate-100 flex items-center justify-center text-[#291242] group-hover:bg-[#8BF784] transition-colors duration-500">
+                <svg lucideBuilding2 size="26" strokeWidth="1.5"></svg>
+              </div>
+              <div>
+                <h4 class="font-alternate text-lg text-[#291242] font-bold uppercase leading-tight">{{ getWebText('about_actors_institutional_title') }}</h4>
+                <div class="w-10 h-1 bg-[#8BF784] rounded-full mt-3 opacity-50"></div>
+              </div>
+            </div>
+            <ul class="relative flex flex-col before:absolute before:left-[11px] before:top-2 before:bottom-2 before:w-[2px] before:bg-gradient-to-b before:from-transparent before:via-slate-200/70 before:to-transparent space-y-2">
+              @for (li of institutionalActors(); track $index) {
+                <li class="relative flex items-center gap-4 text-[0.75rem] font-bold text-slate-500 py-1.5 px-1 hover:text-[#291242] transition-all cursor-pointer group">
+                  <div class="relative w-6 h-6 flex items-center justify-center shrink-0">
+                     <div class="absolute w-2 h-2 rounded-full border-[1.5px] border-slate-300 bg-white group-hover:border-[#00DA5E] group-hover:bg-[#00DA5E] transition-colors duration-300 z-10"></div>
+                     <div class="absolute inset-0 rounded-full bg-[#00DA5E]/15 scale-0 group-hover:scale-100 transition-transform duration-500 ease-out z-0"></div>
+                  </div>
+                  <span class="flex-1 group-hover:translate-x-1.5 transition-transform duration-300 ease-out">{{ li }}</span>
+                </li>
+              }
+            </ul>
+          </div>
+
+          <!-- Sociedad Civil -->
+          <div class="group p-8 md:p-10 transition-all duration-500">
+            <div class="flex items-center gap-4 mb-8">
+              <div class="w-14 h-14 rounded-[1.75rem] bg-slate-50 border border-slate-100 flex items-center justify-center text-[#291242] group-hover:bg-[#8BF784] transition-colors duration-500">
+                <svg lucideUsers size="26" strokeWidth="1.5"></svg>
+              </div>
+              <div>
+                <h4 class="font-alternate text-lg text-[#291242] font-bold uppercase leading-tight">{{ getWebText('about_actors_civil_title') }}</h4>
+                <div class="w-10 h-1 bg-[#8BF784] rounded-full mt-3 opacity-50"></div>
+              </div>
+            </div>
+            <ul class="relative flex flex-col before:absolute before:left-[11px] before:top-2 before:bottom-2 before:w-[2px] before:bg-gradient-to-b before:from-transparent before:via-slate-200/70 before:to-transparent space-y-2">
+              @for (li of civilActors(); track $index) {
+                <li class="relative flex items-center gap-4 text-[0.75rem] font-bold text-slate-500 py-1.5 px-1 hover:text-[#291242] transition-all cursor-pointer group">
+                  <div class="relative w-6 h-6 flex items-center justify-center shrink-0">
+                     <div class="absolute w-2 h-2 rounded-full border-[1.5px] border-slate-300 bg-white group-hover:border-[#00DA5E] group-hover:bg-[#00DA5E] transition-colors duration-300 z-10"></div>
+                     <div class="absolute inset-0 rounded-full bg-[#00DA5E]/15 scale-0 group-hover:scale-100 transition-transform duration-500 ease-out z-0"></div>
+                  </div>
+                  <span class="flex-1 group-hover:translate-x-1.5 transition-transform duration-300 ease-out">{{ li }}</span>
+                </li>
+              }
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </app-content-wrapper>
+
+  <!-- HITOS TIMELINE -->
+  <app-content-wrapper className="bg-slate-50/50" id="pnmc-hitos">
+    <div class="mb-8 lg:mb-12">
+      <app-section-header [backgroundText]="getWebText('about_timeline_bg')" [foregroundText]="getWebText('about_timeline_title')"></app-section-header>
+      <p class="max-w-3xl mt-2 text-base lg:text-[1.05rem] text-slate-700 leading-relaxed font-nunito">{{ getWebText('about_timeline_intro') }}</p>
+    </div>
+    
+    <div class="space-y-8 mb-20">
+      <div class="flex flex-col lg:flex-row h-auto lg:h-[400px] gap-2.5 w-full"> 
+        @for (stage of timelineEvents(); track stage.id) {
+          @let isActive = activeStage() === stage.id;
+          
+          <div
+            (click)="activeStage.set(stage.id)"
+            (keydown.enter)="activeStage.set(stage.id)"
+            (keydown.space)="$event.preventDefault(); activeStage.set(stage.id)"
+            tabindex="0"
+            role="button"
+            [attr.aria-expanded]="isActive"
+            [attr.aria-label]="'Ver el hito: ' + stage.year"
+            [class]="'relative overflow-hidden transition-all duration-700 cursor-pointer group rounded-[1.75rem] border min-h-[150px] lg:min-h-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00DA5E] focus-visible:ring-offset-2 ' + (isActive ? 'flex-[6] bg-slate-900 shadow-xl border-transparent' : 'flex-1 bg-white border-[#E6DAE5] hover:border-[#00DA5E]/50 hover:bg-[#00DA5E]/5 hover:shadow-sm')"
+          >
+            <div [class]="'absolute inset-0 transition-all duration-1000 ' + (isActive ? 'opacity-[0.22]' : 'opacity-10 group-hover:opacity-25')">
+              <img [src]="stage.img" class="w-full h-full object-cover grayscale-[40%] brightness-95" alt="" />
+              <div [class]="'absolute inset-0 bg-[#291242]/30 transition-opacity duration-1000 ' + (isActive ? 'opacity-0' : 'opacity-100')"></div>
+            </div> 
+            
+            <div [class]="'absolute inset-0 p-6 flex flex-col justify-end transition-all duration-700 ' + (isActive ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6 pointer-events-none')"> 
+              <span class="text-[#8BF784] font-alternate text-sm font-bold mb-1 tracking-widest">{{ stage.year }}</span> 
+              <h3 class="font-alternate text-2xl lg:text-3xl font-extrabold text-white uppercase leading-none mb-3 drop-shadow-md">{{ stage.title }}</h3> 
+              <p class="font-nunito text-[0.85rem] text-slate-300 font-light max-w-xl leading-relaxed">{{ stage.desc }}</p> 
+            </div> 
+            
+            <div [class]="'absolute inset-0 flex items-center justify-center transition-opacity duration-500 ' + (isActive ? 'opacity-0' : 'opacity-100')">
+              <div class="rotate-[-90deg] flex items-center justify-center w-full translate-x-8 lg:translate-x-10 opacity-40">
+                <span class="font-gregor text-6xl lg:text-[6rem] font-bold uppercase tracking-tighter text-verde-texto">
+                  {{ stage.year.split('-')[0] }}
+                </span>
+              </div>
+            </div> 
+          </div> 
+        } 
+      </div>
+    </div> 
+  </app-content-wrapper> 
+
+  <!-- MARCO NORMATIVO -->
+  <app-content-wrapper id="pnmc-marco">
+    <div class="mb-8 lg:mb-12">
+      <app-section-header [backgroundText]="getWebText('about_normative_bg')" [foregroundText]="getWebText('about_normative_title')"></app-section-header>
+      <p class="max-w-3xl mt-2 text-base lg:text-[1.05rem] text-slate-700 leading-relaxed font-nunito">{{ getWebText('about_normative_intro') }}</p>
+    </div>
+    
+    <div class="flex flex-col lg:flex-row h-auto lg:h-[400px] gap-2.5 w-full mt-6">
+      @for (stage of normativeStages(); track stage.id) {
+        @let isActive = activeNormativeStage() === stage.id;
+        
+        <div
+          (click)="activeNormativeStage.set(stage.id)"
+          (keydown.enter)="activeNormativeStage.set(stage.id)"
+          (keydown.space)="$event.preventDefault(); activeNormativeStage.set(stage.id)"
+          tabindex="0"
+          role="button"
+          [attr.aria-expanded]="isActive"
+          [attr.aria-label]="'Ver la norma de: ' + stage.year"
+          [class]="'relative overflow-hidden transition-all duration-700 cursor-pointer group rounded-[1.75rem] border min-h-[150px] lg:min-h-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00DA5E] focus-visible:ring-offset-2 ' + (isActive ? 'flex-[6] bg-slate-900 shadow-xl border-transparent' : 'flex-1 bg-white border-[#E6DAE5] hover:border-[#00DA5E]/50 hover:bg-[#00DA5E]/5 hover:shadow-sm')"
+        >
+          <div [class]="'absolute inset-0 transition-all duration-1000 ' + (isActive ? 'opacity-[0.22]' : 'opacity-10 group-hover:opacity-25')">
+            <img [src]="stage.img" class="w-full h-full object-cover grayscale-[40%] brightness-95" alt="" />
+            <div [class]="'absolute inset-0 bg-[#291242]/30 transition-opacity duration-1000 ' + (isActive ? 'opacity-0' : 'opacity-100')"></div>
+          </div>
+          <div [class]="'absolute inset-0 p-6 flex flex-col justify-end transition-all duration-700 ' + (isActive ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6 pointer-events-none')">
+            <span class="text-[#8BF784] font-alternate text-sm font-bold mb-1 tracking-widest">{{ stage.year }}</span>
+            <h3 class="font-alternate text-2xl lg:text-3xl font-extrabold text-white uppercase leading-none mb-3 drop-shadow-md">{{ stage.title }}</h3>
+            <p class="font-nunito text-[0.85rem] text-slate-300 font-light max-w-xl leading-relaxed">{{ stage.desc }}</p>
+          </div>
+          <div [class]="'absolute inset-0 flex items-center justify-center transition-opacity duration-500 ' + (isActive ? 'opacity-0' : 'opacity-100')">
+            <div class="rotate-[-90deg] flex items-center justify-center w-full translate-x-8 lg:translate-x-10 opacity-40">
+              <span class="font-gregor text-5xl lg:text-[5.5rem] font-bold uppercase tracking-tighter text-verde-texto">
+                {{ stage.year.split('-')[0] }}
+              </span>
+            </div>
+          </div>
+        </div>
+      }
+    </div>
+  </app-content-wrapper>
+
+  <!-- EQUIPO / CONTACTO -->
+  <app-content-wrapper className="bg-slate-50/50" id="pnmc-equipo">
+    <div class="mb-8 lg:mb-12">
+      <app-section-header [backgroundText]="getWebText('about_team_bg')" [foregroundText]="getWebText('about_team_title')"></app-section-header>
+      <p class="max-w-3xl mt-2 text-base lg:text-[1.05rem] text-slate-700 leading-relaxed font-nunito">{{ getWebText('about_team_intro') }}</p>
+    </div>
+    
+    <div class="rounded-[3rem] border border-slate-100 bg-white shadow-sm overflow-hidden">
+      <div class="grid grid-cols-1 xl:grid-cols-[0.7fr_1.7fr] items-stretch overflow-hidden">
+        <!-- Coordinadores -->
+        <div class="bg-[#291242] text-white border-b xl:border-b-0 xl:border-r border-white/10 flex flex-col">
+          <div class="h-full px-8 md:px-10 lg:pl-12 lg:pr-8 flex flex-col">
+            <div class="py-6 border-b border-white/10">
+              <span class="font-alternate text-[0.62rem] font-bold uppercase tracking-[0.28em] text-[#8BF784]">
+                {{ getWebText('about_team_coordination_label') }}
+              </span>
+            </div>
+            <div class="divide-y divide-white/10 flex-1 flex flex-col justify-center">
+              @for (member of coordinationTeam(); track member.id) {
+                <div class="py-7 md:py-8">
+                  <div class="flex items-start gap-5">
+                    <div class="w-20 h-24 rounded-[1.75rem] border border-white/10 bg-white/5 flex items-center justify-center text-white/40 shrink-0 overflow-hidden">
+                      @if (member.photo) {
+                        <img [src]="member.photo" [alt]="'Fotografía de ' + member.name" class="h-full w-full object-cover object-center" />
+                      } @else {
+                        <svg lucideUserCircle2 size="30" strokeWidth="1.5"></svg>
+                      }
+                    </div>
+                    <div class="min-w-0">
+                      <span class="block text-[0.54rem] font-bold uppercase tracking-[0.22em] text-white/45 font-alternate mb-3">
+                        {{ member.role }}
+                      </span>
+                      <h4 class="font-gregor text-[1.9rem] md:text-[2.35rem] text-white uppercase leading-none tracking-tight mb-4">
+                        {{ member.name }}
+                      </h4>
+                      <div class="flex items-start gap-3 text-sm text-slate-200 font-nunito">
+                        <svg lucideMessageCircle size="16" class="text-[#00DA5E] mt-0.5 shrink-0"></svg>
+                        <span>{{ member.email }}</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              }
+            </div>
+          </div>
+        </div>
+
+        <!-- Liderazgos Componentes -->
+        <div class="bg-white">
+          <div class="h-full px-8 md:px-10 lg:px-12">
+            <div class="py-6 border-b border-slate-100 bg-white">
+              <span class="font-alternate text-[0.62rem] font-bold uppercase tracking-[0.28em] text-[#291242]">
+                {{ getWebText('about_team_leadership_label') }}
+              </span>
+            </div>
+            <div class="grid grid-cols-1 xl:grid-cols-2 gap-4 xl:gap-5 py-6 xl:py-8">
+              @for (member of leadershipTeam(); track member.id) {
+                <div class="group rounded-[1.75rem] border border-slate-100 bg-slate-50/50 p-5 transition-all hover:-translate-y-1 hover:border-[#00DA5E]/30 hover:bg-white hover:shadow-md">
+                  <div class="flex flex-row items-center gap-5">
+                    <div class="w-[4.5rem] h-[4.5rem] shrink-0 rounded-2xl border border-slate-200/60 bg-white flex items-center justify-center text-slate-300 shadow-sm transition-transform group-hover:scale-105 overflow-hidden">
+                      @if (member.photo) {
+                        <img [src]="member.photo" [alt]="'Fotografía de ' + (member.name || getWebText('about_team_name_placeholder'))" class="h-full w-full object-cover object-center" />
+                      } @else {
+                        <svg lucideUserCircle2 size="28" strokeWidth="1.5" class="group-hover:text-[#00DA5E] transition-colors"></svg>
+                      }
+                    </div>
+                    <div class="min-w-0 flex-1 flex flex-col justify-center space-y-1">
+                      <h4 class="font-alternate text-[0.9rem] text-[#291242] font-bold uppercase leading-tight group-hover:text-[#00DA5E] transition-colors">
+                        {{ member.name || getWebText('about_team_name_placeholder') }}
+                      </h4>
+                      <p class="font-nunito text-[0.8rem] text-slate-500 leading-snug">
+                        {{ member.role.replace('Líder Componente: ', '') }}
+                      </p>
+                      <p class="font-nunito text-[0.75rem] font-light text-slate-400 mt-1 truncate">
+                        {{ member.email || getWebText('about_team_email_placeholder') }}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              }
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </app-content-wrapper>
+</div>

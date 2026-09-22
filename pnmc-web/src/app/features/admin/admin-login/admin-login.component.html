@@ -1,0 +1,295 @@
+<!-- `section`, no `main`: el landmark principal unico lo declara el shell en
+     app.component.html. Un `main` aqui quedaria ANIDADO dentro de aquel, que es
+     una violacion de ARIA y desorienta a quien navega por regiones. -->
+<!--
+  Era `h-screen w-screen … overflow-hidden`. En una pantalla baja —un telefono
+  en horizontal, o cualquier movil con el teclado abierto— el formulario se
+  cortaba y NO habia desplazamiento: el boton de entrar quedaba inalcanzable.
+  Nadie podia iniciar sesion.
+
+  `min-h-screen` deja crecer la caja, `py-10` da respiracion, y el
+  desplazamiento vertical vuelve a existir. Se conserva `overflow-x-hidden`
+  porque las esferas decorativas de fondo (500-600 px, desplazadas fuera del
+  marco a proposito) si deben recortarse en horizontal.
+  `w-full` en vez de `w-screen`: `100vw` incluye el ancho de la barra de
+  desplazamiento y provoca desborde lateral por si solo.
+-->
+<section class="relative min-h-screen w-full bg-[#0d0915] flex flex-col items-center justify-center px-4 py-10 overflow-x-hidden select-none">
+  <!-- Ambient Glowing Spheres -->
+  <div class="absolute -top-40 -right-40 w-[500px] h-[500px] rounded-full bg-verde/8 blur-[130px] pointer-events-none z-0"></div>
+  <div class="absolute -bottom-60 -left-60 w-[600px] h-[600px] rounded-full bg-morado-vivo/12 blur-[150px] pointer-events-none z-0"></div>
+  <div class="absolute top-1/2 left-1/4 -translate-y-1/2 w-[300px] h-[300px] rounded-full bg-emerald-500/5 blur-[120px] pointer-events-none z-0"></div>
+
+  <!-- Internal Admin / Recovery / Captcha Screens -->
+  <div class="w-full max-w-md flex flex-col items-center relative z-10 text-center py-2">
+    <!-- Prominent Hero Website Logo -->
+    <img 
+      src="/assets/branding/pnmc-blanco.png" width="412" height="256" 
+      class="h-24 sm:h-28 md:h-32 w-auto object-contain mb-5 filter drop-shadow-[0_4px_32px_rgba(0,218,94,0.25)] transition-all duration-300 hover:scale-[1.03]" 
+      alt="PNMC Logo" 
+    />
+
+    <!-- Check if External Portal Mode -->
+    <!-- Internal Admin Console Card -->
+      <div class="w-full rounded-[1.75rem] bg-slate-900/40 border border-white/10 backdrop-blur-xl p-6 sm:p-8 shadow-[0_32px_64px_rgba(0,0,0,0.6)] relative terminal-card-glow text-left">
+        <div class="absolute top-0 inset-x-0 h-[2px] bg-gradient-to-r from-transparent via-verde/30 to-transparent rounded-t-[1.75rem]"></div>
+        
+        @if (formMode() === 'login') {
+          <div class="mb-6">
+            <div class="-mt-11 sm:-mt-13 mb-3 relative z-20">
+              <h2 class="text-2xl sm:text-3xl md:text-[2.25rem] font-black uppercase tracking-tight font-display leading-none text-white select-none pointer-events-none drop-shadow-[0_8px_30px_rgba(0,0,0,0.9)]">
+                Centro de <span class="bg-clip-text text-transparent bg-gradient-to-r from-verde via-[#00f56a] to-[#00b04c] drop-shadow-[0_2px_15px_rgba(0,218,94,0.35)]">Administración</span>
+              </h2>
+            </div>
+            <p class="text-dato text-slate-400 mt-2 leading-relaxed font-medium">
+              Portal de acceso exclusivo para el equipo del <strong class="text-slate-200">Grupo de Música</strong> del <strong class="text-slate-200">Plan Nacional de Música para la Convivencia</strong>.
+            </p>
+          </div>
+
+          <form (submit)="handleSubmit($event)" class="space-y-4">
+            <div class="space-y-1.5 group">
+              <label for="admin-email" class="block text-dato font-black uppercase tracking-[0.16em] text-slate-400 pl-1 group-focus-within:text-verde transition-colors duration-300">Correo electrónico</label>
+              <div class="relative">
+                <span class="absolute inset-y-0 left-0 pl-4 flex items-center text-slate-500 pointer-events-none group-focus-within:text-verde transition-colors duration-300">
+                  <svg lucideMail size="15"></svg>
+                </span>
+                <input
+                  id="admin-email"
+                  type="email"
+                  [(ngModel)]="email"
+                  name="email"
+                  autocomplete="username"
+                  required
+                  [class]="'w-full rounded-xl bg-slate-950/50 border pl-11 pr-4 py-2.5 text-xs sm:text-sm text-white placeholder:text-slate-500 outline-none transition-all duration-300 ' + (inputsGlowing() ? 'border-verde ring-2 ring-verde/30 shadow-[0_0_15px_rgba(0,218,94,0.15)] bg-slate-950/70' : 'border-white/10 hover:border-white/20 focus:border-verde focus:ring-2 focus:ring-verde/20 focus:bg-slate-950/70 focus:shadow-[0_0_20px_rgba(0,218,94,0.1)]')"
+                />
+              </div>
+            </div>
+            
+            <div class="space-y-1.5 group">
+              <div class="flex items-center justify-between pl-1">
+                <label for="admin-password" class="block text-dato font-black uppercase tracking-[0.16em] text-slate-400 group-focus-within:text-verde transition-colors duration-300">Contraseña</label>
+                <button 
+                  type="button" 
+                  (click)="formMode.set('recover'); recoverSuccess.set(false); recoverEmail.set('');" 
+                  class="text-dato font-bold text-verde hover:underline cursor-pointer uppercase tracking-wider transition"
+                >
+                  ¿Olvidaste tu contraseña?
+                </button>
+              </div>
+              <div class="relative">
+                <span class="absolute inset-y-0 left-0 pl-4 flex items-center text-slate-500 pointer-events-none group-focus-within:text-verde transition-colors duration-300">
+                  <svg lucideLock size="15"></svg>
+                </span>
+                <input
+                  id="admin-password"
+                  [type]="showPassword() ? 'text' : 'password'"
+                  [(ngModel)]="password"
+                  name="password"
+                  autocomplete="current-password"
+                  required
+                  [class]="'w-full rounded-xl bg-slate-950/50 border pl-11 pr-12 py-2.5 text-xs sm:text-sm text-white placeholder:text-slate-500 outline-none transition-all duration-300 ' + (inputsGlowing() ? 'border-verde ring-2 ring-verde/30 shadow-[0_0_15px_rgba(0,218,94,0.15)] bg-slate-950/70' : 'border-white/10 hover:border-white/20 focus:border-verde focus:ring-2 focus:ring-verde/20 focus:bg-slate-950/70 focus:shadow-[0_0_20px_rgba(0,218,94,0.1)]')"
+                />
+                <button
+                  type="button"
+                  (click)="showPassword.set(!showPassword())"
+                  class="absolute inset-y-0 right-0 pr-4 flex items-center text-slate-500 hover:text-verde transition-colors cursor-pointer"
+                >
+                  @if (showPassword()) { <svg lucideEyeOff size="15"></svg> } @else { <svg lucideEye size="15"></svg> }
+                </button>
+              </div>
+            </div>
+
+            @if (loginState().message && loginState().status !== 'idle') {
+              <div [class]="'flex items-center gap-3 rounded-xl px-4 py-2 text-xs font-semibold uppercase tracking-wider ' + (loginState().status === 'error' ? 'bg-rose-950/40 border border-rose-800/50 text-rose-300' : 'bg-slate-900/60 border border-verde/20 text-verde')">
+                @if (loginState().status === 'error') {
+                  <svg lucideAlertCircle size="14" class="shrink-0 text-rose-400"></svg>
+                } @else {
+                  <svg lucideRefreshCw size="14" class="animate-spin shrink-0 text-verde"></svg>
+                }
+                <span class="leading-snug text-dato sm:text-xs">{{ loginState().message }}</span>
+              </div>
+            }
+
+            <button
+              type="submit"
+              [disabled]="loginState().status === 'saving'"
+              class="w-full flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-verde via-[#00f56a] to-[#00b04c] disabled:opacity-50 px-5 py-2.5 text-xs font-black uppercase tracking-widest text-slate-950 transition-all duration-300 hover:shadow-[0_0_25px_rgba(0,218,94,0.4)] cursor-pointer select-none active:scale-[0.97] btn-shine-effect"
+            >
+              <svg lucideShieldCheck size="15"></svg>
+              Entrar al panel
+            </button>
+          </form>
+        } @else {
+          <!-- Recovery mode -->
+          <div class="mb-5">
+            <div class="flex items-center gap-3 mb-3.5">
+              <div class="relative flex items-center justify-center shrink-0">
+                <div class="absolute inset-0 rounded-lg bg-verde/20 animate-ping opacity-60"></div>
+                <div class="relative h-8 w-8 rounded-lg bg-slate-950/80 border border-verde/40 flex items-center justify-center shadow-[0_0_10px_rgba(0,218,94,0.15)]">
+                  <svg lucideRefreshCw size="14" class="text-verde animate-spin" style="animation-duration: 3s"></svg>
+                </div>
+              </div>
+              <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-dato font-black uppercase tracking-widest bg-verde/10 text-verde border border-verde/20 shadow-[0_0_10px_rgba(0,218,94,0.05)]">
+                Recuperación
+              </span>
+            </div>
+            
+            <h2 class="text-xl sm:text-2xl font-black text-white uppercase tracking-tight font-display leading-tight">
+              Recuperar <span class="bg-clip-text text-transparent bg-gradient-to-r from-verde to-[#00f56a] drop-shadow-[0_2px_10px_rgba(0,218,94,0.2)]">Contraseña</span>
+            </h2>
+            <p class="text-dato text-slate-400 mt-2 leading-relaxed font-medium">Ingresa tu correo electrónico registrado y te enviaremos las instrucciones de restablecimiento.</p>
+          </div>
+
+          @if (!recoverSuccess()) {
+            <form (submit)="handleRecoverSubmit($event)" class="space-y-4">
+              <div class="space-y-1.5 group">
+                <label for="recover-email" class="block text-dato font-black uppercase tracking-[0.16em] text-slate-400 pl-1 group-focus-within:text-verde transition-colors duration-300">Correo electrónico</label>
+                <div class="relative">
+                  <span class="absolute inset-y-0 left-0 pl-4 flex items-center text-slate-500 pointer-events-none group-focus-within:text-verde transition-colors duration-300">
+                    <svg lucideMail size="15"></svg>
+                  </span>
+                  <input
+                    id="recover-email"
+                    type="email"
+                    [(ngModel)]="recoverEmail"
+                    name="recoverEmail"
+                    required
+                    class="w-full rounded-xl bg-slate-950/50 border border-white/10 pl-11 pr-4 py-2.5 text-xs sm:text-sm text-white placeholder:text-slate-500 outline-none hover:border-white/20 focus:border-verde focus:ring-2 focus:ring-verde/20 focus:bg-slate-950/70 focus:shadow-[0_0_20px_rgba(0,218,94,0.1)] transition-all duration-300"
+                  />
+                </div>
+              </div>
+
+              @if (loginState().message && loginState().status === 'saving') {
+                <div class="flex items-center gap-3 rounded-xl px-4 py-2 text-xs font-semibold uppercase tracking-wider bg-slate-900/60 border border-verde/20 text-verde">
+                  <svg lucideRefreshCw size="14" class="animate-spin shrink-0 text-verde"></svg>
+                  <span class="leading-snug text-dato sm:text-xs">{{ loginState().message }}</span>
+                </div>
+              }
+
+              <button
+                type="submit"
+                [disabled]="loginState().status === 'saving'"
+                class="w-full flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-verde via-[#00f56a] to-[#00b04c] disabled:opacity-50 px-5 py-2.5 text-xs font-black uppercase tracking-widest text-slate-950 transition-all duration-300 hover:shadow-[0_0_25px_rgba(0,218,94,0.4)] cursor-pointer select-none active:scale-[0.97] btn-shine-effect"
+              >
+                Enviar Enlace
+              </button>
+
+              <button
+                type="button"
+                (click)="formMode.set('login')"
+                class="w-full text-center text-dato sm:text-xs font-bold text-slate-400 hover:text-verde uppercase tracking-wider mt-3 hover:underline cursor-pointer transition-colors"
+              >
+                Volver al Inicio de Sesión
+              </button>
+            </form>
+          } @else {
+            <div class="space-y-4 text-center">
+              <div class="h-12 w-12 rounded-full bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center mx-auto text-emerald-400 shadow-[0_0_20px_rgba(16,185,129,0.1)]">
+                <svg lucideCheckCircle2 size="24"></svg>
+              </div>
+              <div class="space-y-1">
+                <p class="text-xs sm:text-sm font-bold text-white uppercase tracking-wide">¡Solicitud Procesada!</p>
+                <p class="text-dato sm:text-xs text-slate-400 leading-relaxed">
+                  Hemos enviado un correo a <strong class="text-white">{{ recoverEmail() }}</strong> con las instrucciones y el enlace para restablecer tu contraseña.
+                </p>
+              </div>
+              <button
+                type="button"
+                (click)="formMode.set('login'); recoverSuccess.set(false);"
+                class="w-full flex items-center justify-center gap-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/5 px-5 py-2.5 text-dato sm:text-xs font-bold uppercase tracking-widest text-slate-300 hover:text-white transition-all cursor-pointer hover:scale-[1.01] active:scale-[0.98]"
+              >
+                Volver a Iniciar Sesión
+              </button>
+            </div>
+          }
+        }
+
+        <!--
+          AQUI NO HAY PUERTA AL PORTAL EXTERNO, y es a proposito. `/administracion` es la
+          entrada del equipo del Ministerio: webmaster y gestor interno. Quien
+          viene de fuera entra por `/ecosistema/ingresar`, que es una pantalla
+          distinta con su propio registro. Ofrecer las dos aqui invitaba a un
+          externo a probar en la consola interna y a leer un error de acceso
+          como un fallo del sitio.
+        -->
+      </div>
+
+    <!-- Institutional Endorsement (Ministry Logos) -->
+    <div class="mt-5 flex flex-col items-center gap-2 shrink-0 select-none">
+      <div class="flex items-center justify-center gap-4 sm:gap-5 flex-wrap">
+        <div class="w-[5.5rem] sm:w-[6.5rem] shrink-0">
+          <img src="/assets/branding/logo-gov-co.png" width="400" height="80" class="w-full h-auto object-contain" alt="GOV.CO" />
+        </div>
+        <div class="h-4 w-[1px] bg-white/20"></div>
+        <div class="w-[2.2rem] sm:w-[2.6rem] shrink-0">
+          <img src="/assets/branding/gov-co-footer.png" width="142" height="140" class="w-full h-auto object-contain" alt="Colombia" />
+        </div>
+        <div class="h-4 wpx bg-white/20"></div>
+        <div class="w-[2.9rem] sm:w-[3.5rem] shrink-0">
+          <img src="/assets/branding/Culturas-Blanco.png" width="479" height="370" class="w-full h-auto object-contain" alt="Ministerio de las Culturas" />
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!--
+    Cuentas sembradas para pruebas locales. En produccion angular.json sustituye
+    el modulo `dev-accounts`, `hasDevAccounts` queda en falso y ni el panel ni
+    los correos y contrasenas llegan al bundle.
+  -->
+  @if (hasDevAccounts) {
+  <div class="fixed bottom-6 left-6 z-[4000] text-left">
+    <!-- Toggle Button -->
+    <button
+      type="button"
+      (click)="showDevPanel.set(!showDevPanel())"
+      [class]="'flex items-center gap-2 px-4 py-2.5 rounded-full border shadow-2xl backdrop-blur-md text-xs font-bold transition-all duration-300 hover:scale-[1.03] select-none cursor-pointer ' + (showDevPanel() ? 'bg-verde border-verde text-slate-950 shadow-[0_0_15px_rgba(0,218,94,0.3)]' : 'bg-slate-900/90 border-white/10 text-verde hover:border-verde/30 hover:bg-slate-900')"
+    >
+      <svg lucideUserCheck size="14" [class.animate-pulse]="showDevPanel()"></svg>
+      <span>{{ showDevPanel() ? 'Cerrar Cuentas' : 'Cuentas de Prueba' }}</span>
+    </button>
+
+    <!-- Floating Dev Panel List -->
+    @if (showDevPanel()) {
+      <div class="absolute bottom-14 left-0 w-72 rounded-3xl bg-slate-950/95 border border-white/10 p-5 shadow-[0_16px_40px_rgba(0,0,0,0.7)] backdrop-blur-xl space-y-4 animate-in slide-in-from-bottom-2 duration-300">
+        <div>
+          <p class="text-dato font-black uppercase tracking-wider text-verde">Herramienta de Pruebas</p>
+          <p class="text-dato text-slate-400 mt-0.5 leading-snug">
+            Haz clic en una cuenta para autocompletar el login e ingresar rápidamente a evaluar cada módulo.
+          </p>
+        </div>
+
+        <div class="h-60 overflow-y-auto pr-1 space-y-2 no-scrollbar">
+          @for (role of adminRoles; track role.id) {
+            @if (ROLE_CREDENTIALS[role.id]) {
+              <button
+                type="button"
+                (click)="selectRole(role.id)"
+                [class]="'w-full flex items-center justify-between gap-3 text-left rounded-xl p-2.5 border transition-all cursor-pointer ' + (selectedRole() === role.id ? 'bg-white/10 border-verde/40 text-white' : 'bg-white/5 border-white/5 hover:bg-white/10 hover:border-white/10 text-slate-300 hover:text-white')"
+              >
+                <div class="min-w-0">
+                  <p class="text-dato font-bold uppercase tracking-wider flex items-center gap-1.5">
+                    <span [class]="'h-1.5 w-1.5 rounded-full ' + (role.id === 'webmaster' ? 'bg-violet-500' : role.id === 'gestor_interno' ? 'bg-blue-500' : 'bg-rose-500')"></span>
+                    {{ role.shortLabel }}
+                  </p>
+                  <p class="text-dato text-slate-400 truncate mt-0.5">{{ ROLE_CREDENTIALS[role.id].email }}</p>
+                </div>
+                <span class="text-dato font-black uppercase tracking-wider text-verde/80 bg-verde/10 rounded px-1 py-0.5 shrink-0">
+                  {{ selectedRole() === role.id ? 'Activo' : 'Cargar' }}
+                </span>
+              </button>
+            }
+          }
+        </div>
+
+        <div class="rounded-xl bg-amber-500/10 border border-amber-500/20 p-2.5 text-dato text-amber-300 leading-normal flex gap-2">
+          <span class="shrink-0 text-xs">⚠️</span>
+          <p>
+            <strong>Solo desarrollo.</strong> El build de producción sustituye este módulo, así que ni el panel ni estas cuentas se despliegan.
+          </p>
+        </div>
+      </div>
+    }
+  </div>
+  }
+</section>

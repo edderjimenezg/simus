@@ -1,0 +1,280 @@
+<!--
+  LA FICHA, UNA SOLA VEZ. Reproduce el diseño aprobado de el diseño aprobado del portal —las mismas tarjetas, la misma
+  columna lateral, las mismas clases— y añade lo que el acervo real trae y el diseño no tenía dónde
+  poner: la normalización RDA, los créditos con su papel, los identificadores con su cualificador y
+  las vías de acceso. Lo que cambia entre la fila y el diálogo vive en `estilo`.
+-->
+<div [class]="'grid grid-cols-1 gap-8 ' + estilo.columna">
+
+  <div class="space-y-6">
+    <div class="space-y-4">
+      <div class="flex items-center gap-3">
+        <app-tag [text]="item.section || 'Acervo PNMC'" className="bg-[#291242] text-white px-3 py-1.5"></app-tag>
+        <div class="h-px flex-1 bg-slate-100"></div>
+      </div>
+
+      @if (variante === 'dialogo') {
+        <h3 class="font-alternate text-2xl lg:text-3xl text-[#291242] font-bold tracking-tight leading-tight">{{ item.title }}</h3>
+        <!--
+          EL SUBTITULO Y EL VOLUMEN SE LEEN, y antes no llegaban a la pantalla. El modelo los separa
+          desde una revisión anterior porque así lo pide el estándar, pero la ficha solo pintaba el título:
+          con nueve series en el acervo, dos volúmenes de «Acento» se veían idénticos.
+        -->
+        @if (item.subtitle || item.volume) {
+          <p class="font-nunito text-base text-slate-500 leading-relaxed">
+            {{ item.subtitle }}@if (item.subtitle && item.volume) {<span> · </span>}{{ item.volume }}
+          </p>
+        }
+        <h5 class="font-alternate text-lg text-slate-400 font-bold tracking-tight mt-6">Resumen y contenido</h5>
+      } @else {
+        @if (item.subtitle || item.volume) {
+          <p class="font-nunito text-sm text-slate-500 leading-relaxed">
+            {{ item.subtitle }}@if (item.subtitle && item.volume) {<span> · </span>}{{ item.volume }}
+          </p>
+        }
+        <h5 class="font-alternate text-xl text-[#291242] font-bold tracking-tight">Resumen y contenido</h5>
+      }
+
+      <div class="space-y-3">
+        @for (parrafo of parrafos(); track $index) {
+          <p [class]="'font-nunito text-slate-600 leading-relaxed ' + estilo.parrafo">{{ parrafo }}</p>
+        }
+      </div>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      @if (clasificacion().length > 0) {
+        <div class="rounded-2xl border border-slate-100 bg-white p-5 space-y-4">
+          <div class="flex items-center gap-3">
+            <span aria-hidden="true" class="h-2 w-2 rounded-full bg-[#00DA5E]"></span>
+            <h6 class="font-alternate text-[0.72rem] font-bold tracking-[0.08em] text-[#291242]">Clasificación Editorial</h6>
+          </div>
+          <div class="space-y-3">
+            @for (detalle of clasificacion(); track detalle.rotulo) {
+              <div class="space-y-1">
+                <span [class]="'block font-bold uppercase tracking-widest text-slate-400 ' + estilo.rotulo">{{ detalle.rotulo }}</span>
+                <p [class]="'font-nunito text-slate-700 leading-relaxed break-words ' + estilo.dato">{{ detalle.valor }}</p>
+              </div>
+            }
+          </div>
+        </div>
+      }
+
+      @if (bibliografica().length > 0) {
+        <div class="rounded-2xl border border-slate-100 bg-white p-5 space-y-4">
+          <div class="flex items-center gap-3">
+            <span aria-hidden="true" class="h-2 w-2 rounded-full bg-[#00DA5E]"></span>
+            <h6 class="font-alternate text-[0.72rem] font-bold tracking-[0.08em] text-[#291242]">Ficha Bibliográfica</h6>
+          </div>
+          <div class="space-y-3">
+            @for (detalle of bibliografica(); track detalle.rotulo) {
+              <div class="space-y-1">
+                <span [class]="'block font-bold uppercase tracking-widest text-slate-400 ' + estilo.rotulo">{{ detalle.rotulo }}</span>
+                <p [class]="'font-nunito text-slate-700 leading-relaxed break-words ' + estilo.dato">{{ detalle.valor }}</p>
+              </div>
+            }
+          </div>
+
+          <!--
+            LOS IDENTIFICADORES SON UNA LISTA, NO DOS CAMPOS. PNMC-ED-103 trae CINCO ISBN —PDF,
+            EPUB, HTML, iBook y MOBI— y lo único que los distingue es el cualificador: sin él, la
+            lista serían cinco líneas iguales.
+          -->
+          @if (item.identifiers.length > 0) {
+            <div class="border-t border-slate-100 pt-3 space-y-2">
+              <span [class]="'block font-bold uppercase tracking-widest text-slate-400 ' + estilo.rotulo">Identificadores normalizados</span>
+              <ul class="space-y-1.5">
+                @for (identificador of item.identifiers; track identificador.esquema + identificador.codigo + (identificador.cualificador || '')) {
+                  <li [class]="'font-nunito text-slate-700 break-words ' + estilo.dato">
+                    <span class="font-bold text-[#291242]">{{ identificador.esquema }}</span> {{ identificador.codigo }}
+                    @if (identificador.cualificador) { <span class="text-slate-400">· {{ identificador.cualificador }}</span> }
+                  </li>
+                }
+              </ul>
+            </div>
+          }
+        </div>
+      }
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      @if (caracteristicas().length > 0) {
+        <div class="rounded-2xl border border-slate-100 bg-white p-5 space-y-4">
+          <div class="flex items-center gap-3">
+            <span aria-hidden="true" class="h-2 w-2 rounded-full bg-[#00DA5E]"></span>
+            <h6 class="font-alternate text-[0.72rem] font-bold tracking-[0.08em] text-[#291242]">Características del recurso</h6>
+          </div>
+          <div class="space-y-3">
+            @for (detalle of caracteristicas(); track detalle.rotulo) {
+              <div class="space-y-1">
+                <span [class]="'block font-bold uppercase tracking-widest text-slate-400 ' + estilo.rotulo">{{ detalle.rotulo }}</span>
+                <p [class]="'font-nunito text-slate-700 leading-relaxed break-words ' + estilo.dato">{{ detalle.valor }}</p>
+              </div>
+            }
+          </div>
+        </div>
+      }
+
+      <!--
+        EL PAPEL VA EN LETRA Y NO EN CODIGO. Los once códigos MARC del acervo cargan dieciséis
+        etiquetas distintas —`aut` es «Autor» unas veces y «Autor (corporativo)» otras—, así que
+        derivar la letra del código pondría el papel equivocado en buena parte de los créditos. Por
+        eso `rol` viaja al lado de `rolCodigo`, y por eso la clave de la lista lleva los dos.
+      -->
+      @if (item.credits.length > 0) {
+        <div class="rounded-2xl border border-slate-100 bg-white p-5 space-y-4">
+          <div class="flex items-center gap-3">
+            <span aria-hidden="true" class="h-2 w-2 rounded-full bg-[#00DA5E]"></span>
+            <h6 class="font-alternate text-[0.72rem] font-bold tracking-[0.08em] text-[#291242]">Créditos</h6>
+          </div>
+          <ul class="space-y-3">
+            @for (grupo of creditosPorPapel(); track grupo.papel) {
+              <li class="space-y-1">
+                <span [class]="'block font-bold uppercase tracking-widest text-slate-400 ' + estilo.rotulo">
+                  {{ grupo.papel }}@if (grupo.cuantos > 2) {<span class="normal-case tracking-normal text-slate-300"> · {{ grupo.cuantos }}</span>}
+                </span>
+                <p [class]="'font-nunito text-slate-700 leading-relaxed break-words ' + estilo.dato">{{ grupo.nombres }}</p>
+              </li>
+            }
+          </ul>
+        </div>
+      }
+    </div>
+
+  </div>
+
+  <!-- ═══════════ La columna lateral: portada, referencia y acceso ═══════════ -->
+  <div class="space-y-4">
+    <div class="rounded-2xl border border-slate-100 bg-white overflow-hidden">
+      @if (videoDeYoutube(); as idVideo) {
+        <!--
+          SI EL RECURSO ES UN VIDEO, AQUI SE VE EL VIDEO. Una ficha audiovisual con una portada fija
+          y un enlace que saca a la persona fuera no sirve para lo único que se le pide. La
+          proporción es 16:9 —la de un vídeo— y no el 4:5 de una cubierta.
+        -->
+        <div class="relative w-full" style="aspect-ratio: 16 / 9;">
+          <iframe class="absolute inset-0 h-full w-full" [src]="direccionDelVideo(idVideo)"
+                  [title]="'Vídeo: ' + item.title" loading="lazy"
+                  allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+        </div>
+      } @else {
+        <!--
+          LA PORTADA SE VE ENTERA. una revisión anterior ya lo dejó escrito —«en un catálogo la portada ES el
+          dato»— y las cuatro imágenes seguían recortando con `object-cover`: las cubiertas del
+          acervo no comparten proporción, así que a unas les cortaba el título y a otras la firma.
+        -->
+        <div class="relative overflow-hidden bg-slate-100" style="aspect-ratio: 4 / 5;">
+          <div class="absolute inset-0 grid place-items-center">
+            <svg lucideLibrary size="40" class="text-slate-300" aria-hidden="true"></svg>
+          </div>
+          @if (item.thumbnail && !portadaFallida()) {
+            <img [src]="item.thumbnail" [alt]="'Portada de ' + item.title"
+                 width="640" height="800" loading="lazy" decoding="async"
+                 class="absolute inset-0 z-10 h-full w-full object-contain"
+                 (error)="portadaFallida.set(true)">
+          }
+        </div>
+      }
+
+      <div [class]="estilo.rellenoLateral + ' space-y-4'">
+        <div class="space-y-3">
+          <div>
+            <span [class]="'mb-1 block font-bold uppercase tracking-widest text-slate-400 ' + estilo.rotulo">Referencia</span>
+            <span [class]="'font-alternate font-bold text-[#291242] ' + estilo.referencia">{{ item.id }}</span>
+          </div>
+          <div class="border-t border-slate-50 pt-3">
+            <span [class]="'mb-1 block font-bold uppercase tracking-widest text-slate-400 ' + estilo.rotulo">Autoría visible</span>
+            <span [class]="'font-nunito leading-relaxed text-slate-600 ' + estilo.autoria">{{ item.displayAuthor || 'Sin autoría registrada' }}</span>
+          </div>
+          <div class="border-t border-slate-50 pt-3">
+            <span [class]="'mb-1 block font-bold uppercase tracking-widest text-slate-400 ' + estilo.rotulo">Soporte principal</span>
+            <span [class]="'font-alternate font-bold text-[#291242] ' + estilo.referencia">{{ item.publicationType || 'Consulta editorial' }}{{ item.year ? ' • ' + item.year : '' }}</span>
+          </div>
+        </div>
+
+        @if (item.keywords.length > 0) {
+          <div class="space-y-2 border-t border-slate-50 pt-3">
+            <span [class]="'block font-bold uppercase tracking-widest text-slate-400 ' + estilo.rotulo">Palabras clave</span>
+            <div class="flex flex-wrap gap-1.5">
+              @for (palabra of item.keywords; track palabra) {
+                @if (sePuedeExplorar) {
+                  <!--
+                    LA PALABRA CLAVE LLEVA AL RESTO DEL ACERVO. Es la misma lista con la que filtra
+                    el catálogo, así que enseñarla sin poder pulsarla obliga a cerrar la ficha, subir
+                    y buscarla a mano. En la consola no se pinta pulsable: allí la ficha se enseña
+                    para revisarla, no para navegar.
+                  -->
+                  <button type="button" (click)="explorar.emit({ campo: 'palabraClave', valor: palabra })"
+                          class="min-h-11 rounded text-[0.6rem] font-bold uppercase tracking-widest text-[#087B3E] underline-offset-4 hover:underline">#{{ palabra }}</button>
+                } @else {
+                  <span class="text-[0.6rem] font-bold uppercase tracking-widest text-[#087B3E]">#{{ palabra }}</span>
+                }
+              }
+            </div>
+          </div>
+        }
+
+        @if (item.coverText) {
+          <div class="border-t border-slate-50 pt-3">
+            <div class="space-y-2 rounded-2xl bg-slate-50 px-4 py-4">
+              <div class="flex items-center gap-2 text-slate-300">
+                <svg lucideQuote size="14" aria-hidden="true"></svg>
+                <span [class]="'font-bold uppercase tracking-[0.2em] ' + estilo.rotulo">Texto de portada</span>
+              </div>
+              <p [class]="'font-nunito leading-relaxed whitespace-pre-line text-slate-500 ' + estilo.dato">{{ item.coverText }}</p>
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+
+    <!--
+      LA ZONA DE CONSULTA: EL UNICO SITIO CON ACCIONES DE TODA LA FICHA.
+      Antes había un botón aquí y, tres bloques más arriba, la misma URL listada como «Enlace» con
+      la etiqueta genérica «Recurso en línea», más una fila «Ubicación de la publicación» que
+      repetía palabra por palabra lo que ya decía «Consulta física». Ahora cada vía aparece UNA vez,
+      y el texto dice lo que va a ocurrir: «Descargar el PDF», «Ver el vídeo», «Ver el recurso en
+      línea» o «Consulta presencial», derivado del destino real y no de lo que escribió la fuente.
+    -->
+    <div class="rounded-2xl border border-slate-100 bg-white p-5 space-y-4">
+      <div class="flex items-center gap-3">
+        <span aria-hidden="true" class="h-2 w-2 rounded-full bg-verde"></span>
+        <h6 class="font-alternate text-[0.72rem] font-bold tracking-[0.08em] text-morado">Dónde consultarlo</h6>
+      </div>
+
+      @if (hayDondeConsultar()) {
+        <ul class="space-y-3">
+          @for (via of viasDeConsulta(); track via.url + via.detalle) {
+            <li class="min-w-0">
+              @if (via.clase === 'enlace') {
+                <a [href]="via.url" target="_blank" rel="noopener noreferrer"
+                   [class]="'flex min-h-11 w-full items-center justify-center gap-2 rounded-xl bg-morado px-4 py-3 text-center font-alternate font-bold uppercase tracking-[0.12em] text-white transition-colors hover:bg-morado-vivo ' + estilo.boton">
+                  <span class="min-w-0 break-words">{{ via.accion }}</span>
+                  <svg lucideExternalLink size="14" class="shrink-0" aria-hidden="true"></svg>
+                </a>
+                @if (via.detalle) {
+                  <p class="mt-1.5 text-center text-[0.62rem] leading-relaxed text-slate-400 break-words">{{ via.detalle }}</p>
+                }
+              } @else {
+                <span [class]="'block font-bold uppercase tracking-widest text-slate-400 ' + estilo.rotulo">{{ via.accion }}</span>
+                <p [class]="'mt-1 font-nunito leading-relaxed text-slate-600 break-words ' + estilo.dato">{{ via.detalle }}</p>
+              }
+              @if (via.nota) {
+                <p class="mt-1 text-[0.65rem] leading-relaxed text-slate-400 break-words">{{ via.nota }}</p>
+              }
+            </li>
+          }
+        </ul>
+      } @else {
+        <!--
+          CUATRO PUBLICACIONES DEL ACERVO NO TIENEN NINGUNA VIA DE CONSULTA, y callarlo deja a quien
+          mira preguntándose si falta cargar algo. Se dice.
+        -->
+        <p [class]="'font-nunito leading-relaxed text-slate-500 ' + estilo.dato">
+          Esta publicación aún no tiene una vía de consulta registrada.
+        </p>
+      }
+    </div>
+  </div>
+</div>

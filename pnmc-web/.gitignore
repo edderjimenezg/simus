@@ -1,0 +1,52 @@
+# See https://docs.github.com/get-started/getting-started-with-git/ignoring-files for more about ignoring files.
+
+# Compiled output
+/dist
+/tmp
+/out-tsc
+/bazel-out
+
+# Node
+/node_modules
+npm-debug.log
+yarn-error.log
+
+# IDEs and editors
+.idea/
+.project
+.classpath
+.c9/
+*.launch
+.settings/
+*.sublime-workspace
+
+# Visual Studio Code
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+.history/*
+
+# Miscellaneous
+/.angular/cache
+.sass-cache/
+/connect.lock
+/coverage
+/libpeerconnection.log
+testem.log
+/typings
+
+# System files
+.DS_Store
+Thumbs.db
+
+# Playwright: resultados, trazas y capturas de fallo — se regeneran en cada corrida
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/
+# Las capturas del recorrido orgánico de Home: se miran a ojo tras cada corrida y
+# se rehacen en la siguiente. Llevan la hora dentro, así que ninguna se repite y
+# versionarlas seria acumular megas de imagenes que nadie vuelve a abrir.
+/e2e/capturas/

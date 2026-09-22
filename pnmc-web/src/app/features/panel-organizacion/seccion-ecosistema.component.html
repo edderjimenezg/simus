@@ -1,0 +1,46 @@
+<div class="space-y-8 pb-8">
+  <section aria-labelledby="festivales-gestion-titulo" class="flex flex-col justify-between gap-4 border-b border-slate-200 pb-6 sm:flex-row sm:items-end">
+    <div>
+      <p class="font-alternate text-xs font-bold uppercase tracking-[0.18em] text-verde-texto">Procesos · Ecosistema</p>
+      <h2 id="festivales-gestion-titulo" class="mt-2 font-alternate text-2xl font-bold uppercase tracking-wide text-morado">Festivales</h2>
+      <p class="mt-2 max-w-2xl text-cuerpo leading-relaxed text-prosa">Consulta y gestiona los festivales registrados por tu organización.</p>
+    </div>
+    <a data-testid="abrir-crear-festival" routerLink="nuevo" class="inline-flex shrink-0 items-center justify-center gap-2 rounded-xl bg-verde-texto px-5 py-3 text-sm font-bold text-white no-underline shadow-sm transition hover:bg-verde-hondo focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-morado"><span class="text-lg leading-none">+</span> Registrar Festival</a>
+  </section>
+
+  <p class="text-sm text-slate-500">¿Necesitas registrar otro tipo de proceso? <a routerLink="/gestion/procesos" class="font-bold text-verde-texto hover:underline">Consulta los procesos disponibles.</a></p>
+
+  <section aria-label="Indicadores de Festivales" class="grid divide-y divide-slate-200 border-y border-slate-200 sm:grid-cols-3 sm:divide-x sm:divide-y-0">
+    <div class="py-4 pr-5 sm:px-5 sm:first:pl-0"><p class="font-alternate text-3xl font-bold text-morado">{{ festivales().length }}</p><p class="mt-1 text-xs font-bold uppercase tracking-widest text-slate-500">Registros</p><p class="mt-1 text-xs text-slate-400">Festivales administrados.</p></div>
+    <div class="py-4 sm:px-5"><p class="font-alternate text-3xl font-bold text-morado">{{ pendientes() }}</p><p class="mt-1 text-xs font-bold uppercase tracking-widest text-slate-500">Pendientes</p><p class="mt-1 text-xs text-slate-400">En revisión o con ajustes.</p></div>
+    <div class="py-4 pl-0 sm:pl-5"><p class="font-alternate text-3xl font-bold text-morado">{{ borradores() }}</p><p class="mt-1 text-xs font-bold uppercase tracking-widest text-slate-500">Borradores</p><p class="mt-1 text-xs text-slate-400">Aún sin enviar a revisión.</p></div>
+  </section>
+
+  <section aria-label="Listado de Festivales">
+    @if (errorFestivales()) { <p role="alert" class="rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-800">{{ errorFestivales() }}</p> }
+    @if (errorAccionFestival()) { <p role="alert" class="rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-800">{{ errorAccionFestival() }}</p> }
+    <p role="status" data-testid="aviso-festivales" [class.hidden]="!mensajeFestivales()" class="rounded-xl border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-800">{{ mensajeFestivales() }}</p>
+    @if (cargandoFestivales()) { <p role="status" class="py-5 text-sm text-slate-500">Consultando los Festivales de la organización…</p> }
+    @else { <app-seccion-festivales class="block" [festivales]="festivales()" [ocupado]="festivalOcupado()" (editar)="editarFichaDelFestival($event)" (abrirFicha)="abrirFichaDelFestival($event)" (enviarARevision)="alEnviarARevision($event)" (proponerCambios)="editarFichaDelFestival($event)" (enviarPropuesta)="alEnviarPropuesta($event)" (verEdiciones)="verEdicionesDelFestival($event)" (retirar)="retirarFestival($event)" (solicitarRetiro)="solicitarRetiroFestival($event)"></app-seccion-festivales> }
+  </section>
+
+  <!--
+    RETIRAR Y PEDIR LA ELIMINACION, EN EL DIALOGO DEL PROYECTO. La justificación que viaja a la
+    decisión institucional se escribe aquí, en un campo con su rótulo y su ayuda, y no en la caja de
+    una línea de un `window.prompt`.
+  -->
+  @if (confirmacion(); as pendiente) {
+    <app-confirmacion
+      [titulo]="tituloDeLaConfirmacion()"
+      [detalle]="detalleDeLaConfirmacion()"
+      [accion]="accionDeLaConfirmacion()"
+      [tono]="pendiente.que === 'solicitar-retiro' ? 'confirmar' : 'destructiva'"
+      [pideMotivo]="pendiente.que === 'solicitar-retiro'"
+      rotuloDelMotivo="Por qué pides la eliminación"
+      ayudaDelMotivo="Lo lee el equipo del PNMC al decidir, y queda en el historial del Festival."
+      [ocupado]="festivalOcupado()"
+      identificador="confirmar-decision-de-festival"
+      (confirmar)="confirmarLaDecision($event)"
+      (cancelar)="cerrarLaConfirmacion()" />
+  }
+</div>

@@ -1,0 +1,124 @@
+<footer class="bg-[#291242] text-white pt-20 pb-12 border-t border-white/5 font-nunito relative">
+  <div class="max-w-[100rem] mx-auto px-6 lg:px-8">
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 lg:gap-0">
+      <div class="space-y-8 flex flex-col items-center lg:items-start lg:pr-8">
+        <div class="flex items-center gap-6">
+          <div class="w-[10rem]">
+            <img [src]="imagen('marca_gov_co')" width="400" height="80" class="w-full h-auto object-contain" [alt]="imagenAlt('marca_gov_co')" />
+          </div>
+          <div class="border-l border-white/20 pl-6">
+            <img [src]="imagen('marca_gov_co_sello')" width="142" height="140" class="w-[4.25rem] h-auto object-contain" [alt]="imagenAlt('marca_gov_co_sello')" />
+          </div>
+        </div>
+      </div>
+      <div class="space-y-6 text-left lg:px-8 lg:border-l lg:border-white/20">
+        <div class="pl-4">
+          <h4 class="font-alternate text-sm font-bold uppercase tracking-widest text-white mb-4">
+            {{ getWebText('footer_col2_title') }}
+          </h4>
+          <div class="space-y-4 text-[0.7rem] text-slate-300 font-light leading-relaxed">
+            <p>{{ getWebText('footer_col2_address') }}</p>
+            <p>{{ getWebText('footer_col2_schedule') }}</p>
+            <p>{{ getWebText('footer_col2_phone') }}</p>
+            <p>{{ getWebText('footer_col2_free_line') }}</p>
+            <div class="flex flex-wrap gap-x-4 gap-y-2 pt-2 text-[0.62rem] font-alternate uppercase tracking-[0.18em] text-white/80">
+              @for (item of socialNetworks; track item.label) {
+                <a
+                  [href]="item.href"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="rounded-sm hover:text-[#00DA5E] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00DA5E] focus-visible:ring-offset-2 focus-visible:ring-offset-[#291242]"
+                  [attr.aria-label]="'Abrir ' + item.label + ' en una nueva pestaña'"
+                >{{ item.label }}</a>
+              }
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="space-y-6 text-left lg:px-8 lg:border-l lg:border-white/20">
+        <div class="pl-4">
+          <h4 class="font-alternate text-sm font-bold uppercase tracking-widest text-white mb-4">
+            {{ getWebText('footer_col3_title') }}
+          </h4>
+          <div class="space-y-4 text-[0.7rem] text-slate-300 font-light leading-relaxed">
+            <p>{{ getWebText('footer_col3_address') }}</p>
+            <p>{{ getWebText('footer_col3_schedule') }}</p>
+            <div>
+              <p>{{ getWebText('footer_col3_email_label') }}</p>
+              <a [href]="'mailto:' + getWebText('footer_col3_email')" class="inline-block rounded-sm text-white underline hover:text-[#00DA5E] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00DA5E] focus-visible:ring-offset-2 focus-visible:ring-offset-[#291242]">{{ getWebText('footer_col3_email') }}</a>
+              <p>{{ getWebText('footer_col3_email_note') }}</p>
+            </div>
+            <div>
+              <p class="font-bold text-white">{{ getWebText('footer_col3_corruption_title') }}</p>
+              <a [href]="'mailto:' + getWebText('footer_col3_corruption_email')" class="inline-block rounded-sm text-white underline hover:text-[#00DA5E] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00DA5E] focus-visible:ring-offset-2 focus-visible:ring-offset-[#291242]">{{ getWebText('footer_col3_corruption_email') }}</a>
+            </div>
+            <div>
+              <p class="font-bold text-white">{{ getWebText('footer_col3_legal_title') }}</p>
+              <a [href]="'mailto:' + getWebText('footer_col3_legal_email')" class="inline-block rounded-sm text-white underline hover:text-[#00DA5E] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00DA5E] focus-visible:ring-offset-2 focus-visible:ring-offset-[#291242]">{{ getWebText('footer_col3_legal_email') }}</a>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="grid grid-cols-1 gap-10 text-left lg:px-8 lg:border-l lg:border-white/20">
+        <div class="pl-4">
+          <h4 class="font-alternate text-sm font-bold uppercase tracking-widest text-white mb-4">
+            {{ getWebText('footer_col4_services_title') }}
+          </h4>
+          <ul class="space-y-2 text-[0.7rem] text-slate-300 font-light">
+            @for (item of citizenshipServices; track item.label) {
+              <li>
+                <a
+                  [href]="item.href"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="inline-block rounded-sm underline hover:text-[#00DA5E] transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#00DA5E] focus-visible:ring-offset-2 focus-visible:ring-offset-[#291242]"
+                >{{ item.label }}</a>
+              </li>
+            }
+          </ul>
+        </div>
+        <div class="pl-4">
+          <h4 class="font-alternate text-sm font-bold uppercase tracking-widest text-white mb-4">
+            {{ getWebText('footer_col4_about_title') }}
+          </h4>
+          <ul class="space-y-2 text-[0.7rem] text-slate-300 font-light">
+            @for (item of aboutSite; track item.label) {
+              <li>
+                <!--
+                  LO NUESTRO NO SE ABRE EN OTRA PESTAÑA NI SALE DEL SITIO. `routerLink` para las dos
+                  políticas propias; `href` con `target="_blank"` sigue siendo lo correcto para lo
+                  que vive en mincultura.gov.co.
+                -->
+                @if (item.interno) {
+                  <a
+                    [routerLink]="item.href"
+                    class="inline-block rounded-sm underline hover:text-verde transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-verde focus-visible:ring-offset-2 focus-visible:ring-offset-morado"
+                  >{{ item.label }}</a>
+                } @else {
+                  <a
+                    [href]="item.href"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="inline-block rounded-sm underline hover:text-verde transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-verde focus-visible:ring-offset-2 focus-visible:ring-offset-morado"
+                  >{{ item.label }}</a>
+                }
+              </li>
+            }
+          </ul>
+        </div>
+      </div>
+    </div>
+    <div class="mt-20 pt-8 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-4 text-[0.6rem] text-slate-400 font-alternate uppercase tracking-[0.2em]">
+      <!--
+        El reparto de esta línea: el panel gobierna el prefijo, el código pone el
+        año y el nombre del Ministerio. El año se calcula a propósito, para que
+        en enero no dependa de que alguien se acuerde de publicarlo.
+      -->
+      <p>{{ getWebText('footer_credits_text') }} {{ currentYear }} Ministerio de las Culturas</p>
+      <div class="flex items-center gap-2">
+        <span class="text-[#00DA5E] font-bold">{{ getWebText('footer_credits_tagline') }}</span>
+        <div class="w-1.5 h-1.5 rounded-full bg-[#00DA5E] animate-pulse"></div>
+      </div>
+    </div>
+  </div>
+</footer>

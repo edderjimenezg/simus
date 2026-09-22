@@ -1,0 +1,48 @@
+@keyframes led-blink {
+  0%, 100% { opacity: 0.6; }
+  50% { opacity: 1; filter: brightness(1.2); }
+}
+.led-glow {
+  animation: led-blink 2s ease-in-out infinite;
+}
+@keyframes card-glow {
+  0%, 100% { box-shadow: 0 0 25px rgba(0, 218, 94, 0.03), inset 0 1px 0 rgba(255,255,255,0.06); }
+  50% { box-shadow: 0 0 45px rgba(0, 218, 94, 0.08), inset 0 1px 0 rgba(255,255,255,0.09); }
+}
+.terminal-card-glow {
+  animation: card-glow 6s ease-in-out infinite;
+}
+@keyframes button-shine {
+  0% { left: -120%; }
+  35%, 100% { left: 120%; }
+}
+.btn-shine-effect {
+  position: relative;
+  overflow: hidden;
+}
+.btn-shine-effect::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -120%;
+  width: 45%;
+  height: 100%;
+  background: linear-gradient(
+    to right,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0.3) 50%,
+    rgba(255, 255, 255, 0) 100%
+  );
+  transform: skewX(-25deg);
+  animation: button-shine 6s ease-in-out infinite;
+}
+/* Webkit Input Autofill robust override */
+input:-webkit-autofill,
+input:-webkit-autofill:hover, 
+input:-webkit-autofill:focus, 
+input:-webkit-autofill:active {
+  -webkit-box-shadow: 0 0 0 1000px #090610 inset !important;
+  -webkit-text-fill-color: #ffffff !important;
+  caret-color: #ffffff !important;
+  transition: background-color 5000s ease-in-out 0s !important;
+}

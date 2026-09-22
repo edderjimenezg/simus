@@ -1,0 +1,60 @@
+/* «SOLO LO MINIMO» SE SEÑALA porque casi siempre hay que arreglarlo: una cuenta recién creada a la
+   que nadie decidió qué darle solo tiene los dos apartados que vienen siempre, y con ellos no puede
+   hacer su trabajo. No es un error del sistema, así que no se pinta en rojo. */
+.tabla-administrativa__cifra.es-minimo { color: var(--color-aviso); font-weight: 700; }
+
+/* LA GESTION DE APARTADOS POR CUENTA, en el cajón de la ficha: las familias de la barra
+   izquierda, y en cada una los apartados con su nombre y lo que abre cada uno. Tokens de la
+   consola; nada por pantalla. */
+.modulos__familia {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: .75rem;
+  margin: 1.1rem 0 .35rem;
+}
+.modulos__familia-nombre {
+  margin: 0;
+  color: var(--color-seccion);
+  font-family: var(--font-alternate);
+  font-size: var(--text-dato);
+  font-weight: 700;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+}
+/* Los dos atajos de arriba: conceder es una decisión de conjunto, no de catorce casillas. */
+.modulos__atajos { display: flex; flex-wrap: wrap; gap: .5rem; margin-top: .75rem; }
+.modulos__aviso { margin-top: .75rem; color: var(--color-rotulo); font-size: var(--text-dato); }
+.modulos__aviso.es-hecho { color: var(--color-verde-texto); font-weight: 700; }
+.modulos__lista { margin: 0; padding: 0; list-style: none; }
+.modulos__lista li + li { border-top: 1px solid var(--color-filete); }
+.modulos__modulo {
+  display: flex;
+  align-items: flex-start;
+  gap: .75rem;
+  padding: .55rem .1rem;
+  cursor: pointer;
+}
+.modulos__modulo input {
+  margin-top: .2rem;
+  flex: none;
+  /* ERA LA AZUL DEL SISTEMA OPERATIVO, la única casilla de la consola que no llevaba el color de
+     marca; y en una lista de dieciséis, esa es toda la pantalla. */
+  accent-color: var(--color-morado);
+  width: 1rem;
+  height: 1rem;
+}
+.modulos__modulo.esta-fijo { cursor: default; }
+.modulos__texto { display: flex; flex-direction: column; gap: .1rem; min-width: 0; }
+.modulos__nombre { color: var(--color-valor); font-size: var(--text-cuerpo); font-weight: 600; }
+.modulos__descripcion { color: var(--color-prosa); font-size: var(--text-dato); line-height: 1.4; }
+.modulos__nota {
+  margin-left: auto;
+  flex: none;
+  align-self: center;
+  color: var(--color-rotulo);
+  font-size: var(--text-dato);
+  font-weight: 700;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+}

@@ -1,0 +1,819 @@
+<div class="flex flex-col gap-6 lg:flex-row text-left font-nunito">
+  
+  <!-- Main Panel Area (Left/Center) -->
+  <div class="flex-1 rounded-2xl border border-slate-200 bg-white p-6 shadow-xs transition-all">
+    
+    <!-- Header -->
+    <div class="mb-6 flex flex-wrap items-center justify-between gap-4 border-b border-slate-100 pb-4">
+      <div>
+        <div class="flex items-center gap-2">
+          <span class="inline-flex h-9 w-9 items-center justify-center rounded-xl bg-purple-50 text-morado">
+            <svg lucideSparkles size="18" class="text-purple-600 animate-pulse"></svg>
+          </span>
+          <h2 class="text-xl font-black text-morado">Importación asistida@if (moduloActivo(); as m) { <span> de {{ m.etiqueta }}</span> }</h2>
+        </div>
+        <p class="mt-1 text-xs text-slate-500 font-medium">
+          Prepara el archivo, comprueba sus filas contra la base vigente y crea borradores solo después de tu confirmación.
+        </p>
+      </div>
+
+      <div class="flex items-center gap-2">
+        <button
+          type="button"
+          (click)="alternarHistorial()"
+          [attr.aria-expanded]="mostrarHistorial()"
+          class="rounded-lg border border-purple-200 bg-purple-50 px-3 py-1.5 text-xs font-bold text-purple-900 transition hover:bg-purple-100"
+        >
+          {{ mostrarHistorial() ? 'Cerrar historial' : 'Ver historial' }}
+        </button>
+        @if (paso() > 1) {
+          <!--
+            Los [disabled] de este fichero enlazan las senales «en vuelo» del
+            componente: mientras la accion se ejecuta el boton no acepta un
+            segundo clic, que antes la disparaba dos veces (dos descargas, dos
+            procesados). No se ha cambiado ni el tamano ni la estructura de los
+            botones: solo el atributo y su clase de estado deshabilitado.
+          -->
+          <button
+            type="button"
+            (click)="reiniciar()"
+            [disabled]="reiniciando()"
+            class="flex items-center gap-1 rounded-lg border border-slate-200 bg-slate-50 px-3 py-1.5 text-xs font-semibold text-slate-600 transition hover:bg-slate-100 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            <svg lucideRotateCcw size="12"></svg>
+            Reiniciar
+          </button>
+        }
+      </div>
+    </div>
+
+    <!--
+      EL AVISO DEL PANEL, DONDE ESTABA EL `alert()`. Se lee sin tapar la pantalla y queda junto al
+      control que lo provocó, no en el centro del navegador con el selector escondido detrás.
+    -->
+    @if (avisoDelPanel()) {
+      <p role="alert" class="mb-6 rounded-xl border border-amber-200 bg-amber-50 p-3 text-xs font-semibold text-amber-900">
+        {{ avisoDelPanel() }}
+      </p>
+    }
+
+    <!--
+      EL INDICADOR DE PASOS DEL PROYECTO, NO UNO PROPIO. Esta pantalla dibujaba su asistente a mano
+      —tres bloques con sus círculos, sus flechas y sus clases— mientras otras ocho pantallas ya
+      usaban `app-indicador-de-pasos`. Dos dibujos del mismo patrón que divergían: aquí los rótulos
+      iban en Mayúsculas De Título y la píldora «Paso 2 de 3» repetía lo que el propio indicador
+      decía. Solo se puede volver atrás: avanzar exige pasar por las comprobaciones de cada paso.
+    -->
+    <div class="mb-8 border-b border-slate-100 pb-6">
+      <app-indicador-de-pasos
+        [pasos]="pasosDeLaPreparacion"
+        [pasoActivo]="paso()"
+        etiqueta="Pasos de la importación asistida"
+        (irAlPaso)="volverAlPaso($event)" />
+    </div>
+
+    @if (mostrarHistorial()) {
+      <section class="mb-8 space-y-4 rounded-2xl border border-slate-200 bg-slate-50 p-4" aria-labelledby="titulo-historial-importaciones">
+        <div>
+          <h3 id="titulo-historial-importaciones" class="text-base font-black text-purple-950">Historial de importaciones</h3>
+          <p class="mt-1 text-xs text-slate-600">Consulta qué archivo se revisó, qué decisión se tomó y cómo se conserva su trazabilidad.</p>
+        </div>
+
+        <!--
+          CONSULTA SOLA, SIN BOTON. Era un formulario con «Buscar» al final: había que escribir,
+          elegir el estado y pulsar. Ahora el nombre consulta al dejar de escribir y el estado al
+          cambiarlo, así que el botón hacía lo que ya ocurre y se retira, como manda el encargo del
+          15 de septiembre de 2026 sobre los buscadores del proyecto.
+        -->
+        <div class="grid gap-3 md:grid-cols-[1fr_180px]">
+          <div>
+            <label class="campo__rotulo" for="archivoHistorial">Nombre del archivo</label>
+            <span class="mt-1 block">
+              <app-buscador-de-lista ancho [etiquetaVisible]="true" identificador="archivoHistorial"
+                etiqueta="Nombre del archivo" marcador="Buscar por nombre"
+                [valor]="archivoHistorial()" (cambiar)="buscarEnElHistorial($event)" />
+            </span>
+          </div>
+          <label class="campo__rotulo">
+            Estado
+            <select
+              [ngModel]="estadoHistorial()"
+              (ngModelChange)="estadoHistorial.set($event); cargarHistorial(1)"
+              name="estadoHistorial"
+              class="mt-1 w-full rounded-lg border border-slate-300 bg-white px-3 py-2 font-medium"
+            >
+              <option value="">Todos</option>
+              <option value="previsualizado">Pendientes</option>
+              <option value="aplicado">Aplicadas</option>
+              <option value="expirado">Expiradas</option>
+            </select>
+          </label>
+        </div>
+
+        @if (errorHistorial()) {
+          <p role="alert" class="rounded-lg border border-red-200 bg-red-50 p-3 text-xs font-semibold text-red-800">{{ errorHistorial() }}</p>
+        }
+
+        @if (historialImportaciones(); as historial) {
+          <div class="rounded-xl border border-blue-100 bg-blue-50 p-3 text-xs text-blue-950">
+            <strong>Conservación:</strong> {{ historial.politicaRetencion }}
+          </div>
+
+          @if (historial.items.length === 0) {
+            <app-estado-de-lista titulo="No hay lotes que coincidan con estos filtros"
+              detalle="Cambia el estado o el periodo para ver el resto del historial de importaciones." />
+          } @else {
+            <div class="overflow-x-auto rounded-xl border border-slate-200 bg-white">
+              <table class="w-full min-w-[760px] text-left text-xs">
+                <thead class="bg-slate-100 text-slate-600">
+                  <tr>
+                    <th scope="col" class="p-3">Archivo</th>
+                    <th scope="col" class="p-3">Fecha</th>
+                    <th scope="col" class="p-3">Estado</th>
+                    <th scope="col" class="p-3">Resultado</th>
+                    <th scope="col" class="p-3">Conservación</th>
+                    <th scope="col" class="p-3"><span class="sr-only">Acción</span></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (lote of historial.items; track lote.id) {
+                    <tr class="border-t border-slate-100 align-top">
+                      <td class="p-3"><strong class="block text-slate-900">{{ lote.nombreArchivo }}</strong><span class="text-slate-400">Lote #{{ lote.id }} · {{ lote.formato.toUpperCase() }}</span></td>
+                      <td class="p-3 text-slate-600">{{ lote.fechaPrevisualizacion | date:'d MMM y, HH:mm' }}</td>
+                      <td class="p-3"><app-indicador-de-estado [etiqueta]="etiquetaEstadoImportacion(lote.estado)" [tono]="tonoDelEstado(lote.estado)" [conTexto]="true"></app-indicador-de-estado></td>
+                      <td class="p-3 text-slate-600">{{ lote.filasAplicadas }} creadas · {{ lote.filasRechazadas }} con error</td>
+                      <td class="p-3 text-slate-600">
+                        {{ etiquetaRetencion(lote.estadoRetencion) }}
+                        @if (lote.fechaExpiracion && lote.estado === 'previsualizado') {
+                          <span class="mt-1 block text-slate-400">Vence {{ lote.fechaExpiracion | date:'d MMM y' }}</span>
+                        }
+                      </td>
+                      <td class="p-3 text-right"><button type="button" (click)="consultarLoteHistorial(lote.id)" [disabled]="cargandoDetalleHistorial()" class="rounded-lg border border-slate-300 px-3 py-1.5 font-bold text-purple-950 hover:bg-slate-50 disabled:opacity-50">Ver detalle</button></td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+
+            <div class="flex items-center justify-between text-xs text-slate-600">
+              <span>{{ historial.total }} lotes · Página {{ historial.pagina }} de {{ historial.totalPaginas || 1 }}</span>
+              <div class="flex gap-2">
+                <button type="button" (click)="cargarHistorial(historial.pagina - 1)" [disabled]="historial.pagina <= 1 || cargandoHistorial()" class="rounded-lg border border-slate-300 bg-white px-3 py-1.5 font-bold disabled:opacity-40">Anterior</button>
+                <button type="button" (click)="cargarHistorial(historial.pagina + 1)" [disabled]="historial.pagina >= historial.totalPaginas || cargandoHistorial()" class="rounded-lg border border-slate-300 bg-white px-3 py-1.5 font-bold disabled:opacity-40">Siguiente</button>
+              </div>
+            </div>
+          }
+        }
+
+        @if (detalleHistorial(); as detalle) {
+          <article class="rounded-xl border border-purple-200 bg-white p-4" aria-labelledby="titulo-detalle-lote">
+            <div class="flex flex-wrap items-start justify-between gap-3">
+              <div>
+                <p class="text-dato font-black uppercase tracking-wider text-slate-400">Lote #{{ detalle.id }}</p>
+                <h4 id="titulo-detalle-lote" class="text-sm font-black text-purple-950">{{ detalle.nombreArchivo }}</h4>
+                <p class="mt-1 text-xs text-slate-600">{{ detalle.aviso }}</p>
+              </div>
+              <button type="button" (click)="cerrarDetalleHistorial()" class="rounded-lg border border-slate-300 px-3 py-1.5 text-xs font-bold">Cerrar detalle</button>
+            </div>
+
+            <dl class="mt-4 grid grid-cols-2 gap-3 text-xs md:grid-cols-4">
+              <div><dt class="font-bold text-slate-500">Estado</dt><dd class="mt-1 text-slate-900">{{ etiquetaEstadoImportacion(detalle.estado) }}</dd></div>
+              <div><dt class="font-bold text-slate-500">Filas</dt><dd class="mt-1 text-slate-900">{{ detalle.totalFilas }}</dd></div>
+              <div><dt class="font-bold text-slate-500">Creadas</dt><dd class="mt-1 text-slate-900">{{ detalle.filasAplicadas }}</dd></div>
+              <div><dt class="font-bold text-slate-500">Conservación</dt><dd class="mt-1 text-slate-900">{{ etiquetaRetencion(detalle.estadoRetencion) }}</dd></div>
+            </dl>
+
+            @if (detalle.filas.length > 0) {
+              <div class="mt-4 max-h-64 overflow-auto rounded-lg border border-slate-200">
+                <table class="w-full min-w-[620px] text-left text-xs">
+                  <thead class="sticky top-0 bg-slate-100"><tr><th scope="col" class="p-2">Fila</th><th scope="col" class="p-2">{{ moduloActivo()?.campos?.[0]?.etiqueta || 'Registro' }}</th><th scope="col" class="p-2">Territorio</th><th scope="col" class="p-2">Resultado</th></tr></thead>
+                  <tbody>
+                    @for (fila of detalle.filas; track fila.id) {
+                      <tr class="border-t border-slate-100"><td class="p-2">{{ fila.numeroFila }}</td><td class="p-2 font-semibold">{{ nombreDeFila(fila) }}</td><td class="p-2">{{ resumenDeFila(fila) }}</td><td class="p-2">{{ fila.resultado }}</td></tr>
+                    }
+                  </tbody>
+                </table>
+              </div>
+            } @else if (detalle.estado === 'expirado') {
+              <p class="mt-4 rounded-lg bg-slate-100 p-3 text-xs text-slate-600">El detalle cumplió el plazo de {{ historialImportaciones()?.diasRetencionPrevisualizacion || 30 }} días y fue retirado. La cabecera permanece como evidencia de que la previsualización existió.</p>
+            }
+
+            @if (detalle.puedeConfirmar) {
+              <div class="mt-4 flex flex-wrap items-center justify-between gap-3 rounded-lg bg-purple-50 p-3">
+                <p class="text-xs font-semibold text-purple-950">Esta previsualización es tuya y todavía está dentro del plazo. Puedes retomarla para decidir qué filas importar.</p>
+                <button type="button" (click)="retomarLoteHistorial()" class="rounded-lg bg-purple-950 px-4 py-2 text-xs font-black text-white">Retomar revisión</button>
+              </div>
+            }
+          </article>
+        }
+      </section>
+    }
+
+    <!-- STEP 1: SELECT MODULE AND UPLOAD FILE -->
+    @if (paso() === 1) {
+      <div class="flex flex-col gap-6">
+        
+        <!-- Explanation Card -->
+        <div class="rounded-xl border border-purple-100 bg-purple-50/50 p-4 text-xs text-purple-950">
+          <div class="flex items-start gap-2">
+            <svg lucideInfo size="16" class="mt-0.5 shrink-0 text-morado"></svg>
+            <div>
+              <span class="font-bold">Instrucciones de preparación</span>
+              <ul class="mt-1 list-disc pl-4 space-y-1">
+                <li>Selecciona el módulo destino al cual quieres adaptar los registros.</li>
+                <li>Sube tu archivo de base de datos externa (.xlsx o .csv).</li>
+                <li>Las reglas de nombres y sinónimos propondrán correspondencias en el siguiente paso.</li>
+                <!--
+                  ESTAS DOS LINEAS HABLABAN SIEMPRE DE FESTIVALES Y DE EDICIONES, en una pantalla
+                  que desde el Bloque 5b sirve a cinco destinos: quien preparaba un archivo de
+                  organizaciones leía que «solo una confirmación crea Festivales» y que «las
+                  ediciones se gestionan en su circuito propio». Ahora lo dice el dominio elegido,
+                  que es quien sabe cómo se llama lo suyo y en qué estado nace.
+                -->
+                <li>Se conservan los campos que <b>{{ moduloActivo()?.etiqueta || 'el destino' }}</b> declara; lo que no esté en esa lista no se importa.</li>
+                <li>Primero puedes descargar el resultado. La previsualización en la API no crea registros.</li>
+                <li>Solo una confirmación explícita crea registros de <b>{{ moduloActivo()?.etiqueta || 'ese destino' }}</b> en estado «{{ moduloActivo()?.estadoAlImportar || 'borrador' }}»; nunca publica ni modifica existentes.</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <div class="flex flex-col gap-5">
+          <!--
+            SELECTOR DE MÓDULO. Si `idModulo` llegó por contexto -«Importar Festivales» desde la
+            cabecera del módulo, el único camino desde-, el módulo ya
+            está decidido y no hace falta volver a preguntarlo. El selector se queda para el uso
+            suelto, si alguna vez lo hay.
+          -->
+          <!--
+            QUE VA A PASAR CON LO QUE SUBAS, dicho ANTES de subirlo, y en los dos caminos: con el
+            módulo ya decidido desde su cabecera y con el selector suelto. La regla es que nada
+            importado se publica ni se activa solo, y el estado en el que nace lo declara el
+            servidor; enterarse al ver la lista de resultados llega tarde para quien creía que
+            estaba publicando un directorio entero.
+          -->
+          @if (promesaDelDominio(); as promesa) {
+            <p data-promesa-del-dominio
+               class="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-dato leading-relaxed text-slate-600">
+              Lo que importes entra como <b>{{ promesa.estadoAlImportar }}</b>: nada se publica ni se
+              activa por el hecho de importarlo. {{ promesa.porQueEseEstado }}
+            </p>
+          }
+
+          @if (idModulo) {
+            <p class="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm font-semibold text-slate-700">Vas a preparar un archivo para <b>{{ moduloActivo()?.etiqueta }}</b>.</p>
+          } @else {
+            <div class="flex flex-col gap-2">
+              <label for="moduleSelector" class="campo__rotulo">
+                1. Módulo del sistema de destino
+              </label>
+              <select
+                id="moduleSelector"
+                [ngModel]="idModuloSeleccionado()"
+                (ngModelChange)="idModuloSeleccionado.set($event); $event && proponerCorrespondencias(encabezadosFuente())"
+                class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm font-semibold text-slate-800 focus:border-morado outline-none transition"
+              >
+                <option value="">-- Seleccionar Módulo Destino --</option>
+                @for (mod of modulosAdministrativos(); track mod.dominio) {
+                  <option [value]="mod.dominio">{{ mod.etiqueta }}</option>
+                }
+              </select>
+
+            </div>
+          }
+
+          <!-- Source Database Box -->
+          <div class="flex flex-col">
+            <!--
+              No es un <label>: aquí no hay un campo visible que etiquetar. El
+              campo de archivo está oculto y quien lo abre es la zona de abajo,
+              que sí es un botón. Así que este texto es el NOMBRE de ese botón,
+              enlazado con aria-labelledby.
+            -->
+            <span id="preparacion-archivo-fuente-etiqueta" class="mb-2 block campo__rotulo">
+              2. Cargar tu Base de Datos Externa (.xlsx, .csv)
+            </span>
+            <div
+              (click)="archivoFuenteRef.click()"
+              (keydown.enter)="archivoFuenteRef.click()"
+              (keydown.space)="$event.preventDefault(); archivoFuenteRef.click()"
+              tabindex="0"
+              role="button"
+              aria-labelledby="preparacion-archivo-fuente-etiqueta"
+              [class]="'flex flex-col items-center justify-center rounded-xl border-2 border-dashed p-8 text-center cursor-pointer transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-verde focus-visible:ring-offset-2 ' + (archivoFuente() ? 'border-verde bg-green-50/10' : 'border-slate-300 hover:border-morado bg-slate-50/50 hover:bg-slate-50')"
+            >
+              <input
+                #archivoFuenteRef
+                aria-labelledby="preparacion-archivo-fuente-etiqueta"
+                type="file"
+                accept=".xlsx,.csv"
+                (change)="cargarArchivoFuente($event)"
+                class="hidden"
+              />
+              @if (archivoFuente()) {
+                <svg lucideFileSpreadsheet size="36" class="text-verde"></svg>
+                <span class="mt-2 block text-xs font-black text-slate-900 truncate max-w-[320px]">{{ archivoFuente()?.name }}</span>
+                <span class="mt-1 block text-dato text-verde font-bold">
+                  {{ filasFuente().length }} registros cargados
+                </span>
+              } @else {
+                <svg lucideUpload size="36" class="text-slate-400"></svg>
+                <span class="mt-2 block text-xs font-bold text-slate-800">Cargar Archivo de Datos</span>
+                <span class="mt-1 block text-dato text-slate-400">Arrastra o haz clic para subir</span>
+              }
+            </div>
+          </div>
+
+          <!-- Template Download Utility -->
+          @if (moduloActivo()) {
+            <div class="flex items-center justify-between rounded-xl bg-slate-50 border border-slate-200 p-3 text-xs">
+              <div class="flex items-center gap-2">
+                <svg lucideFileText size="16" class="text-morado"></svg>
+                <span class="font-semibold text-slate-700">
+                  ¿Quieres ver el formato oficial de {{ moduloActivo()?.etiqueta }}?
+                </span>
+              </div>
+              <button
+                type="button"
+                (click)="descargarPlantillaVacia()"
+                [disabled]="descargandoPlantilla()"
+                class="flex items-center gap-1 rounded-lg border border-slate-300 bg-white px-3 py-1 text-dato font-bold text-morado transition hover:bg-slate-50 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <svg lucideDownload size="10"></svg>
+                Ver Plantilla Oficial
+              </button>
+            </div>
+          }
+        </div>
+
+        <!-- Confirm / Continue Button -->
+        <div class="mt-4 flex justify-end">
+          <button
+            type="button"
+            (click)="avanzarAMapeo()"
+            [disabled]="!idModuloSeleccionado() || encabezadosFuente().length === 0"
+            [class]="'flex items-center gap-2 rounded-xl px-5 py-2.5 text-xs font-black tracking-wider uppercase text-white transition shadow-sm cursor-pointer ' + ((!idModuloSeleccionado() || encabezadosFuente().length === 0) ? 'bg-slate-300 cursor-not-allowed' : 'bg-morado hover:bg-[#1a0b2c]')"
+          >
+            Avanzar a Mapeo
+            <svg lucideArrowRight size="14"></svg>
+          </button>
+        </div>
+      </div>
+    }
+
+    <!-- STEP 2: COLUMN MAPPING -->
+    @if (paso() === 2 && moduloActivo()) {
+      <div class="flex flex-col gap-6">
+        <!-- Guide message -->
+        <div class="rounded-xl border border-verde/30 bg-verde/5 p-4 text-xs text-slate-800">
+          <div class="flex items-start gap-2">
+            <svg lucideSparkles size="16" class="mt-0.5 shrink-0 text-verde"></svg>
+            <div>
+              <span class="font-black text-morado">Correspondencias por similitud:</span> las reglas compararon los nombres de las columnas. Revisa la lista y completa los campos obligatorios que sigan sin correspondencia.
+            </div>
+          </div>
+        </div>
+
+        <!-- Table Mappings -->
+        <div class="overflow-x-auto rounded-xl border border-slate-200">
+          <table class="w-full text-left text-xs border-collapse">
+            <thead>
+              <tr class="bg-slate-50 border-b border-slate-200 text-slate-600 font-bold">
+                <th scope="col" class="p-3 w-1/3">Campo Destino (Sistema)</th>
+                <th scope="col" class="p-3 w-1/3">Coincidencia de columnas</th>
+                <th scope="col" class="p-3 w-1/3">Columna Origen (Tu Excel)</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (field of camposActivos(); track field.name) {
+                @if (!field.system && field.name !== 'id' && field.name !== 'status') {
+                  <tr class="border-b border-slate-100 last:border-0 hover:bg-slate-50/50">
+                    <td class="p-3">
+                      <div class="font-black text-slate-900 flex items-center gap-1.5">
+                        {{ field.label }}
+                        @if (field.required) {
+                          <span class="rounded bg-red-100 px-1 py-0.5 text-dato font-black text-red-600 tracking-wide uppercase">
+                            Requerido
+                          </span>
+                        }
+                      </div>
+                      <div class="mt-0.5 text-dato text-slate-500 font-medium">
+                        Ref: <code class="bg-slate-100 px-1 rounded">{{ field.name }}</code> | Tipo: {{ field.type }}
+                      </div>
+                    </td>
+                    <td class="p-3">
+                      @if (obtenerSugerencia(field.name).score >= 90) {
+                        <span class="inline-flex items-center gap-1 rounded-full bg-green-50 px-2 py-0.5 text-dato font-black text-green-700">
+                          <span class="h-1.5 w-1.5 rounded-full bg-green-500"></span>
+                          {{ obtenerSugerencia(field.name).type }} ({{ obtenerSugerencia(field.name).score }}%)
+                        </span>
+                      } @else if (obtenerSugerencia(field.name).score >= 50) {
+                        <span class="inline-flex items-center gap-1 rounded-full bg-purple-50 px-2 py-0.5 text-dato font-black text-purple-700">
+                          <span class="h-1.5 w-1.5 rounded-full bg-purple-500"></span>
+                          {{ obtenerSugerencia(field.name).type }} ({{ obtenerSugerencia(field.name).score }}%)
+                        </span>
+                      } @else {
+                        <span class="inline-flex items-center gap-1 rounded-full bg-slate-50 px-2 py-0.5 text-dato font-black text-slate-500">
+                          <span class="h-1.5 w-1.5 rounded-full bg-slate-300"></span>
+                          Sin Asignar
+                        </span>
+                      }
+                    </td>
+                    <td class="p-3">
+                      <select
+                        [attr.aria-label]="'Columna del archivo que corresponde a ' + field.label"
+                        [ngModel]="correspondencias()[field.name]"
+                        (ngModelChange)="cambiarCorrespondencia(field.name, +$event)"
+                        class="w-full rounded-lg border border-slate-200 bg-white p-1.5 text-xs font-semibold text-slate-800 focus:border-morado outline-none"
+                      >
+                        <option value="-1">-- No asignar --</option>
+                        @for (header of encabezadosFuente(); track header; let idx = $index) {
+                          <option [value]="idx">{{ header }}</option>
+                        }
+                      </select>
+                    </td>
+                  </tr>
+                }
+              }
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Buttons -->
+        <div class="flex items-center justify-between gap-4">
+          <button
+            type="button"
+            (click)="paso.set(1)"
+            class="rounded-xl border border-slate-200 bg-slate-50 px-4 py-2 text-xs font-black tracking-wider uppercase text-slate-600 transition hover:bg-slate-100 cursor-pointer"
+          >
+            Volver
+          </button>
+          
+          <button
+            type="button"
+            (click)="prepararDatos()"
+            [disabled]="procesando()"
+            class="flex items-center gap-2 rounded-xl bg-morado hover:bg-[#1a0b2c] px-5 py-2.5 text-xs font-black tracking-wider uppercase text-white transition cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            Aplicar reglas de preparación
+            <svg lucideSparkles size="14" class="text-verde"></svg>
+          </button>
+        </div>
+      </div>
+    }
+
+    <!-- STEP 3: RESULTS AND DOWNLOAD -->
+    @if (paso() === 3) {
+      <div class="flex flex-col gap-6">
+        @if (procesando()) {
+          <div class="flex flex-col items-center justify-center py-12 text-center">
+            <svg lucideRefreshCw size="40" class="animate-spin text-morado"></svg>
+            <h3 class="mt-4 text-sm font-black text-slate-800">Las reglas locales están preparando los registros...</h3>
+            <p class="mt-1 text-xs text-slate-500 font-medium">Ejecutando normalizaciones DIVIPOLA y depurando correos/teléfonos</p>
+          </div>
+        } @else {
+          <!-- Stats Grid -->
+          <div class="grid grid-cols-2 gap-4 md:grid-cols-4">
+            <div class="rounded-xl border border-slate-100 bg-slate-50/50 p-3 text-center">
+              <span class="block text-2xl font-black text-slate-900">{{ estadisticas().total }}</span>
+              <span class="text-dato font-black uppercase tracking-wider text-slate-400">Total Filas</span>
+            </div>
+            <div class="rounded-xl border border-green-100 bg-green-50/20 p-3 text-center">
+              <span class="block text-2xl font-black text-green-700">{{ estadisticas().filasPreparadas }}</span>
+              <span class="text-dato font-black uppercase tracking-wider text-green-500">Mapeadas</span>
+            </div>
+            <div class="rounded-xl border border-purple-100 bg-purple-50/20 p-3 text-center">
+              <span class="block text-2xl font-black text-morado">{{ estadisticas().normalizaciones }}</span>
+              <span class="text-dato font-black uppercase tracking-wider text-morado/70">Normalizaciones</span>
+            </div>
+            <div class="rounded-xl border border-amber-100 bg-amber-50/20 p-3 text-center">
+              <span class="block text-2xl font-black text-amber-600">{{ estadisticas().advertencias }}</span>
+              <span class="text-dato font-black uppercase tracking-wider text-amber-500">Advertencias</span>
+            </div>
+          </div>
+
+          <!-- Descargar sigue disponible; previsualizar es un ensayo en seco persistido. -->
+          <div class="rounded-2xl border border-slate-200 bg-gradient-to-br from-purple-50/55 via-white to-slate-50 p-6 text-center shadow-xs">
+            <h3 class="text-base font-black text-morado">El archivo preparado está listo para revisión</h3>
+            <p class="mt-1 text-xs text-slate-500 max-w-md mx-auto font-medium">
+              Descárgalo si necesitas revisarlo fuera de SIMUS, o previsualízalo contra la base vigente. Ninguna de estas dos acciones crea registros.
+            </p>
+            
+            <div class="mt-5 flex flex-wrap justify-center gap-3">
+              <button
+                type="button"
+                (click)="descargarExcel()"
+                [disabled]="descargandoExcel()"
+                class="group relative flex items-center gap-2 rounded-xl bg-morado px-6 py-3 text-xs font-black uppercase tracking-wider text-white transition hover:bg-[#1a0b2c] shadow-lg shadow-purple-900/10 cursor-pointer active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <svg lucideDownload size="14" class="text-verde"></svg>
+                Descargar Archivo Formateado (.xlsx)
+              </button>
+              <button
+                type="button"
+                (click)="previsualizarImportacion()"
+                [disabled]="previsualizandoImportacion() || confirmandoImportacion()"
+                class="flex items-center gap-2 rounded-xl bg-emerald-600 px-6 py-3 text-xs font-black uppercase tracking-wider text-white transition hover:bg-emerald-700 shadow-lg shadow-green-900/10 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                @if (previsualizandoImportacion()) {
+                  <svg lucideRefreshCw size="14" class="animate-spin"></svg>
+                  Comprobando filas
+                } @else {
+                  <svg lucideSearch size="14"></svg>
+                  Previsualizar importación
+                }
+              </button>
+            </div>
+          </div>
+
+          @if (errorImportacion()) {
+            <div role="alert" class="rounded-xl border border-red-200 bg-red-50 p-3 text-xs font-semibold text-red-800">
+              {{ errorImportacion() }}
+            </div>
+          }
+
+          @if (mensajeImportacion()) {
+            <div role="status" class="rounded-xl border border-green-200 bg-green-50 p-3 text-xs font-semibold text-green-800">
+              {{ mensajeImportacion() }}
+            </div>
+          }
+
+          @if (previsualizacionImportacion(); as vista) {
+            <section class="rounded-2xl border border-slate-200 bg-white p-4 shadow-xs" aria-labelledby="titulo-previsualizacion-importacion">
+              <div class="flex flex-wrap items-start justify-between gap-3">
+                <div>
+                  <p class="text-dato font-black uppercase tracking-wider text-slate-400">Lote trazable #{{ vista.id }}</p>
+                  <h3 id="titulo-previsualizacion-importacion" class="text-sm font-black text-purple-950">
+                    {{ vista.estado === 'aplicado' ? 'Importación aplicada' : 'Previsualización del servidor' }}
+                  </h3>
+                  <p class="mt-1 text-xs text-slate-500">{{ vista.aviso }}</p>
+                </div>
+                <span>
+                  <app-indicador-de-estado [etiqueta]="etiquetaEstadoImportacion(vista.estado)" [tono]="tonoDelEstado(vista.estado)" [conTexto]="true"></app-indicador-de-estado>
+                </span>
+              </div>
+
+              <div class="mt-4 grid grid-cols-2 gap-3 md:grid-cols-4">
+                <div class="rounded-xl bg-slate-50 p-3 text-center"><strong class="block text-xl text-slate-900">{{ vista.totalFilas }}</strong><span class="text-dato font-black uppercase text-slate-500">Revisadas</span></div>
+                <div class="rounded-xl bg-green-50 p-3 text-center"><strong class="block text-xl text-green-700">{{ vista.filasImportables }}</strong><span class="text-dato font-black uppercase text-green-600">Importables</span></div>
+                <div class="rounded-xl bg-red-50 p-3 text-center"><strong class="block text-xl text-red-700">{{ vista.filasRechazadas }}</strong><span class="text-dato font-black uppercase text-red-600">Con error</span></div>
+                <div class="rounded-xl bg-purple-50 p-3 text-center"><strong class="block text-xl text-purple-800">{{ vista.estado === 'aplicado' ? vista.filasAplicadas : cantidadElegidaParaImportar() }}</strong><span class="text-dato font-black uppercase text-purple-700">{{ vista.estado === 'aplicado' ? 'Creadas' : 'Elegidas' }}</span></div>
+              </div>
+
+              <div class="mt-4 max-h-[360px] overflow-auto rounded-xl border border-slate-200">
+                <table class="w-full min-w-[760px] text-left text-dato">
+                  <thead class="sticky top-0 bg-slate-50 text-slate-600">
+                    <tr>
+                      <th scope="col" class="p-2">Crear</th>
+                      <th scope="col" class="p-2">Fila</th>
+                      <!-- LA COLUMNA SE ROTULA CON EL PRIMER CAMPO QUE DECLARA EL DOMINIO, que es
+                           siempre su identidad: «Nombre del Festival», «Nombre de la organización»,
+                           «Título». Decir «Festival» sobre una tabla de noticias es rotular mal. -->
+                      <th scope="col" class="p-2">{{ moduloActivo()?.campos?.[0]?.etiqueta || 'Registro' }}</th>
+                      <th scope="col" class="p-2">Territorio normalizado</th>
+                      <th scope="col" class="p-2">Resultado</th>
+                      <th scope="col" class="p-2">Hallazgos</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    @for (fila of vista.filas; track fila.id) {
+                      <tr class="border-t border-slate-100 align-top">
+                        <td class="p-2">
+                          @if (fila.puedeImportarse && vista.puedeConfirmar) {
+                            <input
+                              type="checkbox"
+                              [checked]="!estaExcluida(fila.id)"
+                              (change)="alternarExclusion(fila.id)"
+                              [disabled]="confirmandoImportacion()"
+                              [attr.aria-label]="'Crear borrador desde la fila ' + fila.numeroFila"
+                              class="h-4 w-4 accent-emerald-600"
+                            />
+                          } @else if (fila.registroCreadoId) {
+                            <span class="font-black text-green-700">#{{ fila.registroCreadoId }}</span>
+                          } @else {
+                            <span class="text-slate-300">—</span>
+                          }
+                        </td>
+                        <td class="p-2 font-bold text-slate-600">{{ fila.numeroFila }}</td>
+                        <td class="p-2 font-black text-slate-900">{{ nombreDeFila(fila) }}</td>
+                        <!--
+                          LOS PRIMEROS CAMPOS DECLARADOS CON VALOR, sin saber de qué dominio son.
+                          Aquí se leían `nivelCobertura` y los dos territoriales —tres campos de
+                          Festival— y con cualquier otro dominio la columna quedaba en blanco.
+                        -->
+                        <td class="p-2 text-slate-600">{{ resumenDeFila(fila) }}</td>
+                        <td class="p-2">
+                          <!--
+                            EL RESULTADO DE LA FILA CON SU INDICADOR. Era una píldora verde o roja, y
+                            el color solo no dice nada a quien no lo distingue: aquí cada tono lleva
+                            además su icono. Ninguna píldora en el diseño, y esta era una.
+                          -->
+                          <app-indicador-de-estado
+                            [etiqueta]="fila.resultado === 'crear' ? 'Crear como ' + (promesaDelDominio()?.estadoAlImportar ?? 'borrador') : fila.resultado === 'coincidencia_existente' ? 'Ya existe' : 'Requiere corrección'"
+                            [tono]="fila.puedeImportarse ? 'logrado' : 'adverso'"
+                            [conTexto]="true"></app-indicador-de-estado>
+                        </td>
+                        <td class="p-2 text-slate-600">
+                          @if (fila.hallazgos.length === 0) {
+                            Sin hallazgos
+                          } @else {
+                            <ul class="space-y-1">
+                              @for (hallazgo of fila.hallazgos; track hallazgo.codigo + hallazgo.mensaje) {
+                                <li [class]="hallazgo.severidad === 'error' ? 'text-red-700' : 'text-slate-600'">{{ hallazgo.mensaje }}</li>
+                              }
+                            </ul>
+                          }
+                        </td>
+                      </tr>
+                    }
+                  </tbody>
+                </table>
+              </div>
+
+              @if (vista.puedeConfirmar) {
+                <div class="mt-4 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-purple-100 bg-purple-50/40 p-3">
+                  <p class="max-w-xl text-xs font-semibold text-slate-700">
+                    La confirmación creará {{ cantidadElegidaParaImportar() }} borradores bajo responsabilidad institucional. Las filas desmarcadas quedarán registradas como exclusiones humanas.
+                  </p>
+                  <button
+                    type="button"
+                    (click)="confirmarImportacion()"
+                    [disabled]="cantidadElegidaParaImportar() === 0 || confirmandoImportacion()"
+                    class="flex items-center gap-2 rounded-xl bg-purple-950 px-5 py-2.5 text-xs font-black uppercase tracking-wide text-white hover:bg-purple-900 disabled:cursor-not-allowed disabled:opacity-50"
+                  >
+                    @if (confirmandoImportacion()) { <svg lucideRefreshCw size="14" class="animate-spin"></svg> }
+                    Confirmar {{ cantidadElegidaParaImportar() }} borradores
+                  </button>
+                </div>
+              } @else if (vista.estado === 'previsualizado') {
+                <p class="mt-4 rounded-xl border border-slate-200 bg-slate-50 p-3 text-xs font-semibold text-slate-600">
+                  Este lote sigue pendiente, pero solo la persona que creó la previsualización puede confirmarlo.
+                </p>
+              }
+            </section>
+          }
+
+          <!-- Observations list -->
+          <div class="flex flex-col gap-2">
+            <h3 class="text-xs font-black uppercase tracking-wider text-slate-700">
+              Hallazgos de preparación ({{ observaciones().length }})
+            </h3>
+            
+            @if (observaciones().length === 0) {
+              <div class="rounded-xl border border-dashed border-slate-200 p-4 text-center text-xs text-slate-500 font-medium">
+                ¡Excelente! No se requirió ninguna corrección ni se encontraron campos incompletos.
+              </div>
+            } @else {
+              <div class="max-h-[220px] overflow-y-auto rounded-xl border border-slate-200 p-3 bg-slate-50/50 flex flex-col gap-2 text-dato">
+                @for (obs of observaciones(); track obs.message) {
+                  <div
+                    [class]="'flex items-start gap-2 p-2 rounded-lg border bg-white ' + (obs.type === 'warning' ? 'border-amber-100 text-amber-800' : 'border-purple-100 text-morado')"
+                  >
+                    @if (obs.type === 'warning') {
+                      <svg lucideAlertTriangle size="13" class="shrink-0 text-amber-500 mt-0.5"></svg>
+                    } @else {
+                      <svg lucideSparkles size="13" class="shrink-0 text-morado mt-0.5"></svg>
+                    }
+                    <span class="font-semibold">{{ obs.message }}</span>
+                  </div>
+                }
+              </div>
+            }
+          </div>
+
+          <!-- Preview Table -->
+          <div class="flex flex-col gap-2">
+            <h3 class="text-xs font-black uppercase tracking-wider text-slate-700">
+              Previsualización de Muestras (Primeros 3 registros)
+            </h3>
+            <div class="overflow-x-auto rounded-xl border border-slate-200">
+              <table class="w-full text-left text-dato border-collapse">
+                <thead>
+                  <tr class="bg-slate-50 border-b border-slate-200 text-slate-600 font-bold">
+                    @for (field of camposActivos(); track field.name) {
+                      @if (!field.system && field.name !== 'id' && field.name !== 'status') {
+                        <th scope="col" class="p-2 border-r border-slate-200 last:border-r-0">
+                          {{ field.label }}
+                        </th>
+                      }
+                    }
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (row of filasProcesadas() | slice:0:3; track row; let idx = $index) {
+                    <tr class="border-b border-slate-100 last:border-0 hover:bg-slate-50/50">
+                      @for (field of camposActivos(); track field.name) {
+                        @if (!field.system && field.name !== 'id' && field.name !== 'status') {
+                          <td class="p-2 border-r border-slate-200 last:border-r-0 truncate max-w-[120px] font-medium text-slate-700">
+                            @if (row[field.name]) {
+                              {{ row[field.name] }}
+                            } @else {
+                              <span class="text-slate-300 italic">vacío</span>
+                            }
+                          </td>
+                        }
+                      }
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Back Button -->
+          <div class="flex justify-start">
+            <button
+              type="button"
+              (click)="paso.set(2)"
+              class="rounded-xl border border-slate-200 bg-slate-50 px-4 py-2 text-xs font-black tracking-wider uppercase text-slate-600 transition hover:bg-slate-100 cursor-pointer"
+            >
+              Volver a Mapeo
+            </button>
+          </div>
+        }
+      </div>
+    }
+
+  </div>
+
+  <!-- Consultas determinísticas sobre el archivo cargado -->
+  <div class="w-full rounded-2xl border border-slate-200 bg-slate-50 p-4 shadow-xs lg:w-[320px] flex flex-col gap-4">
+    
+    <!-- Título de consultas locales -->
+    <div class="flex items-center gap-2 border-b border-slate-200 pb-3">
+      <div class="flex h-8 w-8 items-center justify-center rounded-lg bg-morado text-white animate-pulse">
+        <svg lucideSearch size="16"></svg>
+      </div>
+      <div>
+        <h3 class="text-xs font-black text-slate-900 uppercase">Consultas del archivo</h3>
+        <span class="inline-flex items-center gap-1 text-dato font-black text-green-600 uppercase">
+          <span class="h-1.5 w-1.5 rounded-full bg-green-500"></span>
+          Reglas disponibles
+        </span>
+      </div>
+    </div>
+
+    <!-- Chat Messages Box -->
+    <div class="flex-1 min-h-[260px] max-h-[360px] overflow-y-auto bg-white rounded-xl border border-slate-200 p-3 flex flex-col gap-2.5 no-scrollbar">
+      @for (msg of mensajesDeConsulta(); track msg.texto) {
+        <div
+          [class]="'flex gap-2 max-w-[90%] rounded-lg p-2.5 text-dato leading-relaxed ' + (msg.emisor === 'sistema' ? 'bg-slate-100 text-slate-800 self-start' : 'bg-morado text-white self-end')"
+        >
+          @if (msg.emisor === 'sistema') {
+            <div class="flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-morado text-white text-dato mt-0.5">
+              B
+            </div>
+          }
+          <div class="whitespace-pre-line font-medium">{{ msg.texto }}</div>
+        </div>
+      }
+      <div #finConsultasRef></div>
+    </div>
+
+    <!-- Info Bubble -->
+    <div class="rounded-lg bg-purple-50/55 border border-purple-100 p-2.5 text-dato text-purple-950 leading-normal font-semibold">
+      💡 Puedes consultarme estadísticas escribiendo: <i>"cuántos registros"</i> o <i>"cuántos errores hay"</i>. También puedes buscar algún término (ej. nombre o municipio).
+    </div>
+
+    <!-- Input Chat -->
+    <form
+      (submit)="$event.preventDefault(); enviarConsulta()"
+      class="flex gap-2"
+    >
+      <input
+        type="text"
+        aria-label="Pregunta sobre tus registros"
+        placeholder="Pregunta sobre tus registros..."
+        [ngModel]="consulta()"
+        (ngModelChange)="consulta.set($event)"
+        name="consulta"
+        class="flex-1 rounded-xl border border-slate-200 bg-white px-2.5 py-2 text-dato font-semibold text-slate-800 outline-none focus:border-morado transition"
+      />
+      <button
+        type="submit"
+        class="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-morado text-white hover:bg-[#1a0b2c] transition cursor-pointer"
+      >
+        <svg lucideSend size="12"></svg>
+      </button>
+    </form>
+
+  </div>
+
+  <!--
+    LAS DOS DECISIONES QUE NO SE DESHACEN, EN EL DIALOGO DEL PROYECTO. Reiniciar tira el trabajo de
+    mapeo; crear los borradores toca la base. El resto de pasos —avanzar, volver, procesar,
+    descargar— no confirman nada a propósito: una confirmación de más enseña a aceptar sin leer.
+  -->
+  @if (confirmacion(); as pendiente) {
+    <app-confirmacion
+      [titulo]="pendiente === 'reiniciar' ? 'Reiniciar la preparación' : 'Crear los borradores'"
+      [detalle]="pendiente === 'reiniciar' ? detalleDelReinicio() : detalleDeLaImportacion()"
+      [accion]="pendiente === 'reiniciar' ? 'Reiniciar' : accionDeLaImportacion()"
+      [tono]="pendiente === 'reiniciar' ? 'destructiva' : 'confirmar'"
+      [ocupado]="confirmandoImportacion()"
+      identificador="confirmar-preparacion-asistida"
+      (confirmar)="confirmarLaDecision()"
+      (cancelar)="cerrarLaConfirmacion()" />
+  }
+
+</div>

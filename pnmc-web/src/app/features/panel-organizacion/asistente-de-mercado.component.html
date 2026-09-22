@@ -1,0 +1,344 @@
+<!--
+  El asistente de alta de un mercado musical, en /gestion/procesos/mercados/nuevo.
+
+  ES EL MISMO IDIOMA QUE EL ALTA DE FESTIVAL: mismo encabezado, mismo indicador de pasos, mismos
+  rótulos y mismos controles. Una organización que ya registró un festival no tiene que aprender un
+  segundo procedimiento; lo que cambia es la ficha, no el recorrido.
+-->
+<div class="mx-auto max-w-6xl space-y-8">
+  <div>
+    <h1 class="font-alternate text-2xl font-bold uppercase tracking-wide text-morado">Registrar un mercado musical</h1>
+    @if (nombreOrganizacion()) {
+      <p class="mt-1 text-sm text-slate-500">
+        Se registra a nombre de <span class="font-bold text-slate-700">{{ nombreOrganizacion() }}</span>.
+      </p>
+    }
+  </div>
+
+  <!-- La puerta va antes del formulario, no después: con el correo sin confirmar el servidor lo
+       rechaza igual, y escribir el mercado entero para encontrarse el muro al guardar es peor. -->
+  @if (faltaConfirmarCorreo()) {
+    <app-aviso-de-correo-sin-confirmar
+      [bloquea]="true"
+      queSeHabilita="registrar mercados musicales a nombre de tu organización" />
+  } @else {
+
+  <app-indicador-de-pasos [pasos]="pasos" [pasoActivo]="pasoActivo()" etiqueta="Pasos del registro"
+                          (irAlPaso)="irAlPaso($event)" />
+
+  <p role="alert" data-testid="asistente-mercado-error" tabindex="-1" [class.hidden]="!error()"
+     class="rounded-xl border border-rose-200 bg-rose-50 p-3 text-sm text-rose-800">{{ error() }}</p>
+
+  @if (cargando()) {
+    <p role="status" class="py-10 text-center text-sm text-slate-500">Preparando el formulario…</p>
+  } @else {
+    <form novalidate (submit)="$event.preventDefault()" class="space-y-6">
+
+      <!-- ═══════════════════════ Paso 1: Datos generales ═══════════════════════ -->
+      @if (pasoActivo() === 1) {
+        <section class="space-y-6 rounded-2xl border border-slate-200 bg-white p-6" aria-labelledby="paso1-mercado-titulo">
+          <div class="border-b border-slate-100 pb-4">
+            <h2 id="paso1-mercado-titulo" class="scroll-mt-28 font-alternate text-sm font-bold uppercase tracking-widest text-morado">1. Datos generales</h2>
+            <p class="mt-2 text-cuerpo leading-relaxed text-prosa">Lo básico para identificar el mercado.</p>
+          </div>
+
+          <div class="space-y-1.5">
+            <label for="mercado-nombre" class="block text-sm font-bold text-slate-800">
+              Nombre del mercado <span class="text-verde-texto">*</span>
+            </label>
+            <input id="mercado-nombre" name="nombre" type="text" required maxlength="240"
+                   [(ngModel)]="formulario.nombre"
+                   [attr.aria-invalid]="errores()['nombre'] ? 'true' : null"
+                   [attr.aria-describedby]="errores()['nombre'] ? 'mercado-nombre-error' : null"
+                   class="w-full rounded-lg border border-slate-300 bg-white p-3 text-sm text-slate-900 focus:border-verde-medio focus:outline-none focus-visible:ring-2 focus-visible:ring-verde-medio">
+            @if (errores()['nombre']) { <p id="mercado-nombre-error" class="text-xs font-medium text-red-700">{{ errores()['nombre'] }}</p> }
+          </div>
+
+          <div class="space-y-1.5">
+            <label for="mercado-descripcion" class="block text-sm font-bold text-slate-800">Descripción del mercado</label>
+            <textarea id="mercado-descripcion" name="descripcion" rows="3" [(ngModel)]="formulario.descripcion"
+                      class="w-full rounded-lg border border-slate-300 bg-white p-3 text-sm text-slate-900 focus:border-verde-medio focus:outline-none focus-visible:ring-2 focus-visible:ring-verde-medio"></textarea>
+            <p class="text-xs text-slate-500">Es lo primero que lee el Programa cuando lo revisa.</p>
+          </div>
+
+          <!-- ALCANCE Y MODALIDAD SON LISTAS Y NO TEXTO LIBRE. En la estructura heredada eran
+               `varchar` sin lista, de modo que «Nacional», «nacional» y «NACIONAL» eran tres
+               alcances distintos y nadie podía contar mercados por alcance. -->
+          <div class="grid gap-4 sm:grid-cols-2">
+            <div class="space-y-1.5">
+              <label for="mercado-alcance" class="block text-sm font-bold text-slate-800">Alcance</label>
+              <select id="mercado-alcance" name="alcanceId" [(ngModel)]="formulario.alcanceId"
+                      class="w-full rounded-lg border border-slate-300 bg-white p-3 text-sm text-slate-900 focus:border-verde-medio focus:outline-none focus-visible:ring-2 focus-visible:ring-verde-medio">
+                <option [ngValue]="null">Sin especificar</option>
+                @for (opcion of catalogos().alcances; track opcion.id) { <option [ngValue]="opcion.id">{{ opcion.nombre }}</option> }
+              </select>
+            </div>
+            <div class="space-y-1.5">
+              <label for="mercado-modalidad" class="block text-sm font-bold text-slate-800">Modalidad</label>
+              <select id="mercado-modalidad" name="modalidadId" [(ngModel)]="formulario.modalidadId"
+                      class="w-full rounded-lg border border-slate-300 bg-white p-3 text-sm text-slate-900 focus:border-verde-medio focus:outline-none focus-visible:ring-2 focus-visible:ring-verde-medio">
+                <option [ngValue]="null">Sin especificar</option>
+                @for (opcion of catalogos().modalidades; track opcion.id) { <option [ngValue]="opcion.id">{{ opcion.nombre }}</option> }
+              </select>
+            </div>
+          </div>
+
+          <div class="grid gap-4 sm:grid-cols-2">
+            <div class="space-y-1.5">
+              <label for="mercado-periodicidad" class="block text-sm font-bold text-slate-800">Periodicidad</label>
+              <select id="mercado-periodicidad" name="periodicidad" [(ngModel)]="formulario.periodicidad"
+                      class="w-full rounded-lg border border-slate-300 bg-white p-3 text-sm text-slate-900 focus:border-verde-medio focus:outline-none focus-visible:ring-2 focus-visible:ring-verde-medio">
+                <option value="">Sin especificar</option>
+                @for (opcion of periodicidades; track opcion.codigo) { <option [value]="opcion.codigo">{{ opcion.etiqueta }}</option> }
+              </select>
+            </div>
+            <!-- EL DETALLE SOLO SE PIDE CUANDO LA RESPUESTA ANTERIOR LO NECESITA: un campo que
+                 depende de otro no se muestra hasta que el primero exista. -->
+            @if (pideDetalle(formulario.periodicidad)) {
+              <div class="space-y-1.5">
+                <label for="mercado-periodicidad-detalle" class="block text-sm font-bold text-slate-800">¿Cada cuánto, entonces?</label>
+                <input id="mercado-periodicidad-detalle" name="periodicidadDetalle" type="text" maxlength="240"
+                       [(ngModel)]="formulario.periodicidadDetalle"
+                       class="w-full rounded-lg border border-slate-300 bg-white p-3 text-sm text-slate-900 focus:border-verde-medio focus:outline-none focus-visible:ring-2 focus-visible:ring-verde-medio">
+              </div>
+            }
+          </div>
+        </section>
+      }
+
+      <!-- ═══════════════════════ Paso 2: Territorio y contacto ═══════════════════════ -->
+      @if (pasoActivo() === 2) {
+        <section class="space-y-6 rounded-2xl border border-slate-200 bg-white p-6" aria-labelledby="paso2-mercado-titulo">
+          <div class="border-b border-slate-100 pb-4">
+            <h2 id="paso2-mercado-titulo" class="scroll-mt-28 font-alternate text-sm font-bold uppercase tracking-widest text-morado">2. Territorio y contacto</h2>
+            <p class="mt-2 text-cuerpo leading-relaxed text-prosa">Dónde ocurre y cómo se llega a quien lo organiza.</p>
+          </div>
+
+          <!-- EL TERRITORIO SALE DE DIVIPOLA, la misma fuente que usa el Festival. El nivel de
+               cobertura decide qué campos hacen falta, y el servidor comprueba la coherencia. -->
+          <div class="space-y-1.5">
+            <label for="mercado-cobertura" class="block text-sm font-bold text-slate-800">Nivel de cobertura</label>
+            <select id="mercado-cobertura" name="nivelCobertura" [ngModel]="formulario.nivelCobertura"
+                    (ngModelChange)="cambiarCobertura($event)"
+                    class="w-full rounded-lg border border-slate-300 bg-white p-3 text-sm text-slate-900 focus:border-verde-medio focus:outline-none focus-visible:ring-2 focus-visible:ring-verde-medio">
+              <option value="municipal">Municipal</option>
+              <option value="departamental">Departamental</option>
+              <option value="nacional">Nacional</option>
+            </select>
+          </div>
+
+          @if (formulario.nivelCobertura !== 'nacional') {
+            <div class="grid gap-4 sm:grid-cols-2">
+              <div class="space-y-1.5">
+                <label for="mercado-departamento" class="block text-sm font-bold text-slate-800">
+                  Departamento <span class="text-verde-texto">*</span>
+                </label>
+                <select id="mercado-departamento" name="codigoDepartamento" [ngModel]="formulario.codigoDepartamento"
+                        (ngModelChange)="cambiarDepartamento($event)"
+                        [attr.aria-invalid]="errores()['codigoDepartamento'] ? 'true' : null"
+                        class="w-full rounded-lg border border-slate-300 bg-white p-3 text-sm text-slate-900 focus:border-verde-medio focus:outline-none focus-visible:ring-2 focus-visible:ring-verde-medio">
+                  <option value="">Elige…</option>
+                  @for (departamento of departamentos(); track departamento.codigo) {
+                    <option [value]="departamento.codigo">{{ departamento.nombre | nombrePropio }}</option>
+                  }
+                </select>
+                @if (errores()['codigoDepartamento']) { <p class="text-xs font-medium text-red-700">{{ errores()['codigoDepartamento'] }}</p> }
+              </div>
+
+              @if (formulario.nivelCobertura === 'municipal') {
+                <div class="space-y-1.5">
+                  <label for="mercado-municipio" class="block text-sm font-bold text-slate-800">
+                    Municipio <span class="text-verde-texto">*</span>
+                  </label>
+                  <select id="mercado-municipio" name="codigoMunicipio" [(ngModel)]="formulario.codigoMunicipio"
+                          [attr.aria-invalid]="errores()['codigoMunicipio'] ? 'true' : null"
+                          class="w-full rounded-lg border border-slate-300 bg-white p-3 text-sm text-slate-900 focus:border-verde-medio focus:outline-none focus-visible:ring-2 focus-visible:ring-verde-medio">
+                    <option value="">Elige…</option>
+                    @for (municipio of municipios(); track municipio.municipalityCode) {
+                      <option [value]="municipio.municipalityCode">{{ municipio.municipalityName | nombrePropio }}</option>
+                    }
+                  </select>
+                  @if (errores()['codigoMunicipio']) { <p class="text-xs font-medium text-red-700">{{ errores()['codigoMunicipio'] }}</p> }
+                </div>
+              }
+            </div>
+          }
+
+          <div class="space-y-1.5">
+            <label for="mercado-lugar" class="block text-sm font-bold text-slate-800">Lugar específico</label>
+            <input id="mercado-lugar" name="lugarEspecifico" type="text" maxlength="300"
+                   [(ngModel)]="formulario.lugarEspecifico" placeholder="Recinto, plaza o sede donde ocurre"
+                   class="w-full rounded-lg border border-slate-300 bg-white p-3 text-sm text-slate-900 focus:border-verde-medio focus:outline-none focus-visible:ring-2 focus-visible:ring-verde-medio">
+          </div>
+
+          <div class="grid gap-4 sm:grid-cols-2">
+            <div class="space-y-1.5">
+              <label for="mercado-correo" class="block text-sm font-bold text-slate-800">Correo de contacto</label>
+              <input id="mercado-correo" name="correoMercado" type="email" maxlength="180" [(ngModel)]="formulario.correoMercado"
+                     class="w-full rounded-lg border border-slate-300 bg-white p-3 text-sm text-slate-900 focus:border-verde-medio focus:outline-none focus-visible:ring-2 focus-visible:ring-verde-medio">
+            </div>
+            <div class="space-y-1.5">
+              <label for="mercado-telefono" class="block text-sm font-bold text-slate-800">Teléfono</label>
+              <input id="mercado-telefono" name="telefonoMercado" type="tel" maxlength="80" [(ngModel)]="formulario.telefonoMercado"
+                     class="w-full rounded-lg border border-slate-300 bg-white p-3 text-sm text-slate-900 focus:border-verde-medio focus:outline-none focus-visible:ring-2 focus-visible:ring-verde-medio">
+            </div>
+            <div class="space-y-1.5">
+              <label for="mercado-web" class="block text-sm font-bold text-slate-800">Página web</label>
+              <input id="mercado-web" name="sitioWebMercado" type="url" maxlength="500" [(ngModel)]="formulario.sitioWebMercado"
+                     class="w-full rounded-lg border border-slate-300 bg-white p-3 text-sm text-slate-900 focus:border-verde-medio focus:outline-none focus-visible:ring-2 focus-visible:ring-verde-medio">
+            </div>
+            <div class="space-y-1.5">
+              <label for="mercado-instagram" class="block text-sm font-bold text-slate-800">Instagram</label>
+              <input id="mercado-instagram" name="instagramMercado" type="url" maxlength="500" [(ngModel)]="formulario.instagramMercado"
+                     class="w-full rounded-lg border border-slate-300 bg-white p-3 text-sm text-slate-900 focus:border-verde-medio focus:outline-none focus-visible:ring-2 focus-visible:ring-verde-medio">
+            </div>
+          </div>
+
+          <p class="text-xs text-slate-500">Al enviarlo a revisión hará falta al menos un correo o un teléfono.</p>
+
+          <!-- QUE SUENA Y DESDE DONDE: los catálogos del Ecosistema, los mismos que llena un
+               Festival. No son un vocabulario propio de mercados. -->
+          <div class="grid gap-4 sm:grid-cols-2">
+            <app-selector-multiple
+              etiqueta="Prácticas musicales" identificador="mercado-nuevo-practicas"
+              [opciones]="catalogos().practicasMusicales" [seleccionados]="formulario.practicasMusicalesIds"
+              ayuda="Qué músicas se mueven en este mercado."
+              textoVacio="Sin prácticas elegidas"
+              (alternar)="alternarDeCatalogo('practicasMusicalesIds', $event)" />
+            <app-selector-multiple
+              etiqueta="Territorios sonoros" identificador="mercado-nuevo-territorios"
+              [opciones]="catalogos().territoriosSonoros" [seleccionados]="formulario.territoriosSonorosIds"
+              ayuda="De qué territorios sonoros viene lo que se reúne aquí."
+              textoVacio="Sin territorios elegidos"
+              (alternar)="alternarDeCatalogo('territoriosSonorosIds', $event)" />
+          </div>
+        </section>
+      }
+
+      <!-- ═══════════════ Paso 3: la pregunta propia de los mercados ═══════════════ -->
+      @if (pasoActivo() === 3) {
+        <section class="space-y-6 rounded-2xl border border-slate-200 bg-white p-6" aria-labelledby="paso3-mercado-titulo">
+          <div class="border-b border-slate-100 pb-4">
+            <h2 id="paso3-mercado-titulo" class="scroll-mt-28 font-alternate text-sm font-bold uppercase tracking-widest text-morado">3. Relación con un festival</h2>
+            <!--
+              ES LA DIFERENCIA REAL CON UN FESTIVAL, y por eso tiene su propio paso. Un mercado
+              puede desarrollarse por su cuenta o dentro de un festival; cuando ocurre dentro de
+              uno, eso es una RELACION entre dos registros del sistema y no un nombre escrito a
+              mano, que es lo que impide poder consultarla o navegarla después.
+            -->
+            <p class="mt-2 text-cuerpo leading-relaxed text-prosa">
+              Un mercado puede desarrollarse de manera independiente o en el marco de un festival.
+            </p>
+          </div>
+
+          <fieldset class="space-y-3">
+            <legend class="text-sm font-bold text-slate-800">¿Este mercado se realiza en el marco de un festival?</legend>
+            <label class="flex items-center gap-2 text-sm text-slate-700">
+              <input type="radio" name="enMarco" [value]="false" data-mercado-independiente
+                     [ngModel]="formulario.seRealizaEnElMarcoDeUnFestival" (ngModelChange)="cambiarSiEstaEnUnFestival(false)"
+                     class="h-4 w-4 accent-morado">
+              <span>No, es un proceso independiente</span>
+            </label>
+            <label class="flex items-center gap-2 text-sm text-slate-700">
+              <input type="radio" name="enMarco" [value]="true" data-mercado-en-festival
+                     [ngModel]="formulario.seRealizaEnElMarcoDeUnFestival" (ngModelChange)="cambiarSiEstaEnUnFestival(true)"
+                     class="h-4 w-4 accent-morado">
+              <span>Sí, se realiza dentro de un festival</span>
+            </label>
+          </fieldset>
+
+          @if (formulario.seRealizaEnElMarcoDeUnFestival) {
+            <!--
+              TRES SITUACIONES DISTINTAS QUE ANTES SE VEIAN IGUAL. Decir «no tienes ninguno» es una
+              afirmación sobre los datos de quien lee, y hacerla cuando en realidad no se pudo
+              preguntar manda a registrar de nuevo un festival que ya existe. Lo reportó el dueño del
+              proyecto sobre una organización que sí los tenía.
+            -->
+            @if (consultaDeFestivales() === 'preguntando' || consultaDeFestivales() === 'sin_preguntar') {
+              <p class="text-sm text-slate-500" data-consultando-festivales>Consultando los festivales de tu organización…</p>
+            } @else if (consultaDeFestivales() === 'fallida') {
+              <div class="rounded-xl border border-rose-200 bg-rose-50 p-4" data-fallo-al-consultar-festivales>
+                <p class="text-sm text-rose-900">
+                  No pudimos consultar los festivales de tu organización. No significa que no tengas ninguno.
+                </p>
+                <button type="button" (click)="cargarLosFestivales()"
+                        class="mt-3 rounded-lg border border-rose-300 px-3 py-2 text-sm font-bold text-rose-900 transition hover:bg-rose-100">
+                  Volver a intentarlo
+                </button>
+              </div>
+            } @else if (festivales().length === 0) {
+              <!--
+                NI SE CREA AL VUELO NI SE ESCRIBE A MANO. Registrar un festival tiene su propio
+                recorrido y su propia revisión; ofrecerlo aquí de paso crearía festivales a medias
+                solo para poder guardar un mercado.
+              -->
+              <div class="rounded-xl border border-amber-200 bg-amber-50 p-4" data-sin-festivales-propios>
+                <p class="text-sm text-amber-900">
+                  Todavía no tienes ningún festival registrado en SIMUS. Regístralo primero desde
+                  <b>Procesos → Registrar Festival</b> y vuelve aquí para asociarlo.
+                </p>
+              </div>
+            } @else {
+              <div class="space-y-1.5">
+                <label for="mercado-festival" class="block text-sm font-bold text-slate-800">
+                  ¿En el marco de cuál? <span class="text-verde-texto">*</span>
+                </label>
+                <select id="mercado-festival" name="festivalId" data-festival-elegido [(ngModel)]="formulario.festivalId"
+                        [attr.aria-invalid]="errores()['festivalId'] ? 'true' : null"
+                        class="w-full rounded-lg border border-slate-300 bg-white p-3 text-sm text-slate-900 focus:border-verde-medio focus:outline-none focus-visible:ring-2 focus-visible:ring-verde-medio">
+                  <option [ngValue]="null">Elige un festival…</option>
+                  @for (festival of festivales(); track festival.id) {
+                    <!-- EL ESTADO SE ENSEÑA Y NO EXCLUYE: un festival en borrador se puede elegir,
+                         porque la condición es existir y ser de tu organización. -->
+                    <option [ngValue]="festival.id">{{ festival.nombre }}@if (festival.estadoRegistro !== 'publicado') { · {{ etiquetaDeEstado(festival.estadoRegistro) }} }</option>
+                  }
+                </select>
+                @if (errores()['festivalId']) { <p class="text-xs font-medium text-red-700">{{ errores()['festivalId'] }}</p> }
+                <p class="text-xs text-slate-500">Solo aparecen los festivales de tu organización, en cualquier estado.</p>
+              </div>
+            }
+          }
+        </section>
+      }
+
+      <!-- ═══════════════════════ Paso 4: revisar y guardar ═══════════════════════ -->
+      @if (pasoActivo() === 4) {
+        <section class="space-y-6 rounded-2xl border border-slate-200 bg-white p-6" aria-labelledby="paso4-mercado-titulo">
+          <div class="border-b border-slate-100 pb-4">
+            <h2 id="paso4-mercado-titulo" class="scroll-mt-28 font-alternate text-sm font-bold uppercase tracking-widest text-morado">4. Revisar y guardar borrador</h2>
+            <p class="mt-2 text-cuerpo leading-relaxed text-prosa">
+              El mercado se guarda en borrador. Podrás completarlo y, cuando esté listo, enviarlo a revisión del Programa.
+            </p>
+          </div>
+
+          <dl class="grid gap-x-8 gap-y-4 sm:grid-cols-2">
+            <div><dt class="text-xs font-bold uppercase tracking-wider text-slate-500">Nombre</dt><dd class="mt-1 text-sm text-slate-800">{{ formulario.nombre || '—' }}</dd></div>
+            <div><dt class="text-xs font-bold uppercase tracking-wider text-slate-500">Cobertura</dt><dd class="mt-1 text-sm text-slate-800">{{ formulario.nivelCobertura }}</dd></div>
+            <div><dt class="text-xs font-bold uppercase tracking-wider text-slate-500">En el marco de</dt>
+              <dd class="mt-1 text-sm text-slate-800">
+                {{ formulario.seRealizaEnElMarcoDeUnFestival ? 'Un festival de tu organización' : 'Proceso independiente' }}
+              </dd>
+            </div>
+            <div><dt class="text-xs font-bold uppercase tracking-wider text-slate-500">Contacto</dt>
+              <dd class="mt-1 text-sm text-slate-800">{{ formulario.correoMercado || formulario.telefonoMercado || 'Sin registrar' }}</dd></div>
+          </dl>
+        </section>
+      }
+
+      <div class="flex flex-wrap items-center justify-between gap-3">
+        <button type="button" [disabled]="pasoActivo() === 1" (click)="anterior()"
+                class="rounded-lg border border-slate-300 px-4 py-2.5 text-sm font-bold text-slate-700 transition hover:bg-white disabled:opacity-50">Anterior</button>
+        @if (pasoActivo() < pasos.length) {
+          <button type="button" (click)="siguiente()"
+                  class="rounded-lg bg-morado px-4 py-2.5 text-sm font-bold text-white transition hover:bg-violet-800">Siguiente</button>
+        } @else {
+          <button type="button" [disabled]="guardando()" (click)="guardar()" data-guardar-mercado
+                  class="rounded-lg bg-morado px-4 py-2.5 text-sm font-bold text-white transition hover:bg-violet-800 disabled:opacity-50">
+            {{ guardando() ? 'Guardando…' : 'Guardar borrador' }}
+          </button>
+        }
+      </div>
+    </form>
+  }
+  }
+</div>

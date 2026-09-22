@@ -1,0 +1,73 @@
+<!--
+  EL LANZADOR SI TAPABA EL CONTENIDO, Y AQUI DECIA QUE NO.
+
+  Este comentario afirmaba que «se queda en la esquina» y que esa esquina estaba libre. Comprobado el 13
+  de septiembre de 2026 en la consola: el botón, de 192x44 px en (1224, 832), quedaba **encima de un
+  `TD «Acciones ▾»`** de la tabla del Catálogo. Al ser fijo, no tapa una fila concreta sino la que
+  pase por ahí al desplazarse, así que la columna de acciones queda parcialmente inalcanzable durante
+  todo el recorrido de una lista de 171 fichas.
+
+  Por eso el anclaje ahora lo decide quien lo monta: en la consola va EN LA CABECERA, que tiene sitio
+  de sobra y no se superpone a nada; donde no haya cabecera con hueco, sigue flotando.
+-->
+<button type="button" (click)="abrir($event)" data-abrir-consulta-guiada
+  [attr.aria-expanded]="abierto()"
+  aria-haspopup="dialog"
+  title="Consulta guiada"
+  [class]="clasesDelLanzador()">
+  <svg lucideMessageCircleQuestion [size]="anclaje === 'flotante' ? 22 : 18" aria-hidden="true"></svg>
+  <!--
+    ANCLADO EN LA CABECERA, EL TEXTO SE VE SIEMPRE. Flotando tenía sentido esconderlo en pantalla
+    pequeña, porque un botón flotante ancho se come el ancho útil. En la cabecera pasa lo contrario:
+    un círculo con un icono, solo en su línea, se lee como un elemento suelto que nadie sabe qué hace.
+  -->
+  <!--
+    FLOTANDO NO LLEVA ROTULO, Y ESA ES LA DIFERENCIA QUE HACE QUE QUEPA. La primera versión flotante
+    era una píldora de 192 px de ancho y tapaba la columna de acciones de las tablas; medido, quedaba
+    encima de un TD «Acciones». Reducida a un botón redondo de 56 px ocupa una novena parte de esa
+    superficie y se aparta del contenido. El nombre lo lleva en su etiqueta accesible y en la ayuda
+    al posarse, que es donde sirve sin ocupar sitio.
+  -->
+  @if (anclaje === 'cabecera') {
+    <span>Consulta guiada</span>
+  } @else {
+    <span class="sr-only">Abrir la consulta guiada</span>
+  }
+</button>
+
+@if (abierto()) {
+  <!--
+    POR ENCIMA DE LA NAVEGACION DEL SITIO, que en el espacio de gestión es `fixed` con `z-[3000]`.
+    Con un z menor el cajón se abría por debajo y su cabecera —el título y el botón de cerrar—
+    quedaba tapada por la barra morada: un panel modal al que no se le ve la salida.
+  -->
+  <div class="fixed inset-0 z-[3100] flex justify-end">
+    <!--
+      EL FONDO ES UN BOTON DE VERDAD, no un `div` con `(click)`. Pulsar fuera para cerrar es un
+      gesto que la gente espera, pero escrito sobre un `div` deja la acción fuera del teclado y sin
+      nombre para un lector de pantalla. Como botón, cierra igual con el ratón y además se anuncia.
+    -->
+    <button type="button" (click)="cerrar()" tabindex="-1" aria-hidden="true"
+      class="absolute inset-0 cursor-default bg-slate-900/30"></button>
+
+    <!--
+      CAJON Y NO MODAL COMPLETO: la respuesta casi siempre se contrasta con lo que hay detrás, y
+      taparlo obligaría a memorizar la cifra para cerrar y volver a mirar.
+    -->
+    <section #panel role="dialog" aria-modal="true" aria-labelledby="cajon-consulta-titulo"
+      appDialogo (cerrar)="cerrar()"
+      data-cajon-consulta-guiada
+      class="relative flex h-full w-full max-w-xl flex-col bg-white shadow-2xl focus:outline-none">
+      <div class="flex items-center justify-between gap-3 border-b border-slate-200 px-5 py-3">
+        <h2 id="cajon-consulta-titulo" class="font-alternate text-sm font-bold uppercase tracking-widest text-morado">Consulta guiada</h2>
+        <button type="button" (click)="cerrar()" data-cerrar-consulta-guiada
+          class="rounded-lg border border-slate-200 p-2 text-slate-600 transition hover:border-morado hover:text-morado focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-morado">
+          <svg lucideX [size]="16" aria-hidden="true"></svg>
+          <span class="sr-only">Cerrar la consulta guiada</span>
+        </button>
+      </div>
+      <app-consulta-guiada [base]="base" [contexto]="contexto" [saludo]="saludo" [limite]="limite"
+        [conTitulo]="false" />
+    </section>
+  </div>
+}

@@ -1,0 +1,668 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   RESUMEN OPERATIVO
+
+   TRES REGLAS QUE VIENEN DE CORRECCIONES, NO DE GUSTO:
+
+   1. UNA SOLA SUPERFICIE LEVANTADA. Una versión anterior metía cada bloque en
+      su tarjeta —e incluso una tarjeta blanca DENTRO de la prioritaria—. Borde,
+      relleno, radio y sombra significan «objeto aparte»: estamparlos en todo
+      hace que no destaque nada. Solo el bloque de decisiones tiene fondo.
+
+   2. NINGUNA FLECHA HACE DE BOTON. Había un «Revisar →» fingiendo ser una
+      acción, sin forma de control, sin área de toque y sin foco propio. Aquí
+      las acciones son botones y las filas pulsables se notan al posarse.
+
+   3. COMPACTO. Un panel de resumen se mira de un vistazo; si hay que
+      desplazarse, no está resumiendo. El ritmo vertical es corto a propósito.
+
+   Y se escribe en líneas legibles: el resto de hojas de este armazón están
+   minificadas a mano, y eso hizo invisible durante meses que `.worklist-count`
+   estuviera declarado dos veces, con la segunda pisando a la primera.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.resumen {
+  display: flex;
+  flex-direction: column;
+  /* EL AIRE VA ENTRE BLOQUES Y NO DENTRO. Apretando el ritmo para que la pantalla
+     cupiera en una vista, los cuatro bloques acabaron pegados y se leían como uno
+     solo muy largo. Separarlos es lo que los hace distinguibles; inflar sus filas
+     sería otra cosa, y esa densidad se conserva. */
+  gap: 2.9rem;
+  margin-top: 1.75rem;
+}
+
+/* ── 1. Lo que pide una decisión ─────────────────────────────────────────── */
+/* SIN MARCO: la referencia más limpia apenas usaba bordes y separaba por espacio.
+   Queda un tinte muy leve que dice «esto es otra cosa» sin dibujar una caja. */
+.resumen-prioridad {
+  border: 0;
+  border-radius: 1.1rem;
+  background: rgba(41, 18, 66, .04);
+  padding: 1.6rem 1.85rem 1.65rem;
+}
+
+/* Sin nada pendiente deja de reclamar atención: no es una alerta. */
+.resumen-prioridad.esta-al-dia { background: #f7f8fa; }
+
+
+
+.resumen-prioridad h2 {
+  margin: .25rem 0 0;
+  color: var(--color-valor);
+  font-weight: 800;
+  font-size: 1.4rem;
+  font-family: var(--font-alternate);
+}
+
+/* ERA EL UNICO RELLENO MACIZO DE UNA PANTALLA PLANA. En un Resumen donde la
+   jerarquía la hacen el tamaño, el aire y los filetes, un rectángulo morado
+   sólido se leía como pegado de otro diseño. Sigue siendo un botón —tiene
+   contorno, área de toque y foco propios—, pero con el peso de lo que le rodea:
+   el relleno se reserva para el momento de posarse encima. */
+.resumen-accion {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--spacing-control);
+  border: 1px solid rgba(41, 18, 66, .28);
+  border-radius: .7rem;
+  background: none;
+  padding: .5rem 1.1rem;
+  color: var(--color-morado);
+  font-size: var(--text-dato);
+  font-weight: 700;
+  transition: background .12s, color .12s, border-color .12s;
+}
+.resumen-accion:hover { border-color: var(--color-morado); background: var(--color-morado); color: #fff; }
+
+/* La cifra, el desglose y la espera, en una sola franja de tres columnas:
+   qué hay, de qué es y desde cuándo, sin bajar la vista. */
+/* La cifra a la izquierda, el desglose ocupando el resto: el número es el
+   elemento dominante del bloque y no un dato más de una fila. */
+.resumen-decision {
+  display: grid;
+  grid-template-columns: minmax(7rem, auto) minmax(0, 1fr);
+  align-items: start;
+  gap: 2.25rem;
+  margin-top: 1.3rem;
+}
+
+/* Es un botón, así que se dibuja como tal aunque no lleve marco: la cifra
+   entera es el área pulsable, y el foco se ve. */
+.resumen-decision__cifra {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: .1rem;
+  min-height: var(--spacing-control);
+  border: 0;
+  background: none;
+  padding: 0;
+  color: var(--color-morado);
+  text-align: left;
+}
+.resumen-decision__cifra strong {
+  font-weight: 800;
+  font-size: 3.6rem;
+  line-height: .9;
+  letter-spacing: -.01em;
+  font-family: var(--font-alternate);
+}
+.resumen-decision__cifra span { color: #5d6a80; font-size: var(--text-dato); font-weight: 800; text-transform: uppercase; letter-spacing: .1em; }
+.resumen-decision__cifra:hover { text-decoration: underline; }
+
+.resumen-desglose {
+  display: flex;
+  flex-direction: column;
+  gap: .55rem;
+  margin: .35rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.resumen-desglose__fila {
+  display: grid;
+  grid-template-columns: 1.9rem minmax(0, auto) minmax(3rem, 1fr);
+  align-items: center;
+  gap: .75rem;
+}
+
+.resumen-desglose__cuenta {
+  color: var(--color-valor);
+  font-weight: 800;
+  font-size: 1.05rem;
+  font-family: var(--font-alternate);
+  text-align: right;
+}
+
+.resumen-desglose__tipo { color: #5d6a80; font-size: var(--text-dato); white-space: nowrap; }
+
+/* La barra ES el dato: dice de un vistazo qué tipo domina el trabajo pendiente. */
+.resumen-desglose__barra {
+  display: block;
+  height: .4rem;
+  border-radius: 99px;
+  background: rgba(41, 18, 66, .09);
+}
+.resumen-desglose__barra > span {
+  display: block;
+  height: 100%;
+  min-width: .4rem;
+  border-radius: 99px;
+  background: var(--color-morado-claro);
+}
+
+.resumen-espera {
+  grid-column: 1 / -1;
+  margin: 1.15rem 0 0;
+  color: #7a8496;
+  font-size: var(--text-dato);
+}
+.resumen-espera b { color: var(--color-valor); font-weight: 800; }
+/* Una semana esperando ya no es «reciente» y deja de leerse como tal. */
+.resumen-espera.es-vieja { color: var(--color-aviso); }
+.resumen-espera.es-vieja b { color: #7a4e0c; }
+
+.resumen-aldia {
+  margin: .85rem 0 0;
+  color: #8b95a7;
+  font-size: var(--text-dato);
+}
+
+.resumen-vacio {
+  margin: .7rem 0 0;
+  color: #6f7b91;
+  font-size: var(--text-cuerpo);
+}
+
+/* ── 2. El acervo ────────────────────────────────────────────────────────────
+   CIFRAS, NO TARJETAS. Separadas por un filete vertical, que es lo justo para
+   leerlas como una serie comparable. La cifra va antes que el rótulo: en una
+   franja de números lo que se recorre es la columna de cifras. */
+/* Ni marcos ni filetes verticales: una franja de cifras separada por espacio,
+   con una sola línea arriba que la despega del bloque anterior. */
+.resumen-pulso {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr));
+  gap: 1.5rem 2.5rem;
+  border-top: 1px solid var(--color-filete);
+  padding-top: 1.4rem;
+}
+
+.resumen-dato {
+  display: flex;
+  flex-direction: column;
+  gap: .15rem;
+  border: 0;
+  background: none;
+  padding: 0;
+  text-align: left;
+}
+.resumen-dato:hover .resumen-dato__rotulo { color: var(--color-morado); }
+
+.resumen-dato__cifra {
+  color: var(--color-morado);
+  font-weight: 800;
+  font-size: 2.25rem;
+  line-height: 1;
+  font-family: var(--font-alternate);
+}
+.resumen-dato__cifra.es-cero { color: #97a1b1; }
+.resumen-dato__cifra--texto { font-size: 1.35rem; }
+.resumen-dato__cifra--texto.es-correcto { color: var(--color-verde-texto); }
+.resumen-dato__cifra--texto.es-aviso { color: var(--color-aviso); }
+
+.resumen-dato__rotulo {
+  color: #67748a;
+  font-size: var(--text-dato);
+  font-weight: 700;
+}
+
+/* ── 3. La trazabilidad ──────────────────────────────────────────────────── */
+
+
+.resumen-traza h3 {
+  margin: 0;
+  color: var(--color-prosa);
+  font-weight: 700;
+  font-size: 1.05rem;
+  font-family: var(--font-alternate);
+}
+
+.resumen-vinculo {
+  border: 0;
+  background: none;
+  padding: .3rem .2rem;
+  color: var(--color-morado-claro);
+  font-size: var(--text-dato);
+  font-weight: 800;
+}
+.resumen-vinculo:hover { color: var(--color-morado); text-decoration: underline; }
+
+.resumen-traza__lista { margin: 0; padding: 0; list-style: none; }
+
+.resumen-traza__fila {
+  display: grid;
+  grid-template-columns: minmax(9rem, .8fr) minmax(0, 1.6fr) auto;
+  align-items: baseline;
+  gap: 1rem;
+  border-bottom: 1px solid #eef0f4;
+  padding: .75rem .15rem;
+}
+
+.resumen-traza__quien b { color: #1f2740; font-size: var(--text-dato); font-weight: 800; }
+.resumen-traza__quien span { margin-left: .4rem; color: #6b7688; font-size: var(--text-dato); }
+.resumen-traza__sobre { min-width: 0; color: #7a8496; font-size: var(--text-dato); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.resumen-traza__cuando { color: #97a1b1; font-size: var(--text-dato); text-align: right; white-space: nowrap; }
+.resumen-traza__cuando b { display: block; margin-top: .1rem; color: #6b7688; font-weight: 800; }
+
+/* En pantalla pequeña las rejillas se apilan y los filetes pasan a horizontales:
+   un filete vertical entre bloques apilados no separa nada. */
+@media (max-width: 860px) {
+  .resumen-decision { grid-template-columns: minmax(0, 1fr); gap: .7rem; }
+  .resumen-espera { text-align: left; }
+}
+@media (max-width: 760px) {
+  .resumen-dato { border-left: 0; border-top: 1px solid var(--color-filete); padding-left: .15rem; padding-right: .15rem; }
+  .resumen-dato:first-child { border-top: 0; }
+  .resumen-traza__fila { grid-template-columns: minmax(0, 1fr); gap: .2rem; }
+  .resumen-traza__sobre,
+  .resumen-traza__cuando { text-align: left; white-space: normal; }
+}
+
+/* ── El contexto de una cifra del acervo ──────────────────────────────────
+   La cifra dice cuánto hay; esta línea, si eso implica trabajo. */
+.resumen-dato__contexto {
+  margin-top: .15rem;
+  color: var(--color-morado-claro);
+  font-size: var(--text-dato);
+  font-weight: 700;
+}
+
+/* ── El alcance de la trazabilidad ────────────────────────────────────────
+   Que se vea que es un extracto y no la bitácora entera. */
+.resumen-traza__alcance {
+  margin: .2rem 0 0;
+  color: #8b95a7;
+  font-size: var(--text-dato);
+}
+
+/* ── De qué está hecho el acervo ───────────────────────────────────────────
+   UNA SOLA BARRA APILADA, no cuatro cifras sueltas. Lo que se pregunta es la
+   proporción —cuánto de lo registrado está de verdad publicado— y eso se lee
+   en un tramo de color, no sumando mentalmente. */
+
+
+.resumen-composicion h3 {
+  margin: 0;
+  color: var(--color-prosa);
+  font-weight: 700;
+  font-size: 1.05rem;
+  font-family: var(--font-alternate);
+}
+
+.resumen-composicion__total {
+  display: flex;
+  align-items: baseline;
+  gap: .5rem;
+  margin: 1.15rem 0 .8rem;
+}
+.resumen-composicion__total strong {
+  color: var(--color-morado);
+  font-weight: 800;
+  font-size: 2.25rem;
+  line-height: 1;
+  font-family: var(--font-alternate);
+}
+.resumen-composicion__total span { color: #67748a; font-size: var(--text-dato); font-weight: 700; }
+
+.resumen-barra-apilada {
+  display: flex;
+  overflow: hidden;
+  height: .85rem;
+  border-radius: 99px;
+  background: #eef0f4;
+}
+.resumen-barra-apilada > span { display: block; height: 100%; }
+
+/* Los estados van del morado al gris: publicado es lo que está resuelto y se
+   lleva el color pleno; borrador y ajustes se apagan progresivamente. No se
+   usa rojo: un borrador no es un error. */
+.es-publicado { background: var(--color-morado); }
+.es-en_revision { background: var(--color-morado-claro); }
+.es-borrador { background: #b9aed0; }
+.es-ajustes_solicitados { background: #d9b98a; }
+/* Archivado: fuera del flujo, sin color. Entró con Mercados, que sí archiva. */
+.es-archivado { background: var(--color-gris-sin-clasificar); }
+
+/* Cada módulo del Ecosistema con su barra: el nombre, cuántos, y adónde ir. */
+.resumen-composicion__modulo + .resumen-composicion__modulo { margin-top: 1.1rem; }
+.resumen-composicion__nombre { display: flex; align-items: baseline; gap: .5rem; margin: 0 0 .45rem; }
+.resumen-composicion__nombre b { color: var(--color-valor); font-size: var(--text-cuerpo); font-weight: 700; }
+.resumen-composicion__nombre span { color: var(--color-rotulo); font-size: var(--text-dato); font-weight: 700; }
+.resumen-composicion__nombre .resumen-vinculo { margin-left: auto; }
+.resumen-composicion__sin-nada { margin: 0; color: var(--color-rotulo); font-size: var(--text-dato); }
+
+.resumen-leyenda {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .5rem 1.75rem;
+  margin: .85rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+.resumen-leyenda li { display: flex; align-items: baseline; gap: .45rem; }
+.resumen-leyenda__muestra {
+  align-self: center;
+  width: .55rem;
+  height: .55rem;
+  border-radius: 50%;
+}
+.resumen-leyenda b { color: var(--color-valor); font-weight: 800; font-size: var(--text-cuerpo); font-family: var(--font-alternate); }
+.resumen-leyenda__rotulo { color: #5d6a80; font-size: var(--text-dato); }
+.resumen-leyenda small { color: #97a1b1; font-size: var(--text-dato); }
+
+/* ── En qué se va el trabajo administrativo ────────────────────────────────
+   Barras horizontales sobre el mismo eje: se comparan entre sí, no contra un
+   absoluto que nadie conoce. */
+.resumen-reparto {
+  display: flex;
+  flex-direction: column;
+  gap: .45rem;
+  margin: .9rem 0 1.25rem;
+  padding: 0;
+  list-style: none;
+}
+.resumen-reparto li {
+  display: grid;
+  grid-template-columns: minmax(8rem, 14rem) minmax(4rem, 1fr) 2rem;
+  align-items: center;
+  gap: .85rem;
+}
+.resumen-reparto__rotulo { color: #5d6a80; font-size: var(--text-dato); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.resumen-reparto__barra { display: block; height: .35rem; border-radius: 99px; background: rgba(41, 18, 66, .09); }
+.resumen-reparto__barra > span { display: block; height: 100%; min-width: .35rem; border-radius: 99px; background: var(--color-morado-claro); }
+.resumen-reparto b { color: var(--color-valor); font-weight: 800; font-size: var(--text-dato); text-align: right; }
+
+@media (max-width: 760px) {
+  .resumen-reparto li { grid-template-columns: minmax(0, 1fr) 2rem; }
+  .resumen-reparto__barra { grid-column: 1 / -1; }
+}
+
+/* ── La franja de estado: composición y cifras, lado a lado ────────────────
+   EN HORIZONTAL Y NO APILADO. Puestos uno debajo de otro, el Resumen se leía
+   como una página larga que había que recorrer; lado a lado caben en una sola
+   vista, que es lo que se pide a una consola. La composición manda —lleva el
+   gráfico— y por eso se lleva la parte mayor. */
+.resumen-panel {
+  display: grid;
+  /* LA MISMA PROPORCION QUE `.resumen-cierre`, Y ESE ES EL ARREGLO DE FONDO.
+     Esta fila iba a 1,45/1 y la de abajo a 1,6/1, así que sus columnas izquierdas
+     terminaban en verticales distintas: por eso «Ver procesos» y «Ver auditoría»,
+     alineadas cada una al extremo derecho de SU bloque, no coincidían entre sí.
+     No era un problema de los enlaces sino de que cada fila se inventaba su
+     retícula. Con una sola proporción, la página tiene una columna y las dos
+     filas se leen como parte del mismo tablero. */
+  grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr);
+  align-items: start;
+  gap: 3.25rem;
+  border-top: 1px solid var(--color-filete);
+  padding-top: 1.9rem;
+}
+
+/* Dentro de la franja, la composición ya no necesita su propia línea superior. */
+
+.resumen-panel .resumen-pulso { border-top: 0; padding-top: 0; }
+
+/* LAS CUATRO CIFRAS: DOS COLUMNAS, ALINEADAS A LA DERECHA.
+   En dos por dos centradas quedaban amontonadas y en una sola columna a la
+   izquierda competían con la composición de al lado. Alineadas a la derecha
+   comparten el borde del panel y sus cifras forman una columna que se recorre
+   de un vistazo, que es lo que se hace con una serie de números. */
+.resumen-panel .resumen-pulso {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1.6rem 2rem;
+}
+
+.resumen-panel .resumen-dato {
+  align-items: flex-end;
+  text-align: right;
+}
+
+.resumen-panel .resumen-dato__cifra { font-size: 2rem; }
+.resumen-panel .resumen-dato__rotulo { color: #5d6a80; }
+
+@media (max-width: 1100px) {
+  .resumen-panel { grid-template-columns: minmax(0, 1fr); gap: 1.75rem; }
+  .resumen-panel .resumen-pulso { grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr)); }
+}
+
+/* ── Trazabilidad y pulso técnico, lado a lado ─────────────────────────────
+   La bitácora sola dejaba media franja vacía a su derecha. */
+.resumen-cierre {
+  display: grid;
+  /* La misma proporción que `.resumen-panel`: una sola retícula para la página. */
+  grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr);
+  align-items: start;
+  gap: 3.25rem;
+}
+
+/* ── El estado técnico ─────────────────────────────────────────────────────
+   MUY GRAFICO A PROPOSITO: un anillo con las piezas en pie, un punto por
+   servicio y la latencia contra un techo explícito. «Disponible» no era un
+   estado, era el resumen de tres comprobaciones distintas. */
+
+
+.resumen-tecnico h3 {
+  margin: 0;
+  color: var(--color-prosa);
+  font-weight: 700;
+  font-size: 1.05rem;
+  font-family: var(--font-alternate);
+}
+
+.resumen-tecnico__entorno {
+  color: #8b95a7;
+  font-size: var(--text-dato);
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+}
+
+.resumen-tecnico__piezas {
+  display: flex;
+  flex-direction: column;
+  gap: .5rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.resumen-tecnico__piezas li {
+  display: grid;
+  grid-template-columns: .5rem minmax(0, auto) minmax(0, 1fr);
+  align-items: baseline;
+  gap: .55rem;
+}
+.resumen-tecnico__punto {
+  align-self: center;
+  width: .5rem;
+  height: .5rem;
+  border-radius: 50%;
+  /* Ámbar y no rojo: una pieza que no responde es algo que revisar, no un error del usuario. */
+  background: #d9a648;
+}
+.resumen-tecnico__piezas li.esta-bien .resumen-tecnico__punto { background: var(--color-verde-texto); }
+.resumen-tecnico__piezas b { color: var(--color-valor); font-size: var(--text-dato); font-weight: 800; }
+.resumen-tecnico__piezas small { color: #8b95a7; font-size: var(--text-dato); }
+
+.resumen-tecnico__sello { margin: .9rem 0 0; color: #97a1b1; font-size: var(--text-dato); }
+
+@media (max-width: 1100px) {
+  .resumen-cierre { grid-template-columns: minmax(0, 1fr); gap: 2rem; }
+}
+
+/* ── La latencia, sobre una escala con sus tramos ──────────────────────────
+   Una barra que crece no dice si diez milisegundos están bien: hace falta ver
+   contra qué. Se dibujan las tres zonas y una marca donde cae la medición, de
+   modo que el juicio se lee sin saber de números. El techo de la escala son
+   600 ms, que es donde la consola deja de ser cómoda. */
+.resumen-escala {
+  margin-top: 1.35rem;
+  border-top: 1px solid #eef0f4;
+  padding-top: 1rem;
+}
+
+.resumen-escala__cabecera {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: .75rem;
+  margin-bottom: .6rem;
+}
+.resumen-escala__rotulo { color: #5d6a80; font-size: var(--text-dato); font-weight: 700; }
+.resumen-escala__cifra {
+  color: var(--color-morado);
+  font-weight: 800;
+  font-size: 1.6rem;
+  line-height: 1;
+  font-family: var(--font-alternate);
+}
+.resumen-escala__cifra small { color: #97a1b1; font-size: .85rem; }
+
+.resumen-escala__pista {
+  position: relative;
+  display: flex;
+  overflow: visible;
+  height: .55rem;
+  border-radius: 99px;
+}
+.resumen-escala__zona { display: block; height: 100%; }
+/* Las zonas se dibujan apagadas: son el contexto, no el dato. La marca es el dato. */
+.resumen-escala__zona.es-agil { flex: 0 0 25%; border-radius: 99px 0 0 99px; background: rgba(8, 123, 62, .22); }
+.resumen-escala__zona.es-aceptable { flex: 1 1 auto; background: rgba(217, 166, 72, .25); }
+.resumen-escala__zona.es-lenta { flex: 0 0 12%; border-radius: 0 99px 99px 0; background: rgba(180, 85, 58, .25); }
+
+.resumen-escala__marca {
+  position: absolute;
+  top: 50%;
+  width: .85rem;
+  height: .85rem;
+  border: 3px solid #fff;
+  border-radius: 50%;
+  background: var(--color-verde-texto);
+  box-shadow: 0 1px 4px rgba(23, 32, 57, .28);
+  transform: translate(-50%, -50%);
+}
+.resumen-escala[data-tramo='aceptable'] .resumen-escala__marca { background: #b8860f; }
+.resumen-escala[data-tramo='lenta'] .resumen-escala__marca { background: #b4553a; }
+
+.resumen-escala__pie {
+  display: flex;
+  justify-content: space-between;
+  margin-top: .4rem;
+  color: #a4adbb;
+  font-size: var(--text-dato);
+}
+
+.resumen-escala__veredicto {
+  margin: .5rem 0 0;
+  color: var(--color-verde-texto);
+  font-size: var(--text-dato);
+  font-weight: 800;
+}
+.resumen-escala[data-tramo='aceptable'] .resumen-escala__veredicto { color: var(--color-aviso); }
+.resumen-escala[data-tramo='lenta'] .resumen-escala__veredicto { color: #9c4630; }
+
+/* ── La bitácora, con tamaños que respiran ─────────────────────────────────
+   En la columna estrecha los nombres partían a dos líneas y todo iba al mismo
+   tamaño mínimo. El autor sube al cuerpo de la escala, la acción se queda en
+   el tamaño de dato y la fila gana altura. */
+.resumen-traza__fila {
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: start;
+  gap: .2rem 1rem;
+  padding: .9rem .15rem;
+}
+.resumen-traza__quien b { display: inline; font-size: var(--text-cuerpo); }
+.resumen-traza__quien span { font-size: var(--text-dato); }
+.resumen-traza__sobre { grid-column: 1; white-space: normal; }
+/* La fecha, a la derecha y abarcando las dos filas. Sin fijar la COLUMNA se
+   colocaba sola en la primera y el registro se leía «02:06 | Webmaster PNMC». */
+.resumen-traza__cuando { grid-column: 2; grid-row: 1 / span 2; align-self: center; }
+
+/* ── El bloque técnico, con la respuesta de la API de protagonista ─────────
+   HABIA UN ANILLO «3/3 EN PIE» Y NO APORTABA: la lista de tres servicios que
+   viene justo debajo ya dice cuáles están en pie, y con más detalle —qué es
+   cada uno y en qué estado—. El anillo repetía ese dato en grande sin añadir
+   nada, y se llevaba la primera lectura del bloque.
+
+   Lo que sí responde una pregunta es cuánto tarda el sistema en contestar, así
+   que esa cifra pasa al tamaño de titular y la lista de servicios queda como
+   lo que es: la comprobación de que todo está conectado. */
+.resumen-escala {
+  margin-top: 1.1rem;
+  border-top: 0;
+  padding-top: 0;
+}
+
+.resumen-escala__cabecera {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: .1rem;
+  margin-bottom: .85rem;
+}
+.resumen-escala__rotulo { order: 2; color: #67748a; font-size: var(--text-dato); font-weight: 700; }
+.resumen-escala__cifra { order: 1; font-size: 3rem; line-height: 1; }
+.resumen-escala__cifra small { font-size: 1.05rem; }
+
+/* La lista de servicios baja debajo de la escala: es la comprobación, no el titular. */
+.resumen-tecnico__piezas {
+  margin-top: 1.35rem;
+  border-top: 1px solid #eef0f4;
+  padding-top: 1rem;
+}
+
+
+/* ── El encabezado de bloque, uno para toda la pantalla ────────────────────
+   Convivían DOS implementaciones distintas —una para el bloque prioritario y
+   otra para los demás— con alineaciones diferentes, así que las acciones de la
+   derecha caían unas a la altura del antetítulo y otras a la del título y no
+   formaban línea. Ahora es la misma clase para los cuatro.
+
+   LA ACCION SE ALINEA CON EL TITULO, no con el antetítulo: el título es la
+   línea que el ojo sigue al recorrer la pantalla, y una acción colgada del
+   renglón de arriba parece pertenecer al bloque anterior. */
+.resumen-encabezado {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  /* La acción, al extremo derecho de su bloque. Para que «Ver procesos» y «Ver
+     auditoría» caigan en la MISMA vertical, lo que hubo que arreglar no fue su
+     alineación sino la rejilla: ver `.resumen-panel` y `.resumen-cierre`. */
+  justify-content: space-between;
+  gap: .75rem 1.1rem;
+  min-height: var(--spacing-control);
+}
+
+/* La pila de texto ocupa lo suyo y la acción se va al extremo. */
+.resumen-encabezado > :first-child { min-width: 0; }
+
+/* Los títulos de bloque, al mismo peso y con el mismo respiro sobre su antetítulo. */
+.resumen-prioridad h2,
+.resumen-composicion h3,
+.resumen-traza h3,
+.resumen-tecnico h3 { margin: .25rem 0 0; }
+
+/* Y la línea que separa el encabezado de su contenido, también la misma. */
+.resumen-composicion .resumen-encabezado,
+.resumen-traza .resumen-encabezado,
+.resumen-tecnico .resumen-encabezado {
+  border-bottom: 1px solid var(--color-filete);
+  padding-bottom: .7rem;
+}
+.resumen-panel .resumen-composicion .resumen-encabezado { border-bottom: 0; padding-bottom: .2rem; }
+
+/* La etiqueta de entorno NO es una acción sino un estado del bloque, así que
+   se queda en el extremo: no compite por la lectura con el título. */
+
+
