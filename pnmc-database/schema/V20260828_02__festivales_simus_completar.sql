@@ -1,6 +1,5 @@
 /*
     PNMC · Festivales · completar el modelo de SIMUS
-    Fecha: 28 de agosto de 2026
 
     QUE ES ESTO Y POR QUE EXISTE
     ----------------------------

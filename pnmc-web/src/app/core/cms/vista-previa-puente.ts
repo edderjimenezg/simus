@@ -5,14 +5,14 @@ import { TextosWebService } from '../services/textos-web.service';
  * EL PUENTE QUE HACE «EN VIVO» LA PREVISUALIZACION DEL PANEL.
  *
  * El problema que resuelve, con su dato: `TextosWebService.getWebText` devuelve
- * `publicado ?? valor de fabrica` (textos-web.service.ts:195). El sitio publico
+ * `publicado ?? valor de fabrica` (textos-web.service.ts). El sitio publico
  * no conoce los borradores, y no debe conocerlos. Pero el panel carga la pagina
  * real dentro de un marco para previsualizarla, y ahi si hace falta ver lo que
  * la editora acaba de teclear y todavia no ha publicado.
  *
  * DESDE EL 30 DE AGOSTO DE 2026 TAMBIEN LAS IMAGENES. `getWebImage` tiene el
  * mismo comportamiento y por el mismo motivo: `serverImages` solo trae lo
- * publicado (textos-web.service.ts:234), asi que una portada recien subida no se
+ * publicado (textos-web.service.ts), asi que una portada recien subida no se
  * veia en la previsualizacion hasta despues de publicarla, que es justo al reves
  * de para lo que sirve previsualizar.
  *
@@ -139,7 +139,7 @@ export class TextosWebConVistaPrevia extends TextosWebService {
    * AQUI SI SE DESCARTA LA CADENA VACIA, al reves que en `getWebText`, y no es una
    * incoherencia: un texto vacio es una decision editorial legitima —dejar un rotulo en
    * blanco—, pero un `<img src="">` no deja un hueco, hace que el navegador vuelva a pedir
-   * la URL de la pagina. `textos-web.service.ts:234` protege esa propiedad para el visitante
+   * la URL de la pagina. `textos-web.service.ts` protege esa propiedad para el visitante
    * y la previsualizacion no la puede romper por la puerta de atras.
    */
   override getWebImage(key: string): string {

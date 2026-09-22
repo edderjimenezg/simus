@@ -1,6 +1,5 @@
 /*
     PNMC · Revisión institucional campo por campo, para cualquier proceso del Ecosistema
-    Fecha: 16 de septiembre de 2026
 
     QUE ES ESTO
     -----------

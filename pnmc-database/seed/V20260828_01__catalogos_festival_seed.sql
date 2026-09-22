@@ -1,6 +1,5 @@
 /*
     PNMC · Semilla · Los nueve catalogos del Festival, y las regiones OCAD
-    Fecha: 28 de agosto de 2026
 
     DE DONDE SALEN ESTOS VALORES
     ----------------------------

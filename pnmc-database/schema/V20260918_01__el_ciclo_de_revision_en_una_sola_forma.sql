@@ -1,6 +1,5 @@
 /*
     PNMC · El ciclo de revisión queda en una sola forma
-    Fecha: 18 de septiembre de 2026
 
     QUE ES ESTO
     -----------

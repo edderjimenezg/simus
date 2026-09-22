@@ -9,7 +9,7 @@ namespace PNMC.Api.Tests;
 /// </summary>
 /// <remarks>
 /// <para>
-/// EL HALLAZGO. La auditoría encontró que comprobar el testigo de una
+/// LA REGLA. La auditoría encontró que comprobar el testigo de una
 /// petición estaba escrito <b>catorce veces</b>, bajo seis nombres distintos —
 /// <c>ValidarAntiforgeryAsync</c>, <c>Csrf</c>, <c>TestigoValido</c>, <c>TestigoValidoAsync</c>,
 /// <c>EsPeticionValidaAsync</c> e <c>IsValidAntiforgeryRequestAsync</c>—, y que normalizar un

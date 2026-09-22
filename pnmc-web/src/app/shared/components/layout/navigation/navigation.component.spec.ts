@@ -177,7 +177,7 @@ describe('NavigationComponent ecosystem navigation', () => {
     // en blanco**. Esta es la que no.
     //
     // El riesgo es el mismo hoy: `nav_mapa` tampoco existe —se renombró a
-    // `nav_ecosistema` (`registro-de-textos-web.ts:619`)—, así que este enlace vive
+    // `nav_ecosistema` (`registro-de-textos-web.ts`)—, así que este enlace vive
     // igual de `rotuloFijo`.
     const mapa = component.resolvedNavigationLinks().find(link => link.id === PAGE_IDS.mapa);
 

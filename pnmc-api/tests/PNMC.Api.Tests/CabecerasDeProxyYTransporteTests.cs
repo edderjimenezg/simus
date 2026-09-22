@@ -17,7 +17,7 @@ namespace PNMC.Api.Tests;
 /// </summary>
 /// <remarks>
 /// <para>
-/// EL HALLAZGO QUE ORIGINA ESTE FICHERO. Cinco politicas de limite de tasa reparten su cupo por
+/// LA REGLA QUE ORIGINA ESTE FICHERO. Cinco politicas de limite de tasa reparten su cupo por
 /// <c>Connection.RemoteIpAddress</c>. Detras de un proxy que no se procesa, esa direccion es
 /// SIEMPRE la del proxy: las cinco particiones colapsan en una sola y el cupo pensado para
 /// frenar a un atacante se lo gasta el trafico legitimo del pais entero. Es decir, el limite

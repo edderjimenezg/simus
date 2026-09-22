@@ -26,7 +26,7 @@ export interface ImagenEnVivo {
   url: string | null;
   /**
    * Las claves que en el sitio rotan con esta. La portada del Home elige una de cuatro al
-   * azar en cada visita (home.component.ts:57), así que sin esto la previsualización enseña
+   * azar en cada visita (home.component.ts), así que sin esto la previsualización enseña
    * la que quiera y la editora no puede mirar la que está cambiando.
    */
   rotanConElla: string[];

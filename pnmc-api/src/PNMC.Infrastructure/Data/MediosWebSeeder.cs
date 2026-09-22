@@ -76,7 +76,7 @@ public static class MediosWebSeeder
                 x.SuggestedWidth,
                 x.SuggestedHeight,
                 // LA VERSIÓN SE TRAE AUNQUE NO SE REFRESQUE, y no es un descuido: `Version` es
-                // token de concurrencia (PnmcDbContext.cs:1558), así que EF la mete en el WHERE
+                // token de concurrencia (PnmcDbContext.cs), así que EF la mete en el WHERE
                 // del UPDATE. Sin ella el fantasma sale con `Version = 0`, ninguna fila casa y el
                 // arranque muere. Ver el comentario del refresco.
                 x.Version,

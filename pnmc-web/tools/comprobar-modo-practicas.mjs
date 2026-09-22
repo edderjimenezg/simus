@@ -2,7 +2,7 @@
 /**
  * Comprueba que el Modo de Prácticas e Influencia dibuja cada proceso DONDE ESTÁ.
  *
- * EL DEFECTO QUE CIERRA. `thematicPoints` no usaba ninguna posición: la calculaba. Tomaba
+ * POR QUE EXISTE. `thematicPoints` no usaba ninguna posición: la calculaba. Tomaba
  * el centroide del DEPARTAMENTO y le sumaba una espiral cuyo ángulo y radio salían del
  * ÍNDICE DEL REGISTRO EN EL ARRAY:
  *

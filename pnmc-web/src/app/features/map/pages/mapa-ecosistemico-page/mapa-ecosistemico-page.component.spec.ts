@@ -6,7 +6,7 @@ import * as MapDomain from '../../domain/map-domain';
 import { MapaEcosistemicoPageComponent } from './mapa-ecosistemico-page.component';
 
 /**
- * PNMC-036 — `fetchMapCountsBundle` (core/services/map-data.service.ts:50-62) emite
+ * PNMC-036 — `fetchMapCountsBundle` (core/services/map-data.service.ts-62) emite
  * diez claves y ninguna es `redesCounts` ni `lutieresCounts`, asi que el componente
  * escribia `undefined` en esos dos signals. De los tres puntos que los indexaban solo
  * uno tenia guarda: al activar la capa "Redes de Documentacion" o "Lutieres",

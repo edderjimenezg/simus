@@ -204,7 +204,7 @@ export class TextosWebService {
     // compilado y borrar un texto no lo borraba (PNMC-040).
     //
     // Los dos casos SI se distinguen, y por eso el cambio es seguro: el endpoint
-    // publico filtra `Publicado != null` (ContenidoWebEndpoints.cs:59), de modo que
+    // publico filtra `Publicado != null` (ContenidoWebEndpoints.cs), de modo que
     // una clave sin publicar no viaja en el diccionario y aqui llega `undefined`.
     // Una cadena vacia solo puede venir de una publicacion deliberada, y se
     // respeta igual que se respeta una nomina publicada vacia.

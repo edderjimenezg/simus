@@ -152,7 +152,7 @@ describe('SelectorMultipleComponent', () => {
 /**
  * Escape no puede cerrar la ventana que contiene al desplegable.
  *
- * <b>EL DEFECTO QUE CIERRA.</b> Desde que toda ventana lleva `appDialogo` —15 de septiembre de
+ * <b>POR QUE EXISTE.</b> Desde que toda ventana lleva `appDialogo` —15 de septiembre de
  * 2026— la ventana también cierra con Escape. Sin detener el evento, una sola pulsación cerraba el
  * desplegable Y la ventana: quien abría las prácticas de un mercado y pulsaba Escape perdía el
  * formulario a medio llenar. Medido en el navegador.

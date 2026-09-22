@@ -1,6 +1,5 @@
 /*
     PNMC · El módulo de un registro se dice de una sola manera
-    Fecha: 21 de septiembre de 2026
 
     QUE ES ESTO
     -----------

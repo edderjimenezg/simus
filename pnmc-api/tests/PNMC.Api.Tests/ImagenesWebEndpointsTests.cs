@@ -395,7 +395,7 @@ public sealed class ImagenesWebEndpointsTests : IClassFixture<TestWebApplication
 
     /// <summary>
     /// PUBLICAR NO RESUCITA UNA CLAVE RETIRADA. Es el mismo defecto que
-    /// <c>ContenidoWebEndpoints.cs:328</c> ya cierra para los textos: si subir con
+    /// <c>ContenidoWebEndpoints.cs</c> ya cierra para los textos: si subir con
     /// <c>publish=true</c> republicara, el botón «retirar» sería reversible por accidente.
     /// </summary>
     [Fact]

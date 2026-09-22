@@ -49,8 +49,8 @@ const ESTADOS_DEL_FESTIVAL: Readonly<Record<string, EstadoFestival>> = {
 
 /**
  * Estados de la propuesta de cambios. Los escribe
- * `RevisionInstitucionalPropuestasFestivalEndpoints.cs:177-180` («AjustesSolicitados»,
- * «Rechazada», «Publicada»), `PropuestasCambioFestivalExternosEndpoints.cs:79` («Borrador») y
+ * `RevisionInstitucionalPropuestasFestivalEndpoints.cs-180` («AjustesSolicitados»,
+ * «Rechazada», «Publicada»), `PropuestasCambioFestivalExternosEndpoints.cs` («Borrador») y
  * `:224` («EnRevision»). El femenino es deliberado y no se corrige aquí: la propuesta no es el
  * Festival.
  */

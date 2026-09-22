@@ -190,7 +190,7 @@ interface FichaDelDirectorio {
 }
 
 // Forma cruda con la que `fetchModuleRecords` entrega Redes y Lutieres
-// (backend-data.service.ts:251-293) y forma normalizada que consume la pagina.
+// (backend-data.service.ts-293) y forma normalizada que consume la pagina.
 interface RawNetworkRecord {
   id?: string;
   fields?: Record<string, unknown>;
@@ -1364,7 +1364,7 @@ export class MapaEcosistemicoPageComponent implements OnInit, OnDestroy, AfterVi
   schoolCounts = signal<any>({});
   marketCounts = signal<any>({});
   // PNMC-036 — `fetchMapCountsBundle` nunca emitio `redesCounts` ni `lutieresCounts`
-  // (map-data.service.ts:50-62 devuelve diez claves y ninguna es esta). Cuando eran
+  // (map-data.service.ts-62 devuelve diez claves y ninguna es esta). Cuando eran
   // signals escribibles, `.set(bundle.redesCounts)` los dejaba en `undefined` y
   // `estiloDelDepartamento` reventaba al indexarlos. Derivarlos de los registros normalizados es
   // lo que hace que "N registros" y "% cobertura" hablen de los mismos datos.

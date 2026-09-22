@@ -1,6 +1,5 @@
 /*
     SIMUS · Referencias históricas de Festivales
-    Fecha: 4 de septiembre de 2026
 
     Sustituye la tabla genérica EntidadesRegistrosFuente en el perfil limpio.
     La única procedencia histórica vigente respalda coincidencias entre una

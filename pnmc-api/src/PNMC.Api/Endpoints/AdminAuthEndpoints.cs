@@ -32,7 +32,7 @@ public static class AdminAuthEndpoints
 
         // ANONIMA A PROPOSITO (3 de 39). Es la puerta: exigir sesion para poder iniciar
         // sesion es un candado con la llave dentro. La llama AdminService.loginAdmin
-        // (pnmc-web/src/app/core/services/admin.service.ts:28) cuando todavia no hay
+        // (pnmc-web/src/app/core/services/admin.service.ts) cuando todavia no hay
         // cookie. No queda indefensa: el propio manejador valida correo y contrasena,
         // rechaza al usuario inactivo y al del rol "externo" con 401, y solo entonces
         // firma la cookie institucional.
@@ -175,7 +175,7 @@ public static class AdminAuthEndpoints
 
         // ANONIMA A PROPOSITO (4 de 39). Aunque el nombre suene administrativo, es la
         // sonda de sesion del SPA: AdminService.fetchAdminMe
-        // (pnmc-web/src/app/core/services/admin.service.ts:34) la llama al arrancar la
+        // (pnmc-web/src/app/core/services/admin.service.ts) la llama al arrancar la
         // consola, justo para averiguar si hay sesion, es decir cuando todavia puede no
         // haberla. Su respuesta no depende de que la ruta este abierta: el manejador
         // resuelve el usuario desde el ClaimsPrincipal y devuelve 401 si no hay ninguno

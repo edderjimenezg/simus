@@ -1,7 +1,5 @@
 /*
     PNMC · Ecosistema · La ficha publica lleva su contacto
-    Fecha: 25 de agosto de 2026
-    Bloque B6 de docs/Documentacion/ecosistema/PLAN-DE-TRABAJO-ORGANIZACIONES.md
 
     QUE HACE
     --------
@@ -22,7 +20,7 @@
     el circuito de revision entero. No era un agujero de seguridad; era una excepcion silenciosa a
     la regla que sostiene todo el modelo de versiones.
 
-    `LecturaFestivalesPublicados.cs:87` lo dejaba escrito con un `??`:
+    `LecturaFestivalesPublicados.cs` lo dejaba escrito con un `??`:
 
         version?.CorreoContacto ?? festival.ContactEmail
 

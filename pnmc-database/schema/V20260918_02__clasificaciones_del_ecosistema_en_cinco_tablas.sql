@@ -1,6 +1,5 @@
 /*
     PNMC · Las clasificaciones del Ecosistema dejan de tener una tabla por proceso
-    Fecha: 18 de septiembre de 2026
 
     QUE ES ESTO
     -----------

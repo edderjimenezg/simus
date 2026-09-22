@@ -1,6 +1,5 @@
 /*
     SIMUS · Perfil local limpio
-    Fecha: 4 de septiembre de 2026
 
     Este guion no altera una base existente. Solo opera sobre la instalación
     local nueva PNMC_SIMUS_LIMPIO, creada por scripts/base-limpia-local.sh.

@@ -6,12 +6,12 @@
    plantillas: nueve de las dieciseis viven en ficheros de configuracion de TypeScript. Medido con
    grep sobre pnmc-web/src/app:
 
-     core/services/media-library.config.ts:29,30,31,32     4 portadas rotatorias del Home
+     core/services/media-library.config.ts,30,31,32     4 portadas rotatorias del Home
      features/pnmc/.../sobre-el-pnmc-page.component.html:7          hero, atributo bgImage literal
      features/content/.../ejes-page.component.html:7                hero, atributo bgImage literal
      features/ecosistema/.../ecosistema-home-page.component.html:2  hero, atributo bgImage literal
-     core/services/ejes-data.config.ts:32, :63, :132       3 videoImg, uno por eje
-     core/cms/resolve-strategy.ts:63, :72                  2 imagenes de estrategia
+     core/services/ejes-data.config.ts, :63, :132       3 videoImg, uno por eje
+     core/cms/resolve-strategy.ts, :72                  2 imagenes de estrategia
      shared/.../navigation.component.html:14               pnmc-blanco.png
      shared/.../footer.component.html:7, :10               logo-gov-co.png, gov-co-footer.png
      features/external-access/external-access-page.component.html:22,141,143,145  las cuatro marcas
@@ -23,7 +23,7 @@
    El numero «quince» que circulo antes no cerraba: sale quince solo si se deja fuera una de las
    cuatro marcas, y cual dejar fuera es una decision, no un hecho.
 
-   Existia la interfaz WebMediaRecord (web-texts.service.ts:51) y una senal privada `media` (:100)
+   Existia la interfaz WebMediaRecord (web-texts.service.ts) y una senal privada `media` (:100)
    que lee localStorage y que NINGUN componente consume: solo alimenta el respaldo de
    exportContent. No es el mecanismo que esta tabla reemplaza; es un resto.
 
@@ -33,7 +33,7 @@
    bytes en un directorio, un .bak restaurado sobre un disco vacio deja dieciseis filas apuntando a
    archivos que no existen y el sitio pierde las imagenes sin decir por que. El precedente propio
    del repositorio va en la misma direccion: las fotografias del equipo viven en base64 dentro de
-   dbo.EquipoWeb (WebTeamContract.MaxPhotoChars = 300_000, WebTeamContract.cs:53).
+   dbo.EquipoWeb (WebTeamContract.MaxPhotoChars = 300_000, WebTeamContract.cs).
 
    POR QUE varbinary Y NO base64 EN nvarchar(max)
    ----------------------------------------------
@@ -227,12 +227,12 @@ GO
    el borrador—, igual que ContenidoWebHistorial.Valor.
 
    LO QUE CUESTA: la poda vigente conserva 6 entradas por clave (PodaDelHistorialContenidoWeb.Tope,
-   PodaDelHistorialContenidoWeb.cs:49). 16 x 6 x 2 MiB son 192 MiB de techo y unos 24 MB realistas.
+   PodaDelHistorialContenidoWeb.cs). 16 x 6 x 2 MiB son 192 MiB de techo y unos 24 MB realistas.
 
    SIN LA ACCION 'importado', y no es un olvido: el respaldo JSON del panel no lleva imagenes, y el
    importador ya lo declara informando `entradasDeMedios` en su bloque de no importado
-   (WebContentImportEndpoints.cs:339). Anadir el valor prometeria un camino que no existe. Los
-   otros cuatro son los de WebCmsGuards.cs:50-53.
+   (WebContentImportEndpoints.cs). Anadir el valor prometeria un camino que no existe. Los
+   otros cuatro son los de WebCmsGuards.cs-53.
    ------------------------------------------------------------------------------------------------ */
 IF OBJECT_ID(N'dbo.MediosWebHistorial', N'U') IS NULL
 BEGIN

@@ -629,7 +629,7 @@ export const WEB_TEXT_GROUPS: DefinicionDeGrupoDeTexto[] = [
     // tenia seis campos —tres de «Actores» y tres de «Procesos»— el prefijo distinguia un
     // bloque del otro. Al quedarse en tres, los tres empezaban por «Procesos - » delante del
     // titulo del formulario que ya dice «Procesos»: prefijo constante, que es justo lo que
-    // `registro-de-textos-web.spec.ts:122` prohibe.
+    // `registro-de-textos-web.spec.ts` prohibe.
     id: 'ecosistema_categories', label: 'Directorios públicos', section: 'Ecosistema', fields: [
       field('ecosistema_processes_tag', 'Antetítulo', 40, 'Directorios públicos'),
       field('ecosistema_processes_title', 'Título', 120, 'Explora los registros'),

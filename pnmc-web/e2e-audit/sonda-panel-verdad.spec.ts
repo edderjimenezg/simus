@@ -11,7 +11,7 @@ import { dentroDeLaVentana } from './dentro-de-la-ventana';
  * responde desde el propio navegador con un 500.
  *
  * El defecto que defienden, medido el 2026-08-21 en
- * `admin-governance-panel.component.ts:172-176`: el callback de `error`
+ * `admin-governance-panel.component.ts-176`: el callback de `error`
  * llamaba al mismo `updateLocal*` que el de `next`. El usuario leia
  * «El registro duplicado ha sido fusionado correctamente en base de datos»
  * cuando el servidor habia devuelto un error, la fila cambiaba en pantalla, y
@@ -274,7 +274,7 @@ test('el Dashboard no inventa cobertura territorial', async ({ page }) => {
   // La seccion con los departamentos vive bajo `@if (userRole === 'lider')`.
   // `lider` es un rol FANTASMA: no esta declarado en ADMIN_ROLES y sin embargo
   // se usa en cuatro sitios del codigo, incluido el usuario de respaldo de
-  // `admin-shell-page.component.ts:167`. Se fuerza por interceptacion, que es
+  // `admin-shell-page.component.ts`. Se fuerza por interceptacion, que es
   // la unica forma de llegar a ese camino sin crear una cuenta.
   // Tambien el login: la sesion se fija con SU respuesta, no con la de /me.
   await page.route('**/api/v1/admin/auth/login**', async (route) => {
@@ -334,7 +334,7 @@ test('el rol fantasma «lider» no revienta los paneles de registros', async ({ 
   test.setTimeout(4 * 60_000);
 
   // `lider` no existe en ADMIN_ROLES, pero se usa en cuatro sitios del codigo
-  // —incluido el usuario de respaldo de admin-shell-page.component.ts:167—.
+  // —incluido el usuario de respaldo de admin-shell-page.component.ts—.
   // Para ese rol `getModulesForRole` devuelve [], `getSelectedModule` devuelve
   // undefined, y la plantilla hacia `{{ module.label }}` sin proteger.
   const forzarLider = async (route: any) => {

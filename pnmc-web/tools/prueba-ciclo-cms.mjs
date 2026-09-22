@@ -133,7 +133,7 @@ if (!campo) {
 // comprobación ingenua esta orden se plantaba ante `agenda_ui`, un grupo
 // perfectamente publicado que solo arrastra dos retiradas. La API tampoco las
 // republicaría: `canPublish = request.Publish && row.Retired is null`
-// (`WebContentEndpoints.cs:329`).
+// (`WebContentEndpoints.cs`).
 const sinPublicar = previo.filter((f) => f.state === 'no_publicado');
 if (sinPublicar.length && !PRIMERA_VEZ) {
   console.error(`El grupo '${GRUPO}' tiene ${sinPublicar.length} de ${previo.length} campos SIN PUBLICAR:`);

@@ -1,6 +1,5 @@
 /*
     PNMC · Comunicaciones · Suscripciones al boletin
-    Fecha: 28 de agosto de 2026
 
     QUE ES ESTO
     -----------

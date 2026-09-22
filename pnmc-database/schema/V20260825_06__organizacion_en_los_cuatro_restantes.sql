@@ -1,7 +1,5 @@
 /*
     PNMC · Ecosistema · Ningun registro sin quien responda por el
-    Fecha: 25 de agosto de 2026
-    Bloque B9 de docs/Documentacion/ecosistema/PLAN-DE-TRABAJO-ORGANIZACIONES.md
 
     QUE HACE
     --------

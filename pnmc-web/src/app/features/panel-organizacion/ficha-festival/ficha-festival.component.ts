@@ -389,7 +389,7 @@ export class FichaFestivalComponent implements OnInit, OnDestroy {
    * La cabecera del Festival admite cambios.
    *
    * SON LOS DOS ESTADOS QUE ACEPTA EL PUT DEL FESTIVAL —`EsEditable`,
-   * `FestivalesExternosEndpoints.cs:482-483`—; en cualquier otro contesta 409. En alta no hay
+   * `FestivalesExternosEndpoints.cs-483`—; en cualquier otro contesta 409. En alta no hay
    * cabecera todavía, así que se da por editable: es lo que se está creando.
    */
   readonly cabeceraEditable = computed(() => {

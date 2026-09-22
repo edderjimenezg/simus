@@ -106,7 +106,7 @@ export const WEB_IMAGE_GROUPS: DefinicionDeGrupoDeImagenes[] = [
     label: 'Portadas rotatorias del Home',
     section: 'Home',
     images: [
-      // Las cuatro de ORIGINAL_MEDIA_LIBRARY (catalogo-de-imagenes-de-galeria.ts:29-32). El
+      // Las cuatro de ORIGINAL_MEDIA_LIBRARY (catalogo-de-imagenes-de-galeria.ts-32). El
       // Home las alterna: la primera es la que se ve al entrar.
       image('home_hero_1', 'Portada 1 (la primera que se ve)', 'fondo', true, 'Musicos en escena', 1670, 1044, UNSPLASH_HOME),
       image('home_hero_2', 'Portada 2', 'fondo', true, 'Presentacion musical', 1670, 1044, UNSPLASH_ESCENA),
@@ -119,7 +119,7 @@ export const WEB_IMAGE_GROUPS: DefinicionDeGrupoDeImagenes[] = [
     label: 'Fotografía de «Huella y evolución»',
     section: 'Home',
     images: [
-      // pnmc-preview-section.component.ts:26 (`IMAGENES_DE_GALERIA[5]`). Hueco medido con el
+      // pnmc-preview-section.component.ts (`IMAGENES_DE_GALERIA[5]`). Hueco medido con el
       // navegador: 676x275 en 1280, 1440, 1600 y 1920 —cuelga de `content-wrapper`, que satura
       // en 1280—, asi que es el unico marco de la portada que no se mueve nunca.
       image('home_identidad_media', 'Fotografía de «Huella y evolución»', 'fondo', true,
@@ -131,7 +131,7 @@ export const WEB_IMAGE_GROUPS: DefinicionDeGrupoDeImagenes[] = [
     label: 'Fotos de «Rutas de Acción Territorial»',
     section: 'Home',
     images: [
-      // strategies-data.config.ts:20,30,40,50,60,70,80,90. El orden es el de las tarjetas en
+      // strategies-data.config.ts,30,40,50,60,70,80,90. El orden es el de las tarjetas en
       // pantalla, no el de los indices de la galeria.
       image('home_ruta_1', 'Ruta 1 · Celebra la Música', 'fondo', true, 'Celebra la Música', 491, 318, '/assets/home/ruta-1.webp'), // copia de G[2],
       image('home_ruta_2', 'Ruta 2 · Territorios Sonoros', 'fondo', true, 'Territorios Sonoros', 491, 318, '/assets/home/ruta-2.webp'), // copia de G[4],
@@ -148,7 +148,7 @@ export const WEB_IMAGE_GROUPS: DefinicionDeGrupoDeImagenes[] = [
     label: 'Fondos del banner deslizante',
     section: 'Home',
     images: [
-      // home-media-banner.component.ts:33,41,49. El marco declarado es el MAS ANCHO del rango de
+      // home-media-banner.component.ts,41,49. El marco declarado es el MAS ANCHO del rango de
       // escritorio —1920x520, relacion 3,69—: el banner ocupa el ancho entero de la ventana y su
       // alto es fijo, de modo que la relacion va de 2,46 a 1280 hasta 3,69 a 1920.
       image('home_banner_1', 'Banner 1 · Sé parte del ecosistema', 'fondo', true, 'Público en un auditorio', 1920, 520, '/assets/home/banner-1.webp'), // copia de G[0],
@@ -161,7 +161,7 @@ export const WEB_IMAGE_GROUPS: DefinicionDeGrupoDeImagenes[] = [
     label: 'Fotos de los procesos del Ecosistema',
     section: 'Home',
     images: [
-      // mapa-ecosistemico-preview.component.ts:61 (`IMAGENES_DE_GALERIA[6 + index]`), en el
+      // mapa-ecosistemico-preview.component.ts (`IMAGENES_DE_GALERIA[6 + index]`), en el
       // orden de `CATEGORIAS_ECOSISTEMA` filtrado por `proceso`. Se pintan al 30 % de opacidad
       // sobre #0f172b, asi que una foto clara se ve casi blanca.
       image('home_eco_1', 'Proceso 1 · Escuelas de música', 'fondo', true, 'Escuelas de música', 405, 208, '/assets/home/eco-1.webp'), // copia de G[6],
@@ -191,7 +191,7 @@ export const WEB_IMAGE_GROUPS: DefinicionDeGrupoDeImagenes[] = [
       /*
         LAS ONCE ULTIMAS RANURAS DE LAS 45 MEDIDAS EL 29 DE AGOSTO DE 2026 — cinco aqui y seis en
         el marco normativo. Salian de `IMAGENES_DE_GALERIA` con el indice a mano en
-        `sobre-el-pnmc-page.component.ts:59` y `:70`: [11..15] y [16, 17, 18, 0, 1, 3].
+        `sobre-el-pnmc-page.component.ts` y `:70`: [11..15] y [16, 17, 18, 0, 1, 3].
 
         EL MARCO ES EL DE LA TARJETA ABIERTA. Medido con el navegador en 1280, 1440, 1600 y 1920:
         700x398 siempre, porque la fila satura en su contenedor. Plegada mide 117x398, relacion
@@ -248,7 +248,7 @@ export const WEB_IMAGE_GROUPS: DefinicionDeGrupoDeImagenes[] = [
     label: 'Imagenes de los ejes',
     section: 'Ejes',
     images: [
-      // Los tres videoImg de ejes-data.config.ts:32, :63 y :132.
+      // Los tres videoImg de ejes-data.config.ts, :63 y :132.
       image('eje_01_media', 'Imagen del eje 1', 'fondo', true, 'Imagen del primer eje', 1280, 720, UNSPLASH_CAMPO),
       image('eje_02_media', 'Imagen del eje 2', 'fondo', true, 'Imagen del segundo eje', 1280, 720, UNSPLASH_ESCENA),
       image('eje_03_media', 'Imagen del eje 3', 'fondo', true, 'Imagen del tercer eje', 1280, 720, UNSPLASH_CAMPO),
@@ -259,7 +259,7 @@ export const WEB_IMAGE_GROUPS: DefinicionDeGrupoDeImagenes[] = [
     label: 'Imagenes de las estrategias',
     section: 'Estrategias',
     images: [
-      // resolve-strategy.ts:63 y :72.
+      // resolve-strategy.ts y :72.
       image('estrategia_celebra_media', 'Imagen de «Celebra la Musica»', 'fondo', true, 'Celebra la Musica', 1440, 702, UNSPLASH_CELEBRA),
       image('estrategia_territorios_media', 'Imagen de «Territorios Sonoros»', 'fondo', true, 'Territorios Sonoros', 1440, 702, UNSPLASH_TERRITORIOS),
     ],
@@ -573,7 +573,7 @@ export const PRESENTACION_NEUTRA: PresentacionDeLaRanura = {
  * HAY UN SOLO GRUPO, y el banner no esta en el. Las tres diapositivas se turnan solas cada pocos
  * segundos, asi que la que se acaba de cambiar aparece sin espejar nada: espejarla taparia las
  * otras dos y haria imposible mirar el banner entero. La portada del Home si entra porque el
- * sorteo es UNA VEZ POR VISITA (home.component.ts:57): sin espejar, recargar el marco para ver la
+ * sorteo es UNA VEZ POR VISITA (home.component.ts): sin espejar, recargar el marco para ver la
  * portada 2 sale a cara o cruz.
  */
 export const ROTAN_JUNTAS: readonly (readonly string[])[] = [

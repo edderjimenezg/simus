@@ -3,7 +3,7 @@ import * as MapDomain from './map-domain';
 /**
  * Donde se coloca la tarjeta de procesos de un territorio.
  *
- * EL DEFECTO QUE CIERRA. Pulsar un municipio abria un modal de 560 px centrado sobre un
+ * POR QUE EXISTE. Pulsar un municipio abria un modal de 560 px centrado sobre un
  * velo con desenfoque: para leer los procesos de Amalfi habia que perder de vista Amalfi
  * y el mapa entero. Pedido por el usuario: «la ventana emergente
  * cuando de click no debe quitar el mapa, debe salir mas pequena alli justo al lado».

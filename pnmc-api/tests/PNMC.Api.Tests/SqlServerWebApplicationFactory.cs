@@ -58,7 +58,7 @@ public sealed class SqlServerWebApplicationFactory : WebApplicationFactory<Progr
             services.RemoveAll<PNMC.Infrastructure.Correo.IEnviadorDeCorreo>();
             services.AddScoped<PNMC.Infrastructure.Correo.IEnviadorDeCorreo, EnviadorQueAbreElEnlace>();
 
-            // CON REINTENTOS, COMO PRODUCCION. DependencyInjection.cs:41 registra el contexto con
+            // CON REINTENTOS, COMO PRODUCCION. DependencyInjection.cs registra el contexto con
             // `EnableRetryOnFailure(5)`, y eso cambia una regla de EF: una transaccion iniciada
             // con `BeginTransactionAsync` fuera de `CreateExecutionStrategy().ExecuteAsync`
             // lanza en el primer SaveChangesAsync. Hasta el 23 ago 2026 este arnes NO

@@ -69,7 +69,7 @@ describe('el panel de Noticias distingue publicada de visible', () => {
 
     const acciones = componente.accionesDe(programada).map(accion => accion.id);
 
-    // EL DEFECTO QUE CIERRA: la noticia está guardada como publicada, así que la consola ofrecía
+    // POR QUE EXISTE: la noticia está guardada como publicada, así que la consola ofrecía
     // «Ver en el portal» y ese enlace devolvía un 404 —la lectura pública no la enseña hasta su
     // fecha—. Una acción que lleva a una vista vacía es justo lo que el proyecto no admite.
     expect(acciones).not.toContain('ver');

@@ -55,7 +55,7 @@ export const MEDIA_LIBRARY = { ...ORIGINAL_MEDIA_LIBRARY };
   y no lo actualizaria nunca; el sintoma seria «publique y no cambio».
 
   `MEDIA_LIBRARY` se queda porque la galeria lo usa como imagen de respaldo de un
-  album sin portada (galeria-page.component.ts:207), y eso no es una ranura de
+  album sin portada (galeria-page.component.ts), y eso no es una ranura de
   diseno administrable.
 */
 

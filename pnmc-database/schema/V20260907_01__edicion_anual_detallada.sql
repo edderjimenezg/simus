@@ -1,6 +1,5 @@
 /*
     SIMUS · Festival · Edición anual detallada
-    Fecha: 07 de septiembre de 2026
 
     Separa los datos de una realización anual del perfil público versionado.
     Es aditiva y segura para una base vacía: no copia ni borra filas históricas.

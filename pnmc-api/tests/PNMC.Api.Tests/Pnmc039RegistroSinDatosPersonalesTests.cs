@@ -13,7 +13,7 @@ namespace PNMC.Api.Tests;
 /// <summary>
 /// PNMC-039. El registro del API no puede llevar datos personales en claro.
 /// <para>
-/// EL HALLAZGO, VERIFICADO ANTES DE TOCAR NADA: un barrido de los 30 ficheros de
+/// LA REGLA, VERIFICADO ANTES DE TOCAR NADA: un barrido de los 30 ficheros de
 /// <c>Endpoints/</c> no encontro ni una sentencia de registro de negocio, ni una metrica, ni una
 /// traza. Hoy eso significa que no se puede depurar. El dia del lanzamiento significa que no se
 /// puede responder a nadie: ya paso esta misma semana, cuando para archivar un expediente hubo

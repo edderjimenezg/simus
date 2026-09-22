@@ -10,9 +10,7 @@
 -- salida de la siembra y estorba a quien busca un error de verdad entre cien lineas.
 --
 --   - La PARTE 1 es la seccion 10 de
---     docs/Documentacion/migracion-simus/scripts/01-usuarios-y-permisos.sql.
 --   - La PARTE 2 es la PARTE B de
---     docs/Documentacion/migracion-simus/scripts/03-catalogos.sql, que ya decia de si misma
 --     que su sitio era este: «cuando la PARTE A se promueva a pnmc-database/schema/, ESTA
 --     PARTE NO VIAJA CON ELLA».
 --
@@ -44,8 +42,8 @@ WHERE NOT EXISTS (SELECT 1 FROM dbo.UsuariosRoles AS ur WHERE ur.IdUsuario = u.I
     LA REGLA DE EXCLUSIVIDAD DE 'externo', QUE LA BASE NO PUEDE IMPONER Y HAY QUE VIGILAR.
 
     Un usuario con {externo, webmaster} pasaria LAS DOS puertas: la institucional
-    (AdminAuthEndpoints.cs:131, que con N:M pasa a ser "alguno de sus roles es interno") y la
-    externa (ExternalAuthEndpoints.cs:188, que pasa a ser "contiene externo") [V].  La misma
+    (AdminAuthEndpoints.cs, que con N:M pasa a ser "alguno de sus roles es interno") y la
+    externa (ExternalAuthEndpoints.cs, que pasa a ser "contiene externo") [V].  La misma
     persona tendria a la vez la cookie pnmc.admin y la pnmc.external, con dos ambitos declarados
     distintos, y ninguna politica lo prohibe.  Eso no es "mas roles": es una puerta nueva.  Y
     D12.1 lo dice sin ambiguedad: si un rol nuevo abriera algo, es un defecto, no una funcion.
@@ -54,7 +52,7 @@ WHERE NOT EXISTS (SELECT 1 FROM dbo.UsuariosRoles AS ur WHERE ur.IdUsuario = u.I
     una funcion escalar dentro de un CHECK -SQL Server lo admite- y NO se hace: esa construccion
     no se reevalua cuando cambia la OTRA fila, de modo que da por buena justamente la combinacion
     que pretende impedir.  Una restriccion que se cree cumplida y no lo esta es peor que ninguna.
-    Donde va de verdad: en la ruta que asigna roles (AdminAuthEndpoints.cs:474), leyendo
+    Donde va de verdad: en la ruta que asigna roles (AdminAuthEndpoints.cs), leyendo
     Permisos.EsRolInterno, con su prueba al lado.  Aqui solo se detecta.
 */
 SELECT N'combinacion_externo_con_rol_interno' AS Comprobacion, u.IdUsuario, u.CorreoElectronico
@@ -64,7 +62,7 @@ WHERE EXISTS (SELECT 1 FROM dbo.UsuariosRoles ur JOIN dbo.Roles r ON r.IdRol = u
   AND EXISTS (SELECT 1 FROM dbo.UsuariosRoles ur JOIN dbo.Roles r ON r.IdRol = ur.IdRol
               WHERE ur.IdUsuario = u.IdUsuario AND r.NombreRol IN (N'webmaster', N'gestor_interno'));
 
-/* Roles fuera de Permisos.RolesDePlataforma (Permisos.cs:147). Deberia dar cero filas. */
+/* Roles fuera de Permisos.RolesDePlataforma (Permisos.cs). Deberia dar cero filas. */
 SELECT N'roles_fuera_del_catalogo' AS Comprobacion, r.IdRol, r.NombreRol
 FROM dbo.Roles AS r
 WHERE r.NombreRol NOT IN (N'webmaster', N'gestor_interno', N'externo');

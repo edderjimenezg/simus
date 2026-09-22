@@ -271,7 +271,7 @@ public static class FestivalesExternosEndpoints
                 .FirstOrDefaultAsync(cancellationToken);
 
             var festivalesElegibles = idInstitucional is null ? [] : await dbContext.FestivalRecords.AsNoTracking()
-                // Las dos grafias, copiando el predicado de LecturaFestivalesPublicados.cs:27
+                // Las dos grafias, copiando el predicado de LecturaFestivalesPublicados.cs
                 // letra por letra. No es redundancia: la base local es insensible a
                 // mayusculas y SQLite no, asi que un solo literal se comporta distinto en
                 // pruebas y contra SQL Server. Los 30 historicos estan en "publicado".

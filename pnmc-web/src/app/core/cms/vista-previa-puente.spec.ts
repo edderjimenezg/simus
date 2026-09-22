@@ -149,7 +149,7 @@ describe('vista previa · qué hace un mensaje aceptado', () => {
 
   it('una URL vacía NO tapa a la compilada', () => {
     // Al reves que en los textos, y a proposito: `<img src="">` no deja un hueco, hace
-    // que el navegador vuelva a pedir la URL de la pagina. `textos-web.service.ts:234`
+    // que el navegador vuelva a pedir la URL de la pagina. `textos-web.service.ts`
     // protege esa propiedad para el visitante y la previsualizacion no la puede romper.
     const servicio = crear();
     servicio.aplicar(mensaje({ imagenes: { home_hero_1: '' } }));

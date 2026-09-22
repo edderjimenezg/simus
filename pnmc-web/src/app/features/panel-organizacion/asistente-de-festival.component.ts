@@ -129,7 +129,7 @@ function vacioANulo(valor: string): string | null {
  * <b>REVIERTE, SOLO PARA CREAR, LA DECISIÓN DEL 29 DE AGOSTO DE 2026.</b> Ese día se retiró un
  * asistente por pasos de `FichaFestivalComponent` a favor de una vista única para leer, editar y
  * crear -«mantengamos este como base para editar y ver ficha; cuando se crea un festival también
- * mantengamos esta estructura», `secciones-de-la-ficha.ts:1-35`-. La dirección de producto, consultado
+ * mantengamos esta estructura», `secciones-de-la-ficha.ts-35`-. La dirección de producto, consultado
  * de nuevo, confirmó que quiere el asistente de vuelta, pero SOLO para
  * dar de alta un Festival nuevo: `FichaFestivalComponent` sigue exactamente igual para leer y
  * editar -esa mitad de la decisión de agosto no se tocó-.

@@ -1,6 +1,5 @@
 /*
     SIMUS · Festival · identificación flexible y visibilidad de Ediciones
-    Fecha: 07 de septiembre de 2026
 
     Una Edición es una realización concreta, no una versión anual. Por eso el
     año deja de ser obligatorio ni único: puede identificarse por número,

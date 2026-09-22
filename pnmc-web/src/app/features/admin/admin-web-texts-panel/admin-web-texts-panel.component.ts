@@ -70,7 +70,7 @@ const PAGINA_DEL_GRUPO: Record<string, string> = {
 
   // La ficha de componente vive en `/ejes/:componente`: el segmento público es estable y legible.
   // pagina que abrir. Se usa el primer componente del primer eje, que existe en
-  // `ejes-data.config.ts:35`. Es una eleccion, no una solucion: los textos de este grupo son los
+  // `ejes-data.config.ts`. Es una eleccion, no una solucion: los textos de este grupo son los
   // mismos en las once fichas, asi que cualquiera sirve para verlos.
   component_detail: '/ejes/apropiacion-y-derechos',
 
@@ -226,7 +226,7 @@ export const ENCUADRES: Record<string, EncuadreDePrevisualizacion[]> = {
   general_404: [{ etiqueta: 'Página de error', ruta: '/esta-ruta-no-existe', ancla: '' }],
   // VA SOBRE LA PORTADA, igual que `PAGINA_DE_LA_SECCION`, y conviene dejar
   // escrito por que, porque el codigo invita a concluir lo contrario:
-  // `showGlobalFooter()` (app.component.ts:73) devuelve false para la portada, y
+  // `showGlobalFooter()` (app.component.ts) devuelve false para la portada, y
   // de ahi se deduce facilmente que en `/` no hay pie. Si lo hay: la portada
   // pinta el suyo propio en home.component.html:227, y esa exclusion existe
   // justamente para que no salgan dos.
@@ -478,7 +478,7 @@ export class AdminWebTextsPanelComponent {
    * Los campos que la editora ha tocado y el marco todavia no puede ensenar.
    *
    * Se compara contra lo PUBLICADO, que es lo mismo que sirve `getWebText`
-   * (textos-web.service.ts:195), y con `??` y no `||`: con `||` un campo
+   * (textos-web.service.ts), y con `??` y no `||`: con `||` un campo
    * publicado en blanco caeria al valor de fabrica y vaciar un texto no contaria
    * como cambio. Es el defecto PNMC-040, en el otro lado del espejo.
    */
@@ -759,7 +759,7 @@ export class AdminWebTextsPanelComponent {
    * Recoge lo que el editor de imagenes acaba de hacer y lo lleva al marco.
    *
    * `rotanConElla` no es un adorno: la portada del Home elige UNA DE CUATRO AL AZAR en cada
-   * visita (home.component.ts:57). Sin espejar la que se esta cambiando sobre las cuatro
+   * visita (home.component.ts). Sin espejar la que se esta cambiando sobre las cuatro
    * claves, la previsualizacion ensenaria la que le toque y la persona no podria mirar la suya.
    * Se dice en pantalla, porque fijar la portada es una mentira piadosa y tiene que verse.
    */

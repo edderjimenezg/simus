@@ -207,7 +207,7 @@ describe('AdminWebTextsPanelComponent · previsualización real', () => {
 
   it('el menú y el pie se encuadran sobre una página que los pinta', () => {
     // ESTE CASO SE FALLÓ PRIMERO Y LO ATRAPÓ LA PRUEBA DE ARRIBA. El razonamiento
-    // equivocado era: `showGlobalFooter()` (app.component.ts:73) devuelve false
+    // equivocado era: `showGlobalFooter()` (app.component.ts) devuelve false
     // para la portada, luego en `/` no hay pie, luego hay que encuadrar en otra
     // página. Es falso: la portada pinta su propio `<app-footer>`
     // (home.component.html:227), y esa exclusión existe justamente para que no

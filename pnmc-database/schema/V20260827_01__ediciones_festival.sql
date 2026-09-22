@@ -1,6 +1,5 @@
 /*
     PNMC · Ecosistema · Ediciones del Festival
-    Fecha: 27 de agosto de 2026
 
     QUE ES ESTO
     -----------
@@ -18,7 +17,7 @@
       · La escriben `PropuestasCambioFestivalExternosEndpoints` y
         `RevisionInstitucionalPropuestasFestivalEndpoints`: es la version del REGISTRO PUBLICADO,
         la que nace cuando el equipo del PNMC aprueba una propuesta de cambios.
-      · Lleva `EsVigente`, y `LecturaFestivalesPublicados.cs:36-38` lee justo esa fila para
+      · Lleva `EsVigente`, y `LecturaFestivalesPublicados.cs-38` lee justo esa fila para
         SUSTITUIR nombre, descripcion, cobertura, practicas y territorios de la ficha publica.
 
     Es decir: meter ahi «la edicion de 2025» cambiaria lo que ve cualquier visitante del sitio. Son

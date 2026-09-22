@@ -163,7 +163,7 @@ export class MenuDeAccionesComponent {
   /**
    * ESCAPE SE DETIENE AQUI CUANDO ESTE CONTROL LO ATIENDE.
    *
-   * <b>EL DEFECTO QUE CIERRA.</b> Desde que toda ventana lleva `appDialogo` —15 de septiembre de
+   * <b>POR QUE EXISTE.</b> Desde que toda ventana lleva `appDialogo` —15 de septiembre de
    * 2026— la ventana también cierra con Escape. Sin detener el evento, una sola pulsación cerraba
    * el desplegable Y la ventana entera: quien abría las prácticas de un mercado y pulsaba Escape
    * perdía el formulario a medio llenar. Lo de dentro se cierra primero, y la ventana solo se

@@ -273,7 +273,7 @@ export interface CatalogoDelFestival {
 
 /**
  * Espejo TypeScript de `FestivalBorradorDto`
- * (pnmc-api/src/PNMC.Contracts/ApiContracts.cs:1194-1210), tal como lo devuelve
+ * (pnmc-api/src/PNMC.Contracts/ApiContracts.cs-1210), tal como lo devuelve
  * GET /api/v1/externo/organizaciones/{id}/festivales.
  */
 export interface FestivalDeLaOrganizacion {
@@ -337,7 +337,7 @@ export interface FestivalDeLaOrganizacion {
 
 /**
  * Espejo de `PropuestaCambioFestivalDto`
- * (pnmc-api/src/PNMC.Contracts/ApiContracts.cs:1323-1345), la propuesta de cambios activa de un
+ * (pnmc-api/src/PNMC.Contracts/ApiContracts.cs-1345), la propuesta de cambios activa de un
  * Festival Publicado.
  */
 export interface PropuestaCambioFestival {
@@ -700,7 +700,7 @@ export abstract class PanelOrganizacionApi {
  * SON DOCE Y VIAJAN JUNTOS. El formulario los necesita TODOS a la vez para poder pintarse: doce
  * peticiones para llenar un formulario son doce veces la latencia y doce sitios donde fallar a
  * medias. Las claves son las del objeto anónimo que devuelve
- * `FestivalesExternosEndpoints.cs:102-116`; un nombre mal escrito aquí deja un desplegable vacío
+ * `FestivalesExternosEndpoints.cs-116`; un nombre mal escrito aquí deja un desplegable vacío
  * sin que nada falle, y por eso están tipadas y no leídas como `any`.
  */
 export interface CatalogosDelFestival {

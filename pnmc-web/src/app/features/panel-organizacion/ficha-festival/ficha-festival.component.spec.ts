@@ -569,7 +569,7 @@ describe('FichaFestivalComponent · la misma vista para leer, editar y crear', (
 
   it('una cabecera fuera de borrador no ofrece «Editar» aunque no tenga ediciones', () => {
     // LA OTRA MITAD DE LA REGLA, y es la del servidor: el PUT del Festival solo admite Borrador y
-    // AjustesSolicitados (`FestivalesExternosEndpoints.cs:482-483`), y en cualquier otro contesta
+    // AjustesSolicitados (`FestivalesExternosEndpoints.cs-483`), y en cualquier otro contesta
     // 409. Sin esta prueba, la rama nueva de `puedeEditar()` abriría el formulario de un Festival
     // publicado para que el guardado muriera contra el servidor.
     fixture.componentRef.setInput('festival', { ...FESTIVAL, estado: 'Publicado' });
@@ -664,7 +664,7 @@ describe('FichaFestivalComponent · la misma vista para leer, editar y crear', (
     tick();
 
     // MUTANTE QUE MATA: llamar a `guardarFestival` en modo propuesta. El PUT directo del Festival
-    // contesta 409 fuera de Borrador/AjustesSolicitados -`FestivalesExternosEndpoints.cs:482-483`-,
+    // contesta 409 fuera de Borrador/AjustesSolicitados -`FestivalesExternosEndpoints.cs-483`-,
     // así que guardar reventaría contra el servidor sobre un Festival Publicado.
     expect(api.festivalesGuardados).toEqual([]);
     expect(api.propuestasGuardadas.length).toBe(1);

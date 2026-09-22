@@ -10,7 +10,7 @@ namespace PNMC.Api.Tests;
 /// </summary>
 /// <remarks>
 /// <para>
-/// EL HALLAZGO QUE TRAJO ESTA PRUEBA. La auditoría encontró que el
+/// LA REGLA QUE TRAJO ESTA PRUEBA. La auditoría encontró que el
 /// mismo registro se nombraba de cuatro maneras: diecisiete tablas guardaban el módulo en una
 /// columna <c>ModuloId</c> y cinco en una <c>Dominio</c>; unas decían <c>festivales</c> y otras
 /// <c>festival</c>; y convivían dos separadores. La consecuencia estaba medida: el cruce entre la

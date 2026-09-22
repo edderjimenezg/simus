@@ -245,7 +245,7 @@ describe('AdminWebTextsPanelComponent · el estudio, en todas las secciones', ()
   });
 
   it('una imagen sin publicar se espeja sobre las cuatro portadas que rotan', () => {
-    // La portada del Home elige UNA DE CUATRO AL AZAR en cada visita (home.component.ts:57).
+    // La portada del Home elige UNA DE CUATRO AL AZAR en cada visita (home.component.ts).
     // Sin espejar, cambiar la portada 1 y mirar la previsualización enseña la que le toque, y
     // tres de cada cuatro veces no es la que se está cambiando.
     componente.selectPill('Home');

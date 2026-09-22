@@ -1,6 +1,5 @@
 /*
     SIMUS · Festivales · Instantáneas de los envíos a revisión
-    Fecha: 9 de septiembre de 2026
 
     Cada fila conserva el contenido exacto que recibió la institución. No representa una Edición
     ni una versión del perfil público: permite comparar el segundo, tercer y posteriores envíos

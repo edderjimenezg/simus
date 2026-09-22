@@ -243,7 +243,6 @@ GO
 
 SET IDENTITY_INSERT dbo.Festivales ON;
 
--- Bloque B2 (25 ago 2026): ningun festival sin quien responda por el. Mientras ninguna
 -- organizacion de la comunidad lo reclame, responde la institucion; la crea
 -- seed/V20260519_03, que corre antes que este fichero.
 DECLARE @IdOrganizacionInstitucional int = (
@@ -271,7 +270,6 @@ GO
 
 SET IDENTITY_INSERT dbo.EscuelasMusica ON;
 
--- Bloque B9: ningun registro del ecosistema sin quien responda por el. `GO` separa
 -- lotes y borra las variables, asi que cada lote declara la suya.
 DECLARE @IdOrganizacionInstitucional int = (
     SELECT TOP (1) IdEntidad FROM dbo.Entidades WHERE EsInstitucional = 1 ORDER BY IdEntidad
@@ -299,7 +297,6 @@ GO
 
 SET IDENTITY_INSERT dbo.Lutieres ON;
 
--- Bloque B9: ningun registro del ecosistema sin quien responda por el. `GO` separa
 -- lotes y borra las variables, asi que cada lote declara la suya.
 DECLARE @IdOrganizacionInstitucional int = (
     SELECT TOP (1) IdEntidad FROM dbo.Entidades WHERE EsInstitucional = 1 ORDER BY IdEntidad

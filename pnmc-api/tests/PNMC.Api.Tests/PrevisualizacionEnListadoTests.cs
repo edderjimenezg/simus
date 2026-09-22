@@ -14,7 +14,7 @@ namespace PNMC.Api.Tests;
 /// </summary>
 /// <remarks>
 /// <para>
-/// <b>EL DEFECTO QUE CIERRA.</b> La consola solo ofrecía «Ver en el portal» cuando el registro ya
+/// <b>POR QUE EXISTE.</b> La consola solo ofrecía «Ver en el portal» cuando el registro ya
 /// estaba publicado: la única forma de saber cómo iba a quedar algo era publicarlo. Un titular que
 /// se corta, una imagen mal encuadrada o un resumen vacío se descubrían con el registro ya en la
 /// calle.

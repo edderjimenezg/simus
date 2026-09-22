@@ -1,7 +1,5 @@
 /*
     PNMC · Ecosistema · Quien responde por una organizacion
-    Fecha: 25 de agosto de 2026
-    Bloque B1 de docs/Documentacion/ecosistema/PLAN-DE-TRABAJO-ORGANIZACIONES.md
 
     QUE HACE
     --------

@@ -25,7 +25,7 @@
  *   /api/v1/map/topojson/departments                 ->  404
  *   /api/v1/map/topojson/territories                 ->  200, 28.547.780 bytes
  *
- * `catalog.service.ts:247` tiene un `catchError` que cae al monolito, así que el mapa se
+ * `catalog.service.ts` tiene un `catchError` que cae al monolito, así que el mapa se
  * ve entero, los 125 municipios se dibujan y sus rótulos aparecen: lo único que delata el
  * problema es que no se pidió ni un fragmento municipal, y que el navegador acaba de
  * descargar 28 MB. Por eso este guion cuenta peticiones y no polígonos.

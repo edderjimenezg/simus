@@ -24,7 +24,7 @@ describe('/pnmc · las once fotos y los textos que se repintan', () => {
   /*
     EL DOBLE GUARDA LOS TEXTOS EN UNA SEÑAL, y eso no es un detalle de montaje: es la mitad de lo
     que esta prueba mide. `TextosWebService` guarda lo publicado en señales
-    (`textos-web.service.ts:124`), así que un `computed` que lo lea se recalcula solo cuando llega
+    (`textos-web.service.ts`), así que un `computed` que lo lea se recalcula solo cuando llega
     contenido nuevo. Con un objeto llano el doble no notificaría a nadie, el `computed` devolvería
     siempre su primer valor, y la prueba diría que el componente está congelado aunque no lo esté.
   */

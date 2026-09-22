@@ -1,7 +1,5 @@
 /*
     PNMC · Ecosistema · Todo festival tiene organizacion responsable
-    Fecha: 25 de agosto de 2026
-    Bloque B2 de docs/Documentacion/ecosistema/PLAN-DE-TRABAJO-ORGANIZACIONES.md
 
     QUE HACE
     --------

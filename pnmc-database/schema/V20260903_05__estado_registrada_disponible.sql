@@ -1,6 +1,5 @@
 /*
     SIMUS · Estado inicial de organizaciones
-    Fecha: 03 de septiembre de 2026
 
     La FK de Entidades exige que el estado de nacimiento exista también en una base creada solo
     con migraciones (sin la siembra de demostración). No se reemplazan ni se eliminan estados.

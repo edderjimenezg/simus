@@ -523,7 +523,7 @@ public static class ImagenesWebEndpoints
 
             var huella = MediosWebContrato.Huella(bytes);
 
-            // MISMO PREDICADO QUE EN TEXTOS (ContenidoWebEndpoints.cs:328): una fila retirada no
+            // MISMO PREDICADO QUE EN TEXTOS (ContenidoWebEndpoints.cs): una fila retirada no
             // vuelve sola. Subir con publish=true sobre una clave retirada guarda el borrador y NO
             // la resucita; para eso esta republicar, que es una accion explicita.
             var puedePublicar = publicar && fila.Retired is null;

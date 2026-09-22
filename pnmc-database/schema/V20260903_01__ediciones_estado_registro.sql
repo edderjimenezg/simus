@@ -1,6 +1,5 @@
 /*
     SIMUS · Estado de registro y dirección artística de EdicionesFestival
-    Fecha: 3 de septiembre de 2026
 
     Una Edición temporal tiene dos estados diferentes y ambos son necesarios:
       - EstadoRegistro: su ciclo de gobierno (borrador, revisión, ajustes, publicado...).

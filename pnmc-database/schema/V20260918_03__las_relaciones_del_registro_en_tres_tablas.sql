@@ -1,6 +1,5 @@
 /*
     PNMC · Dónde ocurre, con quién se hace y qué material tiene: tres tablas, no seis
-    Fecha: 18 de septiembre de 2026
 
     QUE ES ESTO
     -----------

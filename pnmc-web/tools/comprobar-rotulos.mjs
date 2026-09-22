@@ -2,7 +2,7 @@
 /**
  * Comprueba que TODOS los territorios del mapa se rotulan con la misma regla.
  *
- * EL DEFECTO QUE CIERRA, DEL 29 DE AGOSTO DE 2026. El archipiélago llevaba
+ * POR QUE EXISTE, DEL 29 DE AGOSTO DE 2026. El archipiélago llevaba
  * `className: 'archipelago-label'`, una clase que NO EXISTE en `styles.css`: ni una
  * regla. Sin estilo propio se quedaba con el globo por defecto de Leaflet —caja blanca
  * con borde y sombra, 312 px de ancho— flotando sobre el Caribe. Y como el interruptor

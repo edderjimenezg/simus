@@ -21,7 +21,7 @@ public sealed class Pnmc054LecturaPublicaTests : IClassFixture<TestWebApplicatio
     private const string PeriodicidadAprobada = "anual";
     private const string PeriodicidadRechazada = "bienal";
     private const string DepartamentoAprobado = "Antioquia";
-    // El nombre canonico DIVIPOLA del codigo 11 lleva coma (DatabaseBootstrapper.cs:602).
+    // El nombre canonico DIVIPOLA del codigo 11 lleva coma (DatabaseBootstrapper.cs).
     // La prueba siembra el CODIGO y la lectura publica devuelve el NOMBRE resuelto.
     private const string DepartamentoRechazado = "Bogota, D.C.";
 
@@ -33,7 +33,7 @@ public sealed class Pnmc054LecturaPublicaTests : IClassFixture<TestWebApplicatio
     /// Reproduce el hallazgo por el camino real: se publica la propuesta por HTTP (eso crea la
     /// version nueva y la marca EsVigente) y despues se deja la propuesta en "Rechazada".
     /// Ese ultimo paso se escribe sobre la fila y no por HTTP porque el endpoint de decisiones
-    /// devuelve 409 ante cualquier segunda decision (RevisionInstitucionalPropuestasFestivalEndpoints.cs:71):
+    /// devuelve 409 ante cualquier segunda decision (RevisionInstitucionalPropuestasFestivalEndpoints.cs):
     /// el unico camino que produce este par de filas en la aplicacion es la carrera entre dos
     /// revisores simultaneos, que no es reproducible de forma determinista en una prueba.
     /// El estado resultante es exactamente el que A06 midio extremo a extremo:

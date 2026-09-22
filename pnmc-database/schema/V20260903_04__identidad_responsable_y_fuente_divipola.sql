@@ -1,6 +1,5 @@
 /*
     SIMUS · Identidad de quien responde y procedencia territorial
-    Fecha: 03 de septiembre de 2026
 
     Los nombres segmentados se conservan junto al nombre de presentación legado. La fuente del
     catálogo se registra separada de DIVIPOLA para poder cambiar de corte sin inventar procedencia.

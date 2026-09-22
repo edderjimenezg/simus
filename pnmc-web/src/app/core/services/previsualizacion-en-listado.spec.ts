@@ -57,7 +57,7 @@ describe('PrevisualizacionEnListadoService', () => {
     const lista = [{ id: 1 }, { id: 2 }, { id: 3 }, { id: 4 }];
     const mismoId = (a: { id: number }, b: { id: number }) => a.id === b.id;
 
-    // EL DEFECTO QUE CIERRA: colocado el primero, el registro se pintaba con la tarjeta de portada
+    // POR QUE EXISTE: colocado el primero, el registro se pintaba con la tarjeta de portada
     // —grande, con imagen a sangre— que es justamente la que no va a tener. La pregunta «¿cómo se
     // verá?» recibía la respuesta de otra tarjeta.
     expect(servicio.anteponer(lista, { id: 9 }, mismoId, 'noticias'))

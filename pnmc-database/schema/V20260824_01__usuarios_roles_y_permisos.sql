@@ -1,7 +1,6 @@
 /*
 ================================================================================================
     PNMC - Usuarios, roles y permisos.  Implementa D10 y D12 de
-    docs/Documentacion/migracion-simus/decisiones.md.
 
     QUE ES ESTE FICHERO.  Un DISENO ejecutable, no una migracion ejecutada.  No se ha corrido
     contra ninguna base: lo unico comprobado sobre el es un analisis sintactico (SET PARSEONLY),
@@ -16,9 +15,9 @@
     QUE NO HACE, Y ES DELIBERADO
     ----------------------------
     1. NO ABRE NINGUNA PUERTA.  Las politicas de Program.cs siguen siendo la unica puerta:
-       FallbackPolicy (Program.cs:161-163), InstitutionalPolicy / ExternalPolicy
-       (Program.cs:165-172), PoliticaCualquierSesion (Program.cs:177-183) y PoliticaFuncionario
-       (Program.cs:202-206) [V].  Un permiso concedido aqui es un filtro ADICIONAL dentro de una
+       FallbackPolicy (Program.cs-163), InstitutionalPolicy / ExternalPolicy
+       (Program.cs-172), PoliticaCualquierSesion (Program.cs-183) y PoliticaFuncionario
+       (Program.cs-206) [V].  Un permiso concedido aqui es un filtro ADICIONAL dentro de una
        ruta que la politica ya autorizo; nunca un sustituto.  Es D10.1, y es la advertencia de
        D12.1: "mas roles no pueden significar mas puertas".
     2. NO TRAE DATOS DE SIMUS.  Ni una fila.  Alcance cerrado el 24 ago 2026: solo estructura.
@@ -134,7 +133,6 @@ DECLARE @RetirarIdRol bit = 1;
 /*
 ================================================================================================
     PROCEDENCIA. Este fichero se genero el 24 ago 2026 a partir del diseno
-    docs/Documentacion/migracion-simus/scripts/01-usuarios-y-permisos.sql, que se conserva
     entero -con todo su razonamiento y sus citas- y es donde hay que leer el POR QUE. Aqui vive
     el QUE, que es lo unico que se ejecuta.
 
@@ -167,13 +165,13 @@ DECLARE @RetirarIdRol bit = 1;
 
   NO HAY COLUMNA "Activo", Y ES UNA DECISION.  Mismo criterio que la seccion 7 aplica a
   RolesPermisos, y viene de un defecto de origen [S]: ART_MUSICA_ROL_RECURSO.esActivo existe y el
-  resolutor NO LA MIRA (ServicioRecurso.cs:18-23 y :59-64 filtran por Tipo y por rol, nunca por
+  resolutor NO LA MIRA (ServicioRecurso.cs-23 y :59-64 filtran por Tipo y por rol, nunca por
   esActivo), de modo que una concesion "desactivada" sigue concediendo.  Una columna que dice
   "revocado" y no revoca es peor que no tenerla: da una falsa sensacion de control.  Aqui la
   asignacion existe o no existe.
 
   CLAVE SUSTITUTA + UNIQUE, y no clave compuesta.  Se copia la forma de dbo.UsuariosEntidades
-  (PnmcDbContext.cs:860-870) [V], que es la tabla puente que PNMC ya tiene, para que las dos se
+  (PnmcDbContext.cs-870) [V], que es la tabla puente que PNMC ya tiene, para que las dos se
   lean igual.  El UNIQUE hace el trabajo real; el IdUsuarioRol es lo que espera el patron
   entity.HasKey(x => x.Id) del contexto.
 */
@@ -195,7 +193,7 @@ BEGIN
             justificacion: «hoy borrar un usuario se lleva su rol, y la ruta DELETE
             /admin/auth/users/{id} no sabe nada de tablas hijas, asi que sin cascada empezaria a
             fallar con Msg 547».  ERA FALSA, y se comprobo abriendo la ruta: no borra nada.
-            AdminAuthEndpoints.cs:550-551 hace `user.IsActive = false; user.UpdatedAt = ...` -baja
+            AdminAuthEndpoints.cs-551 hace `user.IsActive = false; user.UpdatedAt = ...` -baja
             LOGICA- y `Users.Remove` / `Remove(user` no aparece NI UNA VEZ en `src` ni en `tests`.
             En PNMC nadie borra filas de dbo.Usuarios, de modo que el Msg 547 que la cascada venia
             a evitar no puede ocurrir.
@@ -210,7 +208,7 @@ BEGIN
 
         /*
             HACIA Roles, SIN CASCADA, Y TAMBIEN A PROPOSITO.  Borrar un rol que alguien tiene debe
-            FALLAR, no vaciar cuentas en silencio.  Permisos.cs:144-147 [V] dice que cualquier
+            FALLAR, no vaciar cuentas en silencio.  Permisos.cs-147 [V] dice que cualquier
             nombre fuera de RolesDePlataforma es un residuo; retirarlo es un trabajo con su propio
             guion -como fue V20260823_01__retirada_aliados.sql-, no un efecto colateral.
         */
@@ -221,7 +219,7 @@ END;
 
 /*
     "QUIEN TIENE ESTE ROL" ES UNA PREGUNTA QUE EL API YA HACE.  La guarda del ultimo webmaster
-    (WebmastersQuePuedenEntrarAsync, AdminAuthEndpoints.cs:659 [V]) recorre los usuarios por rol.
+    (WebmastersQuePuedenEntrarAsync, AdminAuthEndpoints.cs [V]) recorre los usuarios por rol.
     El UQ de arriba ordena por (IdUsuario, IdRol) y no sirve para esa direccion.
 */
 IF NOT EXISTS (SELECT 1 FROM sys.indexes
@@ -241,11 +239,11 @@ END;
 
   EL PROBLEMA.  Los permisos se resuelven en el login y viajan en los claims (D10).  Un claim
   escrito en el login se queda congelado hasta que la cookie expire: 8 horas deslizantes
-  (Program.cs:97 y :120) [V].  Sin nada mas, revocar un permiso no revoca nada durante 8 horas.
+  (Program.cs y :120) [V].  Sin nada mas, revocar un permiso no revoca nada durante 8 horas.
 
   LA SOLUCION QUE PNMC YA TIENE.  RevalidacionDeSesion comprueba por peticion, contra la base y
   con cache de 30 s acotada a [1,300], que la cuenta siga activa y con el mismo rol
-  (RevalidacionDeSesion.cs:88-107 y Program.cs:628) [V].  Basta con que compare una tercera cosa.
+  (RevalidacionDeSesion.cs-107 y Program.cs) [V].  Basta con que compare una tercera cosa.
 
   POR QUE UNA COLUMNA Y NO CHECKSUM_AGG.  El diseno previo (perfilado/mapeo-usuarios-permisos.md
   §5.3) proponia calcular el sello al vuelo con CONCAT(COUNT(*), ':', CHECKSUM_AGG(IdPermiso)).
@@ -254,7 +252,7 @@ END;
   anula.  Habria que escribir COUNT(DISTINCT ...) y CHECKSUM_AGG(DISTINCT ...), y acordarse
   siempre.  Una columna entera que solo sube no tiene ese filo.
 
-  Y ADEMAS SE PROYECTA SOLA.  La consulta de RevalidacionDeSesion.cs:99-102 ya une Usuarios con
+  Y ADEMAS SE PROYECTA SOLA.  La consulta de RevalidacionDeSesion.cs-102 ya une Usuarios con
   Roles; anadir r.VersionPermisos a esa proyeccion es una columna mas en el mismo viaje.  Un
   CHECKSUM_AGG sobre otra tabla seria una subconsulta que LINQ no compone contra ese Join.
 
@@ -302,7 +300,7 @@ BEGIN
         /*
             SIN ESPACIOS AL BORDE, MEDIDO CON DATALENGTH Y NO COMPARADO.
             En origen ART_MUSICA_RECURSO.Codigo es NCHAR(30) y trae relleno, y el codigo de SIMUS
-            tuvo que defenderse a mano (ManejadorUsuario.cs:44-46, "TrimEnd defensivo") [S].
+            tuvo que defenderse a mano (ManejadorUsuario.cs-46, "TrimEnd defensivo") [S].
             CUIDADO SI ALGUIEN "SIMPLIFICA" ESTO: la version obvia
                 CHECK (CodigoTipoDocumento = LTRIM(RTRIM(CodigoTipoDocumento)))
             NO FUNCIONA.  SQL Server rellena con espacios al comparar cadenas, de modo que
@@ -335,7 +333,7 @@ END;
     juridicas son Entidades -Entidades.NumeroIdentificacion, con su indice unico filtrado
     UQ_Entidades_NumeroIdentificacion (V20260823_02:244-249) [V]-, no Usuarios.  Meterlo aqui
     invitaria a registrar una empresa como si fuera una persona, que es exactamente la confusion
-    que UsuariosEntidades existe para no tener (Permisos.cs:24-30 [V]: el rol dice que clase de
+    que UsuariosEntidades existe para no tener (Permisos.cs-30 [V]: el rol dice que clase de
     cosas puede hacer, el alcance dice sobre que actor).
 */
 MERGE dbo.TiposDocumento AS destino
@@ -576,7 +574,7 @@ END;
 
     POR QUE UN DISPARADOR, SI EL PROYECTO DESCONFIA DE LA MAGIA.  Porque la alternativa -que la
     ruta del API que edite permisos suba la version- falla exactamente en el caso para el que el
-    sello existe.  RevalidacionDeSesion.cs:33-35 [V] lo dice de su propia ventana de 30 s: "la
+    sello existe.  RevalidacionDeSesion.cs-35 [V] lo dice de su propia ventana de 30 s: "la
     ventana solo cubre los cambios hechos POR FUERA del API -un UPDATE a mano contra la base-".
     Un contador que solo sube cuando el API lo sube no ve el UPDATE a mano, que es justo el cambio
     que nadie va a recordar propagar.
@@ -615,11 +613,11 @@ END;
   LEA ESTO ANTES DE SEMBRARLA.  Hoy el menu de la consola NO sale de la base: esta escrito en el
   frontend, y en dos sitios [V] -pnmc-web/src/app/features/admin/domain/admin-config.ts (los
   modulos, con su allowedRoles) y
-  pnmc-web/src/app/features/admin/admin-shell-page/admin-shell-page.component.ts:919-933
+  pnmc-web/src/app/features/admin/admin-shell-page/admin-shell-page.component.ts-933
   (las secciones y el
   webmasterOnly)-.  Sembrar filas aqui mientras eso siga asi produce DOS MENUS: uno que se pinta y
   otro que nadie mira, y el segundo se queda atras sin que nada se ponga rojo.  Es la falla que
-  Permisos.cs:78-87 [V] describe para las listas de roles repetidas, aplicada al menu.
+  Permisos.cs-87 [V] describe para las listas de roles repetidas, aplicada al menu.
 
   LA TABLA SE CREA IGUAL, porque D12.3 dice que la ESTRUCTURA viaja y porque tenerla vacia y
   documentada es lo que permite mover el menu aqui despues sin volver a discutir su forma.
@@ -699,32 +697,32 @@ END;
   a la vez son indistinguibles cuando algo falla.
 
   externo SE QUEDA CON CERO CONCESIONES, Y NO ES UN OLVIDO.  Lo que una persona externa puede
-  hacer no lo decide un permiso fino sino ExternalPolicy (Program.cs:169-172) mas su vinculo en
+  hacer no lo decide un permiso fino sino ExternalPolicy (Program.cs-172) mas su vinculo en
   UsuariosEntidades: "el rol dice que clase de cosas puede hacer; el alcance dice sobre que actor"
-  (Permisos.cs:24-30) [V].  Darle filas aqui seria empezar a describir su alcance en el sitio
+  (Permisos.cs-30) [V].  Darle filas aqui seria empezar a describir su alcance en el sitio
   equivocado.
 */
 MERGE dbo.Permisos AS destino
 USING (VALUES
     -- ecosistema
-    (N'registros.revisar',            N'Revisar registros',            N'ecosistema',     N'Entrar a la bandeja institucional de revision. Hoy: PoliticaFuncionario sobre el circuito (Program.cs:202-206).'),
-    (N'registros.publicar',           N'Publicar registros',           N'ecosistema',     N'Aprobar o publicar un registro sectorial. Hoy: cualquier rol interno (Permisos.EsFuncionario, Permisos.cs:175-176; D3 del modelo de roles).'),
-    (N'entidades.administrar',        N'Administrar entidades',        N'ecosistema',     N'Alta, edicion y estado de Entidades. Hoy: AdminEntityEndpoints.cs:537-538.'),
-    (N'gobernanza.resolver_vinculos', N'Resolver vinculaciones',       N'ecosistema',     N'Solicitudes de vinculacion, duplicados y banderas de calidad. Hoy no hay lista de roles: deciden los `.RequireAuthorization()` sin politica de RecordGovernanceEndpoints.cs:33 y :38, que caen en el esquema institucional por omision (Program.cs:165) y admiten a los dos roles internos.'),
+    (N'registros.revisar',            N'Revisar registros',            N'ecosistema',     N'Entrar a la bandeja institucional de revision. Hoy: PoliticaFuncionario sobre el circuito (Program.cs-206).'),
+    (N'registros.publicar',           N'Publicar registros',           N'ecosistema',     N'Aprobar o publicar un registro sectorial. Hoy: cualquier rol interno (Permisos.EsFuncionario, Permisos.cs-176; D3 del modelo de roles).'),
+    (N'entidades.administrar',        N'Administrar entidades',        N'ecosistema',     N'Alta, edicion y estado de Entidades. Hoy: AdminEntityEndpoints.cs-538.'),
+    (N'gobernanza.resolver_vinculos', N'Resolver vinculaciones',       N'ecosistema',     N'Solicitudes de vinculacion, duplicados y banderas de calidad. Hoy no hay lista de roles: deciden los `.RequireAuthorization()` sin politica de RecordGovernanceEndpoints.cs y :38, que caen en el esquema institucional por omision (Program.cs) y admiten a los dos roles internos.'),
     -- festivales
     (N'festivales.decidir',           N'Decidir sobre Festivales',     N'festivales',     N'Publicar o rechazar un Festival en el circuito institucional. Hoy: PoliticaFuncionario, unica guarda de rol del circuito.'),
     (N'propuestas.decidir',           N'Decidir propuestas de cambio', N'festivales',     N'Aceptar o rechazar una propuesta de cambio de Festival. Hoy: PoliticaFuncionario.'),
     (N'festivales.normalizar',        N'Normalizar versiones',         N'festivales',     N'Lanzar la normalizacion masiva de versiones historicas. Hoy: PoliticaFuncionario.'),
     -- cms
-    (N'cms.editar',                   N'Editar textos del sitio',      N'cms',            N'Guardar contenido del CMS de textos. Hoy: WebContentEndpoints.cs:549-552.'),
-    (N'cms.publicar',                 N'Publicar textos del sitio',    N'cms',            N'Llevar una clave a estado publicado. Hoy SOLO webmaster: WebContentEndpoints.cs:28 declara PublisherRoles con webmaster y nadie mas.'),
-    (N'cms.importar',                 N'Importar textos',              N'cms',            N'Carga masiva de contenido web. Hoy: WebContentImportEndpoints.cs:348-351.'),
-    (N'equipo_web.editar',            N'Editar el equipo web',         N'cms',            N'Guardar la nomina del equipo web. Hoy: WebTeamEndpoints.cs:26 EditorRoles = webmaster + gestor_interno.'),
-    (N'equipo_web.publicar',          N'Publicar el equipo web',       N'cms',            N'Llevar la nomina a publicada. Hoy SOLO webmaster: WebTeamEndpoints.cs:27 PublisherRoles, comprobado en :192.'),
+    (N'cms.editar',                   N'Editar textos del sitio',      N'cms',            N'Guardar contenido del CMS de textos. Hoy: WebContentEndpoints.cs-552.'),
+    (N'cms.publicar',                 N'Publicar textos del sitio',    N'cms',            N'Llevar una clave a estado publicado. Hoy SOLO webmaster: WebContentEndpoints.cs declara PublisherRoles con webmaster y nadie mas.'),
+    (N'cms.importar',                 N'Importar textos',              N'cms',            N'Carga masiva de contenido web. Hoy: WebContentImportEndpoints.cs-351.'),
+    (N'equipo_web.editar',            N'Editar el equipo web',         N'cms',            N'Guardar la nomina del equipo web. Hoy: WebTeamEndpoints.cs EditorRoles = webmaster + gestor_interno.'),
+    (N'equipo_web.publicar',          N'Publicar el equipo web',       N'cms',            N'Llevar la nomina a publicada. Hoy SOLO webmaster: WebTeamEndpoints.cs PublisherRoles, comprobado en :192.'),
     -- administracion
-    (N'usuarios.administrar',         N'Administrar usuarios',         N'administracion', N'Alta, edicion, desactivacion y borrado de cuentas. Hoy SOLO webmaster: AdminAuthEndpoints.cs:515.'),
-    (N'sistema.configurar',           N'Configurar el sistema',        N'administracion', N'Seccion Sistema de la consola. Hoy SOLO webmaster: admin-shell-page.component.ts:922.'),
-    (N'monitor.consultar',            N'Consultar el monitor',         N'administracion', N'Panel de estado de la plataforma. Hoy: AdminDataEndpoints.cs:195, sesion institucional.')
+    (N'usuarios.administrar',         N'Administrar usuarios',         N'administracion', N'Alta, edicion, desactivacion y borrado de cuentas. Hoy SOLO webmaster: AdminAuthEndpoints.cs.'),
+    (N'sistema.configurar',           N'Configurar el sistema',        N'administracion', N'Seccion Sistema de la consola. Hoy SOLO webmaster: admin-shell-page.component.ts.'),
+    (N'monitor.consultar',            N'Consultar el monitor',         N'administracion', N'Panel de estado de la plataforma. Hoy: AdminDataEndpoints.cs, sesion institucional.')
 ) AS origen (CodigoPermiso, NombrePermiso, Modulo, DescripcionPermiso)
 ON destino.CodigoPermiso = origen.CodigoPermiso
 WHEN MATCHED THEN
@@ -740,11 +738,11 @@ WHEN NOT MATCHED THEN
     roles son IdRol 4, 5 y 6 [V], no 1, 2 y 3.
 
     LA DIFERENCIA ENTRE LOS DOS ROLES INTERNOS SON TRES FILAS, y las tres estan medidas en el
-    codigo de hoy: cms.publicar (WebContentEndpoints.cs:28), usuarios.administrar
-    (AdminAuthEndpoints.cs:515) y sistema.configurar (admin-shell-page.component.ts:922).  Todo lo
+    codigo de hoy: cms.publicar (WebContentEndpoints.cs), usuarios.administrar
+    (AdminAuthEndpoints.cs) y sistema.configurar (admin-shell-page.component.ts).  Todo lo
     demas que hace un webmaster lo hace tambien un gestor_interno, porque la decision D3 del modelo
     de roles dice que CUALQUIER funcionario decide, publicacion de registros incluida
-    (Permisos.cs:166-176) [V].  Si esta tabla dijera otra cosa, estaria cambiando la politica de
+    (Permisos.cs-176) [V].  Si esta tabla dijera otra cosa, estaria cambiando la politica de
     tapadillo, que es lo que la seccion promete no hacer.
 
     EL MERGE NO BORRA LO QUE NO ESTA EN LA LISTA -no lleva WHEN NOT MATCHED BY SOURCE- y es a
@@ -804,11 +802,11 @@ WHEN NOT MATCHED THEN
       resucita -cual de los tres es el principal, y quien lo decide cuando cambian- y ademas obliga
       a cada lector a elegir entre dos fuentes para "que rol tiene esta persona".  Dos fuentes para
       un dato es como se llega a que una se quede atras sin que nadie lo note, que es literalmente
-      el argumento de Permisos.cs:78-87 contra las listas de roles repetidas.
+      el argumento de Permisos.cs-87 contra las listas de roles repetidas.
 
   (b) DEJARLA DE USAR SIN RETIRARLA.  Es la peor de las tres.  La columna seguiria siendo NOT NULL
       con FK, asi que TODO INSERT en Usuarios tendria que escribir algo -vease
-      ExternalAuthEndpoints.cs:59 y DatabaseBootstrapper.cs:495 [V]-, y lo que escriba no lo
+      ExternalAuthEndpoints.cs y DatabaseBootstrapper.cs [V]-, y lo que escriba no lo
       comprueba nadie contra UsuariosRoles.  Es exactamente la patologia de
       ART_MUSICA_ROL_RECURSO.esActivo [S]: una columna que parece decir algo y no lo dice.  Con el
       agravante de que aqui la columna viva y la tabla puente pueden CONTRADECIRSE, y quien lea la

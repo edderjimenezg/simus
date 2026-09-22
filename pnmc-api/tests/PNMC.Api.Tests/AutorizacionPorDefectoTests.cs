@@ -11,7 +11,7 @@ namespace PNMC.Api.Tests;
 /// <summary>
 /// PNMC-056. El valor por defecto de la autorizacion del API.
 /// <para>
-/// EL HALLAZGO: de los 126 endpoints mapeados, 40 se servian sin autenticar y ni uno solo lo
+/// LA REGLA: de los 126 endpoints mapeados, 40 se servian sin autenticar y ni uno solo lo
 /// hacia a proposito — no habia un solo <c>AllowAnonymous</c> escrito en todo el repositorio.
 /// (De aquellas 40, las tres de <c>/admin/ally-requests</c> ya se cerraron aparte; quedan 37 en
 /// <c>Endpoints/</c> mas las 2 sondas de salud de <c>Program.cs</c>, que el censo no contaba.)

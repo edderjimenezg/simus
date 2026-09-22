@@ -11,7 +11,7 @@ namespace PNMC.Api.Tests;
 /// <b>QUÉ SE ROMPIÓ, con su fecha.</b> El 30 de agosto de 2026 el arranque del API cayó entero en
 /// «modo degradado» con un <c>DbUpdateConcurrencyException</c>: «expected to affect 1 row(s), but
 /// actually affected 0». La causa: <c>Version</c> es token de concurrencia
-/// (<c>PnmcDbContext.cs:1558</c>), el sembrador adjuntaba una instancia mínima sin ella, y EF
+/// (<c>PnmcDbContext.cs</c>), el sembrador adjuntaba una instancia mínima sin ella, y EF
 /// emitía <c>WHERE IdMedioWeb = @id AND Version = 0</c>. Ninguna fila tiene versión 0.
 /// </para>
 /// <para>

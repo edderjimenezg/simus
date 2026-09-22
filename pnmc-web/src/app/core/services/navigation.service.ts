@@ -29,7 +29,7 @@ export const PAGE_IDS = {
   // ninguna parte dentro del sitio. El menu ya no lo lista —ese sitio lo ocupa
   // «Ver Mapa»— y el identificador se quedo sin un solo uso.
   //
-  // Las rutas `/simus/*` de `app.routes.ts:105-112` siguen redirigiendo, y
+  // Las rutas `/simus/*` de `app.routes.ts-112` siguen redirigiendo, y
   // `getPageIdFromPath` sigue reconociendolas: son cadenas literales, no este
   // identificador. El enlace saliente vive en `ENLACES_EXTERNOS.simus`.
   mapaParticipa: 'mapa-participa',
@@ -148,7 +148,7 @@ export class NavigationService {
     // registro del CMS no hay clave `nav_mapa` —se renombro a `nav_ecosistema`
     // cuando el enlace de al lado cambio de identificador—, y sin la marca
     // `getResolvedNavigationLinks` pediria esa clave, `getWebText` devolveria ''
-    // (`textos-web.service.ts:196`) y el boton se quedaria sin rotulo.
+    // (`textos-web.service.ts`) y el boton se quedaria sin rotulo.
     { name: 'Ver Mapa', id: PAGE_IDS.mapa, rotuloFijo: true },
     // Su identificador es `ecosistema` y no `mapa`, aunque su desplegable
     // ofrezca las dos cosas. Lo fue durante meses, y traia dos consecuencias

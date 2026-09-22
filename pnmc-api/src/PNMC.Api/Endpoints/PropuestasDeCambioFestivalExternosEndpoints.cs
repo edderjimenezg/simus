@@ -82,7 +82,7 @@ public static class PropuestasDeCambioFestivalExternosEndpoints
             if (existente is not null) return Results.Ok(await ADtoAsync(existente, dbContext, cancellationToken));
 
             // BAJO LA ESTRATEGIA DE EJECUCION, no a pelo. Produccion registra el contexto con
-            // `EnableRetryOnFailure` (DependencyInjection.cs:41) y EF prohibe una transaccion
+            // `EnableRetryOnFailure` (DependencyInjection.cs) y EF prohibe una transaccion
             // iniciada por el usuario fuera de la estrategia: el primer SaveChangesAsync lanza
             // InvalidOperationException y este POST respondia 500 SIEMPRE contra SQL Server.
             // Es el mismo bloqueo que se diagnostico el 23 ago 2026 en la normalizacion de

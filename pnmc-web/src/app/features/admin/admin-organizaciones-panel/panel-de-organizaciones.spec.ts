@@ -561,7 +561,7 @@ describe('AdminOrganizacionesPanelComponent · el registro de organizaciones', (
   });
 
   it('desde la tabla se puede cambiar el estado de una organización', () => {
-    // EL DEFECTO QUE CIERRA: «aparece en la última columna pero no sé cómo cambiarles los estados».
+    // POR QUE EXISTE: «aparece en la última columna pero no sé cómo cambiarles los estados».
     // Para hacerlo había que adivinar que la fila se abre al pulsarla y encontrar el botón dentro de
     // la ficha. Una acción que hay que descubrir por ensayo y error no existe.
     montar();

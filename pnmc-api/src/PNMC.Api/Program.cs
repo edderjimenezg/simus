@@ -23,7 +23,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 // PNMC-039. REGISTRO ESTRUCTURADO.
 //
-// EL HALLAZGO, CONFIRMADO POR BARRIDO ANTES DE TOCAR NADA: cero sentencias de
+// LA REGLA, CONFIRMADO POR BARRIDO ANTES DE TOCAR NADA: cero sentencias de
 // registro de negocio en los 30 ficheros de Endpoints/ —26 de ellos *Endpoints.cs,
 // el billete decia 27—, cero metricas y cero trazas en todo el API, ni un solo
 // ILogger inyectado. Hoy eso significa que no se puede depurar; el dia del

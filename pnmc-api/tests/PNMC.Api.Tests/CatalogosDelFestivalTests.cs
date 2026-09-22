@@ -99,7 +99,7 @@ public sealed class CatalogosDelFestivalTests : IClassFixture<TestWebApplication
     public async Task Sin_Sesion_Externa_No_Se_Sirven_Los_Catalogos()
     {
         // NO ES UNA RUTA PUBLICA, y conviene que quede fijado: el grupo `/externo` lleva
-        // `ExternalPolicy` (`FestivalesExternosEndpoints.cs:18`). Los catalogos no son secretos,
+        // `ExternalPolicy` (`FestivalesExternosEndpoints.cs`). Los catalogos no son secretos,
         // pero abrir una ruta del canal externo sin sesion abre tambien la superficie que la
         // acompana, y esta clase es la unica que mira esta ruta.
         var cliente = _factory.CreateClient();

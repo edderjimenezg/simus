@@ -1,7 +1,5 @@
 /*
     PNMC · Migracion SIMUS · Festivales
-    Fichero: docs/Documentacion/migracion-simus/scripts/02-festivales.sql
-    Fecha:   24 de agosto de 2026
     Estado:  DISENO. NO EJECUTADO NUNCA, contra ninguna base.
 
     QUE ES ESTO
@@ -60,7 +58,6 @@
 /*
 ================================================================================================
     PROCEDENCIA. Generado el 24 ago 2026 desde
-    docs/Documentacion/migracion-simus/scripts/02-festivales.sql, que se conserva entero y es
     donde esta el POR QUE de cada tabla, cada trampa de nombre de SIMUS y cada decision.
     Este fichero es identico a aquel: no lleva comprobaciones de solo lectura que separar.
 ================================================================================================

@@ -1,11 +1,9 @@
 /*
     PNMC · Ecosistema · La historia no se reescribe
-    Fecha: 25 de agosto de 2026
-    Bloque B5 de docs/Documentacion/ecosistema/PLAN-DE-TRABAJO-ORGANIZACIONES.md
 
-    EL DEFECTO QUE CIERRA, MEDIDO
+    POR QUE EXISTE
     -----------------------------
-    `RevisionInstitucionalFestivalesEndpoints.cs:70` arma la ficha de revision resolviendo el
+    `RevisionInstitucionalFestivalesEndpoints.cs` arma la ficha de revision resolviendo el
     nombre de la organizacion por JOIN CONTRA EL PRESENTE:
 
         var organizacion = await dbContext.EntityProfiles... .Select(item => item.Name)...

@@ -82,7 +82,7 @@ describe('TextosWebService · el sitio publico lee de la API', () => {
     // La premisa que sostenia la conducta anterior —«el servidor devuelve '' por
     // dos motivos que no se pueden separar»— es falsa contra este servidor:
     // `GET /api/v1/contenido-web` filtra `Publicado != null`
-    // (ContenidoWebEndpoints.cs:59), asi que una clave sin publicar NO aparece en
+    // (ContenidoWebEndpoints.cs), asi que una clave sin publicar NO aparece en
     // el diccionario. Cadena vacia significa una sola cosa: alguien la publico asi.
     api.textos = { texts: { access_footer_note: '' }, count: 1 };
     const service = crear(api);
@@ -106,7 +106,7 @@ describe('TextosWebService · el sitio publico lee de la API', () => {
   });
 
   it('retirar una clave la devuelve al texto compilado', async () => {
-    // Retirar pone `Publicado = null` (ContenidoWebEndpoints.cs:379) y entonces la
+    // Retirar pone `Publicado = null` (ContenidoWebEndpoints.cs) y entonces la
     // clave desaparece del diccionario. Retirar y publicar en blanco son dos
     // acciones distintas con dos resultados distintos, y asi debe seguir.
     api.textos = { texts: {}, count: 0 };

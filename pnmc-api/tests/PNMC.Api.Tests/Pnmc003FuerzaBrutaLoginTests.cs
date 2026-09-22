@@ -18,7 +18,7 @@ namespace PNMC.Api.Tests;
 /// <summary>
 /// PNMC-003. La puerta de la consola institucional admitia fuerza bruta ilimitada.
 /// <para>
-/// EL HALLAZGO: <c>/api/v1/admin/auth/login</c> se mapeaba con <c>.AllowAnonymous()</c> y nada
+/// LA REGLA: <c>/api/v1/admin/auth/login</c> se mapeaba con <c>.AllowAnonymous()</c> y nada
 /// mas. Su gemela del canal externo, <c>/api/v1/externo/auth/login</c>, si llevaba
 /// <c>RequireRateLimiting("external-login")</c> desde el principio; la institucional —la que
 /// entrega la cookie de webmaster, es decir el control total de usuarios, datos y publicacion—

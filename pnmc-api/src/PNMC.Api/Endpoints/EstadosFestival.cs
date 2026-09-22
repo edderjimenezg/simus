@@ -87,7 +87,7 @@ public static class EstadosFestival
     /// </para>
     /// <para>
     /// POR QUE SE AÑADIO AL CATALOGO EN VEZ DE REUTILIZAR UNO DE LOS SIETE.
-    /// <c>ExternalOrganizationEndpoints.cs:75</c> escribia <c>"registrada"</c> desde el
+    /// <c>ExternalOrganizationEndpoints.cs</c> escribia <c>"registrada"</c> desde el
     /// principio —es el estado funcional de una entidad registrada— y la tabla no lo tenia. Medido
     /// contra <c>PNMC_LOCAL</c>:
     /// </para>

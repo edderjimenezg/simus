@@ -8,7 +8,7 @@ import { Injectable, signal } from '@angular/core';
  * No había ningún interceptor HTTP (`app.config.ts` registraba
  * `provideHttpClient()` a secas). Cuando la cookie de sesión caducaba, el
  * sondeo de fondo recibía el 401 y lo único que ocurría era que
- * `admin-shell-page.component.ts:519-522` escribía «Error de conexión» en un
+ * `admin-shell-page.component.ts-522` escribía «Error de conexión» en un
  * texto de 9,3 px de la barra lateral.
  *
  * `isAuthenticated()` seguía devolviendo `true`, la consola seguía pintada, y

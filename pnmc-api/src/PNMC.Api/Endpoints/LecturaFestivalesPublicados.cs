@@ -143,7 +143,7 @@ public static class LecturaFestivalesPublicados
     /// <summary>
     /// PNMC-054. <c>EsVigente</c> no prueba por si sola que un revisor haya aprobado el contenido de esa
     /// version: la version nueva y el estado de la propuesta que la origina se escriben en pasos separados
-    /// (RevisionInstitucionalPropuestasFestivalEndpoints.cs:84-109), de modo que puede quedar marcada como
+    /// (RevisionInstitucionalPropuestasFestivalEndpoints.cs-109), de modo que puede quedar marcada como
     /// vigente una version cuya propuesta acabo en Rechazada, y la lectura publica la sirve como oficial.
     /// Aqui la lectura publica solo acepta una version si la propuesta que la produjo esta Publicada; si no
     /// lo esta, retrocede a la ultima version no repudiada, que es el estado que el rechazo debia dejar en

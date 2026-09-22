@@ -22,7 +22,6 @@ BEGIN
          N'Sistema PNMC', N'sistema@pnmc.local', NULL, NULL, N'festival@pnmc.local', NULL, NULL,
          NULL, NULL, NULL, 1, N'programada', CONVERT(date, '2026-06-01'), CONVERT(date, '2026-06-03'),
          N'municipal', '05', '05001', 1, N'borrador',
-         -- Bloque B2: ningun festival sin quien responda por el. Mientras nadie lo reclame,
          -- responde la institucion. La crea seed/V20260519_03, que corre antes que este fichero.
          (SELECT TOP (1) IdEntidad FROM dbo.Entidades WHERE EsInstitucional = 1 ORDER BY IdEntidad));
 END;
@@ -73,7 +72,6 @@ BEGIN
         (N'Escuela de musica de prueba PNMC', N'Municipal', N'Publica', N'Sistema PNMC', NULL, N'escuela@pnmc.local',
          NULL, N'municipal', '05', '05001', N'Medellin', NULL, 6.260564, -75.591711, 120, 80, 3,
          N'Iniciacion musical; ensamble', N'Musicas comunitarias', 1, N'Registro de prueba.', 1, N'borrador',
-         -- Bloque B9: ningun registro del ecosistema sin quien responda por el. Mientras
          -- nadie lo reclame, responde la institucion; la crea seed/V20260519_03.
          (SELECT TOP (1) IdEntidad FROM dbo.Entidades WHERE EsInstitucional = 1 ORDER BY IdEntidad));
 END;
@@ -91,7 +89,6 @@ BEGIN
          1, N'programada', CONVERT(date, '2026-06-02'), CONVERT(date, '2026-06-03'), N'Sistema PNMC',
          @IdFestivalPrueba, N'Festival de prueba PNMC', N'local', N'presencial', N'municipal',
          '05', '05001', N'Medellin', 1, N'borrador',
-         -- Bloque B9: ningun registro del ecosistema sin quien responda por el. Mientras
          -- nadie lo reclame, responde la institucion; la crea seed/V20260519_03.
          (SELECT TOP (1) IdEntidad FROM dbo.Entidades WHERE EsInstitucional = 1 ORDER BY IdEntidad));
 END;
@@ -106,7 +103,6 @@ BEGIN
         (N'Red de documentacion de prueba PNMC', N'Archivo sonoro', N'municipal', '05', '05001', N'Urbana',
          6.260564, -75.591711, N'Registro de prueba para redes de documentacion.', N'documentacion@pnmc.local',
          NULL, 1, N'borrador',
-         -- Bloque B9: ningun registro del ecosistema sin quien responda por el. Mientras
          -- nadie lo reclame, responde la institucion; la crea seed/V20260519_03.
          (SELECT TOP (1) IdEntidad FROM dbo.Entidades WHERE EsInstitucional = 1 ORDER BY IdEntidad));
 END;
@@ -122,7 +118,6 @@ BEGIN
         (N'Lutier de prueba PNMC', N'individual', NULL, N'Cuerdas pulsadas', N'Guitarra; tiple',
          N'Registro de prueba para luteria.', N'Lutier de prueba', N'lutier@pnmc.local', NULL,
          N'municipal', '05', '05001', NULL, N'Urbana', 6.260564, -75.591711, 1, N'borrador',
-         -- Bloque B9: ningun registro del ecosistema sin quien responda por el. Mientras
          -- nadie lo reclame, responde la institucion; la crea seed/V20260519_03.
          (SELECT TOP (1) IdEntidad FROM dbo.Entidades WHERE EsInstitucional = 1 ORDER BY IdEntidad));
 END;

@@ -86,7 +86,7 @@
         EL MARGEN. `max-w-[100rem]` son 1600 px, así que por debajo de esa anchura no recorta nada:
         el único margen que existe es el relleno, y eran 48 px de `lg:px-12`. Con `xl:px-16` pasan a
         64 px. `max-w-[100rem]` no se toca —es el riel común del sitio: footer.component.html:2,
-        navigation.component.html:6, section-intro.component.ts:23— y no se añade tramo `2xl`: a
+        navigation.component.html:6, section-intro.component.ts— y no se añade tramo `2xl`: a
         partir de 1536 px el riel ya deja 160 px libres a cada lado por sí solo, y más relleno solo
         desalinearía esta banda del pie de página.
 
@@ -146,7 +146,7 @@
 
             AQUÍ HUBO UN `md:flex-wrap` Y SE RETIRÓ. Se le atribuía ser la válvula para un
             `home_bulletin_btn` largo —el panel admite 40 caracteres,
-            core/cms/registro-de-textos-web.ts:212—, pero un mutante que lo borraba dejaba las nueve
+            core/cms/registro-de-textos-web.ts—, pero un mutante que lo borraba dejaba las nueve
             pruebas en verde, incluida la que monta los textos del CMS en su tope. No hacía nada.
           -->
           <div
@@ -172,7 +172,7 @@
 
               Sin `md:w-40` esta columna se dimensiona a `max-content`: «Síguenos en nuestras redes
               oficiales» ronda los 175 px en una línea, y un `home_social_desc` en el tope del campo
-              —120 caracteres, core/cms/registro-de-textos-web.ts:214— pasa de 550 px. Eso empujaría al
+              —120 caracteres, core/cms/registro-de-textos-web.ts— pasa de 550 px. Eso empujaría al
               formulario y le comería el sitio al botón, que es justo lo que hay que evitar. Con el
               ancho fijo el texto se parte dentro de la columna y crece hacia abajo. Los tres
               iconos miden 136 px (3 x 40 + 2 x 8 de `gap-2`) y caben con 24 px de sobra;

@@ -1,7 +1,5 @@
 /*
     PNMC · Ecosistema · Escenarios
-    Fecha: 25 de agosto de 2026
-    Bloque B8 de docs/Documentacion/ecosistema/PLAN-DE-TRABAJO-ORGANIZACIONES.md
 
     QUE ES ESTO
     -----------

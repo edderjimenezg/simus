@@ -232,7 +232,7 @@ public sealed class GuardasDelCmsTests
     /// <para>
     /// ESTA ES LA RUTA PRINCIPAL DE PUBLICACIÓN del CMS y era la única de su familia sin prueba.
     /// Comprobado: neutralizando el <c>if</c> de
-    /// <c>ContenidoWebEndpoints.cs:262</c>, la suite completa quedaba en verde. Sus tres hermanos
+    /// <c>ContenidoWebEndpoints.cs</c>, la suite completa quedaba en verde. Sus tres hermanos
     /// con la misma lista —<c>retire</c>, <c>republish</c>, la nómina y la importación— sí
     /// estaban cubiertos; la que de verdad publica, no. Con esa línea rota, un funcionario
     /// publica cualquier texto al portal público en una sola petición.

@@ -66,7 +66,7 @@ class NoticiasFalsas {
   al lado del boton» pasaba en verde sin medir nada, porque no habia boton contra el que medir.
 
   Montarlo es seguro y se comprobo: `BoletinFormComponent` no tiene `ngOnInit` ni constructor
-  propio, y solo llama al servicio en `cargarPolitica()` (boletin-form.component.ts:92) y en
+  propio, y solo llama al servicio en `cargarPolitica()` (boletin-form.component.ts) y en
   `confirmar()` (:135), las dos por accion del visitante. Sin pulsar nada, el doble de
   `BoletinService` no recibe una sola llamada; esta ahi para que un dia que si la reciba no salga
   una peticion HTTP de una prueba de maquetacion.
@@ -335,7 +335,7 @@ describe('HomeComponent', () => {
 
   El resto del archivo usa un doble que devuelve la clave como valor: cadenas cortas y parecidas
   entre sí. Con eso, una maquetación que reviente cuando la editora escriba un rótulo largo pasa
-  en verde. Los topes no son inventados, salen del registro (core/cms/registro-de-textos-web.ts:212-214):
+  en verde. Los topes no son inventados, salen del registro (core/cms/registro-de-textos-web.ts-214):
   `home_bulletin_btn` admite 40 caracteres, `home_social_title` 80 y `home_social_desc` 120.
 */
 const TOPES_DEL_CMS: Record<string, number> = {

@@ -328,7 +328,6 @@ BEGIN
          CONCAT(N'Dato de prueba concentrado en ', @NombreDepartamento, N' para validar metricas territoriales.'),
          1,
          @CodigoEstadoPublicado,
-         -- Bloque B9: ningun registro del ecosistema sin quien responda por el.
          @IdOrganizacionInstitucional,
          DATEADD(DAY, -50 + @i, SYSUTCDATETIME()),
          SYSUTCDATETIME());
@@ -376,7 +375,6 @@ BEGIN
          CONCAT(N'Centro cultural de ', @NombreMunicipio),
          1,
          @CodigoEstadoPublicado,
-         -- Bloque B9: ningun registro del ecosistema sin quien responda por el.
          @IdOrganizacionInstitucional,
          DATEADD(DAY, -40 + @i, SYSUTCDATETIME()),
          SYSUTCDATETIME());
@@ -415,7 +413,6 @@ BEGIN
          CONCAT(N'https://archivo.pnmc.local/', RIGHT(CONCAT(N'00', @i), 2)),
          1,
          @CodigoEstadoPublicado,
-         -- Bloque B9: ningun registro del ecosistema sin quien responda por el.
          @IdOrganizacionInstitucional,
          DATEADD(DAY, -35 + @i, SYSUTCDATETIME()),
          SYSUTCDATETIME());
@@ -461,7 +458,6 @@ BEGIN
          @Longitud,
          1,
          @CodigoEstadoPublicado,
-         -- Bloque B9: ningun registro del ecosistema sin quien responda por el.
          @IdOrganizacionInstitucional,
          DATEADD(DAY, -30 + @i, SYSUTCDATETIME()),
          SYSUTCDATETIME());

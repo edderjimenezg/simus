@@ -21,17 +21,17 @@ WHERE Titulo IS NULL OR LTRIM(RTRIM(Titulo)) = '';
 -- estuvieran sanos, sino porque ninguna de las dos condiciones puede darse:
 --
 --   * `FechaInicio` es `date NOT NULL` (V20260519_03__contenidos_modulos.sql:73)
---     y la entidad la declara `DateTime` no anulable (Rows.cs:39). Un evento sin
+--     y la entidad la declara `DateTime` no anulable (Rows.cs). Un evento sin
 --     fecha no queda en NULL: queda en el centinela 0001-01-01.
 --   * `CodigoDepartamento` admite NULL en el DDL, pero el codigo nunca escribe
---     NULL. `DepartmentCode` es `string = string.Empty` (Rows.cs:42) y la carga
---     guarda `deptCode ?? string.Empty` (AdminDataEndpoints.cs:1418, 1500, 1532,
+--     NULL. `DepartmentCode` es `string = string.Empty` (Rows.cs) y la carga
+--     guarda `deptCode ?? string.Empty` (AdminDataEndpoints.cs, 1500, 1532,
 --     1580, 1604). Lo que queda en la columna es cadena vacia.
 --   * Ademas es `char(2)`, asi que la cadena vacia se almacena rellenada con
 --     espacios: hay que comparar con LTRIM/RTRIM, no con `= N''` a secas.
 --
 -- LIMITE CONOCIDO, y hay que decirlo: `ResolveCoverageLevel`
--- (AdminDataEndpoints.cs:2216-2235) convierte "sin departamento" en
+-- (AdminDataEndpoints.cs-2235) convierte "sin departamento" en
 -- NivelCobertura = 'nacional'. Un evento al que se le perdio el territorio queda
 -- indistinguible de un evento nacional legitimo, y NINGUNA consulta sobre esta
 -- tabla puede separarlos. Por eso la parte (c) de abajo cuenta, sin afirmar que
@@ -101,12 +101,12 @@ WHERE CorreoElectronico IS NULL
 -- En `dbo.ContenidoWeb`, `Publicado` distingue tres estados y hay que respetar
 -- los tres:
 --   * NULL          -> nadie la publico, o se retiro. El sitio sirve el texto
---                      compilado (WebContentEndpoints.cs:59 filtra IS NOT NULL).
+--                      compilado (WebContentEndpoints.cs filtra IS NOT NULL).
 --   * cadena vacia  -> alguien PUBLICO el campo en blanco a proposito.
 --   * texto         -> lo que ve el visitante.
 --
 -- Hasta la correccion de PNMC-040, el front-end resolvia el texto con `||` en
--- lugar de `??` (web-texts.service.ts:196), de modo que la cadena vacia caia al
+-- lugar de `??` (web-texts.service.ts), de modo que la cadena vacia caia al
 -- valor compilado: borrar un texto publicado no lo borraba y el panel confirmaba
 -- que si. Al corregirlo, TODA clave que aparezca en esta consulta deja de
 -- mostrar su texto de fabrica y pasa a verse en blanco en el sitio publico.

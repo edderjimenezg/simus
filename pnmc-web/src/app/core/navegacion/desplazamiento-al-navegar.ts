@@ -6,7 +6,7 @@ import { filter } from 'rxjs/operators';
 /**
  * Cuándo una navegación sube la página arriba, y cuándo no.
  *
- * <b>EL DEFECTO QUE CIERRA.</b> El enrutador estaba configurado con
+ * <b>POR QUE EXISTE.</b> El enrutador estaba configurado con
  * <c>scrollPositionRestoration: 'top'</c>, que sube arriba en TODA navegación. Eso es correcto al
  * cambiar de pantalla y es un salto molesto cuando lo único que cambia es el estado de la que ya
  * estás mirando: en el Catálogo Editorial, abrir una ficha desde el mosaico devolvía el listado al

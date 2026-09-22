@@ -119,7 +119,7 @@ export class SeccionFestivalesComponent {
 
   /**
    * Editar el Festival directamente. El API solo lo admite en Borrador y en
-   * AjustesSolicitados (`FestivalesExternosEndpoints.cs:482-483`, `EsEditable`); en
+   * AjustesSolicitados (`FestivalesExternosEndpoints.cs-483`, `EsEditable`); en
    * cualquier otro estado el PUT contesta 409, así que el botón no se pinta.
    */
   puedeEditar(festival: FestivalDeLaOrganizacion): boolean {

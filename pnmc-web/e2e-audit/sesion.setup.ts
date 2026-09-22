@@ -8,7 +8,7 @@ import { RUTA_SESION } from './sesion-compartida';
  *
  * ## Por qué existe
  *
- * El API tiene un limitador de tasa (`Program.cs:107-112`, `PermitLimit = 30`).
+ * El API tiene un limitador de tasa (`Program.cs-112`, `PermitLimit = 30`).
  * Cuando cada prueba iniciaba sesión por su cuenta, una corrida completa
  * disparaba **más de sesenta accesos en pocos minutos** y agotaba la ventana.
  * Los últimos proyectos —portátil y escritorio— se quedaban sin poder entrar, y

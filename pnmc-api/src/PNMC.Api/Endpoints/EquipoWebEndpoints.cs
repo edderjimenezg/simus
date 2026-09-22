@@ -57,7 +57,7 @@ public static class EquipoWebEndpoints
         // exige sesion (linea 65 de este fichero).
         //
         // DATOS DE CONTACTO — OCTAVA LECTURA, ANOTADA APARTE: MiembroDelEquipoWeb incluye Email
-        // (ContratoDeEquipoWeb.cs:20), asi que esta ruta expone correos de personas sin
+        // (ContratoDeEquipoWeb.cs), asi que esta ruta expone correos de personas sin
         // pedir sesion. Es distinta de las siete del catalogo: aqui el correo es
         // institucional y se publica a proposito, un webmaster tuvo que pulsar publicar
         // para que saliera. Se deja anonima y se anota igualmente, para que la decision

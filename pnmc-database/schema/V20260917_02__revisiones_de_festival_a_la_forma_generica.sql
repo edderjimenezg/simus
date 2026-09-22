@@ -1,6 +1,5 @@
 /*
     PNMC · Las revisiones de Festival pasan a las tablas genéricas
-    Fecha: 17 de septiembre de 2026
 
     QUE ES ESTO
     -----------

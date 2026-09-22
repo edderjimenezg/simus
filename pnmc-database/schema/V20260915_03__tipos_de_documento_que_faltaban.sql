@@ -1,7 +1,7 @@
 /*
   SIMUS · Los dos tipos de documento que el alta externa aceptaba y el catálogo no tenía
 
-  EL HALLAZGO. `ExternalOrganizationEndpoints` llevaba los tipos de documento escritos a mano y la
+  LA REGLA. `ExternalOrganizationEndpoints` llevaba los tipos de documento escritos a mano y la
   lista tenía DIEZ; `dbo.TiposDocumento` tiene ocho. Los dos que faltaban son «Documento de
   identificación extranjero» (die) y «Carné diplomático» (cd). Es decir: el alta de una organización
   aceptaba dos códigos que el catálogo no reconoce, y cualquier pantalla que lea de la tabla —desde

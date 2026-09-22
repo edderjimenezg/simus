@@ -44,7 +44,7 @@ import {
  * para el mismo canal.
  *
  * <b>Las notificaciones no llevan testigo y no es un descuido.</b> `POST /notifications/{id}/read`
- * no valida antiforgery en el servidor (`NotificationEndpoints.cs:57-82`, no recibe `IAntiforgery`)
+ * no valida antiforgery en el servidor (`NotificationEndpoints.cs-82`, no recibe `IAntiforgery`)
  * y se cierra con `PoliticaCualquierSesion` porque su destinatario puede ser tanto la organización
  * externa como el funcionario. Mandar una cabecera que nadie comprueba daría la impresión de una
  * protección que no está.

@@ -15,7 +15,7 @@ namespace PNMC.Api.Tests;
 /// <para>
 /// POR QUE ESTA PRUEBA EXISTE, y por qué no la sustituye ninguna de las que ya había. Una
 /// auditoría hizo el experimento: cambiar
-/// <c>RevisionInstitucionalFestivalesEndpoints.cs:21</c> de
+/// <c>RevisionInstitucionalFestivalesEndpoints.cs</c> de
 /// <c>Permisos.PoliticaFuncionario</c> a <c>InstitutionalPolicy</c> —es decir, volver al agujero
 /// que se acababa de cerrar— dejaba <b>la suite entera en verde</b>. Reproducido: 326 pasan, 0
 /// fallan.

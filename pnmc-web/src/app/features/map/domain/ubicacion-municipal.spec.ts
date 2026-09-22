@@ -3,7 +3,7 @@ import * as MapDomain from './map-domain';
 /**
  * DÓNDE SE DIBUJA CADA PROCESO EN EL MODO DE PRÁCTICAS E INFLUENCIA.
  *
- * EL DEFECTO QUE CIERRA, Y ES UN DATO FALSO EN PANTALLA. `thematicPoints` no usaba
+ * POR QUE EXISTE, Y ES UN DATO FALSO EN PANTALLA. `thematicPoints` no usaba
  * ninguna posición: calculaba una. Tomaba el centroide del departamento y le sumaba un
  * desplazamiento en espiral cuyo ángulo y radio salían del ÍNDICE DEL REGISTRO EN EL
  * ARRAY (`const angle = (index * 0.72) % (2 * Math.PI)`). Reordenar los datos movía los

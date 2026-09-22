@@ -1,6 +1,5 @@
 /*
     PNMC · Propuesta de cambio sobre lo ya publicado, para cualquier proceso del Ecosistema
-    Fecha: 17 de septiembre de 2026
 
     QUE ES ESTO
     -----------

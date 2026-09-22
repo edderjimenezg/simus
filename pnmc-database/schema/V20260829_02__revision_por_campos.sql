@@ -1,6 +1,5 @@
 /*
     PNMC · Revisión institucional · Cambios pedidos campo por campo
-    Fecha: 29 de agosto de 2026
 
     QUE ES ESTO
     -----------
@@ -25,8 +24,8 @@
     Y HABIA UNA COLUMNA ESPERANDO. `RegistrosRevisionHistorial.CamposObservados`, nvarchar(max),
     existe desde `V20260525_01__administracion_extendida.sql`. La escribe una sola ruta
     —`POST /admin/data/{modulo}/{id}/status`, para agenda, noticias y galería— desde
-    `AdminDataEndpoints.cs:862`, y NINGUNA pantalla la llena: `observedFieldsJson` viaja siempre
-    vacío desde `admin.service.ts:565`. Es decir: el modelo ya preveía la revisión por campos y
+    `AdminDataEndpoints.cs`, y NINGUNA pantalla la llena: `observedFieldsJson` viaja siempre
+    vacío desde `admin.service.ts`. Es decir: el modelo ya preveía la revisión por campos y
     nunca llegó a existir. Estas dos tablas la construyen para Festivales, y el envío sigue
     escribiendo esa columna con el JSON de lo pedido, para que el historial que ya se consulta lo
     lleve dentro sin cambiar de forma.

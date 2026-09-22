@@ -138,7 +138,7 @@ describe('RevisionDeCamposStore · las notas por campo', () => {
   });
 
   it('lo que se manda al servidor lleva las notas de TODAS las ediciones', () => {
-    // EL DEFECTO QUE CIERRA: el PUT reemplaza la lista entera. Mandar solo las de la edición
+    // POR QUE EXISTE: el PUT reemplaza la lista entera. Mandar solo las de la edición
     // abierta borraría las de las demás en silencio, y quien anotó la de 2024 y pasó a la de 2025
     // perdería la primera al guardar.
     almacen.sembrar(revision([

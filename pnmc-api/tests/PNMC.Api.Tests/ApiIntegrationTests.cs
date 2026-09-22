@@ -1197,7 +1197,7 @@ public sealed class ApiIntegrationTests : IClassFixture<TestWebApplicationFactor
     /// </summary>
     /// <remarks>
     /// <para>
-    /// EL DEFECTO, MEDIDO ANTES DE TOCAR NADA. <c>RevisionInstitucionalFestivalesEndpoints.cs:70</c>
+    /// EL DEFECTO, MEDIDO ANTES DE TOCAR NADA. <c>RevisionInstitucionalFestivalesEndpoints.cs</c>
     /// armaba la ficha de revision resolviendo el nombre de la organizacion por JOIN CONTRA EL
     /// PRESENTE, y a esa misma respuesta le colgaba el historial entero. De modo que el dia en que
     /// una organizacion se cambiara el nombre, TODAS sus entradas pasadas —las de hace dos anos

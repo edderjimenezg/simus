@@ -13,7 +13,7 @@ namespace PNMC.Api.Tests;
 /// </summary>
 /// <remarks>
 /// <para>
-/// EL HALLAZGO. El circuito escribia los estados en PascalCase y la base tiene una clave
+/// LA REGLA. El circuito escribia los estados en PascalCase y la base tiene una clave
 /// foranea contra <c>EstadosContenido</c>, cuyos siete codigos son minuscula con guion
 /// bajo. Medido con un <c>UPDATE</c> por cada nombre contra <c>PNMC_LOCAL</c>:
 /// </para>
