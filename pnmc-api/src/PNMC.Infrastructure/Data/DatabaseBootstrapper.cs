@@ -222,14 +222,14 @@ public static class DatabaseBootstrapper
 
         await db.SaveChangesAsync(cancellationToken);
 
-        // LA FILA DE dbo.UsuariosRoles, QUE ES LO QUE DA EL ROL DESDE LA FASE B.
+        // LA FILA DE dbo.UsuariosRoles, QUE ES LO QUE DA EL ROL DESDE LA TRANSICION.
         //
         // Sin esto, una base arrancada por el bootstrapper —la de desarrollo local y la que
         // fabrica el arnes de SQLite— dejaba a las cuentas semilla con `IdRol` puesto y CERO
         // filas de asignacion, es decir sin poder iniciar sesion: exactamente el sintoma que el
         // defecto U3 del plan describia para la siembra de SQL Server, en el otro camino.
         //
-        // Desde la fase C es lo UNICO que da el rol: `Usuarios.IdRol` ya no existe. Va DESPUES
+        // Desde la transicion es lo UNICO que da el rol: `Usuarios.IdRol` ya no existe. Va DESPUES
         // del guardado porque un usuario recien creado no tiene Id hasta que EF lo escribe.
         //
         // NO ACUMULA: deja EXACTAMENTE el rol pedido y retira cualquier otro. Un bootstrapper que

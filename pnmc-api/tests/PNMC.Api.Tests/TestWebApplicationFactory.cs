@@ -132,7 +132,7 @@ public sealed class TestWebApplicationFactory : WebApplicationFactory<Program>
             rolDesconocidoUser.PasswordHash = AdminAuthEndpoints.HashPassword(rolDesconocidoUser, "pnmc-desconocido");
             db.Users.Add(rolDesconocidoUser);
 
-            // LAS FILAS DE dbo.UsuariosRoles, QUE ES LO UNICO QUE DA EL ROL DESDE LA FASE C.
+            // LAS FILAS DE dbo.UsuariosRoles, QUE ES LO UNICO QUE DA EL ROL DESDE LA TRANSICION.
             //
             // La columna `Usuarios.IdRol` ya no existe. Sin estas cuatro filas, las cuatro cuentas
             // de prueba existen y no pueden iniciar sesion: el login responde 403 con el motivo

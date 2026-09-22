@@ -14,7 +14,7 @@ namespace PNMC.Api.Tests;
 /// </summary>
 /// <remarks>
 /// <para>
-/// POR QUÉ NACIÓ, Y ERA UN DEFECTO PROPIO. Al escribir la fase B se añadió a la ruta de alta un
+/// POR QUÉ NACIÓ, Y ERA UN DEFECTO PROPIO. Al escribir la transicion se añadió a la ruta de alta un
 /// guardado adelantado —<c>UsuariosRoles.IdUsuario</c> necesita el identificador del usuario, y una
 /// fila recién añadida no lo tiene hasta que EF la escribe—. Ese guardado quedó <b>antes</b> de que
 /// nadie asignara <c>Usuarios.IdRol</c>, que entonces era <c>NOT NULL</c> con foránea a
@@ -29,7 +29,7 @@ namespace PNMC.Api.Tests;
 /// lo encontró la primera alta contra la base real.
 /// </para>
 /// <para>
-/// QUÉ MIDE HOY, TRAS LA FASE C. La columna desapareció y con ella aquel defecto concreto, pero no
+/// QUÉ MIDE HOY, TRAS LA TRANSICION. La columna desapareció y con ella aquel defecto concreto, pero no
 /// la propiedad: <b>crear una cuenta desde la consola tiene que dejarla usable contra la base
 /// real</b>, con uno o con dos roles, y la mezcla prohibida tiene que rechazarse sin dejar rastro.
 /// </para>
@@ -70,7 +70,7 @@ public sealed class AltaDeUsuarioSqlServerTests
 
         await ExigirRolesAsync(correo, "gestor_interno");
 
-        // Y LA CUENTA ENTRA. Entre la fase B y la C aqui se comprobaba que `Usuarios.IdRol` no
+        // Y LA CUENTA ENTRA. durante la transicion aqui se comprobaba que `Usuarios.IdRol` no
         // hubiera quedado a cero; esa columna ya no existe, asi que se comprueba la propiedad que
         // aquel aserto perseguia de verdad: que el alta deja una cuenta USABLE. Un 200 sobre una
         // cuenta que no puede iniciar sesion es un 200 que miente.

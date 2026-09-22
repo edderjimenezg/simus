@@ -9,7 +9,7 @@ import {
 } from './admin-config';
 
 /**
- * La fase B en la consola: una sesión puede traer varios roles, y lo que abre es la UNIÓN.
+ * En la consola: una sesión puede traer varios roles, y lo que abre es la UNIÓN.
  *
  * POR QUÉ EXISTE. El SPA decidía por `session().role`, un solo valor. Desde que el API envía
  * `roles`, decidir por el primero haría que la consola abriera o cerrara pantallas según el orden
@@ -21,7 +21,7 @@ import {
  *  2. Que la unión sea unión: ni la intersección, ni «todo».
  *  3. Que una sesión ilegible caiga del lado seguro, que es el que no abre la consola interna.
  */
-describe('roles en conjunto (fase B)', () => {
+describe('roles en conjunto', () => {
   describe('rolesDeSesion', () => {
     it('lee el campo nuevo cuando viene', () => {
       expect(rolesDeSesion({ role: 'gestor_interno', roles: ['gestor_interno', 'webmaster'] }))

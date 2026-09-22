@@ -395,7 +395,7 @@ public sealed class FabricaConLimitadorDeLoginActivo : WebApplicationFactory<Pro
             db.Users.Add(gestora);
             db.SaveChanges();
 
-            // LA FILA DE dbo.UsuariosRoles. Ver RolesEnPruebas: desde la fase C es lo unico que
+            // LA FILA DE dbo.UsuariosRoles. Ver RolesEnPruebas: desde entonces es lo unico que
             // da el rol, y sin esto la gestora no puede entrar ni al primer intento — con lo que
             // la prueba de fuerza bruta mediria un 401 que no viene del limite de intentos.
             db.UsuariosRoles.Add(new UsuarioRolRow { UserId = gestora.Id, RoleId = rol.Id, CreatedAt = DateTime.UtcNow });

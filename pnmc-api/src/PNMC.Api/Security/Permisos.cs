@@ -163,7 +163,7 @@ public static class Permisos
     /// <see cref="EsRolInterno(string?)"/>.
     /// </summary>
     /// <remarks>
-    /// Existe desde la fase B, cuando una persona paso a poder tener varios roles a la vez. La
+    /// Existe desde entonces, cuando una persona paso a poder tener varios roles a la vez. La
     /// puerta institucional pregunta por aqui: basta UNO interno para entrar, igual que basta un
     /// rol interno para que <see cref="EsFuncionario"/> diga que si. La combinacion prohibida
     /// —externo mezclado con interno— no se filtra en la puerta sino en el sitio donde se crea,
@@ -185,7 +185,7 @@ public static class Permisos
     /// </summary>
     /// <remarks>
     /// <para>
-    /// EL DEFECTO U7 DEL PLAN DE CONSTRUCCION, y la razon por la que la fase B no podia entrar
+    /// EL DEFECTO U7 DEL PLAN DE CONSTRUCCION, y la razon por la que la transicion no podia entrar
     /// sin esta funcion. PNMC tiene dos cookies con dos ambitos distintos —<c>pnmc.admin</c>,
     /// institucional, y <c>pnmc.external</c>, del ecosistema— y con la columna escalar
     /// <c>Usuarios.IdRol</c> era imposible tener las dos: un rol, un ambito. En cuanto los roles
@@ -200,7 +200,7 @@ public static class Permisos
     /// contra la base no pasa por ninguna ruta del API.
     /// </para>
     /// <para>
-    /// NO ES LO MISMO QUE «tener dos roles», que es legitimo y es todo el sentido de la fase B:
+    /// NO ES LO MISMO QUE «tener dos roles», que es legitimo y es todo el sentido de la transicion:
     /// <c>{gestor_interno, webmaster}</c> es correcto y da la union de los dos.
     /// </para>
     /// </remarks>

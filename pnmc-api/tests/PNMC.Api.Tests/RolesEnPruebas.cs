@@ -9,14 +9,14 @@ namespace PNMC.Api.Tests;
 /// </summary>
 /// <remarks>
 /// <para>
-/// POR QUÉ HIZO FALTA. Hasta la fase B de la migración de SIMUS, once ficheros de prueba creaban
+/// POR QUÉ HIZO FALTA. Hasta la transicion de la migración de SIMUS, once ficheros de prueba creaban
 /// su usuario con <c>RoleId = idWebmaster</c> y eso bastaba, porque el rol vivía en una columna.
-/// Desde la fase B el rol vive en la tabla de asignación y <b>esa línea dejó de dar ningún rol</b>:
+/// Desde la transicion el rol vive en la tabla de asignación y <b>esa línea dejó de dar ningún rol</b>:
 /// la cuenta se creaba, el login respondía 403 con el motivo <c>sin_rol_valido</c> y la prueba
 /// fallaba en un sitio que no tenía nada que ver con lo que medía.
 /// </para>
 /// <para>
-/// ESCRIBE LO MISMO QUE PRODUCCIÓN Y NADA MÁS: la fila de <c>UsuariosRoles</c>. Entre la fase B y
+/// ESCRIBE LO MISMO QUE PRODUCCIÓN Y NADA MÁS: la fila de <c>UsuariosRoles</c>. Entre la transicion y
 /// la C escribía además <c>Usuarios.IdRol</c>, porque el sistema también lo hacía; esa columna ya
 /// no existe. Una prueba que escribiera algo que el sistema no escribe dejaría de medir el sistema.
 /// </para>

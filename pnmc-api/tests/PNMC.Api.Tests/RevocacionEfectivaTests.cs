@@ -169,7 +169,7 @@ public sealed class RevocacionEfectivaTests : IClassFixture<TestWebApplicationFa
         fila.IsActive = activo;
         await db.SaveChangesAsync();
 
-        // POR dbo.UsuariosRoles, QUE ES LO QUE LA REVALIDACION LEE. Antes de la fase B bastaba
+        // POR dbo.UsuariosRoles, QUE ES LO QUE LA REVALIDACION LEE. Antes de la transicion bastaba
         // con mover `Usuarios.IdRol`; ahora esa columna no decide nada, y escribirla sola dejaba
         // esta prueba en verde falso: cambiaba algo que el sistema ya no mira, la sesion seguia
         // valida y el aserto de «te echa al cambiarte el rol» pasaba a medir el aire.

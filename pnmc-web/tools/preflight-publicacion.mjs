@@ -105,7 +105,7 @@ let gruposConCambio = 0;
 let camposConCambio = 0;
 
 for (const grupoId of aRevisar) {
-  const res = await pedir(`/admin/web-content/groups/${grupoId}`, {}, cookie);
+  const res = await pedir(`/admin/contenido-web/groups/${grupoId}`, {}, cookie);
   if (!res.ok) {
     console.log(`  ${grupoId.padEnd(26)} — no se pudo leer (HTTP ${res.status})`);
     continue;

@@ -170,7 +170,7 @@ public sealed class CandadoDelUltimoWebmasterTests : IClassFixture<TestWebApplic
         db.Users.Add(fila);
         db.SaveChanges();
 
-        // LA FILA DE dbo.UsuariosRoles: desde la fase C es lo unico que da el rol, y sin esta
+        // LA FILA DE dbo.UsuariosRoles: desde entonces es lo unico que da el rol, y sin esta
         // linea la cuenta existe pero no puede iniciar sesion. Ver RolesEnPruebas.
         db.UsuariosRoles.Add(new UsuarioRolRow { UserId = fila.Id, RoleId = idWebmaster, CreatedAt = DateTime.UtcNow });
         db.SaveChanges();
@@ -206,7 +206,7 @@ public sealed class CandadoDelUltimoWebmasterTests : IClassFixture<TestWebApplic
     {
         using var alcance = _factory.Services.CreateScope();
         var db = alcance.ServiceProvider.GetRequiredService<PnmcDbContext>();
-        // Desde la fase B, «el rol que tiene en la base» sale de dbo.UsuariosRoles. Se afirma
+        // Desde la transicion, «el rol que tiene en la base» sale de dbo.UsuariosRoles. Se afirma
         // que hay exactamente uno porque estas cuentas se crean con uno; si algun dia tuvieran
         // varios, este ayudante tendria que decir cual, y es mejor que falle a que elija solo.
         var roles = await RolesEnPruebas.LeerAsync(db, id);

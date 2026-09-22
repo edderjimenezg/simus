@@ -31,7 +31,7 @@ import { IconoDeEnlaceComponent, TipoDeEnlace } from '../icono-de-enlace/icono-d
   imports: [IconoDeEnlaceComponent],
   styles: [':host { display: contents; }'],
   /*
-    EL DATO VA PRIMERO Y EL ROTULO DEBAJO. Lo pidió así la dirección de producto de 2026: en una ficha que se consulta, lo que se busca es el valor —«Fundación de Prueba»—, y
+    EL DATO VA PRIMERO Y EL ROTULO DEBAJO. Lo pidió así la dirección de producto: en una ficha que se consulta, lo que se busca es el valor —«Fundación de Prueba»—, y
     el rótulo solo hace falta para confirmar de qué campo es.
 
     EN EL ARBOL, EL `dt` SIGUE ANTES QUE EL `dd`, porque es lo único que admite la especificación de

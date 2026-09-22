@@ -406,7 +406,7 @@ public static class ExternalOrganizationEndpoints
         var value = principal.FindFirstValue(ClaimTypes.NameIdentifier);
         if (!int.TryParse(value, NumberStyles.Integer, CultureInfo.InvariantCulture, out var userId)) return null;
 
-        // POR dbo.UsuariosRoles (fase B). Misma forma que en ExternalAuthEndpoints y por la misma
+        // POR dbo.UsuariosRoles. Misma forma que en ExternalAuthEndpoints y por la misma
         // razon: con varios roles por persona, el Join contra la columna escalar deja de ser
         // «una fila como mucho».
         return await dbContext.Users

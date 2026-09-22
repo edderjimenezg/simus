@@ -951,7 +951,7 @@ export class AdminCatalogoEditorialPanelComponent {
       // Decía `set(this.facetaUbicacion())`, y como el efecto que escribe la dirección dispara una
       // navegación, cualquier cambio de cualquier filtro volvía a pasar por aquí: quitar una
       // faceta cualquiera dejaba `ubicacion` vacío un instante y el árbol entero se plegaba solo.
-      // Lo reportó criterio: «una vez des-selecciono cualquier filtro se compacta
+      // El criterio es este: «una vez des-selecciono cualquier filtro se compacta
       // automáticamente todas las subcategorías, no tiene sentido ese comportamiento».
       //
       // Abrir sí: llegar con `?ubicacion=Repertorio` tiene que enseñar sus rutas. Cerrar es un

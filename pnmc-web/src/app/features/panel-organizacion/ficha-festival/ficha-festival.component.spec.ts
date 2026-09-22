@@ -37,7 +37,7 @@ import {
 
   LAS CINCO COSAS QUE NO PUEDEN FALLAR:
 
-  1) LOS RÓTULOS SON LOS DEL VOLCADO DE SIMUS. Es la corrección definida con nombre y
+  1) LOS RÓTULOS SON LOS DEL VOLCADO DE SIMUS. Es la corrección pedida con nombre y
      apellido: «a los nombres de los campos no los cambies como vi que hiciste, en por ejemplo
      "fuente de financiamiento"; déjalo tal cual». Un rótulo traducido a gusto —«Fuente principal»
      por ID_FUENTE_FINANCIACION— no falla en ninguna prueba de comportamiento y hace que la pantalla

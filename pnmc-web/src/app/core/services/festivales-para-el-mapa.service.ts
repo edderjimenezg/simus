@@ -19,7 +19,7 @@ import { SEPARADOR_DE_CLASIFICACION } from '../../features/map/domain/map-domain
  * está aquí, a la vista, en vez de repartida por un servicio que nadie usaba.
  *
  * <b>NO HAY CORREO NI TELEFONO, Y ES CORRECTO.</b> El contrato público los retiró el 30 de agosto
- * de 2026 por decisión de criterio: «todo dato personal o correo se quita de la versión
+ * de 2026 por decisión criterio: «todo dato personal o correo se quita de la versión
  * pública, solo se dejan redes sociales». El mapeador anterior los pedía igual, así que habría
  * seguido pidiendo datos que el API ya no entrega aunque la ruta hubiera existido.
  */

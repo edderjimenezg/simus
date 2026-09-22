@@ -13,7 +13,7 @@ import { MapaEcosistemicoPageComponent } from './mapa-ecosistemico-page.componen
  * antes del cambio: pulsar la primera tarjeta abría un diálogo de 1280x639 —«Detalle de
  * Redes de Documentación»— y el mapa quedaba entero detrás.
  *
- * Pedido por criterio: «que se vaya al mapa y se ubique en el municipio, y se abra la
+ * El criterio es este: «que se vaya al mapa y se ubique en el municipio, y se abra la
  * pestaña que se usa dentro del mapa para ubicar».
  *
  * QUÉ SE MIDE AQUÍ Y QUÉ NO. Aquí se mide lo que decide el componente: qué señales

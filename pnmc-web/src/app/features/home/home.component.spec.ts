@@ -335,7 +335,7 @@ describe('HomeComponent', () => {
 
   El resto del archivo usa un doble que devuelve la clave como valor: cadenas cortas y parecidas
   entre sí. Con eso, una maquetación que reviente cuando la editora escriba un rótulo largo pasa
-  en verde. Los topes no son inventados, salen del registro (core/cms/registro-de-textos-web.ts-214):
+  en verde. Los topes no son inventados, salen del registro (core/cms/registro-de-textos-web.ts):
   `home_bulletin_btn` admite 40 caracteres, `home_social_title` 80 y `home_social_desc` 120.
 */
 const TOPES_DEL_CMS: Record<string, number> = {

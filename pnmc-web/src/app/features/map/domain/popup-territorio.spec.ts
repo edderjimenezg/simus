@@ -5,7 +5,7 @@ import * as MapDomain from './map-domain';
  *
  * POR QUE EXISTE. Pulsar un municipio abria un modal de 560 px centrado sobre un
  * velo con desenfoque: para leer los procesos de Amalfi habia que perder de vista Amalfi
- * y el mapa entero. Pedido por criterio: «la ventana emergente
+ * y el mapa entero. El criterio es este: «la ventana emergente
  * cuando de click no debe quitar el mapa, debe salir mas pequena alli justo al lado».
  *
  * POR QUE ESTE FICHERO EXISTE, HABIENDO YA UNA PRUEBA EN EL COMPONENTE. La prueba

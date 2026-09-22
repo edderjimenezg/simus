@@ -1088,15 +1088,15 @@ public sealed class RoleRow
 /// </summary>
 /// <remarks>
 /// <para>
-/// ES LA FUENTE DE VERDAD DE QUE ROLES TIENE ALGUIEN desde la fase B de la migracion de
+/// ES LA FUENTE DE VERDAD DE QUE ROLES TIENE ALGUIEN en el modelo de
 /// SIMUS (24 de agosto de 2026). Hasta entonces el rol vivia en la columna escalar
 /// <c>Usuarios.IdRol</c>, que solo admite uno.
 /// </para>
 /// <para>
-/// <b>ES LA UNICA FUENTE, desde la fase C (25 ago 2026).</b> La columna escalar
+/// <b>ES LA UNICA FUENTE.</b> La columna escalar
 /// <c>Usuarios.IdRol</c> ya no existe: la retiro la seccion 11 de
 /// <c>schema/V20260824_01__usuarios_roles_y_permisos.sql</c>, y con ella desaparecio la
-/// escritura doble que la fase B mantenia para poder revertir el despliegue.
+/// escritura doble que la transicion mantenia para poder revertir el despliegue.
 /// </para>
 /// <para>
 /// Eso es lo que hace comprobable el invariante que motivo toda la migracion: <b>los roles de

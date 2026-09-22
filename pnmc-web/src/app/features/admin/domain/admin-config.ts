@@ -53,7 +53,7 @@ export function esRolInterno(roleId: string | null | undefined): boolean {
 /**
  * Los roles de una sesión, normalizados y sin repetidos.
  *
- * DESDE LA FASE B DE LA MIGRACIÓN DE SIMUS una persona puede tener varios roles, y el API los
+ * DESDE LA TRANSICION DE LA MIGRACIÓN DE SIMUS una persona puede tener varios roles, y el API los
  * envía en `user.roles`. El campo `user.role` sigue viniendo —es el principal por precedencia— y
  * este ayudante lo usa como respaldo, de modo que una respuesta anterior al cambio se sigue
  * entendiendo. Devolver una lista vacía cuando no hay sesión no es un descuido: con la lista

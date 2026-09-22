@@ -349,7 +349,7 @@ public sealed class AdminLoginRequest
 
 /// <param name="Role">
 /// El rol PRINCIPAL, por precedencia declarada (webmaster &gt; gestor_interno &gt; externo).
-/// Desde la fase B de la migracion de SIMUS una persona puede tener varios; este campo se
+/// Desde el modelo vigente una persona puede tener varios; este campo se
 /// conserva porque media consola pinta una sola etiqueta, y quitarlo habria sido un cambio
 /// rompiente sin necesidad. La verdad completa esta en <paramref name="Roles"/>.
 /// </param>
@@ -421,7 +421,7 @@ public sealed class AdminUserUpsertRequest
     public string Email { get; set; } = string.Empty;
 
     /// <summary>
-    /// Rol unico. Se sigue admitiendo, y es lo que envia cualquier cliente anterior a la fase B.
+    /// Rol unico. Se sigue admitiendo, y es lo que envia cualquier cliente anterior a la transicion.
     /// </summary>
     /// <remarks>
     /// Si <see cref="Roles"/> viene con contenido, MANDA <see cref="Roles"/> y este campo se

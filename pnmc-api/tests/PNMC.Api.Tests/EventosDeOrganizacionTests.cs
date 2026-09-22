@@ -261,7 +261,7 @@ public sealed class EventosDeOrganizacionTests
     /// <remarks>
     /// <b>EL DEFECTO QUE TRAJO ESTA PRUEBA.</b> El circuito ponía el evento «en revisión» y no había
     /// ninguna cola que lo listara: la única forma de encontrarlo era abrir Agenda y filtrar por
-    /// estado. Lo reportó criterio: «al enviar evento a
+    /// estado. El criterio es este: «al enviar evento a
     /// revisión debería aparecer en la bandeja de Solicitudes y revisiones».
     /// </remarks>
     [Fact]

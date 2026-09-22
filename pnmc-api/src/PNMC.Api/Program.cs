@@ -755,7 +755,7 @@ static RateLimitPartition<string> CreateAdminLoginRateLimitPartition(HttpContext
 /// puede verificar, que es justo lo que este evento existe para impedir.
 /// </para>
 /// <para>
-/// EL CONJUNTO ENTERO DE ROLES SE COMPARA, NO EL PRIMERO. Desde la fase B de la migracion de
+/// EL CONJUNTO ENTERO DE ROLES SE COMPARA, NO EL PRIMERO. Desde el modelo vigente de
 /// SIMUS una persona puede tener varios roles, y la cookie lleva un claim por cada uno. Leer
 /// solo el primero —que es lo que hacia `FindFirst`— dejaria pasar el caso que mas importa:
 /// a quien se le RETIRA uno de dos roles, la cookie sigue trayendo el otro en primera
@@ -764,7 +764,7 @@ static RateLimitPartition<string> CreateAdminLoginRateLimitPartition(HttpContext
 /// que la comparacion falle por un cambio real de roles y no por el orden en que vinieron.
 /// </para>
 /// <para>
-/// UNA CUENTA SIN NINGUN ROL TAMBIEN SE ECHA. Es un estado alcanzable desde la fase B —la
+/// UNA CUENTA SIN NINGUN ROL TAMBIEN SE ECHA. Es un estado alcanzable desde entonces —la
 /// tabla de asignacion puede quedarse vacia para alguien— y significa que esa persona ya no
 /// tiene por que estar dentro. El conjunto vacio no coincide con ninguna cookie firmada, asi
 /// que el rechazo sale solo de la misma comparacion.

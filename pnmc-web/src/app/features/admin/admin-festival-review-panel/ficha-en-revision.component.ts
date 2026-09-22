@@ -200,7 +200,7 @@ import { ConfirmacionComponent } from '../../../shared/components/ui/confirmacio
 
             Ahora es un bloque con nombre: qué se ha señalado, en qué campos —cada uno lleva a su
             campo—, y la observación general debajo. Mejorado a petición
-            de criterio: «revisa todo el tema de la observación general, de las
+            criterio: «revisa todo el tema de la observación general, de las
             observaciones específicas».
           -->
           <section class="devolucion" aria-label="Lo que se devuelve a la organización">

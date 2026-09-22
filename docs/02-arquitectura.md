@@ -13,7 +13,7 @@ publicado, el diario de migraciones y las dos suites de pruebas—, de modo que 
 |---|---|---|
 | `pnmc-web/` | Angular 21 con señales, componentes autónomos y Tailwind 4 | El portal público, el espacio de la organización y la consola de gestión administrativa |
 | `pnmc-api/` | .NET 10, Minimal APIs, EF Core | La única puerta a los datos: **310 operaciones** en 261 caminos |
-| `pnmc-database/` | SQL Server, migraciones con DbUp | **132 tablas**, **101 migraciones** aplicadas |
+| `pnmc-database/` | SQL Server, migraciones con DbUp | **113 tablas**, **102 migraciones** |
 
 Alrededor: `scripts/` levanta y comprueba el entorno local, `infra/` guarda lo de despliegue y
 `docs/` es lo que está leyendo.
@@ -47,10 +47,10 @@ envoltorio— pero no comparten sesión ni permisos.
 
 ## 2.4 Cómo se sostiene
 
-- **Pruebas**: **1 078** en el API contra SQL Server real, **1 358** en el frontend.
+- **Pruebas**: **1 125** en el API, de las que 59 corren contra SQL Server real, y **1 407** en el frontend.
 - **Contrato**: `pnmc-api/openapi.yaml` se versiona y una prueba comprueba que corresponde al
   código. Se regenera con `ACTUALIZAR_OPENAPI=1 dotnet test --filter ContratoOpenApi`.
-- **Trinquetes**: **once** métricas de interfaz y una de tipado, con techo sellado, y **87 pruebas
+- **Trinquetes**: **doce** métricas de interfaz y una de tipado, con techo sellado, y **87 pruebas
   propias** que fijan qué cuenta cada métrica y qué no. No dejan que la deuda suba sin que alguien lo
   decida. Viven en `pnmc-web/trinquete/`.
 - **Puertas**: ver [`10-pruebas.md`](10-pruebas.md).

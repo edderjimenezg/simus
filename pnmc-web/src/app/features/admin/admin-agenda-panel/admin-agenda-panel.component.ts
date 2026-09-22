@@ -324,7 +324,7 @@ export class AdminAgendaPanelComponent {
    *
    * <b>ORDENAR EN MEMORIA ERA EL DEFECTO, no una simplificación.</b> La Agenda pinta doce filas de
    * cuarenta páginas; ordenar el array cargado reordenaba esas doce y dejaba el resto donde
-   * estaba. se detectó: «debe ser de todos, no
+   * estaba. Se detectó: «debe ser de todos, no
    * solo de los de la página visible, por eso en la página 1 no me aparecía nunca ningún
    * publicado». Es el mismo criterio que ya seguían Festivales y Organizaciones.
    *

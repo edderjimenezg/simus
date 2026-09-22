@@ -99,7 +99,7 @@ if (elegidos.length === 0) {
 // cambió de verdad. Sin esta lectura el informe diría «12 grupos repuestos» sin
 // distinguir los que ya estaban en fábrica, y una orden destructiva debe dejar
 // claro qué destruyó.
-const antes = await api('/web-content');
+const antes = await api('/contenido-web');
 const publicadoAntes = antes.estado === 200 ? (JSON.parse(antes.cuerpo).texts ?? {}) : {};
 
 const login = await api('/admin/auth/login', { body: JSON.stringify(CREDENCIALES) });
@@ -108,7 +108,7 @@ if (login.estado !== 200) {
   process.exit(2);
 }
 const csrf = await (async () => {
-  const r = await api('/admin/web-content/csrf');
+  const r = await api('/admin/contenido-web/csrf');
   const j = JSON.parse(r.cuerpo);
   return j.token ?? j.requestToken ?? Object.values(j)[0];
 })();
@@ -119,7 +119,7 @@ for (const [id, grupo] of elegidos) {
     fields: grupo.campos.map((c) => ({ key: c.key, content: c.defecto })),
     publish: true,
   });
-  const r = await api(`/admin/web-content/groups/${id}`, { body: cuerpo, token: csrf });
+  const r = await api(`/admin/contenido-web/groups/${id}`, { body: cuerpo, token: csrf });
   if (r.estado !== 200) {
     console.error(`grupo ${id}: HTTP ${r.estado} — ${r.cuerpo.slice(0, 200)}`);
     process.exit(1);

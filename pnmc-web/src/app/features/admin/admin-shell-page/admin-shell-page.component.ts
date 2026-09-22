@@ -866,7 +866,7 @@ export class AdminShellPageComponent implements OnInit, OnDestroy {
   // Active Role and Capabilities
 
   /**
-   * TODOS los roles de la sesión. Desde la fase B de la migración de SIMUS una persona puede
+   * TODOS los roles de la sesión. Desde la transicion de la migración de SIMUS una persona puede
    * tener varios, y decidir por el primero haría que la consola abriera o cerrara pantallas
    * según el orden en que llegaran.
    *

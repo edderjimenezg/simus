@@ -8,7 +8,7 @@ namespace PNMC.Api.Security;
 /// </summary>
 /// <remarks>
 /// <para>
-/// LA FASE B DE LA MIGRACION DE SIMUS, en una frase: el rol dejo de ser una columna escalar
+/// EL MODELO DE ROLES, en una frase: el rol dejo de ser una columna escalar
 /// (<c>Usuarios.IdRol</c>, que solo admite uno) y paso a ser una tabla de asignacion
 /// (<c>dbo.UsuariosRoles</c>, que admite varios). Este fichero es el unico sitio del API que
 /// sabe eso; el resto pregunta aqui.
@@ -22,7 +22,7 @@ namespace PNMC.Api.Security;
 /// devolver mas de una fila y quien no lo espere se quedara con la primera.
 /// </para>
 /// <para>
-/// SIN SEGUNDA FUENTE, DESDE LA FASE C (25 ago 2026). Entre la fase B y la C,
+/// SIN SEGUNDA FUENTE. Durante la transicion,
 /// <see cref="AsignarAsync"/> escribia ademas <c>Usuarios.IdRol</c> —una escritura doble que
 /// nadie leia— para poder revertir el despliegue sin tocar la base. Esa columna ya no existe: la
 /// retiro la seccion 11 de <c>schema/V20260824_01__usuarios_roles_y_permisos.sql</c>, encendida
@@ -32,7 +32,7 @@ namespace PNMC.Api.Security;
 /// <para>
 /// SIN VUELTA ATRAS SILENCIOSA. Si una cuenta no tiene ninguna fila en <c>UsuariosRoles</c>,
 /// <see cref="ObtenerAsync"/> devuelve la lista <b>vacia</b> y no consulta <c>IdRol</c> como
-/// respaldo. Es deliberado: un respaldo silencioso haria que la fase C —retirar la columna—
+/// respaldo. Es deliberado: un respaldo silencioso haria que retirar la columna
 /// pasara de «todo el mundo pierde el rol de golpe, y se ve» a «unos cuantos lo pierden cuando
 /// les toque, y no se ve». El plan de construccion lo pide asi en su comprobacion 7. Quien no
 /// tenga rol no inicia sesion, y el registro lo dice con el motivo <c>sin_rol_valido</c>.

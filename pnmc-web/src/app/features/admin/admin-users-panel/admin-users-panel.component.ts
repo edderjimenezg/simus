@@ -65,7 +65,7 @@ export class AdminUsersPanelComponent {
   // Users state
   users = signal<UsuarioDelSistema[]>([]);
   /**
-   * `roles` es un CONJUNTO desde la fase B de la migración de SIMUS.
+   * `roles` es un CONJUNTO desde entonces de la migración de SIMUS.
    *
    * `role` ya no está: el API acepta los dos campos —`roles` manda cuando viene— pero enviar los
    * dos desde aquí abriría la puerta a que se contradijeran, y quien leyera el código tendría que
@@ -924,7 +924,7 @@ export class AdminUsersPanelComponent {
   // ---------------------------------------------------------------- roles, en conjunto
 
   /**
-   * Los roles de una fila del listado, entendiendo también respuestas anteriores a la fase B.
+   * Los roles de una fila del listado, entendiendo también respuestas anteriores a la transicion.
    *
    * El parámetro va tipado y no como `any` aunque `users()` sí lo sea: esto es lo único que este
    * componente necesita saber de una fila, y escribirlo aquí es lo que impide que el trinquete de

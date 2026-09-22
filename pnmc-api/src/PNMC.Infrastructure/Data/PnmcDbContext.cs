@@ -100,7 +100,7 @@ public sealed class PnmcDbContext : DbContext
     public DbSet<RoleRow> Roles => Set<RoleRow>();
 
     /// <summary>
-    /// Que roles tiene cada persona. <b>Fuente de verdad desde la fase B</b>; ver
+    /// Que roles tiene cada persona. <b>Fuente de verdad desde entonces</b>; ver
     /// <see cref="UsuarioRolRow"/> y <c>Security/RolesDeUsuario.cs</c>.
     /// </summary>
     public DbSet<UsuarioRolRow> UsuariosRoles => Set<UsuarioRolRow>();
@@ -890,7 +890,7 @@ public sealed class PnmcDbContext : DbContext
             entity.Property(x => x.CreatedAt).HasColumnName("FechaCreacion");
             entity.Property(x => x.UpdatedAt).HasColumnName("FechaActualizacion");
 
-            // AQUI HUBO UNA FORANEA HACIA dbo.Roles, Y SE FUE CON LA COLUMNA (fase C).
+            // AQUI HUBO UNA FORANEA HACIA dbo.Roles, Y SE FUE CON LA COLUMNA.
             //
             // Se declaro el 25 ago 2026 porque la base la tenia y el modelo no, y esa diferencia
             // dejaba ciego al carril rapido: `EnsureCreated` fabricaba la tabla de SQLite sin la

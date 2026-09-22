@@ -11,7 +11,7 @@ namespace PNMC.Api.Security;
 /// <param name="Roles">
 /// Los roles que la cuenta tiene EN <c>dbo.UsuariosRoles</c>, normalizados y en orden estable
 /// (<see cref="RolesDeUsuario.Ordenar"/>). Puede venir vacía: una cuenta sin ninguna asignación
-/// es un estado real desde la fase B, y significa que esa persona no debe seguir dentro.
+/// es un estado real desde entonces, y significa que esa persona no debe seguir dentro.
 /// </param>
 public sealed record EstadoDeCuenta(bool Activo, IReadOnlyList<string> Roles)
 {
@@ -111,7 +111,7 @@ public sealed class RevalidacionDeSesion
         using var alcance = _fabricaDeAlcances.CreateScope();
         var db = alcance.ServiceProvider.GetRequiredService<PnmcDbContext>();
 
-        // DOS CONSULTAS, NO UN JOIN, Y ES DELIBERADO. Desde la fase B los roles son varios, asi
+        // DOS CONSULTAS, NO UN JOIN, Y ES DELIBERADO. Desde la transicion los roles son varios, asi
         // que el join devolveria una fila POR ROL y habria que decidir que hacer con la cuenta
         // que no tiene ninguno. Separandolas, «existe pero sin roles» se distingue de «no
         // existe», que son dos cosas distintas: la primera se echa, la segunda ademas se registra

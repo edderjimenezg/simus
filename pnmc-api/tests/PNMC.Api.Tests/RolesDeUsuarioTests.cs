@@ -4,7 +4,7 @@ using Xunit;
 namespace PNMC.Api.Tests;
 
 /// <summary>
-/// El orden y la unicidad del conjunto de roles, que desde la fase B son <b>carga estructural</b>
+/// El orden y la unicidad del conjunto de roles, que desde entonces son <b>carga estructural</b>
 /// y no cosmética.
 /// </summary>
 /// <remarks>
@@ -19,7 +19,7 @@ namespace PNMC.Api.Tests;
 ///     conjuntos distintos y el sistema echaría a la gente en cada petición.
 ///   </description></item>
 ///   <item><description>
-///     <b>El rol principal</b> que viaja en la cookie, en el DTO y —mientras dure la fase B— en la
+///     <b>El rol principal</b> que viaja en la cookie, en el DTO y —mientras dure la transicion— en la
 ///     columna <c>Usuarios.IdRol</c>. Si dependiera del plan de ejecución de SQL Server, la misma
 ///     cuenta se etiquetaría distinto entre dos peticiones.
 ///   </description></item>

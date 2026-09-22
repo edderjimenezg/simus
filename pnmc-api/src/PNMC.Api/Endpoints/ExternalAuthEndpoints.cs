@@ -153,7 +153,7 @@ public static class ExternalAuthEndpoints
             dbContext.Users.Add(user);
             await dbContext.SaveChangesAsync(cancellationToken);
 
-            // LA FILA DE UsuariosRoles, QUE ES LO QUE DA EL ROL. Desde la fase C es lo unico:
+            // LA FILA DE UsuariosRoles, QUE ES LO QUE DA EL ROL. Desde la transicion es lo unico:
             // `Usuarios.IdRol` ya no existe. Va DESPUES del guardado porque necesita el Id que EF
             // acaba de asignar a la fila nueva.
             await RolesDeUsuario.AsignarAsync(dbContext, user, [role], cancellationToken);
@@ -537,7 +537,7 @@ public static class ExternalAuthEndpoints
             return null;
         }
 
-        // POR dbo.UsuariosRoles (fase B). Con la columna escalar este Join devolvia una fila como
+        // POR dbo.UsuariosRoles. Con la columna escalar este Join devolvia una fila como
         // mucho; con N:M devolveria una por rol, asi que el filtro va sobre la tabla de asignacion
         // y el `Any` deja el resultado en «existe alguna asignacion a externo», que es la
         // pregunta que la ruta quiere hacer.

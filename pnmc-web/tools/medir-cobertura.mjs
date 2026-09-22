@@ -103,7 +103,7 @@ async function api(ruta, opciones = {}) {
 }
 
 async function token() {
-  const r = await api('/admin/web-content/csrf');
+  const r = await api('/admin/contenido-web/csrf');
   const j = JSON.parse(r.cuerpo);
   return j.token ?? j.requestToken ?? Object.values(j)[0];
 }
@@ -121,7 +121,7 @@ async function escribirGrupos(valorDe) {
   const t = await token();
   for (const [grupo, campos] of grupos) {
     const cuerpo = JSON.stringify({ fields: campos.map((c) => ({ key: c.key, content: valorDe(c) })), publish: true });
-    const r = await api(`/admin/web-content/groups/${grupo}`, { body: cuerpo, token: t });
+    const r = await api(`/admin/contenido-web/groups/${grupo}`, { body: cuerpo, token: t });
     if (r.estado !== 200) throw new Error(`grupo ${grupo}: HTTP ${r.estado} — ${r.cuerpo.slice(0, 200)}`);
   }
 }
@@ -135,7 +135,7 @@ if (login.estado !== 200) {
 // Fotografía del texto publicado ANTES de tocar nada. Es lo único que permite
 // devolver la base a como estaba; sin esta lectura, la reposición del final no
 // tiene contra qué comparar y acaba publicando el catálogo entero.
-const lecturaPrevia = await api('/web-content');
+const lecturaPrevia = await api('/contenido-web');
 if (lecturaPrevia.estado !== 200) {
   console.error(`No se pudo leer el estado publicado (HTTP ${lecturaPrevia.estado}). Sin esa foto no es seguro escribir.`);
   process.exit(2);

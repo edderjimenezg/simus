@@ -420,7 +420,7 @@ export class MapaEcosistemicoPageComponent implements OnInit, OnDestroy, AfterVi
   // datos: medido a 1280x639, su borde superior caia en y=1498, a mil pixeles del
   // pliegue. Nadie que no se propusiera buscarla la encontraba.
   //
-  // Pedido por criterio: «este pasalo arriba como una pestana independiente, en
+  // El criterio es este: «este pasalo arriba como una pestana independiente, en
   // una pestana que solo quede el directorio aqui».
   // ---------------------------------------------------------------------------
 
@@ -745,7 +745,7 @@ export class MapaEcosistemicoPageComponent implements OnInit, OnDestroy, AfterVi
   // salia un dialogo de 1280x639 —«Detalle de Redes de Documentacion»— y el mapa
   // desaparecia detras del velo.
   //
-  // Pedido por criterio: «que se vaya al mapa y se ubique en el municipio, y se abra
+  // El criterio es este: «que se vaya al mapa y se ubique en el municipio, y se abra
   // la pestana que se usa dentro del mapa para ubicar, la idea es que sea un directorio
   // de navegacion que funciona como atajo en el mapa».
   //

@@ -67,7 +67,7 @@ async function api(ruta, opciones = {}) {
   return { estado: Number(stdout.slice(9, 12)), cuerpo: stdout.slice(corte) };
 }
 
-const publico = async () => JSON.parse((await api('/web-content')).cuerpo).texts;
+const publico = async () => JSON.parse((await api('/contenido-web')).cuerpo).texts;
 
 let paso = 0;
 let fallos = 0;
@@ -83,12 +83,12 @@ if (login.estado !== 200) {
   process.exit(2);
 }
 const csrf = await (async () => {
-  const r = await api('/admin/web-content/csrf');
+  const r = await api('/admin/contenido-web/csrf');
   const j = JSON.parse(r.cuerpo);
   return j.token ?? j.requestToken ?? Object.values(j)[0];
 })();
 
-const respuestaGrupo = await api(`/admin/web-content/groups/${GRUPO}`);
+const respuestaGrupo = await api(`/admin/contenido-web/groups/${GRUPO}`);
 if (respuestaGrupo.estado !== 200) {
   console.error(`El grupo '${GRUPO}' no existe (HTTP ${respuestaGrupo.estado}).`);
   process.exit(2);
@@ -161,7 +161,7 @@ console.log();
 
 const publicadoAntes = (await publico())[CLAVE];
 
-const escribir = (contenido, publicar) => api(`/admin/web-content/groups/${GRUPO}`, {
+const escribir = (contenido, publicar) => api(`/admin/contenido-web/groups/${GRUPO}`, {
   token: csrf,
   body: JSON.stringify({
     fields: previo.map((f) => ({ key: f.key, content: f.key === CLAVE ? contenido : f.draft })),
@@ -172,7 +172,7 @@ const escribir = (contenido, publicar) => api(`/admin/web-content/groups/${GRUPO
 const guardado = await escribir(MARCADOR, false);
 comprobar(guardado.estado === 200, 'guardar borrador responde 200', `guardar borrador responde ${guardado.estado}`);
 
-const trasGuardar = JSON.parse((await api(`/admin/web-content/groups/${GRUPO}`)).cuerpo)
+const trasGuardar = JSON.parse((await api(`/admin/contenido-web/groups/${GRUPO}`)).cuerpo)
   .fields.find((f) => f.key === CLAVE);
 comprobar(trasGuardar.draft === MARCADOR,
   'el borrador quedó escrito en la base',
@@ -192,13 +192,13 @@ comprobar((await publico())[CLAVE] === MARCADOR,
   'el sitio público ya sirve el texto publicado',
   'el sitio público NO recogió la publicación');
 
-const historial = JSON.parse((await api(`/admin/web-content/${CLAVE}/history`)).cuerpo);
+const historial = JSON.parse((await api(`/admin/contenido-web/${CLAVE}/history`)).cuerpo);
 const entradas = Array.isArray(historial) ? historial : (historial.items ?? historial.entries ?? []);
 comprobar(entradas.length > 0,
   `el historial registró el cambio (${entradas.length} entradas)`,
   'el historial no registró nada');
 
-const repuesto = await api(`/admin/web-content/groups/${GRUPO}`, {
+const repuesto = await api(`/admin/contenido-web/groups/${GRUPO}`, {
   token: csrf,
   body: JSON.stringify({
     fields: previo.map((f) => ({ key: f.key, content: f.published ?? f.draft })),

@@ -117,7 +117,7 @@ public sealed class LecturaDeDocumentosTests
 
     [Theory]
     // Las tres formas en que un afiche colombiano escribe una fecha.
-    [InlineData("Concierto en la plaza", "2025-10-12", null)]
+    [InlineData("Concierto el 12 de octubre de 2025 en la plaza", "2025-10-12", null)]
     [InlineData("Del 3 al 7 de agosto de 2024, Festival de Bandas", "2024-08-03", "2024-08-07")]
     [InlineData("Inscripciones hasta el 15/09/2025", "2025-09-15", null)]
     public void Las_fechas_se_leen_como_las_escribe_la_gente(string texto, string inicio, string? fin)

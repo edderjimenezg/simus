@@ -333,7 +333,7 @@ public sealed class Pnmc059ColaDeRevisionSqlServerTests
         await db.SaveChangesAsync();
 
             // LA FILA DE dbo.UsuariosRoles. `RoleId` de arriba ya no da ningun rol: desde la
-            // fase B el rol vive en la tabla de asignacion, y sin esta linea la cuenta existe
+            // El rol vive en la tabla de asignacion, y sin esta linea la cuenta existe
             // pero el login la rechaza con el motivo `sin_rol_valido`. Ver RolesEnPruebas.
         await RolesEnPruebas.AsignarPorIdAsync(db, usuario.Id, [idWebmaster!.Value]);
     }

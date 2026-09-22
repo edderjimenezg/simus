@@ -107,10 +107,10 @@ public static class AdminAuthEndpoints
                 return Results.Unauthorized();
             }
 
-            // LOS ROLES SALEN DE dbo.UsuariosRoles, NO DE Usuarios.IdRol (fase B).
+            // LOS ROLES SALEN DE dbo.UsuariosRoles, NO DE Usuarios.IdRol.
             // Una cuenta sin ninguna asignacion NO entra, y no hay respaldo a la columna vieja:
             // ver Security/RolesDeUsuario.cs sobre por que un respaldo silencioso convertiria la
-            // fase C en un fallo invisible.
+            // su retirada en un fallo invisible.
             var roles = await RolesDeUsuario.ObtenerAsync(dbContext, user.Id, cancellationToken);
             if (roles.Count == 0)
             {
@@ -532,7 +532,7 @@ public static class AdminAuthEndpoints
                 });
             }
 
-            // LA GUARDA DEL DEFECTO U7, y la condicion escrita que bloqueaba la fase B.
+            // LA GUARDA DEL DEFECTO U7, y la condicion escrita que bloqueaba la transicion.
             // {externo, gestor_interno} solo es representable desde que los roles son un
             // conjunto, y esa persona tendria a la vez la cookie institucional y la del
             // ecosistema: seria la revisada y quien revisa. Se cierra AQUI, donde el estado se
@@ -912,7 +912,7 @@ public static class AdminAuthEndpoints
     /// </summary>
     /// <remarks>
     /// <para>
-    /// ES LO QUE HACE QUE EL RESTO DEL API NO SE ENTERE DE LA FASE B. `IsInRole` y las politicas
+    /// ES LO QUE HACE QUE EL RESTO DEL API NO SE ENTERE DE LA TRANSICION. `IsInRole` y las politicas
     /// de autorizacion de ASP.NET ya sabian leer varios claims de rol; el modelo anterior solo
     /// escribia uno. Por eso <c>Permisos.EsFuncionario</c> y <c>Permisos.EsWebmaster</c> no han
     /// tenido que cambiar ni una linea: preguntaban por `IsInRole`, y ahora hay mas de uno que
@@ -1016,7 +1016,7 @@ public static class AdminAuthEndpoints
     /// </remarks>
     private static async Task<int> WebmastersQuePuedenEntrarAsync(PnmcDbContext dbContext, CancellationToken cancellationToken)
     {
-        // POR dbo.UsuariosRoles, NO POR Usuarios.IdRol (fase B). El Distinct no sobra: con N:M
+        // POR dbo.UsuariosRoles, NO POR Usuarios.IdRol. El Distinct no sobra: con N:M
         // el mismo usuario podria aparecer una vez por cada rol que tenga si algun dia el filtro
         // se ensancha, y contar dos veces al ultimo webmaster convertiria la guarda en un
         // permiso para dejar la consola huerfana.
@@ -1066,7 +1066,7 @@ public static class AdminAuthEndpoints
     /// entero en <c>Roles</c>.
     /// </summary>
     /// <remarks>
-    /// <c>RoleLabel</c> repite el principal a proposito. Antes de la fase B llevaba el nombre sin
+    /// <c>RoleLabel</c> repite el principal a proposito. Antes de la transicion llevaba el nombre sin
     /// normalizar de la fila de <c>dbo.Roles</c>; ahora los nombres viajan normalizados desde
     /// <see cref="RolesDeUsuario"/> y no hay una segunda grafia que ofrecer. Se conserva el campo
     /// porque la consola lo lee, no porque diga algo distinto.
