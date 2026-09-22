@@ -11,11 +11,9 @@ import { IMAGENES_DEL_BLOQUE } from '../../../core/cms/registro-de-imagenes-web'
 /*
   EL ESTUDIO: el bloque que se edita y la página real, en la misma pantalla.
 
-  Este fichero se llamaba `estudio-del-home.spec.ts` mientras el diseño estaba detrás de
-  `SECCION_DE_ESTUDIO = 'Home'`. Desde es el único diseño del panel y
-  cubre todas las secciones, así que el nombre viejo habría descrito lo contrario de lo que hace.
+  El estudio es el único diseño del panel y cubre todas sus secciones.
 
-  QUÉ SE ESTABA MIRANDO. Hasta el formulario ocupaba nueve columnas y la
+  QUÉ SE MIRA. El formulario ocupaba nueve columnas y la
   previsualización iba en una banda DEBAJO. Medido con el navegador en una ventana de 1600×1000:
   el marco empezaba en y=1011, es decir siempre fuera de pantalla. Para ver el efecto de una
   frase había que dejar de verla, y las imágenes se administraban en otra pantalla distinta.

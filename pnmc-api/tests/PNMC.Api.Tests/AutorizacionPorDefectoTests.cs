@@ -70,7 +70,7 @@ public sealed class AutorizacionPorDefectoTests : IClassFixture<TestWebApplicati
     /// escenario publica a proposito —correo, telefono, direccion, redes—, como los otros cuatro
     /// directorios. No hay ni un campo <c>Responsable*</c> en su proyeccion, y de eso no depende
     /// la buena voluntad de quien la escribio: la vigila el barrido de
-    /// <c>FugaDeResponsableEnRespuestaPublicaTests</c>, que la recorre sola por leerse de
+    /// <c>FichaPublicaSinDatosPersonalesTests</c>, que la recorre sola por leerse de
     /// <c>EndpointDataSource</c>.
     /// </para>
     /// </remarks>
@@ -94,7 +94,7 @@ public sealed class AutorizacionPorDefectoTests : IClassFixture<TestWebApplicati
     ///         de modo que el cliente recibiria HTML donde espera JSON.</item>
     /// </list>
     /// Ninguna de las dos devuelve dato alguno, y las dos quedan barridas por
-    /// <c>FugaDeResponsableEnRespuestaPublicaTests</c>, que desde hoy sabe invocar una ruta
+    /// <c>FichaPublicaSinDatosPersonalesTests</c>, que desde hoy sabe invocar una ruta
     /// comodin.
     /// </remarks>
     /// <remarks>

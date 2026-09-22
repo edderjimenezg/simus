@@ -8,10 +8,7 @@ import { routes } from '../../app.routes';
 /**
  * El guard del panel externo.
  *
- * <b>Lo que reemplaza.</b> `auth.guard.ts` estaba escrito, no lo importaba ninguna ruta, y
- * devolvía <code>true</code> en TODAS sus ramas: aparentaba proteger y no protegía. Se retiró.
- *
- * <b>El defecto que estas pruebas fijan.</b> Hasta abrir
+ * <b>LO QUE ESTAS PRUEBAS FIJAN.</b> Hasta abrir
  * <code>/ecosistema/mi-panel</code> sin sesión pintaba el formulario de acceso DENTRO del panel:
  * la barra de direcciones decía «mi-panel» mientras la pantalla pedía credenciales.
  */
@@ -90,7 +87,7 @@ describe('sesionExternaGuard', () => {
   });
 
   it('la ruta del panel lo declara, que es lo único que lo pone en servicio', () => {
-    // `auth.guard.ts` cumplía todo lo demás y no protegía nada por esto: ninguna ruta lo nombraba.
+    // Un guard que ninguna ruta declara no protege nada, por correcto que sea su interior.
     const panel = routes.find((r) => r.path === 'gestion');
 
     expect(panel).withContext('no existe la ruta del panel').toBeTruthy();

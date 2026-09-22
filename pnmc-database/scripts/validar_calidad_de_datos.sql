@@ -106,7 +106,7 @@ WHERE CorreoElectronico IS NULL
 --   * texto         -> lo que ve el visitante.
 --
 -- Hasta la correccion de PNMC-040, el front-end resolvia el texto con `||` en
--- lugar de `??` (web-texts.service.ts), de modo que la cadena vacia caia al
+-- lugar de `??` (textos-web.service.ts), de modo que la cadena vacia caia al
 -- valor compilado: borrar un texto publicado no lo borraba y el panel confirmaba
 -- que si. Al corregirlo, TODA clave que aparezca en esta consulta deja de
 -- mostrar su texto de fabrica y pasa a verse en blanco en el sitio publico.

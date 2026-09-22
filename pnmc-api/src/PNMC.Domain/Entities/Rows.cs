@@ -1528,7 +1528,7 @@ public sealed class EntityProfileRow
 /// </para>
 /// <para>
 /// TODO CAMPO <c>Responsable*</c> ES DATO PERSONAL DE UN TERCERO. Ninguno puede aparecer en una
-/// respuesta sin sesion; lo vigila <c>FugaDeResponsableEnRespuestaPublicaTests</c>, que se escribio
+/// respuesta sin sesion; lo vigila <c>FichaPublicaSinDatosPersonalesTests</c>, que se escribio
 /// ANTES que esta clase precisamente para poder ponerse rojo el dia en que alguien la proyecte.
 /// </para>
 /// </remarks>

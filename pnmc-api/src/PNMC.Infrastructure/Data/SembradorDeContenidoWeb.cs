@@ -10,7 +10,7 @@ namespace PNMC.Infrastructure.Data;
 /// Siembra la tabla [ContenidoWeb] con el catálogo de claves editables.
 /// <para>
 /// El catálogo se genera desde el registro del front-end
-/// (<c>pnmc-web/src/app/core/cms/web-text-registry.ts</c>) con
+/// (<c>pnmc-web/src/app/core/cms/registro-de-textos-web.ts</c>) con
 /// <c>npm run cms:catalog</c> y viaja incrustado como recurso. Así no existe una
 /// segunda copia de las 238 claves mantenida a mano en C#.
 /// </para>

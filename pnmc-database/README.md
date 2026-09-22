@@ -24,5 +24,5 @@ sesión que necesiten.
 ```
 
 El detalle operativo está en
-[`docs/operacion/base-de-datos-y-migraciones.md`](../docs/05-base-de-datos.md).
+[`docs/05-base-de-datos.md`](../docs/05-base-de-datos.md).
 

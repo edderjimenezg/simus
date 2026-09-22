@@ -1347,7 +1347,7 @@ public sealed class PerfilOrganizacionSolicitud
 /// TODO CAMPO DE ESTE DTO ES DATO PERSONAL DE UN TERCERO (Ley 1581 de 2012). Va en una respuesta
 /// aparte de <see cref="PerfilOrganizacionDto"/> a propósito: la tabla es un satélite 1:1 y
 /// publicar la cédula tiene que exigir escribir un JOIN deliberado, no venir de regalo con el
-/// perfil. <c>FugaDeResponsableEnRespuestaPublicaTests</c> se pone en rojo si aparece en una ruta
+/// perfil. <c>FichaPublicaSinDatosPersonalesTests</c> se pone en rojo si aparece en una ruta
 /// anónima.
 /// </remarks>
 public sealed record ResponsableOrganizacionDto(

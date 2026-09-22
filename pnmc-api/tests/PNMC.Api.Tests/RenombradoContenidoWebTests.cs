@@ -378,7 +378,7 @@ public sealed class RenombradoContenidoWebTests
         // `ecosistema_simus_cta` fue el destino del renombrado y esta prueba comprobaba que
         // hubiera llegado. la dirección de producto retiró de /ecosistema la
         // tarjeta que enlazaba a SIMUS, y con ella las cuatro claves del grupo
-        // `ecosistema_simus_externo`; el motivo está escrito en web-text-registry.ts, sobre el
+        // `ecosistema_simus_externo`; el motivo está escrito en registro-de-textos-web.ts, sobre el
         // grupo `ecosistema_explore`. Sin lector, `cms:huerfanas` las habría reportado en cada
         // ejecución. La comprobación se da vuelta: la clave no debe volver.
         //

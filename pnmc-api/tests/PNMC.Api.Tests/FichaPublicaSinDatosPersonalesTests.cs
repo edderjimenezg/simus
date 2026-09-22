@@ -24,7 +24,7 @@ namespace PNMC.Api.Tests;
 /// o anadir una segunda que lleve el mismo valor pasaria por delante de la asercion sin
 /// despeinarla. Se busca el VALOR sembrado dentro del texto de la respuesta, que es lo unico que
 /// no se puede esquivar cambiando de nombre. Es la mitad que
-/// <see cref="FugaDeResponsableEnRespuestaPublicaTests"/> declara que no cubre —«el barrido mira
+/// <see cref="FichaPublicaSinDatosPersonalesTests"/> declara que no cubre —«el barrido mira
 /// NOMBRES de propiedad, no valores»— aplicada al Festival.
 /// </para>
 ///

@@ -38,7 +38,7 @@ const PASSWORD = process.env.PNMC_ADMIN_PASSWORD ?? 'admin';
  * con node a secas, igual que el resto de herramientas de `tools/`.
  */
 async function leerRegistro() {
-  const fuente = await readFile(join(ROOT, 'src/app/core/cms/web-text-registry.ts'), 'utf8');
+  const fuente = await readFile(join(ROOT, 'src/app/core/cms/registro-de-textos-web.ts'), 'utf8');
   const compilados = new Map();
   const grupos = new Map();
   let grupoActual = null;
@@ -82,7 +82,7 @@ const solicitados = process.argv.slice(2).filter((a) => !a.startsWith('--'));
 
 const { compilados, grupos } = await leerRegistro();
 if (compilados.size === 0) {
-  console.error('No se pudo leer el registro. ¿Cambió el formato de web-text-registry.ts?');
+  console.error('No se pudo leer el registro. ¿Cambió el formato de registro-de-textos-web.ts?');
   process.exit(2);
 }
 

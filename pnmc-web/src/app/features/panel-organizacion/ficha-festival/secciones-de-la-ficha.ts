@@ -1,18 +1,13 @@
 /**
  * Las secciones de la ficha del Festival.
  *
- * <b>SON SECCIONES Y YA NO SON PASOS.</b> Hasta este fichero se llamaba
- * `pasos-de-la-ficha.ts` y describía un formulario de doce pantallas con «Atrás» y «Siguiente». Lo
- * cambió el usuario ese mismo día: «quiero que mantengamos la misma vista para editar la edición
- * del festival y para la ficha; si le doy editar, me habilita los campos del festival… ese cambio
- * de formulario es complejo, mantengamos este como base para editar y ver ficha; cuando se crea un
- * festival también mantengamos esta estructura, así homogenizamos».
+ * <b>SON SECCIONES, NO PASOS.</b> Crear, leer y editar comparten una sola vista: las mismas
+ * secciones y en el mismo orden. No hay formulario por pasos con «Atrás» y «Siguiente».
  *
  * <b>QUÉ IMPLICA.</b> Leer y editar son la misma pantalla: las mismas secciones y en el mismo
  * orden. Lo único que cambia al pulsar «Editar el Festival» es que el valor deja de ser texto y
- * pasa a ser un campo. Antes eran dos maquetaciones distintas —una lista de definiciones para
- * leer, doce pantallas para escribir— y quien venía de leer tenía que volver a encontrar dónde
- * estaba cada dato.
+ * pasa a ser un campo, de modo que quien venía de leer no tiene que volver a encontrar dónde está
+ * cada dato.
  *
  * <b>ERAN ONCE SECCIONES EN DOS BLOQUES, Y AHORA SON TRES.</b> Las otras ocho describían la
  * Edición y vivían en una pestaña que ningún montaje de `FichaFestivalComponent` llegaba a

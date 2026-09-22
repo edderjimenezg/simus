@@ -9,7 +9,7 @@ namespace PNMC.Infrastructure.Data;
 /// El sobre del respaldo que exporta el panel desde <c>localStorage</c>.
 /// <para>
 /// Se corresponde con <c>RespaldoDeContenidoWeb</c> de
-/// <c>pnmc-web/src/app/core/services/web-texts.service.ts</c>. El botón de
+/// <c>pnmc-web/src/app/core/services/textos-web.service.ts</c>. El botón de
 /// exportar es trabajo de la Fase 1, así que <b>todo respaldo que pueda existir
 /// lo produjo esa implementación</b>: no hay formatos anteriores que soportar.
 /// </para>

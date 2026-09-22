@@ -2,7 +2,7 @@
  * Exporta el registro de contenido editable a un JSON que la API incrusta como
  * recurso y usa para sembrar la tabla [ContenidoWeb].
  *
- * El registro TypeScript (src/app/core/cms/web-text-registry.ts) es la fuente de
+ * El registro TypeScript (src/app/core/cms/registro-de-textos-web.ts) es la fuente de
  * verdad de las 238 claves: sus etiquetas, sus límites y sus textos por defecto.
  * Este script evita que exista una segunda copia mantenida a mano en C#.
  *
@@ -16,8 +16,8 @@ import { fileURLToPath } from 'node:url';
 import { createHash } from 'node:crypto';
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
-const REGISTRY = join(ROOT, 'src/app/core/cms/web-text-registry.ts');
-const IMAGE_REGISTRY = join(ROOT, 'src/app/core/cms/web-image-registry.ts');
+const REGISTRY = join(ROOT, 'src/app/core/cms/registro-de-textos-web.ts');
+const IMAGE_REGISTRY = join(ROOT, 'src/app/core/cms/registro-de-imagenes-web.ts');
 const OUT = join(ROOT, '../pnmc-api/src/PNMC.Infrastructure/Data/web-content-catalog.json');
 
 /**
@@ -31,13 +31,13 @@ const source = await readFile(REGISTRY, 'utf8');
 const start = source.indexOf('const field =');
 const end = source.indexOf('/** Compatibilidad con el editor');
 if (start < 0 || end < 0) {
-  throw new Error('No se ubicó el bloque de datos del registro; revise web-text-registry.ts');
+  throw new Error('No se ubicó el bloque de datos del registro; revise registro-de-textos-web.ts');
 }
 
 const block = source
   .slice(start, end)
-  .replace('(key: string, label: string, limit: number, defaultValue: string): WebTextFieldDefinition', '(key, label, limit, defaultValue)')
-  .replace('export const WEB_TEXT_GROUPS: WebTextGroupDefinition[]', 'const WEB_TEXT_GROUPS')
+  .replace('(key: string, label: string, limit: number, defaultValue: string): DefinicionDeCampoDeTexto', '(key, label, limit, defaultValue)')
+  .replace('export const WEB_TEXT_GROUPS: DefinicionDeGrupoDeTexto[]', 'const WEB_TEXT_GROUPS')
   .replace(/export const TEAM_DEFAULTS: string\[\]\[\]/, 'const TEAM_DEFAULTS');
 
 const groups = eval(`${block}\n;WEB_TEXT_GROUPS`);
@@ -86,16 +86,16 @@ const imageSource = await readFile(IMAGE_REGISTRY, 'utf8');
 const imageStart = imageSource.indexOf('const image =');
 const imageEnd = imageSource.indexOf('/** Todas las claves aplanadas');
 if (imageStart < 0 || imageEnd < 0) {
-  throw new Error('No se ubicó el bloque de datos del registro de imágenes; revise web-image-registry.ts');
+  throw new Error('No se ubicó el bloque de datos del registro de imágenes; revise registro-de-imagenes-web.ts');
 }
 
 const imageBlock = imageSource
   .slice(imageStart, imageEnd)
   .replace(
-    /\(\s*key: string,[\s\S]*?\): WebImageFieldDefinition/,
+    /\(\s*key: string,[\s\S]*?\): DefinicionDeCampoDeImagen/,
     '(key, label, use, editable, alt, suggestedWidth, suggestedHeight, defaultUrl)',
   )
-  .replace('export const WEB_IMAGE_GROUPS: WebImageGroupDefinition[]', 'const WEB_IMAGE_GROUPS');
+  .replace('export const WEB_IMAGE_GROUPS: DefinicionDeGrupoDeImagenes[]', 'const WEB_IMAGE_GROUPS');
 
 const imageGroups = eval(`${imageBlock}\n;WEB_IMAGE_GROUPS`);
 

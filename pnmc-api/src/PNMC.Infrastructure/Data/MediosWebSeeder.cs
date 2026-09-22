@@ -7,7 +7,7 @@ namespace PNMC.Infrastructure.Data;
 /// Siembra la tabla <c>dbo.MediosWeb</c> con las ranuras de imagen del catálogo.
 /// <para>
 /// El catálogo sale del mismo JSON incrustado que los textos, generado desde
-/// <c>pnmc-web/src/app/core/cms/web-image-registry.ts</c> con <c>npm run cms:catalog</c>. Así no
+/// <c>pnmc-web/src/app/core/cms/registro-de-imagenes-web.ts</c> con <c>npm run cms:catalog</c>. Así no
 /// existe una segunda copia de las 44 ranuras mantenida a mano en C#.
 /// </para>
 /// <para>

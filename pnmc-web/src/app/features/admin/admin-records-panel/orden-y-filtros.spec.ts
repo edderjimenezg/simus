@@ -15,7 +15,7 @@ import { ADMIN_MODULES } from '../domain/admin-config';
  *
  * <b>Lo que se comprueba aquí y lo que no.</b> Aquí, que la pantalla PIDE el orden y los filtros, y
  * que pinta la flecha con lo que el servidor contestó. Que el servidor ordene bien lo comprueba
- * <code>OrdenYFiltrosDeRegistrosTests</code> en la suite de la API — sobre ciento veinte registros,
+ * las pruebas de la API — sobre ciento veinte registros,
  * que es donde la diferencia se ve.
  */
 describe('AdminRecordsPanelComponent · orden y filtros', () => {

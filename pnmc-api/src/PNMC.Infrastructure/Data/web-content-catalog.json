@@ -1106,7 +1106,7 @@
       "section": "Home",
       "label": "Palabra de fondo",
       "limit": 50,
-      "defaultValue": "MAPA"
+      "defaultValue": "REGISTROS"
     },
     {
       "key": "home_eco_title",
@@ -1394,7 +1394,7 @@
       "section": "Mapa Ecosistémico",
       "label": "Paso 1, título",
       "limit": 80,
-      "defaultValue": "Bienvenido al Geovisor Ecosistémico"
+      "defaultValue": "Un mapa que se lee de varias formas"
     },
     {
       "key": "map_tutorial_1_desc",
@@ -1402,8 +1402,8 @@
       "groupLabel": "Tutorial del geovisor",
       "section": "Mapa Ecosistémico",
       "label": "Paso 1, texto",
-      "limit": 300,
-      "defaultValue": "Este recorrido interactivo te guiará paso a paso para que explores los procesos, infraestructuras y la influencia cultural de la música en Colombia de manera profesional."
+      "limit": 400,
+      "defaultValue": "Aquí están los procesos musicales del país situados en su territorio. En dieciocho pasos verás qué hace cada control: qué se está mirando, cómo acotarlo, las tres formas de dibujarlo y las tres de leerlo. Puedes salir cuando quieras y volver desde el botón de ayuda."
     },
     {
       "key": "map_tutorial_2_title",
@@ -1412,7 +1412,7 @@
       "section": "Mapa Ecosistémico",
       "label": "Paso 2, título",
       "limit": 80,
-      "defaultValue": "1. Capas y Registros de Procesos"
+      "defaultValue": "Qué se está mirando"
     },
     {
       "key": "map_tutorial_2_desc",
@@ -1420,8 +1420,8 @@
       "groupLabel": "Tutorial del geovisor",
       "section": "Mapa Ecosistémico",
       "label": "Paso 2, texto",
-      "limit": 300,
-      "defaultValue": "Usa este panel para encender y apagar las capas del ecosistema: Festivales, Escuelas de Música, Mercados, Lutieres y Redes de Documentación."
+      "limit": 400,
+      "defaultValue": "Las capas dicen qué tipo de proceso hay en el mapa. Hoy puedes consultar Festivales y Agenda; las otras cuatro están en preparación y aparecen desactivadas, no vacías. La cifra de al lado es cuántos registros tiene la capa puesta."
     },
     {
       "key": "map_tutorial_3_title",
@@ -1430,7 +1430,7 @@
       "section": "Mapa Ecosistémico",
       "label": "Paso 3, título",
       "limit": 80,
-      "defaultValue": "2. Filtros de Influencia Regional"
+      "defaultValue": "Acotar: buscar y territorio"
     },
     {
       "key": "map_tutorial_3_desc",
@@ -1438,8 +1438,8 @@
       "groupLabel": "Tutorial del geovisor",
       "section": "Mapa Ecosistémico",
       "label": "Paso 3, texto",
-      "limit": 300,
-      "defaultValue": "Refina la visualización en el mapa seleccionando prácticas musicales específicas o territorios sonoros (como la Marimba o los Cantos de comunidades negras)."
+      "limit": 400,
+      "defaultValue": "Busca por nombre, municipio o palabra, o elige departamento y municipio. Lo que pongas aparece como una etiqueta arriba de esta columna y puedes quitarlo de uno en uno, sin deshacer el resto."
     },
     {
       "key": "map_tutorial_4_title",
@@ -1448,7 +1448,7 @@
       "section": "Mapa Ecosistémico",
       "label": "Paso 4, título",
       "limit": 80,
-      "defaultValue": "3. Modo Cobertura (Densidad)"
+      "defaultValue": "El lente: con qué se colorea"
     },
     {
       "key": "map_tutorial_4_desc",
@@ -1456,8 +1456,8 @@
       "groupLabel": "Tutorial del geovisor",
       "section": "Mapa Ecosistémico",
       "label": "Paso 4, texto",
-      "limit": 300,
-      "defaultValue": "Este modo tiñe los departamentos según la cantidad total de procesos registrados, dándote una lectura rápida y comparativa de la densidad nacional de la capa activa."
+      "limit": 400,
+      "defaultValue": "Gira el selector para elegir con qué se reparte el color: por territorios sonoros, por prácticas musicales o por división administrativa. El lente no filtra nada; cambia el criterio con el que se pinta lo mismo, y ese criterio viaja a las otras dos vistas."
     },
     {
       "key": "map_tutorial_5_title",
@@ -1466,7 +1466,7 @@
       "section": "Mapa Ecosistémico",
       "label": "Paso 5, título",
       "limit": 80,
-      "defaultValue": "4. Modo Influencia (Puntos y Zonas)"
+      "defaultValue": "Coropleta: el departamento entero, teñido"
     },
     {
       "key": "map_tutorial_5_desc",
@@ -1474,8 +1474,8 @@
       "groupLabel": "Tutorial del geovisor",
       "section": "Mapa Ecosistémico",
       "label": "Paso 5, texto",
-      "limit": 300,
-      "defaultValue": "Proyecta en el mapa las zonas de influencia directa de las prácticas seleccionadas. Verás círculos en los municipios y departamentos coloreados por predominancia."
+      "limit": 400,
+      "defaultValue": "Cada departamento se colorea según lo que domina en él o cuántos registros tiene. Se lee de un vistazo, pero tiene una trampa conocida: un departamento grande pesa más en la vista aunque tenga menos procesos. Para comparar cantidades, mejor la siguiente."
     },
     {
       "key": "map_tutorial_6_title",
@@ -1484,7 +1484,7 @@
       "section": "Mapa Ecosistémico",
       "label": "Paso 6, título",
       "limit": 80,
-      "defaultValue": "5. Resumen y Registros Recientes"
+      "defaultValue": "Símbolos proporcionales: un círculo por municipio"
     },
     {
       "key": "map_tutorial_6_desc",
@@ -1492,8 +1492,323 @@
       "groupLabel": "Tutorial del geovisor",
       "section": "Mapa Ecosistémico",
       "label": "Paso 6, texto",
+      "limit": 400,
+      "defaultValue": "Un círculo en cada municipio, más grande cuantos más procesos tenga. A diferencia de la coropleta, el tamaño no depende de lo extenso que sea el territorio, así que sirve para comparar de verdad. Los círculos cercanos se agrupan y se separan al acercar."
+    },
+    {
+      "key": "map_tutorial_7_title",
+      "groupId": "map_tutorial",
+      "groupLabel": "Tutorial del geovisor",
+      "section": "Mapa Ecosistémico",
+      "label": "Paso 7, título",
+      "limit": 80,
+      "defaultValue": "Mapa de calor: la práctica que desborda"
+    },
+    {
+      "key": "map_tutorial_7_desc",
+      "groupId": "map_tutorial",
+      "groupLabel": "Tutorial del geovisor",
+      "section": "Mapa Ecosistémico",
+      "label": "Paso 7, texto",
+      "limit": 400,
+      "defaultValue": "Una mancha continua que ignora los límites administrativos. Es la forma de ver lo que las otras dos no pueden: una práctica musical no se detiene en la frontera de un departamento, y aquí se ve dónde se concentra de verdad."
+    },
+    {
+      "key": "map_tutorial_8_title",
+      "groupId": "map_tutorial",
+      "groupLabel": "Tutorial del geovisor",
+      "section": "Mapa Ecosistémico",
+      "label": "Paso 8, título",
+      "limit": 80,
+      "defaultValue": "Cómo leer lo que ves"
+    },
+    {
+      "key": "map_tutorial_8_desc",
+      "groupId": "map_tutorial",
+      "groupLabel": "Tutorial del geovisor",
+      "section": "Mapa Ecosistémico",
+      "label": "Paso 8, texto",
+      "limit": 400,
+      "defaultValue": "Esta nota explica qué significan los colores y los tamaños del dibujo que esté puesto, y cambia con él. Puedes plegarla cuando ya no la necesites y volver a abrirla en cualquier momento."
+    },
+    {
+      "key": "map_tutorial_9_title",
+      "groupId": "map_tutorial",
+      "groupLabel": "Tutorial del geovisor",
+      "section": "Mapa Ecosistémico",
+      "label": "Paso 9, título",
+      "limit": 80,
+      "defaultValue": "El mapa responde"
+    },
+    {
+      "key": "map_tutorial_9_desc",
+      "groupId": "map_tutorial",
+      "groupLabel": "Tutorial del geovisor",
+      "section": "Mapa Ecosistémico",
+      "label": "Paso 9, texto",
+      "limit": 400,
+      "defaultValue": "Pulsa un departamento para entrar en él y ver sus municipios; pulsa un municipio para abrir la lista de sus procesos. Puedes acercar con la rueda y volver al país entero quitando el filtro de departamento."
+    },
+    {
+      "key": "map_tutorial_10_title",
+      "groupId": "map_tutorial",
+      "groupLabel": "Tutorial del geovisor",
+      "section": "Mapa Ecosistémico",
+      "label": "Paso 10, título",
+      "limit": 80,
+      "defaultValue": "Mapa, gráfico o tabla"
+    },
+    {
+      "key": "map_tutorial_10_desc",
+      "groupId": "map_tutorial",
+      "groupLabel": "Tutorial del geovisor",
+      "section": "Mapa Ecosistémico",
+      "label": "Paso 10, texto",
+      "limit": 400,
+      "defaultValue": "Los mismos datos en tres presentaciones, y el conmutador está siempre a mano. Sobre el mapa son tres iconos en la esquina para no tapar territorio; en gráfico y tabla sube arriba con sus rótulos, porque ahí la pregunta es cómo se vuelve."
+    },
+    {
+      "key": "map_tutorial_11_title",
+      "groupId": "map_tutorial",
+      "groupLabel": "Tutorial del geovisor",
+      "section": "Mapa Ecosistémico",
+      "label": "Paso 11, título",
+      "limit": 80,
+      "defaultValue": "El gráfico: siete lecturas del mismo conjunto"
+    },
+    {
+      "key": "map_tutorial_11_desc",
+      "groupId": "map_tutorial",
+      "groupLabel": "Tutorial del geovisor",
+      "section": "Mapa Ecosistémico",
+      "label": "Paso 11, texto",
+      "limit": 400,
+      "defaultValue": "Cada posición de esta tira es a la vez una cifra y un control: dice el dato y, al pulsarla, cambia lo que se dibuja debajo. Registros, lo más declarado, municipios, calendario, cobertura… ninguna repite lo que otra ya dice."
+    },
+    {
+      "key": "map_tutorial_12_title",
+      "groupId": "map_tutorial",
+      "groupLabel": "Tutorial del geovisor",
+      "section": "Mapa Ecosistémico",
+      "label": "Paso 12, título",
+      "limit": 80,
+      "defaultValue": "Registros por departamento, en barras"
+    },
+    {
+      "key": "map_tutorial_12_desc",
+      "groupId": "map_tutorial",
+      "groupLabel": "Tutorial del geovisor",
+      "section": "Mapa Ecosistémico",
+      "label": "Paso 12, texto",
+      "limit": 400,
+      "defaultValue": "El orden y el valor. Las barras están a escala del mayor, con la rejilla en sus cuartos para poder decir «este está por la mitad» sin medir. Pulsa una fila y el mapa se va a ese departamento."
+    },
+    {
+      "key": "map_tutorial_13_title",
+      "groupId": "map_tutorial",
+      "groupLabel": "Tutorial del geovisor",
+      "section": "Mapa Ecosistémico",
+      "label": "Paso 13, título",
+      "limit": 80,
+      "defaultValue": "Los mismos datos, en áreas"
+    },
+    {
+      "key": "map_tutorial_13_desc",
+      "groupId": "map_tutorial",
+      "groupLabel": "Tutorial del geovisor",
+      "section": "Mapa Ecosistémico",
+      "label": "Paso 13, texto",
+      "limit": 400,
+      "defaultValue": "Aquí el área de cada bloque es su parte del total: los bloques juntos son el país entero. La barra dice el orden; el área dice la proporción. No son la misma figura con otro aspecto: responden dos preguntas distintas."
+    },
+    {
+      "key": "map_tutorial_14_title",
+      "groupId": "map_tutorial",
+      "groupLabel": "Tutorial del geovisor",
+      "section": "Mapa Ecosistémico",
+      "label": "Paso 14, título",
+      "limit": 80,
+      "defaultValue": "Lo más declarado, y sobre qué"
+    },
+    {
+      "key": "map_tutorial_14_desc",
+      "groupId": "map_tutorial",
+      "groupLabel": "Tutorial del geovisor",
+      "section": "Mapa Ecosistémico",
+      "label": "Paso 14, texto",
+      "limit": 400,
+      "defaultValue": "De qué está hecho el ecosistema según lo que los registros declaran. Puedes medirlo por territorios sonoros o por prácticas y géneros: son dos clasificaciones distintas del mismo conjunto. Cada fila lleva el color que el lente le da en el mapa."
+    },
+    {
+      "key": "map_tutorial_15_title",
+      "groupId": "map_tutorial",
+      "groupLabel": "Tutorial del geovisor",
+      "section": "Mapa Ecosistémico",
+      "label": "Paso 15, título",
+      "limit": 80,
+      "defaultValue": "Barras o unidades"
+    },
+    {
+      "key": "map_tutorial_15_desc",
+      "groupId": "map_tutorial",
+      "groupLabel": "Tutorial del geovisor",
+      "section": "Mapa Ecosistémico",
+      "label": "Paso 15, texto",
+      "limit": 400,
+      "defaultValue": "Las barras comparan proporciones; las unidades cuentan. En unidades cada cuadro es un registro, así que se puede contar con el dedo: es útil cuando las cifras son pocas y la diferencia entre cuatro y cinco importa."
+    },
+    {
+      "key": "map_tutorial_16_title",
+      "groupId": "map_tutorial",
+      "groupLabel": "Tutorial del geovisor",
+      "section": "Mapa Ecosistémico",
+      "label": "Paso 16, título",
+      "limit": 80,
+      "defaultValue": "La tabla: el conjunto entero"
+    },
+    {
+      "key": "map_tutorial_16_desc",
+      "groupId": "map_tutorial",
+      "groupLabel": "Tutorial del geovisor",
+      "section": "Mapa Ecosistémico",
+      "label": "Paso 16, texto",
+      "limit": 400,
+      "defaultValue": "Para recorrer la lista completa, comparar municipios o imprimirla. Ocupa el ancho entero porque aquí lo que se quiere es leer muchas filas seguidas, no buscar una. Desde este mismo control vuelves al mapa."
+    },
+    {
+      "key": "map_tutorial_17_title",
+      "groupId": "map_tutorial",
+      "groupLabel": "Tutorial del geovisor",
+      "section": "Mapa Ecosistémico",
+      "label": "Paso 17, título",
+      "limit": 80,
+      "defaultValue": "El directorio: los registros, uno a uno"
+    },
+    {
+      "key": "map_tutorial_17_desc",
+      "groupId": "map_tutorial",
+      "groupLabel": "Tutorial del geovisor",
+      "section": "Mapa Ecosistémico",
+      "label": "Paso 17, texto",
+      "limit": 400,
+      "defaultValue": "Lista lo que hay en el ámbito que tengas puesto y sigue a los filtros: al entrar en un departamento se acota a él. Pulsa «Ubicar en el mapa» en cualquier ficha para llevar el mapa hasta su municipio."
+    },
+    {
+      "key": "map_tutorial_18_title",
+      "groupId": "map_tutorial",
+      "groupLabel": "Tutorial del geovisor",
+      "section": "Mapa Ecosistémico",
+      "label": "Paso 18, título",
+      "limit": 80,
+      "defaultValue": "La agenda: lo que tiene fecha"
+    },
+    {
+      "key": "map_tutorial_18_desc",
+      "groupId": "map_tutorial",
+      "groupLabel": "Tutorial del geovisor",
+      "section": "Mapa Ecosistémico",
+      "label": "Paso 18, texto",
+      "limit": 400,
+      "defaultValue": "Los eventos publicados del territorio abierto, con su fecha y su lugar. Aparece cuando tiene sentido —al abrir un departamento— y no al filtrar por práctica musical, porque un evento no se clasifica así."
+    },
+    {
+      "key": "map_explorar_capas",
+      "groupId": "map_explorar",
+      "groupLabel": "Modo explorar del geovisor",
+      "section": "Mapa Ecosistémico",
+      "label": "Capas",
       "limit": 300,
-      "defaultValue": "En el panel derecho puedes alternar entre las pestañas 'Resumen' para ver estadísticas agregadas y 'Registros Recientes' para explorar la lista de procesos locales."
+      "defaultValue": "Qué tipo de proceso hay en el mapa. Hoy se consultan Festivales y Agenda; las otras cuatro están en preparación y aparecen desactivadas."
+    },
+    {
+      "key": "map_explorar_filtros",
+      "groupId": "map_explorar",
+      "groupLabel": "Modo explorar del geovisor",
+      "section": "Mapa Ecosistémico",
+      "label": "Filtrar",
+      "limit": 300,
+      "defaultValue": "Acota lo que se ve: por nombre, por departamento o por municipio. Lo que pongas aparece como etiqueta y se quita de uno en uno."
+    },
+    {
+      "key": "map_explorar_lente",
+      "groupId": "map_explorar",
+      "groupLabel": "Modo explorar del geovisor",
+      "section": "Mapa Ecosistémico",
+      "label": "El lente",
+      "limit": 300,
+      "defaultValue": "Con qué criterio se reparte el color: territorios sonoros, prácticas musicales o división administrativa. No filtra nada; cambia cómo se pinta lo mismo."
+    },
+    {
+      "key": "map_explorar_dibujo",
+      "groupId": "map_explorar",
+      "groupLabel": "Modo explorar del geovisor",
+      "section": "Mapa Ecosistémico",
+      "label": "Cómo se dibuja",
+      "limit": 300,
+      "defaultValue": "Tres maneras de proyectar lo mismo: coropleta tiñe departamentos enteros, símbolos pone un círculo por municipio, y calor dibuja una mancha que ignora los límites."
+    },
+    {
+      "key": "map_explorar_lienzo",
+      "groupId": "map_explorar",
+      "groupLabel": "Modo explorar del geovisor",
+      "section": "Mapa Ecosistémico",
+      "label": "El mapa",
+      "limit": 300,
+      "defaultValue": "Pulsa un departamento para entrar en él; pulsa un municipio para ver sus procesos. La rueda acerca y aleja."
+    },
+    {
+      "key": "map_explorar_leyenda",
+      "groupId": "map_explorar",
+      "groupLabel": "Modo explorar del geovisor",
+      "section": "Mapa Ecosistémico",
+      "label": "Cómo leer esta vista",
+      "limit": 300,
+      "defaultValue": "Qué significan los colores y los tamaños del dibujo que esté puesto. Cambia con él, y se puede plegar."
+    },
+    {
+      "key": "map_explorar_vistas",
+      "groupId": "map_explorar",
+      "groupLabel": "Modo explorar del geovisor",
+      "section": "Mapa Ecosistémico",
+      "label": "Mapa, gráfico o tabla",
+      "limit": 300,
+      "defaultValue": "Los mismos datos en tres presentaciones. El gráfico ordena y compara; la tabla sirve para recorrer la lista entera o imprimirla."
+    },
+    {
+      "key": "map_explorar_lecturas",
+      "groupId": "map_explorar",
+      "groupLabel": "Modo explorar del geovisor",
+      "section": "Mapa Ecosistémico",
+      "label": "Las lecturas",
+      "limit": 300,
+      "defaultValue": "Siete maneras de leer el mismo conjunto. Cada posición dice su cifra y, al pulsarla, cambia lo que se dibuja debajo."
+    },
+    {
+      "key": "map_explorar_figura",
+      "groupId": "map_explorar",
+      "groupLabel": "Modo explorar del geovisor",
+      "section": "Mapa Ecosistémico",
+      "label": "La figura",
+      "limit": 300,
+      "defaultValue": "Dos dibujos para la misma lectura, que no dicen lo mismo: la barra da el orden y el valor, el área da la parte del todo, las unidades se pueden contar."
+    },
+    {
+      "key": "map_explorar_dimension",
+      "groupId": "map_explorar",
+      "groupLabel": "Modo explorar del geovisor",
+      "section": "Mapa Ecosistémico",
+      "label": "La dimensión",
+      "limit": 300,
+      "defaultValue": "Sobre qué se mide la composición: territorios sonoros o prácticas y géneros. Son dos clasificaciones distintas del mismo conjunto."
+    },
+    {
+      "key": "map_explorar_listado",
+      "groupId": "map_explorar",
+      "groupLabel": "Modo explorar del geovisor",
+      "section": "Mapa Ecosistémico",
+      "label": "Directorio y agenda",
+      "limit": 300,
+      "defaultValue": "El directorio lista lo que hay en el ámbito puesto; la agenda, lo que tiene fecha. Desde cualquier ficha se puede ubicar el proceso en el mapa."
     },
     {
       "key": "ejes_hero_tag",
@@ -3296,5 +3611,5 @@
       "defaultUrl": "/assets/branding/gov-co-footer.png"
     }
   ],
-  "catalogHash": "e4e01dfedb172b4b"
+  "catalogHash": "39cb780319c22cc0"
 }

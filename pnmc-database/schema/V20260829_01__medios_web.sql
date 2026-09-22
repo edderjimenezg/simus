@@ -22,7 +22,7 @@
    El numero «quince» que circulo antes no cerraba: sale quince solo si se deja fuera una de las
    cuatro marcas, y cual dejar fuera es una decision, no un hecho.
 
-   Existia la interfaz WebMediaRecord (web-texts.service.ts) y una senal privada `media` (:100)
+   Existia la interfaz WebMediaRecord (textos-web.service.ts) y una senal privada `media` (:100)
    que lee localStorage y que NINGUN componente consume: solo alimenta el respaldo de
    exportContent. No es el mecanismo que esta tabla reemplaza; es un resto.
 
