@@ -177,7 +177,7 @@ GO
 */
 /*
     ================================================================================================
-    GUARDA DE LA FASE C — TODO EL BLOQUE HEREDADO, DENTRO DE UNA SOLA CONDICION.
+    GUARDA DE COMPATIBILIDAD — TODO EL BLOQUE HEREDADO, DENTRO DE UNA SOLA CONDICION.
     ================================================================================================
 
     `dbo.Usuarios.IdRol` ya no existe: la retira la seccion 11 de
@@ -196,16 +196,15 @@ GO
         declare the scalar variable "@RolWebmaster"».
 
     (c) EL DELETE SIGUE PREGUNTANDO POR `Usuarios.IdRol` Y NO POR `dbo.UsuariosRoles`, aunque desde
-        la fase C esa sea la tabla que manda.  Razon de orden: `UsuariosRoles` la crea
+        esa sea la tabla que manda.  Razon de orden: `UsuariosRoles` la crea
         V20260824_01, que va DESPUES de este fichero, asi que en la primera construccion todavia no
         existe.  Dentro de esta guarda la columna existe por definicion, de modo que preguntar por
         ella es a la vez correcto y suficiente.
 
-    POR QUE HACE FALTA: `scripts/seed-local-db.sh` aplica TODO `schema/` en
-    cada ejecucion.  Sobre una base ya migrada este bloque moria y se llevaba por delante la
-    tuberia entera en su segundo fichero.  La suite estaba en verde -438 de 438- porque
-    SiembraRepetibleTests aplicaba el esquema UNA vez y las semillas dos.  Ahora aplica las dos
-    cosas dos veces.
+    POR QUE HACE FALTA.  El guion debe poder aplicarse tanto sobre una base recien creada
+    -donde `IdRol` existe porque este mismo fichero la acaba de crear- como sobre una ya migrada,
+    donde la columna ya no esta.  Sin la guarda, el segundo caso muere con Msg 1911 en el indice
+    y Msg 207 en los UPDATE.
 */
 IF COL_LENGTH(N'dbo.Usuarios', N'IdRol') IS NOT NULL
 EXEC(N'DECLARE @RolExterno int = (SELECT TOP 1 IdRol FROM dbo.Roles WHERE NombreRol = N''externo'');

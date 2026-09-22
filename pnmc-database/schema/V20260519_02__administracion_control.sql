@@ -54,7 +54,7 @@ BEGIN
 END;
 
 /*
-    GUARDA DE LA FASE C.  `dbo.Usuarios.IdRol` ya no existe: la retira la seccion 11 de
+    GUARDA DE COMPATIBILIDAD.  `dbo.Usuarios.IdRol` ya no existe: la retira la seccion 11 de
     V20260824_01__usuarios_roles_y_permisos.sql.  Este bloque solo tiene sentido mientras exista,
     es decir, en la PRIMERA construccion de una base -donde este guion la crea unas lineas mas
     arriba- y en una base antigua que todavia no se haya migrado.
@@ -63,11 +63,10 @@ END;
     tabla existente al COMPILAR el lote, no al ejecutarlo: sin el EXEC, el lote entero muere con
     Msg 207 sobre `IdRol` y ni siquiera llega a evaluar el COL_LENGTH que debia protegerlo.
 
-    POR QUE HACE FALTA: `scripts/seed-local-db.sh` aplica TODO `schema/` en
-    cada ejecucion.  Sobre una base ya migrada, este bloque moria -Msg 1911 en el indice, Msg 207
-    en los UPDATE- y se llevaba por delante la tuberia entera en su segundo fichero.  La suite
-    estaba en verde: 438 de 438.  Lo que faltaba no era una guarda, era una PRUEBA que aplicara el
-    esquema dos veces, y ahora la hay (SiembraRepetibleTests).
+    POR QUE HACE FALTA.  El guion debe poder aplicarse tanto sobre una base recien creada
+    -donde `IdRol` existe porque este mismo fichero la acaba de crear- como sobre una ya migrada,
+    donde la columna ya no esta.  Sin la guarda, el segundo caso muere con Msg 1911 en el indice
+    y Msg 207 en los UPDATE.
 */
 IF COL_LENGTH(N'dbo.Usuarios', N'IdRol') IS NOT NULL
    AND NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = N'IX_Usuarios_IdRol' AND object_id = OBJECT_ID(N'dbo.Usuarios'))

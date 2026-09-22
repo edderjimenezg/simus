@@ -110,7 +110,7 @@ SET NOCOUNT ON;
 /*
     EL UNICO INTERRUPTOR DEL FICHERO.  Ver seccion 11.  Puesto a 1 retira dbo.Usuarios.IdRol.
 
-    ENCENDIDO EL 25 DE AGOSTO DE 2026, Y ESE ES EL ORDEN CORRECTO: la fase B -el codigo que dejo
+    ACTIVO, Y ESE ES EL ORDEN CORRECTO: la fase B -el codigo que dejo
     de leer la columna- se desplego el mismo dia, commit 740653d.  Encenderlo ANTES habria tumbado
     el API; encenderlo despues es lo que hace comprobable el invariante "los roles de una persona
     son exactamente las filas de dbo.UsuariosRoles", sin segunda fuente que pueda contradecirlo.
@@ -138,7 +138,7 @@ DECLARE @RetirarIdRol bit = 1;
       - schema/V20260824_01__usuarios_roles_y_permisos.sql  <- ESTE. Estructura y catalogo.
       - seed/V20260824_01__usuarios_roles_seed.sql          <- la copia de filas, DESPUES de
                                                                que la siembra cree los usuarios.
-      - scripts/validar_migracion_simus.sql                 <- las comprobaciones de solo lectura.
+      - pnmc-database/scripts/validar_migracion_simus.sql                 <- las comprobaciones de solo lectura.
 ================================================================================================
 */
 
@@ -773,7 +773,7 @@ WHEN NOT MATCHED THEN
 
 /*
 ================================================================================================
-  SECCION 11.  Retirada de dbo.Usuarios.IdRol.  ENCENDIDA EL 25 AGO 2026 (fase C).
+  SECCION 11.  Retirada de dbo.Usuarios.IdRol.  ACTIVA.
 ================================================================================================
 
   LA RECOMENDACION ES RETIRARLA.  Las otras dos opciones, y por que se descartan:

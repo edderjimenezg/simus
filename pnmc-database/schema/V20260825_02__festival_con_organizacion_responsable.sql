@@ -42,7 +42,7 @@
     puesto en el sitio equivocado.
 
     LAS DOS PASADAS SALEN 0 EN CUALQUIER CASO, que es lo que exige el criterio de aceptacion y lo
-    que comprueba `SiembraRepetibleTests`.
+    que exige la siembra local.
 
     ESTE FICHERO TIENE QUE ESTAR EN LA LISTA `SCHEMAS` DE scripts/seed-local-db.sh.
 */

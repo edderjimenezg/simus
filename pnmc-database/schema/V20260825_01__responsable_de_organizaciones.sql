@@ -37,7 +37,7 @@
     `SELECT *`, cualquier `Include` de mas y cualquier DTO que se serialice entero publicaria el
     documento de una persona natural. En un satelite, publicarlo exige escribir un `JOIN` a
     proposito: la fuga deja de ser el resultado de un descuido y pasa a exigir una decision.
-    `FugaDeResponsableEnRespuestaPublicaTests` vigila el resto.
+    `FichaPublicaSinDatosPersonalesTests` vigila el resto.
 
     LA TABLA VIEJA SE SUELTA AQUI MISMO
     -----------------------------------
@@ -49,7 +49,7 @@
     IDEMPOTENCIA
     ------------
     Todo va guardado: `scripts/seed-local-db.sh` tiene que poder correr dos veces seguidas con
-    salida 0, y `SiembraRepetibleTests` lo comprueba.
+    salida 0.
 
     COL_LENGTH devuelve NULL tambien cuando la TABLA no existe, no solo cuando falta la columna
     (trampa documentada en V20260823_02): por eso el remiendo de `Entidades` va sobre una tabla
