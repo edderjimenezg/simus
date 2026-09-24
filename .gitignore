@@ -120,3 +120,8 @@ output/
 ~$*.docx
 ~$*.xlsx
 ~$*.pptx
+
+# Material de trabajo que se deja caer en el árbol y no forma parte de la entrega.
+/Corte Septiembre/
+/Documentación de cierre septiembre /
+/Documentación de cierre septiembre/
