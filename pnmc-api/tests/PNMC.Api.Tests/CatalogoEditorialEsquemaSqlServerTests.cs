@@ -54,7 +54,7 @@ public sealed class CatalogoEditorialEsquemaSqlServerTests
         $"INSERT INTO dbo.PublicacionesEditoriales (Codigo, Titulo, EstadoCatalogacion, EstadoPublicacion) " +
         $"VALUES (N'{codigo}', N'Ficha de prueba', N'{catalogacion}', N'{publicacion}');";
 
-    [Fact]
+    [HechoSqlServer]
     public async Task Un_estado_de_catalogacion_inventado_lo_rechaza_la_base()
     {
         var restriccion = await RestriccionQueRechazaAsync(InsertarPublicacion("CK-CAT-01", catalogacion: "en_evaluacion"));
@@ -62,7 +62,7 @@ public sealed class CatalogoEditorialEsquemaSqlServerTests
         Assert.Equal("CK_PublicacionesEditoriales_Catalogacion", restriccion);
     }
 
-    [Fact]
+    [HechoSqlServer]
     public async Task Un_estado_de_publicacion_inventado_lo_rechaza_la_base()
     {
         var restriccion = await RestriccionQueRechazaAsync(InsertarPublicacion("CK-PUB-01", publicacion: "visible"));
@@ -70,7 +70,7 @@ public sealed class CatalogoEditorialEsquemaSqlServerTests
         Assert.Equal("CK_PublicacionesEditoriales_Publicacion", restriccion);
     }
 
-    [Fact]
+    [HechoSqlServer]
     public async Task El_tipo_de_agente_va_en_minuscula_y_la_base_rechaza_el_capitalizado()
     {
         // POR QUE ESTA PRUEBA EXISTE. El adaptador del portal comparaba el tipo de agente contra
@@ -85,7 +85,7 @@ public sealed class CatalogoEditorialEsquemaSqlServerTests
         Assert.Equal("CK_AgentesEditoriales_Tipo", restriccion);
     }
 
-    [Fact]
+    [HechoSqlServer]
     public async Task La_base_admite_los_tipos_de_agente_que_declara_el_contrato()
     {
         // Y EL OTRO LADO DE LA MISMA MONEDA: que el vocabulario del contrato entre de verdad. Con
@@ -100,7 +100,7 @@ public sealed class CatalogoEditorialEsquemaSqlServerTests
         }
     }
 
-    [Fact]
+    [HechoSqlServer]
     public async Task El_anio_final_no_puede_ser_anterior_al_inicial()
     {
         var restriccion = await RestriccionQueRechazaAsync(
@@ -110,7 +110,7 @@ public sealed class CatalogoEditorialEsquemaSqlServerTests
         Assert.Equal("CK_PublicacionesEditoriales_Anios", restriccion);
     }
 
-    [Fact]
+    [HechoSqlServer]
     public async Task Un_acceso_con_dos_destinos_lo_rechaza_la_base()
     {
         // LA MISMA REGLA QUE COMPRUEBA `TieneDestinoValido` EN EL CONTRATO, impuesta también aquí.
@@ -125,7 +125,7 @@ public sealed class CatalogoEditorialEsquemaSqlServerTests
         Assert.Equal("CK_AccesosEditoriales_UnSoloDestino", restriccion);
     }
 
-    [Fact]
+    [HechoSqlServer]
     public async Task Un_acceso_de_tipo_archivo_sin_archivo_lo_rechaza_la_base()
     {
         await RestriccionQueRechazaAsync(InsertarPublicacion("CK-ACC-02"));
@@ -138,7 +138,7 @@ public sealed class CatalogoEditorialEsquemaSqlServerTests
         Assert.Equal("CK_AccesosEditoriales_UnSoloDestino", restriccion);
     }
 
-    [Fact]
+    [HechoSqlServer]
     public async Task La_bitacora_rechaza_un_valor_que_no_sea_objeto_JSON()
     {
         // ESTA ES LA PRUEBA QUE FALTABA. Un escalar pasa por JSON en cualquier analizador y no
@@ -151,7 +151,7 @@ public sealed class CatalogoEditorialEsquemaSqlServerTests
         Assert.Equal("CK_BitacoraAuditoria_ValoresNuevos_JSON", restriccion);
     }
 
-    [Fact]
+    [HechoSqlServer]
     public async Task La_bitacora_acepta_los_verbos_que_usa_el_catalogo_editorial()
     {
         // Los cuatro que escribe `CatalogoEditorialEndpoints`. Si alguien añade una operación con

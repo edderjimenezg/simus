@@ -87,7 +87,7 @@ public sealed class BancoDeArchivosEsquemaSqlServerTests
         "INSERT INTO dbo.Usuarios (NombreCompleto, CorreoElectronico, HashContrasena) " +
         "VALUES (N'Prueba de esquema', N'esquema@pnmc.local', N'x');");
 
-    [Fact]
+    [HechoSqlServer]
     public async Task Dos_archivos_no_pueden_compartir_la_ruta_de_almacenamiento()
     {
         await SembrarUsuarioAsync();
@@ -100,7 +100,7 @@ public sealed class BancoDeArchivosEsquemaSqlServerTests
         Assert.Equal("UQ_Archivos_RutaAlmacenamiento", restriccion);
     }
 
-    [Fact]
+    [HechoSqlServer]
     public async Task Una_imagen_por_encima_de_dos_megas_la_rechaza_la_base()
     {
         await SembrarUsuarioAsync();
@@ -112,7 +112,7 @@ public sealed class BancoDeArchivosEsquemaSqlServerTests
         Assert.Equal("CK_Archivos_PesoPorTipo", restriccion);
     }
 
-    [Fact]
+    [HechoSqlServer]
     public async Task Un_documento_admite_veinte_megas()
     {
         await SembrarUsuarioAsync();
@@ -124,7 +124,7 @@ public sealed class BancoDeArchivosEsquemaSqlServerTests
         Assert.Null(restriccion);
     }
 
-    [Fact]
+    [HechoSqlServer]
     public async Task Un_evento_municipal_sin_departamento_lo_rechaza_la_base()
     {
         // La regla que septiembre tenía y nosotros no: el nivel de cobertura va atado a sus
