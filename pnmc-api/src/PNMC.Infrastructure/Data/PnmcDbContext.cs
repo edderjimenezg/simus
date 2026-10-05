@@ -414,8 +414,8 @@ public sealed class PnmcDbContext : DbContext
             entity.ToTable("LocalizacionesDeRegistro");
             entity.HasKey(x => x.Id);
             entity.Property(x => x.Id).HasColumnName("IdLocalizacionDeRegistro");
-            entity.Property(x => x.ModuloId).HasColumnName("ModuloId").HasMaxLength(40).IsRequired();
-            entity.Property(x => x.RegistroId).HasColumnName("RegistroId").HasMaxLength(64).IsRequired();
+            entity.Property(x => x.ModuloId).HasColumnName("ModuloId").HasMaxLength(80).IsRequired();
+            entity.Property(x => x.RegistroId).HasColumnName("RegistroId").HasMaxLength(120).IsRequired();
             entity.Property(x => x.CodigoDepartamento).HasColumnName("CodigoDepartamento").HasMaxLength(2);
             entity.Property(x => x.CodigoMunicipio).HasColumnName("CodigoMunicipio").HasMaxLength(5);
             entity.Property(x => x.ZonaUrbanoRuralId).HasColumnName("ZonaUrbanoRuralId");
@@ -428,8 +428,8 @@ public sealed class PnmcDbContext : DbContext
             entity.ToTable("EntidadesAliadasDeRegistro");
             entity.HasKey(x => x.Id);
             entity.Property(x => x.Id).HasColumnName("IdEntidadAliadaDeRegistro");
-            entity.Property(x => x.ModuloId).HasColumnName("ModuloId").HasMaxLength(40).IsRequired();
-            entity.Property(x => x.RegistroId).HasColumnName("RegistroId").HasMaxLength(64).IsRequired();
+            entity.Property(x => x.ModuloId).HasColumnName("ModuloId").HasMaxLength(80).IsRequired();
+            entity.Property(x => x.RegistroId).HasColumnName("RegistroId").HasMaxLength(120).IsRequired();
             entity.Property(x => x.Nombre).HasColumnName("NombreEntidadAliada").HasMaxLength(300);
             entity.Property(x => x.Correo).HasColumnName("CorreoEntidadAliada").HasMaxLength(180);
             entity.Property(x => x.NaturalezaEntidadId).HasColumnName("NaturalezaEntidadId");
@@ -441,8 +441,8 @@ public sealed class PnmcDbContext : DbContext
             entity.ToTable("ArchivosDeRegistro");
             entity.HasKey(x => x.Id);
             entity.Property(x => x.Id).HasColumnName("IdArchivoDeRegistro");
-            entity.Property(x => x.ModuloId).HasColumnName("ModuloId").HasMaxLength(40).IsRequired();
-            entity.Property(x => x.RegistroId).HasColumnName("RegistroId").HasMaxLength(64).IsRequired();
+            entity.Property(x => x.ModuloId).HasColumnName("ModuloId").HasMaxLength(80).IsRequired();
+            entity.Property(x => x.RegistroId).HasColumnName("RegistroId").HasMaxLength(120).IsRequired();
             entity.Property(x => x.ArchivoId).HasColumnName("ArchivoId");
             entity.Property(x => x.Url).HasColumnName("Url").HasMaxLength(1000);
             entity.Property(x => x.RolArchivo).HasColumnName("RolArchivo").HasMaxLength(80).IsRequired();
@@ -456,8 +456,8 @@ public sealed class PnmcDbContext : DbContext
             entity.ToTable("PracticasMusicalesDeRegistro");
             entity.HasKey(x => x.Id);
             entity.Property(x => x.Id).HasColumnName("IdPracticaMusicalDeRegistro");
-            entity.Property(x => x.ModuloId).HasColumnName("ModuloId").HasMaxLength(40).IsRequired();
-            entity.Property(x => x.RegistroId).HasColumnName("RegistroId").HasMaxLength(64).IsRequired();
+            entity.Property(x => x.ModuloId).HasColumnName("ModuloId").HasMaxLength(80).IsRequired();
+            entity.Property(x => x.RegistroId).HasColumnName("RegistroId").HasMaxLength(120).IsRequired();
             entity.Property(x => x.ValorId).HasColumnName("IdPracticaMusical");
             entity.Property(x => x.FechaCreacion).HasColumnName("FechaCreacion");
             // LA CLAVE AJENA CONTRA EL CATALOGO SE CONSERVA: es la que impide guardar un valor que
@@ -470,8 +470,8 @@ public sealed class PnmcDbContext : DbContext
             entity.ToTable("TerritoriosSonorosDeRegistro");
             entity.HasKey(x => x.Id);
             entity.Property(x => x.Id).HasColumnName("IdTerritorioSonoroDeRegistro");
-            entity.Property(x => x.ModuloId).HasColumnName("ModuloId").HasMaxLength(40).IsRequired();
-            entity.Property(x => x.RegistroId).HasColumnName("RegistroId").HasMaxLength(64).IsRequired();
+            entity.Property(x => x.ModuloId).HasColumnName("ModuloId").HasMaxLength(80).IsRequired();
+            entity.Property(x => x.RegistroId).HasColumnName("RegistroId").HasMaxLength(120).IsRequired();
             entity.Property(x => x.ValorId).HasColumnName("IdTerritorioSonoro");
             entity.Property(x => x.FechaCreacion).HasColumnName("FechaCreacion");
             // LA CLAVE AJENA CONTRA EL CATALOGO SE CONSERVA: es la que impide guardar un valor que
@@ -484,8 +484,8 @@ public sealed class PnmcDbContext : DbContext
             entity.ToTable("ExpresionesArtisticasDeRegistro");
             entity.HasKey(x => x.Id);
             entity.Property(x => x.Id).HasColumnName("IdExpresionArtisticaDeRegistro");
-            entity.Property(x => x.ModuloId).HasColumnName("ModuloId").HasMaxLength(40).IsRequired();
-            entity.Property(x => x.RegistroId).HasColumnName("RegistroId").HasMaxLength(64).IsRequired();
+            entity.Property(x => x.ModuloId).HasColumnName("ModuloId").HasMaxLength(80).IsRequired();
+            entity.Property(x => x.RegistroId).HasColumnName("RegistroId").HasMaxLength(120).IsRequired();
             entity.Property(x => x.ValorId).HasColumnName("IdExpresionArtistica");
             entity.Property(x => x.FechaCreacion).HasColumnName("FechaCreacion");
             // LA CLAVE AJENA CONTRA EL CATALOGO SE CONSERVA: es la que impide guardar un valor que
@@ -498,8 +498,8 @@ public sealed class PnmcDbContext : DbContext
             entity.ToTable("ModalidadesParticipacionDeRegistro");
             entity.HasKey(x => x.Id);
             entity.Property(x => x.Id).HasColumnName("IdModalidadParticipacionDeRegistro");
-            entity.Property(x => x.ModuloId).HasColumnName("ModuloId").HasMaxLength(40).IsRequired();
-            entity.Property(x => x.RegistroId).HasColumnName("RegistroId").HasMaxLength(64).IsRequired();
+            entity.Property(x => x.ModuloId).HasColumnName("ModuloId").HasMaxLength(80).IsRequired();
+            entity.Property(x => x.RegistroId).HasColumnName("RegistroId").HasMaxLength(120).IsRequired();
             entity.Property(x => x.ValorId).HasColumnName("IdModalidadParticipacion");
             entity.Property(x => x.FechaCreacion).HasColumnName("FechaCreacion");
             // LA CLAVE AJENA CONTRA EL CATALOGO SE CONSERVA: es la que impide guardar un valor que
@@ -512,8 +512,8 @@ public sealed class PnmcDbContext : DbContext
             entity.ToTable("TiposIngresoDeRegistro");
             entity.HasKey(x => x.Id);
             entity.Property(x => x.Id).HasColumnName("IdTipoIngresoDeRegistro");
-            entity.Property(x => x.ModuloId).HasColumnName("ModuloId").HasMaxLength(40).IsRequired();
-            entity.Property(x => x.RegistroId).HasColumnName("RegistroId").HasMaxLength(64).IsRequired();
+            entity.Property(x => x.ModuloId).HasColumnName("ModuloId").HasMaxLength(80).IsRequired();
+            entity.Property(x => x.RegistroId).HasColumnName("RegistroId").HasMaxLength(120).IsRequired();
             entity.Property(x => x.ValorId).HasColumnName("IdTipoIngreso");
             entity.Property(x => x.FechaCreacion).HasColumnName("FechaCreacion");
             // LA CLAVE AJENA CONTRA EL CATALOGO SE CONSERVA: es la que impide guardar un valor que
@@ -1071,8 +1071,8 @@ public sealed class PnmcDbContext : DbContext
             entity.ToTable("EnviosDeRevision");
             entity.HasKey(x => x.Id);
             entity.Property(x => x.Id).HasColumnName("IdEnvioDeRevision");
-            entity.Property(x => x.ModuloId).HasColumnName("ModuloId").HasMaxLength(40).IsRequired();
-            entity.Property(x => x.RegistroId).HasColumnName("RegistroId").HasMaxLength(64).IsRequired();
+            entity.Property(x => x.ModuloId).HasColumnName("ModuloId").HasMaxLength(80).IsRequired();
+            entity.Property(x => x.RegistroId).HasColumnName("RegistroId").HasMaxLength(120).IsRequired();
             entity.Property(x => x.NumeroEnvio).HasColumnName("NumeroEnvio");
             entity.Property(x => x.UsuarioRemitenteId).HasColumnName("IdUsuarioRemitente");
             entity.Property(x => x.OrganizacionId).HasColumnName("IdOrganizacion");

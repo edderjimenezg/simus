@@ -71,7 +71,15 @@ bash scripts/tests/run-script-tests.sh
 
 La suite completa de persistencia necesita SQL local y `PNMC_PRUEBAS_SQLSERVER=1`.
 
-## 9.6 Azure
+## 9.6 Base SIMUS del Ministerio
+
+El módulo de Festivales se incorpora a la base SIMUS con Flyway, desde `pnmc-database/simus-ministerio/`:
+respaldo completo, `flyway baseline` (registra las tablas `ART_MUS_*` existentes como versión 1),
+`flyway migrate` y `verificacion/verificar_estado_objetivo.sql`. El procedimiento, los requisitos y el
+traslado de registros heredados están en el `README.md` de esa carpeta. Antes de desplegar se ejecuta
+`scripts/validar-simus-ministerio.sh` con la exportación vigente de la base.
+
+## 9.7 Azure
 
 La infraestructura versionada está en `infra/`. Antes de un despliegue real se confirman
 la suscripción, el grupo de recursos, el nombre del sitio y la cadena de conexión. Esos

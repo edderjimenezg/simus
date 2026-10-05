@@ -197,7 +197,7 @@ FROM dbo.TiposIngreso AS d JOIN @Ingresos AS o ON o.Slug = d.Slug;
 GO
 
 -- -------------------------------------------------------------------------------------------
--- dbo.TiposOrganizador   <-  ART_MUS_FESTIVALES_TIPO_ORGANIZADOR (7 filas)
+-- dbo.TiposOrganizador   <-  ART_MUS_FESTIVALES_TIPO_ORGANIZADOR (7 filas), más «Otro», que habilita OtroTipoOrganizador
 -- -------------------------------------------------------------------------------------------
 DECLARE @Organizadores TABLE (Nombre nvarchar(280) NOT NULL, Slug nvarchar(320) NOT NULL PRIMARY KEY, Orden int NOT NULL);
 INSERT INTO @Organizadores (Nombre, Slug, Orden) VALUES
@@ -207,7 +207,8 @@ INSERT INTO @Organizadores (Nombre, Slug, Orden) VALUES
     (N'Museo',                          N'museo',                        4),
     (N'Casa cultural',                  N'casa-cultural',                5),
     (N'Comunitario',                    N'comunitario',                  6),
-    (N'Mixto',                          N'mixto',                        7);
+    (N'Mixto',                          N'mixto',                        7),
+    (N'Otro',                           N'otro',                         8);
 
 INSERT INTO dbo.TiposOrganizador (NombreTipoOrganizador, Slug, Descripcion, OrdenVisualizacion)
 SELECT o.Nombre, o.Slug, NULL, o.Orden FROM @Organizadores AS o
@@ -287,20 +288,21 @@ FROM dbo.RegionesOcad AS d JOIN @Regiones AS o ON o.Slug = d.Slug;
 GO
 
 /*
-    LAS 32 CORRESPONDENCIAS, tal como las reparte el origen. Se conservan EXACTAMENTE: el reparto
+    LAS 33 CORRESPONDENCIAS: las 32 del origen, que se conservan EXACTAMENTE, y San Andrés (88), que
+    el origen omitía y que pertenece a la región Caribe del Sistema General de Regalías. El reparto
     es una decision administrativa del OCAD y no una geografia que se pueda deducir. Dos ejemplos
     de por que no se puede deducir: Antioquia (05) esta en EJE CAFETERO y no en PACIFICO, aunque
     tenga costa pacifica; y Bogota (11) esta en CENTRO ORIENTE, que es una region y no una ciudad.
 
-    SE INSERTAN SOLO LOS CODIGOS QUE EXISTEN EN `dbo.Divipola`. El origen trae 32 y Colombia tiene
-    33 departamentos: el `JOIN` deja fuera cualquier codigo que aqui no exista en vez de reventar
-    contra la FK, y la consulta de verificacion del final dice cuantos entraron.
+    SE INSERTAN SOLO LOS CODIGOS QUE EXISTEN EN `dbo.Divipola`: el `JOIN` deja fuera cualquier codigo
+    que aqui no exista en vez de reventar contra la FK, y la consulta de verificacion del final dice
+    cuantos entraron.
 */
 DECLARE @Reparto TABLE (CodigoDepartamento char(2) NOT NULL PRIMARY KEY, SlugRegion nvarchar(320) NOT NULL);
 INSERT INTO @Reparto (CodigoDepartamento, SlugRegion) VALUES
     -- Caribe
     ('44', N'caribe'), ('20', N'caribe'), ('47', N'caribe'), ('08', N'caribe'),
-    ('70', N'caribe'), ('13', N'caribe'), ('23', N'caribe'),
+    ('70', N'caribe'), ('13', N'caribe'), ('23', N'caribe'), ('88', N'caribe'),
     -- Centro Oriente
     ('54', N'centro-oriente'), ('68', N'centro-oriente'), ('15', N'centro-oriente'),
     ('25', N'centro-oriente'), ('11', N'centro-oriente'),

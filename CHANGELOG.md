@@ -3,6 +3,29 @@
 El formato sigue [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) y el versionado es
 [semántico](https://semver.org/lang/es/).
 
+## [Sin publicar]
+
+### Añadido
+
+- **Migración de la base SIMUS del Ministerio**: línea Flyway (`pnmc-database/simus-ministerio/`, V1–V8)
+  que incorpora el modelo de Festivales, sus catálogos transversales y DIVIPOLA MGN 2025 junto a las
+  tablas `ART_MUS_*`, con correspondencia de identificadores y traslado gobernado de registros
+  heredados. Exige Flyway `V8` en la base SIMUS.
+- `scripts/validar-simus-ministerio.sh`: valida la instalación completa, la actualización y la
+  igualdad de estructura con la cadena DbUp.
+
+### Cambiado
+
+- El modelo de Festivales admite solo estados editoriales, exige fuentes de financiación distintas en
+  la edición, distingue localizaciones por zona y entidades aliadas identificables. San Andrés entra
+  en la región OCAD Caribe y los tipos de organizador incluyen «Otro». Exige `V20260929_01` en la
+  cadena DbUp.
+
+### Retirado
+
+- Cinco columnas sin uso de `Festivales`: `Activo`, `IdUsuarioCreador`, `TipoOrganizadorId`,
+  `Director` y `FechaEnvioARevision`.
+
 ## [1.0.0] — 2026-09-21
 
 Primera versión consolidada del Sistema de Información de la Música.

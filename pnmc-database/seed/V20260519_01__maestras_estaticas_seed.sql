@@ -132,3 +132,17 @@ SET d.NombrePracticaMusical = o.Nombre,
     d.OrdenVisualizacion     = o.Orden
 FROM dbo.PracticasMusicales AS d
 JOIN @Practicas AS o ON o.Slug = d.Slug;
+
+/*
+    CADA TERRITORIO Y CADA PRÁCTICA TIENE SU FICHA CONCEPTUAL. Las fichas se crean aquí, después de
+    los catálogos, porque una base nueva tiene los catálogos vacíos cuando corren las migraciones;
+    sin esta fila, las descripciones de `V20260908_03` no encontrarían nada que completar.
+*/
+INSERT INTO dbo.FichasConceptualesTerritoriosSonoros (TerritorioSonoroId)
+SELECT t.IdTerritorioSonoro FROM dbo.TerritoriosSonoros AS t
+WHERE NOT EXISTS (SELECT 1 FROM dbo.FichasConceptualesTerritoriosSonoros AS f WHERE f.TerritorioSonoroId = t.IdTerritorioSonoro);
+
+INSERT INTO dbo.FichasConceptualesPracticasMusicales (PracticaMusicalId)
+SELECT p.IdPracticaMusical FROM dbo.PracticasMusicales AS p
+WHERE NOT EXISTS (SELECT 1 FROM dbo.FichasConceptualesPracticasMusicales AS f WHERE f.PracticaMusicalId = p.IdPracticaMusical);
+GO

@@ -53,7 +53,8 @@ herramientas mantenidas, en `tools/`; los límites cuantificados de deuda, en `t
 
 ## Datos
 
-- `pnmc-database/schema/`: historial inmutable de cambios estructurales.
+- `pnmc-database/schema/`: historial inmutable de cambios estructurales (DbUp).
+- `pnmc-database/simus-ministerio/`: migraciones Flyway de la base SIMUS del Ministerio y su verificación.
 - `pnmc-database/seed/`: cargas explícitas separadas del esquema.
 - `pnmc-database/scripts/`: consultas de auditoría y validación.
 - `pnmc-database/local/`: notas sobre el modelo local.

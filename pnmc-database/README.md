@@ -8,6 +8,8 @@ Artefactos de SQL Server y Azure SQL.
 - `seed/`: datos de referencia o demostración, separados del esquema.
 - `scripts/`: validaciones y auditorías SQL.
 - `local/`: documentación del modelo y del entorno local.
+- `simus-ministerio/`: migraciones Flyway que llevan la base SIMUS del Ministerio al mismo modelo;
+  tienen su propia numeración y su propio historial (`flyway_schema_history`).
 
 La carpeta `migrations/` fue retirada: contenía dos guiones baseline fuera del flujo real.
 `schema/` es la única fuente de cambios y `dbo.SchemaVersions` conserva su historial.

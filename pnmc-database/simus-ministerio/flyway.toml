@@ -1,0 +1,10 @@
+# Configuración de Flyway para la línea de migraciones de la base SIMUS del Ministerio.
+# La conexión no se guarda aquí: se entrega con FLYWAY_URL, FLYWAY_USER y FLYWAY_PASSWORD.
+
+[flyway]
+locations = ["filesystem:migraciones"]
+encoding = "UTF-8"
+validateMigrationNaming = true
+baselineVersion = "1"
+baselineDescription = "estado inicial simus"
+cleanDisabled = true

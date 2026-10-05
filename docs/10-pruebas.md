@@ -9,6 +9,7 @@
 | Pruebas de los guiones de operación | que los guiones de `scripts/` hacen lo que declaran |
 | Verificación de estructura | que el repositorio conserva su forma y no reaparece material retirado |
 | Trinquetes | límites cuantificados que no pueden empeorar |
+| Línea de la base SIMUS del Ministerio | instalación completa y actualización con Flyway, misma estructura en ambos caminos y en la cadena DbUp |
 
 ## 10.2 Cómo se ejecutan
 
@@ -25,6 +26,9 @@ cd pnmc-web && npm run lint && npm run trinquete && npm test && npm run build
 # API
 cd pnmc-api && dotnet build PNMC.Api.sln --configuration Release
 dotnet test pnmc-api/tests/PNMC.Api.Tests/PNMC.Api.Tests.csproj
+
+# Base SIMUS del Ministerio (necesita Docker y sqlcmd)
+./scripts/validar-simus-ministerio.sh --estado-inicial <exportación.sql> --comparar-con-desarrollo
 ```
 
 ## 10.3 Pruebas contra SQL Server

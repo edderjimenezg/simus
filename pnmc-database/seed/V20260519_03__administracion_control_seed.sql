@@ -25,18 +25,18 @@ WHEN NOT MATCHED THEN
 
 MERGE dbo.EstadosContenido AS destino
 USING (VALUES
-    (N'borrador', N'Borrador', N'Contenido en elaboracion interna.'),
-    (N'en_revision', N'En revision', N'Contenido enviado a revision editorial o tecnica.'),
+    (N'borrador', N'Borrador', N'Contenido en elaboración interna.'),
+    (N'en_revision', N'En revisión', N'Contenido enviado a revisión editorial o técnica.'),
     (N'ajustes_solicitados', N'Ajustes solicitados', N'Contenido devuelto al responsable para corregir campos u observaciones.'),
-    (N'aprobado', N'Aprobado', N'Contenido aprobado, pendiente de publicacion o activacion.'),
+    (N'aprobado', N'Aprobado', N'Contenido aprobado, pendiente de publicación o activación.'),
     (N'publicado', N'Publicado', N'Contenido visible para usuarios finales.'),
-    (N'archivado', N'Archivado', N'Contenido retirado de la vista publica sin eliminarlo.'),
-    (N'rechazado', N'Rechazado', N'Contenido revisado y no aprobado para publicacion.'),
+    (N'archivado', N'Archivado', N'Contenido retirado de la vista pública sin eliminarlo.'),
+    (N'rechazado', N'Rechazado', N'Contenido revisado y no aprobado para publicación.'),
     -- Estado de una Entidad recien dada de alta por el canal externo, no de un contenido.
     -- ExternalOrganizationEndpoints lo escribia desde el principio y la
     -- tabla no lo tenia, de modo que FK_Entidades_EstadosContenido rechazaba el alta: crear
     -- una organizacion era imposible contra SQL Server. Comprobado.
-    (N'registrada', N'Registrada', N'Entidad dada de alta por su responsable, activa y sin aprobacion ministerial previa.')
+    (N'registrada', N'Registrada', N'Entidad dada de alta por su responsable, activa y sin aprobación ministerial previa.')
 ) AS origen (CodigoEstado, NombreEstado, DescripcionEstado)
 ON destino.CodigoEstado = origen.CodigoEstado
 WHEN MATCHED THEN
